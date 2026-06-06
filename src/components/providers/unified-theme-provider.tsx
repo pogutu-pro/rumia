@@ -38,14 +38,15 @@ export function UnifiedThemeProvider({
   children, 
   forcedTheme 
 }: UnifiedThemeProviderProps) {
+  const props = {
+    attribute: 'class' as const,
+    defaultTheme: forcedTheme || 'system',
+    enableSystem: !forcedTheme,
+    forcedTheme,
+    disableTransitionOnChange: true,
+  };
   return (
-    <ThemeProvider 
-      attribute="class" 
-      defaultTheme={forcedTheme || "system"} 
-      enableSystem={!forcedTheme}
-      forcedTheme={forcedTheme}
-      disableTransitionOnChange
-    >
+    <ThemeProvider {...(props as any)}>
       {children}
     </ThemeProvider>
   );

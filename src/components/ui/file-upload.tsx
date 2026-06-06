@@ -77,16 +77,16 @@ export function FileUpload({
     getInputProps,
     isDragActive,
     isFileDialogActive,
-    open: openFileDialog, // useful for accessibility: explicit open on button click
+    open: openFileDialog,
   } = useDropzone({
     onDrop,
     accept: accepted,
     maxSize,
-    multiple: false, // Single file upload as current spec
+    multiple: false,
     disabled,
-    noClick: true, // Disable click on entire dropzone, better for accessibility with button below
-    noKeyboard: false, // Allow keyboard interaction
-  });
+    noClick: true,
+    noKeyboard: false,
+  } as any);
 
   return (
     <div

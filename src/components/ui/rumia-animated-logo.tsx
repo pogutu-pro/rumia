@@ -147,7 +147,7 @@ export function RumiaAnimatedLogo({
         a
       </span>
 
-      <style jsx>{`
+      <style>{`
         @keyframes jump {
           0%, 100% {
             transform: translateY(0);

@@ -49,7 +49,7 @@ export function ImageUpload({
     accept: { 'image/*': ['.jpeg', '.png', '.jpg', '.webp'] },
     maxFiles: 1,
     disabled,
-  });
+  } as any);
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,7 +88,7 @@ export function ImageUpload({
           disabled && 'opacity-60 cursor-not-allowed pointer-events-none',
         )}
       >
-        <input {...getInputProps()} />
+        <input {...(getInputProps() as React.InputHTMLAttributes<HTMLInputElement>)} />
 
         {preview || currentImageUrl ? (
           <div className="absolute inset-0 w-full h-full">

@@ -156,7 +156,7 @@ export function MultiImageUpload({
     accept: { 'image/*': ['.jpeg', '.png', '.jpg', '.webp'] },
     maxSize: maxSize,
     multiple: true,
-  });
+  } as any);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -195,7 +195,7 @@ export function MultiImageUpload({
             : 'border-border hover:border-muted-foreground/50',
         )}
       >
-        <input {...getInputProps()} />
+        <input {...(getInputProps() as React.InputHTMLAttributes<HTMLInputElement>)} />
         <UploadCloud className="mx-auto h-10 w-10 text-primary mb-3" />
         <p className="text-base font-semibold text-foreground">
           Drag & drop your photos here
