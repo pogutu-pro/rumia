@@ -19,7 +19,26 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-xs">
-      <div className="overflow-x-auto">
+      {/* Mobile card list */}
+      <ul className="divide-y divide-slate-100 md:hidden">
+        {leads.map((lead) => {
+          const listing = listings.find((l) => l.id === lead.listing_id);
+          const date = new Date(lead.clicked_at);
+          return (
+            <li key={lead.id} className="px-4 py-3 flex flex-col gap-0.5">
+              <span className="font-bold text-slate-900 text-sm truncate">
+                {listing ? listing.title : 'Unknown Listing'}
+              </span>
+              <span className="text-xs text-slate-500">
+                {format(date, 'd MMM yyyy')} · {format(date, 'h:mm a')}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-xs">
             <tr>
@@ -32,7 +51,6 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
             {leads.map((lead) => {
               const listing = listings.find((l) => l.id === lead.listing_id);
               const date = new Date(lead.clicked_at);
-              
               return (
                 <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 font-bold text-slate-900">

@@ -42,27 +42,29 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'mt1.google.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'pub-*.r2.dev',
+      },
     ],
   },
   async headers() {
     return [
       {
-        // Web manifest: short cache so icon/name changes propagate quickly
         source: '/manifest.webmanifest',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
       },
       {
-        // Favicons and PWA icons: short cache, revalidate on every visit
         source: '/:file(favicon.*|apple-touch-icon.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
       },
-
       {
-        // Security headers for all routes
+        // Security headers for all routes — middleware also sets these,
+        // this acts as a fallback for static/edge routes
         source: '/(.*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
         ],

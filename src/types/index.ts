@@ -41,3 +41,57 @@ export interface Commission {
   amount: number;
   status: 'pending' | 'paid';
 }
+
+// Admin-specific interfaces
+
+// Extended Agent with admin-specific fields
+export interface AdminAgent {
+  id: string;
+  name: string;
+  phone: string;
+  whatsapp: string;
+  status: 'active' | 'suspended';
+  created_at: string;
+  user_id: string;
+  // Computed fields (from joins/aggregations)
+  active_listings_count?: number;
+  total_leads_count?: number;
+  pending_commissions_sum?: number;
+}
+
+// Extended Commission with timestamps
+export interface AdminCommission {
+  id: string;
+  agent_id: string;
+  listing_id: string;
+  amount: number;
+  status: 'pending' | 'paid';
+  created_at: string;
+  paid_at: string | null;
+  // Join fields
+  agents?: { name: string; id: string } | null;
+  listings?: { title: string; id: string } | null;
+}
+
+// Extended Lead with join fields
+export interface AdminLead {
+  id: string;
+  listing_id: string;
+  agent_id: string;
+  clicked_at: string;
+  ip_hash: string;
+  listings?: { title: string; id: string } | null;
+  agents?: { name: string; id: string } | null;
+}
+
+export interface CreateAgentInput {
+  name: string;
+  phone: string;
+  whatsapp: string;
+}
+
+export interface CreateCommissionInput {
+  agent_id: string;
+  listing_id: string;
+  amount: number;
+}

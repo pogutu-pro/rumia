@@ -19,7 +19,35 @@ export function CommissionTable({ commissions, listings, leadsCountByListing }: 
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-xs">
-      <div className="overflow-x-auto">
+      {/* Mobile card list */}
+      <ul className="divide-y divide-slate-100 md:hidden">
+        {commissions.map((commission) => {
+          const listing = listings.find((l) => l.id === commission.listing_id);
+          return (
+            <li key={commission.id} className="px-4 py-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-bold text-slate-900 text-sm truncate">
+                  {listing ? listing.title : 'Unknown Listing'}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  {commission.status === 'paid' ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Paid</span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">Pending</span>
+                  )}
+                  <span className="text-xs text-slate-400">{leadsCountByListing[String(commission.listing_id)] || 0} leads</span>
+                </div>
+              </div>
+              <span className="font-black text-slate-900 text-sm shrink-0">
+                KES {commission.amount.toLocaleString()}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-xs">
             <tr>
@@ -33,24 +61,17 @@ export function CommissionTable({ commissions, listings, leadsCountByListing }: 
             {commissions.map((commission) => {
               const listing = listings.find((l) => l.id === commission.listing_id);
               const leadsCount = leadsCountByListing[String(commission.listing_id)] || 0;
-              
               return (
                 <tr key={commission.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 font-bold text-slate-900">
                     {listing ? listing.title : 'Unknown Listing'}
                   </td>
-                  <td className="px-6 py-4 text-slate-600 font-medium">
-                    {leadsCount}
-                  </td>
+                  <td className="px-6 py-4 text-slate-600 font-medium">{leadsCount}</td>
                   <td className="px-6 py-4">
                     {commission.status === 'paid' ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                        Paid
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Paid</span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
-                        Pending
-                      </span>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">Pending</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right font-black text-slate-900">

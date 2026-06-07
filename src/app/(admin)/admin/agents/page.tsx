@@ -1,0 +1,37 @@
+import { createClient } from '@/lib/supabase/server';
+import type { AdminAgent } from '@/types';
+import { AgentsTableClient } from './agents-table-client';
+
+export default async function AgentsPage() {
+  const supabase = await createClient();
+
+  const { data: agentsRaw } = await (supabase as any).from('agents').select(`
+    id, name, phone, whatsapp, status, created_at,
+    listings(id, is_active),
+    leads(id),
+    commissions(amount, status)
+  `);
+
+  const agents: AdminAgent[] = (agentsRaw ?? []).map((agent: any) => {
+    const listings: Array<{ id: string; is_active: boolean }> = agent.listings ?? [];
+    const leads: Array<{ id: string }> = agent.leads ?? [];
+    const commissions: Array<{ amount: number; status: string }> = agent.commissions ?? [];
+
+    return {
+      id: agent.id,
+      name: agent.name,
+      phone: agent.phone,
+      whatsapp: agent.whatsapp,
+      status: agent.status,
+      created_at: agent.created_at,
+      user_id: agent.user_id ?? '',
+      active_listings_count: listings.filter((l) => l.is_active === true).length,
+      total_leads_count: leads.length,
+      pending_commissions_sum: commissions
+        .filter((c) => c.status === 'pending')
+        .reduce((sum, c) => sum + (c.amount ?? 0), 0),
+    };
+  });
+
+  return <AgentsTableClient agents={agents} />;
+}

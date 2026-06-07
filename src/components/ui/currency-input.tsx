@@ -83,7 +83,7 @@ function CurrencyInputFieldInner<TFieldValues extends FieldValues>(
 }
 
 export const CurrencyInputField = React.memo(
-  React.forwardRef(CurrencyInputFieldInner as any) as <
+  React.forwardRef(CurrencyInputFieldInner as any) as unknown as <
     TFieldValues extends FieldValues = FieldValues,
   >(
     props: CurrencyInputFieldProps<TFieldValues> & {

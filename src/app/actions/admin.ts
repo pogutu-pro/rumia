@@ -1,0 +1,291 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
+import { isAdminEmail } from '@/lib/utils/admin';
+import type { CreateAgentInput, CreateCommissionInput } from '@/types';
+
+type ActionResult = { success: true } | { success: false; error: string };
+
+/**
+ * Returns a Supabase admin client using the service role key.
+ * Required for supabase.auth.admin.* operations.
+ */
+function getAdminSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceRoleKey) {
+    throw new Error('Missing Supabase admin configuration');
+  }
+
+  return createAdminClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+/**
+ * Validates the current session and returns the user if they are an admin.
+ * Returns null if the session is missing or the user is not an admin.
+ */
+async function getAdminUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user || !user.email) {
+    return null;
+  }
+
+  if (!isAdminEmail(user.email)) {
+    return null;
+  }
+
+  return user;
+}
+
+/**
+ * Creates a Supabase Auth user and a linked agent record.
+ * If Auth user creation fails, the agent row is NOT inserted (no orphaned records).
+ *
+ * Validates: Requirements 1.1, 1.3, 7.3, 7.4
+ */
+export async function createAgentAction(
+  data: CreateAgentInput
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    // Derive email from phone: strip non-alphanumeric chars, append domain
+    const sanitizedPhone = data.phone.replace(/[^a-zA-Z0-9]/g, '');
+    const derivedEmail = `${sanitizedPhone}@agents.rumia.co.ke`;
+
+    // Generate a random password using crypto.randomUUID
+    const password = crypto.randomUUID();
+
+    // Create Supabase Auth user first (requires service role key)
+    const adminSupabase = getAdminSupabaseClient();
+    const { data: authData, error: authError } =
+      await adminSupabase.auth.admin.createUser({
+        email: derivedEmail,
+        password,
+        email_confirm: true,
+      });
+
+    if (authError || !authData.user) {
+      return {
+        success: false,
+        error: authError?.message ?? 'Failed to create agent account',
+      };
+    }
+
+    // Auth user created — now insert the agent row
+    const supabase = await createClient();
+    const { error: insertError } = await supabase.from('agents').insert({
+      name: data.name,
+      phone: data.phone,
+      whatsapp: data.whatsapp,
+      user_id: authData.user.id,
+      status: 'active',
+    });
+
+    if (insertError) {
+      // Agent insert failed — attempt to clean up the orphaned Auth user
+      await adminSupabase.auth.admin.deleteUser(authData.user.id);
+      return {
+        success: false,
+        error: insertError.message ?? 'Failed to create agent record',
+      };
+    }
+
+    revalidatePath('/admin/agents');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Updates an agent's status to 'active' or 'suspended'.
+ *
+ * Validates: Requirements 6.5, 6.6, 8.6
+ */
+export async function updateAgentStatusAction(
+  agentId: string,
+  status: 'active' | 'suspended'
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('agents')
+      .update({ status })
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath(`/admin/agents/${agentId}`);
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Sets a listing's is_active flag.
+ *
+ * Validates: Requirements 8.3, 9.7
+ */
+export async function updateListingActiveAction(
+  listingId: string,
+  isActive: boolean
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('listings')
+      .update({ is_active: isActive })
+      .eq('id', listingId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Permanently deletes a listing record.
+ *
+ * Validates: Requirements 9.5, 9.6
+ */
+export async function deleteListingAction(
+  listingId: string
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('listings')
+      .delete()
+      .eq('id', listingId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/listings');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Creates a commission record with status 'pending'.
+ *
+ * Validates: Requirements 10.10, 11.4
+ */
+export async function createCommissionAction(
+  data: CreateCommissionInput
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from('commissions').insert({
+      agent_id: data.agent_id,
+      listing_id: data.listing_id,
+      amount: data.amount,
+      status: 'pending',
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/commissions');
+    revalidatePath('/admin/leads');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Marks a commission as paid and records the paid timestamp.
+ *
+ * NOTE: The `commissions` table must have the `paid_at` column. If it doesn't
+ * exist yet, run the following migration in Supabase:
+ *   ALTER TABLE commissions ADD COLUMN IF NOT EXISTS paid_at timestamptz;
+ *
+ * Validates: Requirements 8.6, 11.4, 12.8
+ */
+export async function markCommissionPaidAction(
+  commissionId: string
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('commissions')
+      .update({
+        status: 'paid',
+        paid_at: new Date().toISOString(),
+      })
+      .eq('id', commissionId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/commissions');
+    revalidatePath('/admin/agents');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}

@@ -40,6 +40,7 @@ export default async function DashboardPage() {
         phone: '+254700000000',
         whatsapp: '+254700000000',
         commission_balance: 0,
+        status: 'active',
       })
       .select()
       .single();
@@ -125,72 +126,68 @@ export default async function DashboardPage() {
       {/* Welcome header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Welcome back, {agent.name}!
           </h1>
-          <p className="text-slate-500 font-medium mt-1">
+          <p className="text-slate-500 font-medium mt-1 text-sm sm:text-base">
             Manage your properties, review performance, and track your payouts.
           </p>
         </div>
       </div>
 
-      {/* Stats Cards (4 items as requested) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Active Listings Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-5">
-          <div className="p-4 rounded-xl bg-slate-100 text-slate-700">
-            <Building2 className="h-6 w-6" />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
+          <div className="p-3 sm:p-4 rounded-xl bg-slate-100 text-slate-700">
+            <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
               Active Listings
             </span>
-            <h3 className="text-2xl font-black text-slate-900 mt-0.5">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
               {activeListingsCount}
             </h3>
           </div>
         </div>
 
-        {/* Leads This Month Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-5">
-          <div className="p-4 rounded-xl bg-emerald-50 text-emerald-700">
-            <MessageCircle className="h-6 w-6" />
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
+          <div className="p-3 sm:p-4 rounded-xl bg-emerald-50 text-emerald-700">
+            <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
               Leads This Month
             </span>
-            <h3 className="text-2xl font-black text-slate-900 mt-0.5">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
               {leadsThisMonthCount}
             </h3>
           </div>
         </div>
 
-        {/* Pending Commission Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-5">
-          <div className="p-4 rounded-xl bg-amber-50 text-amber-700">
-            <Landmark className="h-6 w-6" />
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
+          <div className="p-3 sm:p-4 rounded-xl bg-amber-50 text-amber-700">
+            <Landmark className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
-          <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Pending Commission
+          <div className="min-w-0">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Pending
             </span>
-            <h3 className="text-2xl font-black text-slate-900 mt-0.5">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 truncate">
               KES {commissionOwed.toLocaleString()}
             </h3>
           </div>
         </div>
 
-        {/* Total Earned Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-5">
-          <div className="p-4 rounded-xl bg-indigo-50 text-indigo-700">
-            <Wallet className="h-6 w-6" />
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
+          <div className="p-3 sm:p-4 rounded-xl bg-indigo-50 text-indigo-700">
+            <Wallet className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
-          <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <div className="min-w-0">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
               Total Earned
             </span>
-            <h3 className="text-2xl font-black text-slate-900 mt-0.5">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 truncate">
               KES {totalEarned.toLocaleString()}
             </h3>
           </div>
@@ -199,15 +196,15 @@ export default async function DashboardPage() {
 
       {/* Main Section — My Listings */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
             My Listings
           </h2>
           <Link
             href="/dashboard/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-600/10 hover:scale-[1.01] transition-all self-start sm:self-auto border-0"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-600/10 transition-all self-start sm:self-auto"
           >
-            <Plus className="h-4.5 w-4.5" />
+            <Plus className="h-4 w-4" />
             Add New Listing
           </Link>
         </div>
@@ -217,20 +214,14 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Leads Section */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">
-            Recent Leads
-          </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div className="space-y-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">Recent Leads</h2>
           <LeadsTable leads={leads.slice(0, 10)} listings={listings as any || []} />
         </div>
 
-        {/* Commission Section */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">
-            Commission Status
-          </h2>
+        <div className="space-y-3">
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">Commission Status</h2>
           <CommissionTable 
             commissions={commissions} 
             listings={listings as any || []} 
