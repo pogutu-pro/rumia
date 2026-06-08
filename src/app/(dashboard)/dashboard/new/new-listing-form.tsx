@@ -1,22 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+
+// Dynamically imported with ssr:false because @googlemaps/js-api-loader
+// references `window` at module-evaluation time, which crashes Next.js SSR.
+const GoogleLocationInput = dynamic(
+  () =>
+    import('@/components/ui/google-location-input').then(
+      (mod) => mod.GoogleLocationInput
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-11 w-full rounded-md bg-slate-100 animate-pulse" />
+    ),
+  }
+);
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, UploadCloud, Youtube } from 'lucide-react';
 
-import { Eye, ShieldCheck, Zap, Droplets, Wifi, Compass, MapPin as MapPinIcon } from 'lucide-react';
+import { Zap, Droplets, Wifi } from 'lucide-react';
 
 interface NewListingFormProps {
   agentId: string | number;
+  agentWhatsapp?: string | null;
+  initialListing?: InitialListingData;
+  mode?: 'create' | 'edit';
 }
 
 interface UploadedImage {
+  id?: string;
   url: string;
   name: string;
   category: string; // Room, Bathroom, Exterior, Study Area, Laundry Area, Kitchen
@@ -26,6 +45,42 @@ interface FormRoomType {
   room_type: string;
   price: string;
   is_available: boolean;
+}
+
+interface InitialListingData {
+  id: string;
+  title: string;
+  description?: string | null;
+  price: number | string;
+  location: string;
+  youtube_id?: string | null;
+  room_type?: string | null;
+  amenities?: string[] | null;
+  bathroom_type?: string | null;
+  distance_to_campus?: string | null;
+  security_type?: string | null;
+  water_included?: boolean | null;
+  electricity_included?: boolean | null;
+  wifi_included?: boolean | null;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  gender?: 'mixed' | 'male' | 'female' | null;
+  proximity_description?: string | null;
+  is_active?: boolean | null;
+  county?: string | null;
+  area?: string | null;
+  listing_images?: Array<{
+    id?: string;
+    r2_url: string;
+    category?: string | null;
+    display_order?: number | null;
+  }> | null;
+  listing_room_types?: Array<{
+    id?: string;
+    room_type: string;
+    price: number | string;
+    is_available?: boolean | null;
+  }> | null;
 }
 
 function extractYoutubeId(urlOrId: string): string {
@@ -42,34 +97,70 @@ function extractYoutubeId(urlOrId: string): string {
   return trimmed;
 }
 
-export function NewListingForm({ agentId }: NewListingFormProps) {
-  const router = useRouter();
-  const supabase = createClient();
+function toNullableNumber(value: number | string | null | undefined) {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [location, setLocation] = useState('');
-  const [youtubeId, setYoutubeId] = useState('');
-  const [roomType, setRoomType] = useState('Single');
-  const [amenities, setAmenities] = useState<string[]>([]);
-  const [landlordPhone, setLandlordPhone] = useState('');
-  const [images, setImages] = useState<UploadedImage[]>([]);
+function initialImages(listing?: InitialListingData): UploadedImage[] {
+  return [...(listing?.listing_images || [])]
+    .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    .map((image, index) => ({
+      id: image.id,
+      url: image.r2_url,
+      name: `Existing image ${index + 1}`,
+      category: image.category || 'Room',
+    }));
+}
+
+function initialRoomTypes(listing?: InitialListingData): FormRoomType[] {
+  const existing = listing?.listing_room_types || [];
+
+  if (existing.length > 0) {
+    return existing.map((room) => ({
+      room_type: room.room_type,
+      price: String(room.price || ''),
+      is_available: room.is_available ?? true,
+    }));
+  }
+
+  return [{ room_type: 'Single Room', price: '7500', is_available: true }];
+}
+
+export function NewListingForm({
+  agentId,
+  agentWhatsapp,
+  initialListing,
+  mode = 'create',
+}: NewListingFormProps) {
+  const router = useRouter();
+  const isEditing = mode === 'edit' && !!initialListing;
+
+  const [title, setTitle] = useState(initialListing?.title || '');
+  const [description, setDescription] = useState(initialListing?.description || '');
+  const [price, setPrice] = useState(String(initialListing?.price || ''));
+  const [location, setLocation] = useState(initialListing?.location || '');
+  const [youtubeId, setYoutubeId] = useState(initialListing?.youtube_id || '');
+  const [roomType, setRoomType] = useState(initialListing?.room_type || 'Single');
+  const [amenities, setAmenities] = useState<string[]>(initialListing?.amenities || []);
+  const [whatsappNumber, setWhatsappNumber] = useState(agentWhatsapp || '');
+  const [images, setImages] = useState<UploadedImage[]>(() => initialImages(initialListing));
   
   // New production-ready fields
-  const [bathroomType, setBathroomType] = useState('Shared');
-  const [distanceToCampus, setDistanceToCampus] = useState('3 mins walk');
-  const [securityType, setSecurityType] = useState('24/7 CCTV & Guards');
-  const [waterIncluded, setWaterIncluded] = useState(true);
-  const [electricityIncluded, setElectricityIncluded] = useState(true);
-  const [wifiIncluded, setWifiIncluded] = useState(true);
-  const [latitude, setLatitude] = useState('-0.3975');
-  const [longitude, setLongitude] = useState('36.9615');
+  const [bathroomType, setBathroomType] = useState(initialListing?.bathroom_type || 'Shared');
+  const [distanceToCampus, setDistanceToCampus] = useState(initialListing?.distance_to_campus || '3 mins walk');
+  const [securityType, setSecurityType] = useState(initialListing?.security_type || '24/7 CCTV & Guards');
+  const [waterIncluded, setWaterIncluded] = useState(initialListing?.water_included ?? true);
+  const [electricityIncluded, setElectricityIncluded] = useState(initialListing?.electricity_included ?? true);
+  const [wifiIncluded, setWifiIncluded] = useState(initialListing?.wifi_included ?? true);
+  const [latitude, setLatitude] = useState<number | null>(() => toNullableNumber(initialListing?.latitude));
+  const [longitude, setLongitude] = useState<number | null>(() => toNullableNumber(initialListing?.longitude));
+  const [gender, setGender] = useState<'mixed' | 'male' | 'female'>(initialListing?.gender || 'mixed');
+  const [proximityDescription, setProximityDescription] = useState(initialListing?.proximity_description || '');
 
   // Dynamic list of room types
-  const [roomTypes, setRoomTypes] = useState<FormRoomType[]>([
-    { room_type: 'Single Room', price: '7500', is_available: true }
-  ]);
+  const [roomTypes, setRoomTypes] = useState<FormRoomType[]>(() => initialRoomTypes(initialListing));
   
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -94,6 +185,16 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
       prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item))
     );
   };
+
+  const handleLocationChange = useCallback((resolved: {
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+  }) => {
+    setLocation(resolved.address);
+    setLatitude(resolved.latitude);
+    setLongitude(resolved.longitude);
+  }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -153,7 +254,7 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
     e.preventDefault();
     if (isSaving || isUploading) return;
 
-    if (!title || !price || !location) {
+    if (!title || !price || !location || !whatsappNumber) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -162,17 +263,18 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
     setIsDraft(asDraft);
 
     try {
-      const { createListingAction } = await import('@/app/actions/listings');
+      const { createListingAction, updateListingAction } = await import('@/app/actions/listings');
       
       const payload = {
+        listing_id: initialListing?.id,
         title,
         description,
         price,
         location,
         agent_id: agentId,
+        agent_whatsapp: whatsappNumber,
         youtube_id: youtubeId,
         is_active: !asDraft,
-        landlord_phone: landlordPhone,
         room_type: roomType,
         amenities: amenities,
         bathroom_type: bathroomType,
@@ -181,24 +283,30 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
         electricity_included: electricityIncluded,
         water_included: waterIncluded,
         wifi_included: wifiIncluded,
-        latitude: latitude,
-        longitude: longitude,
+        gender: gender,
+        proximity_description: proximityDescription,
+        latitude,
+        longitude,
+        county: initialListing?.county || 'nyeri',
+        area: initialListing?.area || 'dekut',
         images: images,
         roomTypes: roomTypes
       };
 
-      const result = await createListingAction(payload);
+      const result = isEditing
+        ? await updateListingAction(payload)
+        : await createListingAction(payload);
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to insert listing');
       }
 
-      toast.success('Listing created successfully!');
+      toast.success(isEditing ? 'Listing updated successfully!' : 'Listing created successfully!');
       router.push('/dashboard');
       router.refresh();
     } catch (error: any) {
-      console.error('Error creating listing:', error);
-      toast.error(error.message || 'Failed to create listing. Please try again.');
+      console.error('Error saving listing:', error);
+      toast.error(error.message || 'Failed to save listing. Please try again.');
       setIsSaving(false);
     }
   };
@@ -238,17 +346,49 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
+          <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="location">Location *</Label>
-            <Input
+            <GoogleLocationInput
               id="location"
-              type="text"
               required
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. Juja, gate C"
+              latitude={latitude}
+              longitude={longitude}
+              onChange={handleLocationChange}
+              placeholder="e.g. Nyaribo, Gichugu Road, or hostel name"
+              inputClassName="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
+          </div>
+
+          {/* Gender */}
+          <div className="space-y-2">
+            <Label htmlFor="gender">Accommodation Gender</Label>
+            <select
+              id="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value as any)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 font-medium"
+            >
+              <option value="mixed">Mixed (All students)</option>
+              <option value="female">Female Only (Ladies)</option>
+              <option value="male">Male Only (Gents)</option>
+            </select>
+          </div>
+
+          {/* Proximity Description */}
+          <div className="space-y-2">
+            <Label htmlFor="proximityDescription">Proximity to Campus</Label>
+            <Input
+              id="proximityDescription"
+              type="text"
+              value={proximityDescription}
+              onChange={(e) => setProximityDescription(e.target.value)}
+              placeholder="e.g. 50m from Gate A, 200m from Resource Centre"
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
+            <p className="text-[11px] text-slate-400 font-medium">
+              Used by the smart search to match "gate A" or "near campus" queries.
+            </p>
           </div>
 
           {/* Room Type */}
@@ -266,20 +406,20 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
             </select>
           </div>
 
-          {/* Landlord WhatsApp */}
+          {/* Agent WhatsApp */}
           <div className="space-y-2">
-            <Label htmlFor="landlordPhone">Landlord WhatsApp *</Label>
+            <Label htmlFor="agentWhatsapp">Agent WhatsApp *</Label>
             <Input
-              id="landlordPhone"
+              id="agentWhatsapp"
               type="tel"
               required
-              value={landlordPhone}
-              onChange={(e) => setLandlordPhone(e.target.value)}
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumber(e.target.value)}
               placeholder="e.g. +254700000000"
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
             <p className="text-[11px] text-slate-400 font-medium">
-              This is the number students will contact when they click &quot;WhatsApp Agent&quot;.
+              This updates your agent profile and is the number students will contact on WhatsApp.
             </p>
           </div>
 
@@ -344,32 +484,6 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
               placeholder="e.g. 24/7 CCTV & Guards"
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
-          </div>
-
-          {/* Map Coordinates (Lat/Lng) */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude">Latitude</Label>
-              <Input
-                id="latitude"
-                type="text"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
-                placeholder="-0.3975"
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="longitude">Longitude</Label>
-              <Input
-                id="longitude"
-                type="text"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
-                placeholder="36.9615"
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
-              />
-            </div>
           </div>
 
           {/* Utility Inclusions */}
@@ -646,7 +760,7 @@ export function NewListingForm({ agentId }: NewListingFormProps) {
               Publishing...
             </>
           ) : (
-            'Publish Listing'
+            isEditing ? 'Update Listing' : 'Publish Listing'
           )}
         </Button>
       </div>

@@ -33,11 +33,11 @@ export const Footer = React.memo(function Footer() {
 
           {/* Quick Links */}
           <div className="flex justify-center gap-8 text-sm font-bold">
-            <Link href="/browse" className="hover:text-white transition-colors">
+            <Link href="/hostels" className="hover:text-white transition-colors">
               Browse Hostels
             </Link>
             <Link href="/auth/login" className="hover:text-white transition-colors">
-              Agent Portal
+              Login
             </Link>
           </div>
 

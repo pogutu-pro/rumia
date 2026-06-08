@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
 import '@/styles/globals.css';
@@ -34,25 +35,27 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke'
   ),
   title: {
-    default: 'RUMIA — Student Accommodation Marketplace',
-    template: '%s | RUMIA',
+    default: 'Find Student Hostels Near DeKUT Nyeri | Rumia',
+    template: '%s | Rumia',
   },
   description:
-    'Find and contact verified student hostels near your university in Kenya. Free browse, simple click-to-WhatsApp booking.',
+    'Discover verified student hostels near Dedan Kimathi University of Technology in Nyeri. Browse self-contained and shared rooms with direct agent contact. No fees.',
   keywords: [
-    'student accommodation',
-    'student housing Kenya',
-    'university hostels',
-    'hostel booking',
-    'verified hostels',
+    'student hostels near DeKUT',
+    'student accommodation Nyeri',
+    'DeKUT hostels',
+    'Dedan Kimathi University hostels',
+    'student housing Nyeri Kenya',
+    'verified hostels near DeKUT',
   ],
-  authors: [{ name: 'RUMIA Platform Team', url: 'https://rumia.co.ke' }],
-  creator: 'RUMIA Platform',
-  publisher: 'RUMIA Platform',
+  authors: [{ name: 'Rumia', url: 'https://rumia.co.ke' }],
+  creator: 'Rumia',
+  publisher: 'Rumia',
   icons: {
-    icon: [
-      { url: '/images/logo/logo.svg', type: 'image/svg+xml' },
-    ],
+    icon: [{ url: '/images/logo/logo.svg', type: 'image/svg+xml' }],
+  },
+  alternates: {
+    canonical: 'https://rumia.co.ke',
   },
 };
 
@@ -73,6 +76,7 @@ export default function RootLayout({
         )}
       >
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );

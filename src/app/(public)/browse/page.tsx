@@ -1,10 +1,19 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, MapPin, DollarSign, ArrowRight, SlidersHorizontal, Eye } from 'lucide-react';
+import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/server';
 
-export const revalidate = 0; // Live queries
+export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: 'Browse Student Hostels Near DeKUT',
+  description:
+    'Browse all verified student hostels near Dedan Kimathi University of Technology in Nyeri, Kenya. Filter by price and location.',
+  alternates: { canonical: 'https://rumia.co.ke/browse' },
+};
 
 interface PageProps {
   searchParams: Promise<{
@@ -30,6 +39,9 @@ export default async function BrowsePage({ searchParams }: PageProps) {
       location,
       agent_id,
       is_active,
+      slug,
+      county,
+      area,
       listing_images (
         r2_url,
         display_order
@@ -173,15 +185,16 @@ export default async function BrowsePage({ searchParams }: PageProps) {
                   return (
                     <Link
                       key={item.id}
-                      href={`/listing/${item.id}`}
+                      href={item.slug ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}` : `/listing/${item.id}`}
                       className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full"
                     >
                       <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                        <img
+                        <Image
                           src={imageUrl}
-                          alt={item.title}
-                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
+                          alt={`${item.title} — student hostel near DeKUT Nyeri`}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                         <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-900 border border-slate-100/50">
                           KES {item.price.toLocaleString()}/mo

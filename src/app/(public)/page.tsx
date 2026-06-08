@@ -1,11 +1,42 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, DollarSign, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, MapPin, ArrowRight } from 'lucide-react';
+import { Metadata } from 'next';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/server';
+import { JsonLd } from '@/components/seo/json-ld';
 
-export const revalidate = 0; // Disable caching to fetch live data
+export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: 'Find Student Hostels Near DeKUT Nyeri',
+  description:
+    'Discover verified student hostels near Dedan Kimathi University of Technology, Nyeri. Browse self-contained & shared rooms. Contact agents directly on WhatsApp.',
+  alternates: { canonical: 'https://rumia.co.ke' },
+  openGraph: {
+    title: 'Find Student Hostels Near DeKUT Nyeri | Rumia',
+    description:
+      'Discover verified student hostels near Dedan Kimathi University of Technology, Nyeri. Browse self-contained & shared rooms. Contact agents directly on WhatsApp.',
+    url: 'https://rumia.co.ke',
+    siteName: 'Rumia',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Find Student Hostels Near DeKUT Nyeri | Rumia',
+    description:
+      'Discover verified student hostels near Dedan Kimathi University of Technology, Nyeri. Browse self-contained & shared rooms.',
+  },
+};
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Rumia',
+  url: 'https://rumia.co.ke',
+  description: 'Verified student hostel listings near Dedan Kimathi University of Technology, Nyeri, Kenya.',
+  areaServed: { '@type': 'City', name: 'Nyeri', addressCountry: 'KE' },
+};
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -21,6 +52,9 @@ export default async function HomePage() {
       location,
       agent_id,
       is_active,
+      slug,
+      county,
+      area,
       listing_images (
         r2_url,
         display_order
@@ -55,6 +89,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50">
+      <JsonLd data={organizationSchema} />
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1600')] bg-cover bg-center" />
@@ -67,47 +102,38 @@ export default async function HomePage() {
             Verified Campus Housing
           </span>
           
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] mb-6">
-            Find Your Perfect <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
-              Campus Accommodation
-            </span>
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] mb-4">
+            Student Hostels Near DeKUT, Nyeri
           </h1>
-          
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-            Search hundreds of verified hostels near your university. Direct contact with trusted agents. No hidden booking fees.
+
+          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
+            Rumia lists verified student hostels near{' '}
+            <strong className="text-white">Dedan Kimathi University of Technology</strong> in Nyeri,
+            Kenya. Browse self-contained bedsitters, shared rooms, and ensuite singles —
+            then contact the agent directly on WhatsApp. No booking fees.
           </p>
 
           {/* Search Bar Widget */}
           <div className="bg-white p-2 sm:p-3 rounded-2xl shadow-2xl border border-slate-100 max-w-3xl mx-auto text-slate-800">
-            <form action="/browse" method="GET" className="flex flex-col sm:flex-row items-center gap-2">
-              <div className="relative flex-1 w-full">
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              <Link href="/hostels" className="relative flex-1 w-full">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
                 <Input
                   type="text"
-                  name="search"
-                  placeholder="Enter university or town (e.g. Juja, Madaraka...)"
-                  className="w-full pl-12 pr-4 h-12 border-0 focus-visible:ring-0 text-base font-medium placeholder-slate-400"
+                  defaultValue=""
+                  readOnly
+                  placeholder='Search hostels — try "cheap ladies wifi"'
+                  className="w-full pl-12 pr-4 h-12 border-0 focus-visible:ring-0 text-base font-medium placeholder-slate-400 cursor-pointer"
                 />
-              </div>
-              
-              <div className="h-6 w-px bg-slate-200 hidden sm:block" />
-              
-              <div className="relative w-full sm:w-48">
-                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-                <Input
-                  type="number"
-                  name="maxPrice"
-                  placeholder="Max budget (KES)"
-                  className="w-full pl-12 pr-4 h-12 border-0 focus-visible:ring-0 text-base font-medium placeholder-slate-400"
-                />
-              </div>
-              
-              <Button type="submit" size="lg" className="w-full sm:w-auto h-12 px-8 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-md shadow-emerald-600/10">
-                <Search className="h-4 w-4 mr-2" />
+              </Link>
+              <Link
+                href="/hostels"
+                className="w-full sm:w-auto h-12 px-8 inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-md shadow-emerald-600/10 text-sm"
+              >
+                <Search className="h-4 w-4" />
                 Search
-              </Button>
-            </form>
+              </Link>
+            </div>
           </div>
 
           {/* Quick Locations */}
@@ -117,7 +143,7 @@ export default async function HomePage() {
               {uniqueLocations.map((loc) => (
                 <Link
                   key={loc}
-                  href={`/browse?search=${encodeURIComponent(loc)}`}
+                  href={`/hostels?q=${encodeURIComponent(loc)}`}
                   className="px-3.5 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white transition-all font-medium"
                 >
                   {loc}
@@ -139,7 +165,7 @@ export default async function HomePage() {
               Explore the latest premium student rooms available right now.
             </p>
           </div>
-          <Link href="/browse" className="group hidden sm:flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors">
+          <Link href="/hostels" className="group hidden sm:flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors">
             View all listings
             <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
@@ -159,15 +185,16 @@ export default async function HomePage() {
               return (
                 <Link
                   key={item.id}
-                  href={`/listing/${item.id}`}
+                  href={item.slug ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}` : `/listing/${item.id}`}
                   className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full"
                 >
                   <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                    <img
+                    <Image
                       src={imageUrl}
-                      alt={item.title}
-                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
+                      alt={`${item.title} — student hostel near DeKUT Nyeri`}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                     <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900 border border-slate-100/50">
                       KES {item.price.toLocaleString()}/mo
@@ -210,7 +237,7 @@ export default async function HomePage() {
         )}
 
         <div className="mt-10 text-center sm:hidden">
-          <Link href="/browse" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors">
+          <Link href="/hostels" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors">
             View All Listings
             <ArrowRight className="h-4 w-4" />
           </Link>

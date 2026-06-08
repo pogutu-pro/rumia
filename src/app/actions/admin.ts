@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { isAdminEmail } from '@/lib/utils/admin';
+import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
 import type { CreateAgentInput, CreateCommissionInput } from '@/types';
 
 type ActionResult = { success: true } | { success: false; error: string };
@@ -90,12 +91,21 @@ export async function createAgentAction(
 
     // Auth user created — now insert the agent row
     const supabase = await createClient();
+
+    // Generate unique slug from agent name
+    const baseSlug = generateAgentSlug(data.name);
+    const slug = await uniqueSlug(baseSlug, async (s) => {
+      const { data: existing } = await supabase.from('agents').select('id').eq('slug', s).maybeSingle();
+      return !!existing;
+    });
+
     const { error: insertError } = await supabase.from('agents').insert({
       name: data.name,
       phone: data.phone,
       whatsapp: data.whatsapp,
       user_id: authData.user.id,
       status: 'active',
+      slug,
     });
 
     if (insertError) {

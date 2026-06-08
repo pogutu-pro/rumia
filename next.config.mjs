@@ -43,8 +43,14 @@ const nextConfig = {
         hostname: 'mt1.google.com',
       },
       {
+        // Cloudflare R2 public bucket
         protocol: 'https',
-        hostname: 'pub-*.r2.dev',
+        hostname: 'pub-35395ff8fc144313adfa903807f2a359.r2.dev',
+      },
+      {
+        // Any other Cloudflare R2 public bucket (wildcard)
+        protocol: 'https',
+        hostname: '*.r2.dev',
       },
     ],
   },

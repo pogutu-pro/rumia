@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   LayoutDashboard,
+  BarChart3,
   Users,
   Building2,
   MousePointerClick,
@@ -23,6 +24,7 @@ export interface AdminSidebarProps {
 
 const navLinks = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard, exact: true },
+  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, exact: false },
   { label: 'Agents', href: '/admin/agents', icon: Users, exact: false },
   { label: 'Listings', href: '/admin/listings', icon: Building2, exact: false },
   { label: 'Leads', href: '/admin/leads', icon: MousePointerClick, exact: false },

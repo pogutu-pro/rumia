@@ -2,7 +2,7 @@
 
 export const PUBLIC_ROUTES = {
   HOME: '/',
-  BROWSE: '/browse',
+  HOSTELS: '/hostels',
   LISTING: (id: string | number) => `/listing/${id}`,
   AGENT: (id: string | number) => `/agent/${id}`,
 };

@@ -3,13 +3,65 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 /**
- * Minimal middleware for Rumia Marketplace.
- * Protects /dashboard and /admin routes — everything else is public.
+ * Middleware for Rumia Marketplace.
+ * - Protects /dashboard and /admin routes
+ * - 301 redirects /listing/[id] and /agent/[id] UUID paths to slug-based canonical URLs
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only guard authenticated routes
+  // ── 301 redirect /browse → /hostels ──────────────────────────────────────────
+  if (pathname === '/browse') {
+    const dest = new URL('/hostels', request.url);
+    // Preserve any query params
+    request.nextUrl.searchParams.forEach((v, k) => dest.searchParams.set(k, v));
+    return NextResponse.redirect(dest, { status: 301 });
+  }
+
+  // ── 301 permanent redirects for old UUID-based listing URLs ──────────────────
+  const listingMatch = pathname.match(/^\/listing\/([0-9a-f-]{36})$/);
+  if (listingMatch) {
+    const id = listingMatch[1];
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/listings?id=eq.${id}&select=slug,county,area&limit=1`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
+      if (res.ok) {
+        const rows = await res.json();
+        const row = rows[0];
+        if (row?.slug) {
+          const dest = `/hostels/${row.county || 'nyeri'}/${row.area || 'dekut'}/${row.slug}`;
+          return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
+        }
+      }
+    } catch {}
+  }
+
+  // ── 301 permanent redirects for old UUID-based agent URLs ────────────────────
+  const agentMatch = pathname.match(/^\/agent\/([0-9a-f-]{36})$/);
+  if (agentMatch) {
+    const id = agentMatch[1];
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/agents?id=eq.${id}&select=slug&limit=1`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
+      if (res.ok) {
+        const rows = await res.json();
+        const row = rows[0];
+        if (row?.slug) {
+          return NextResponse.redirect(new URL(`/agents/${row.slug}`, request.url), { status: 301 });
+        }
+      }
+    } catch {}
+  }
+
+  // ── Auth protection ───────────────────────────────────────────────────────────
   const isProtectedRoute =
     pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
 
@@ -78,11 +130,11 @@ export async function middleware(request: NextRequest) {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://apis.google.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://apis.google.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.r2.cloudflarestorage.com https://maps.googleapis.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com",
       "frame-src 'self' https://www.youtube.com",
       "object-src 'none'",
       "base-uri 'self'",

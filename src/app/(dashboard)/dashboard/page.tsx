@@ -4,7 +4,7 @@ import { ListingsList } from './listings-list';
 import { GettingStarted } from './getting-started';
 import { LeadsTable } from './leads-table';
 import { CommissionTable } from './commission-table';
-import { Building2, MessageCircle, Landmark, Plus, Wallet } from 'lucide-react';
+import { Building2, MessageCircle, Landmark, Plus, Wallet, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 export const revalidate = 0; // Fresh statistics always
@@ -110,6 +110,33 @@ export default async function DashboardPage() {
 
   const commissions = allCommissions || [];
 
+  const { data: listingViewAnalyticsRaw } = await (supabase as any).rpc(
+    'get_agent_listing_view_analytics',
+    { p_agent_id: agent.id }
+  );
+
+  const listingViewAnalytics = (listingViewAnalyticsRaw ?? []).map((row: any) => ({
+    listing_id: row.listing_id,
+    listing_title: row.listing_title,
+    listing_slug: row.listing_slug,
+    county: row.county || 'nyeri',
+    area: row.area || 'dekut',
+    today_count: Number(row.today_count || 0),
+    week_count: Number(row.week_count || 0),
+    month_count: Number(row.month_count || 0),
+    all_time_count: Number(row.all_time_count || 0),
+  }));
+
+  const viewSummary = listingViewAnalytics.reduce(
+    (acc: any, row: any) => ({
+      today: acc.today + row.today_count,
+      week: acc.week + row.week_count,
+      month: acc.month + row.month_count,
+      allTime: acc.allTime + row.all_time_count,
+    }),
+    { today: 0, week: 0, month: 0, allTime: 0 }
+  );
+
   const commissionOwed = commissions
     .filter((c: any) => c.status === 'pending')
     .reduce((acc: number, c: any) => acc + c.amount, 0);
@@ -191,6 +218,84 @@ export default async function DashboardPage() {
               KES {totalEarned.toLocaleString()}
             </h3>
           </div>
+        </div>
+      </div>
+
+      {/* Analytics */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
+            Analytics
+          </h2>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Student views across your listings.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          {[
+            ['Today', viewSummary.today],
+            ['This Week', viewSummary.week],
+            ['This Month', viewSummary.month],
+            ['All Time', viewSummary.allTime],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
+              <div className="p-3 sm:p-4 rounded-xl bg-blue-50 text-blue-700">
+                <Eye className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div>
+                <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  {label}
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
+                  {Number(value).toLocaleString()}
+                </h3>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xs">
+          {listingViewAnalytics.length === 0 ? (
+            <div className="px-6 py-10 text-center text-sm font-semibold text-slate-400">
+              View analytics will appear after students visit your listings.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
+                <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <tr>
+                    <th className="px-5 py-3">Listing</th>
+                    <th className="px-5 py-3 text-right">Today</th>
+                    <th className="px-5 py-3 text-right">This Week</th>
+                    <th className="px-5 py-3 text-right">This Month</th>
+                    <th className="px-5 py-3 text-right">All Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {listingViewAnalytics.map((row: any) => {
+                    const href = row.listing_slug
+                      ? `/hostels/${row.county}/${row.area}/${row.listing_slug}`
+                      : `/listing/${row.listing_id}`;
+
+                    return (
+                      <tr key={row.listing_id} className="hover:bg-slate-50/60">
+                        <td className="px-5 py-4 font-bold text-slate-900">
+                          <Link href={href} className="hover:text-emerald-600">
+                            {row.listing_title}
+                          </Link>
+                        </td>
+                        <td className="px-5 py-4 text-right font-semibold text-slate-600">{row.today_count.toLocaleString()}</td>
+                        <td className="px-5 py-4 text-right font-semibold text-slate-600">{row.week_count.toLocaleString()}</td>
+                        <td className="px-5 py-4 text-right font-semibold text-slate-900">{row.month_count.toLocaleString()}</td>
+                        <td className="px-5 py-4 text-right font-semibold text-slate-600">{row.all_time_count.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

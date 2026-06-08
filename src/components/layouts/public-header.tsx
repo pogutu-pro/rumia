@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils/cn';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 const NAV_LINKS = [
-  { href: '/browse', label: 'Browse Hostels' },
-  { href: '/auth/login', label: 'Agent Login' },
+  { href: '/hostels', label: 'Browse All' },
+  { href: '/auth/login', label: 'Login' },
 ];
 
 export const PublicHeader = React.memo(function PublicHeader() {

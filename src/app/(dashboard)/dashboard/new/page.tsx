@@ -18,7 +18,7 @@ export default async function NewListingPage() {
   // Find agent profile
   let { data: agent } = await supabase
     .from('agents')
-    .select('id')
+    .select('id, phone, whatsapp')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -48,7 +48,7 @@ export default async function NewListingPage() {
       </div>
 
       {/* Form Component */}
-      <NewListingForm agentId={agent.id} />
+      <NewListingForm agentId={agent.id} agentWhatsapp={agent.whatsapp || agent.phone || ''} />
     </div>
   );
 }
