@@ -40,8 +40,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
       security_type, water_included, electricity_included, wifi_included,
       latitude, longitude, gender, proximity_description, is_active,
       county, area,
-      listing_images ( id, r2_url, category, display_order ),
-      listing_room_types ( id, room_type, price, is_available )
+      listing_images ( id, r2_url, category, display_order )
     `)
     .eq('id', id)
     .eq('agent_id', agent.id)
@@ -50,6 +49,13 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
   if (error || !listing) {
     notFound();
   }
+
+  const { data: roomTypes } = await supabase
+    .from('listing_room_types')
+    .select('id, room_type, price, is_available')
+    .eq('listing_id', id);
+
+  (listing as any).listing_room_types = roomTypes || [];
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

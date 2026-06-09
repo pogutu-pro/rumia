@@ -749,14 +749,18 @@ async function seed() {
         .delete()
         .eq('listing_id', existing.id);
 
-      const { error: roomTypeInsertError } = await supabase.from('listing_room_types').insert(
-        t.room_types.map((rt) => ({
-          listing_id: existing.id,
-          room_type: rt.room_type,
-          price: rt.price,
-          is_available: rt.is_available,
-        }))
-      );
+      let roomTypeInsertError;
+      if (!roomTypeDeleteError) {
+        const result = await supabase.from('listing_room_types').insert(
+          t.room_types.map((rt) => ({
+            listing_id: existing.id,
+            room_type: rt.room_type,
+            price: rt.price,
+            is_available: rt.is_available,
+          }))
+        );
+        roomTypeInsertError = result.error;
+      }
 
       const relatedError =
         imageDeleteError || imageInsertError || roomTypeDeleteError || roomTypeInsertError;

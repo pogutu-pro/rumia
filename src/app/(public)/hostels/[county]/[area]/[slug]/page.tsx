@@ -48,8 +48,7 @@ const getListing = cache(async (slug: string) => {
       room_type, slug, county, area, updated_at, latitude, longitude,
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category,
       listing_images ( id, r2_url, display_order ),
-      agents ( id, name, phone, whatsapp, slug ),
-      listing_room_types ( id, room_type, price, is_available )
+      agents ( id, name, phone, whatsapp, slug )
     `,
     )
     .eq('slug', slug)
@@ -57,7 +56,13 @@ const getListing = cache(async (slug: string) => {
     .single();
 
   if (error || !data) return null;
-  return data as any;
+
+  const { data: roomTypes } = await supabase
+    .from('listing_room_types')
+    .select('id, room_type, price, is_available')
+    .eq('listing_id', data.id);
+
+  return { ...data, listing_room_types: roomTypes || [] } as any;
 });
 
 async function getNearbyListings(listing: any) {

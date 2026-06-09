@@ -12,43 +12,43 @@ export interface AreaCoordinates {
 export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
   'Near Gate A': {
     name: 'Near Gate A',
-    latitude: -0.396,
-    longitude: 36.96,
+    latitude: -0.3969393,
+    longitude: 36.9570816,
   },
   'Near Gate B': {
     name: 'Near Gate B',
-    latitude: -0.3985,
-    longitude: 36.959,
+    latitude: -0.3975,
+    longitude: 36.9602,
   },
   'Near Gate C (Boma)': {
     name: 'Near Gate C (Boma)',
-    latitude: -0.3975,
-    longitude: 36.963,
+    latitude: -0.4005,
+    longitude: 36.9645,
   },
   'Nyeri View': {
     name: 'Nyeri View',
-    latitude: -0.4015,
-    longitude: 36.965,
+    latitude: -0.3963,
+    longitude: 36.95,
   },
   'Kahawa Ridge': {
     name: 'Kahawa Ridge',
-    latitude: -0.395,
-    longitude: 36.957,
+    latitude: -0.401,
+    longitude: 36.954,
   },
   'Embassy Area': {
     name: 'Embassy Area',
-    latitude: -0.4025,
-    longitude: 36.962,
+    latitude: -0.3721,
+    longitude: 36.9325,
   },
   Nyaribo: {
     name: 'Nyaribo',
-    latitude: -0.4,
-    longitude: 36.968,
+    latitude: -0.3785,
+    longitude: 36.981,
   },
   Boma: {
     name: 'Boma',
-    latitude: -0.3975,
-    longitude: 36.963,
+    latitude: -0.4005,
+    longitude: 36.9645,
   },
 };
 
