@@ -20,7 +20,7 @@ function listingPayload(formData: any, agentId: string) {
     county: formData.county || 'nyeri',
     area: formData.area || 'dekut',
     description: formData.description,
-    price: parseFloat(formData.price) || null,
+    price: parseFloat(formData.price_single || formData.price) || null,
     location: formData.location,
     agent_id: agentId,
     youtube_id: formData.youtube_id || null,
