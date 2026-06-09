@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
@@ -35,7 +36,7 @@ interface PageProps {
   params: Promise<{ county: string; area: string; slug: string }>;
 }
 
-async function getListing(slug: string) {
+const getListing = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('listings')
@@ -57,7 +58,7 @@ async function getListing(slug: string) {
 
   if (error || !data) return null;
   return data as any;
-}
+});
 
 async function getNearbyListings(listing: any) {
   const supabase = await createClient();

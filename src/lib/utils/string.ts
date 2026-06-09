@@ -12,7 +12,7 @@ export function slugify(text: string): string {
  * e.g. "Sunrise Court" + "dekut" → "sunrise-court-dekut"
  */
 export function generateListingSlug(name: string, area = 'dekut'): string {
-  return `${slugify(name)}-${area}`;
+  return `${slugify(name)}-${slugify(area)}`;
 }
 
 /**

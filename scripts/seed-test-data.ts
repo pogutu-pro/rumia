@@ -683,7 +683,7 @@ async function seed() {
 
   for (const t of LISTING_TEMPLATES) {
     const agentId = agentIds[t.agentIndex];
-    const listingSlug = `${slugify(t.title)}-${t.area}`;
+    const listingSlug = `${slugify(t.title)}-${slugify(t.area)}`;
 
     const { data: existing } = await supabase
       .from('listings')
