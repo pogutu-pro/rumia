@@ -862,8 +862,8 @@ export function NewListingForm({
             />
             <p className="text-[11px] text-slate-400 font-medium">
               Paste the entire YouTube video URL (e.g. youtube.com/watch?v=...)
-              or just the 11-character code. We'll automatically extract the ID
-              to display the tour.
+              or just the 11-character code. We will automatically extract the
+              ID to display the tour.
             </p>
             {youtubeId && youtubeId.length >= 10 && (
               <div className="mt-3 aspect-video max-w-sm rounded-xl overflow-hidden border border-slate-200 shadow-xs">

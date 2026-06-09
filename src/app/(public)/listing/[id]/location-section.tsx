@@ -12,7 +12,6 @@ import {
   useRef,
   useEffect,
   useCallback,
-  useLayoutEffect,
 } from 'react';
 
 interface LocationSectionProps {
@@ -67,7 +66,7 @@ function ResolvedLocationSection({
 }) {
   const [streetViewStatus, setStreetViewStatus] = useState<
     'loading' | 'available' | 'unavailable'
-  >('loading');
+  >(() => (apiKey ? 'loading' : 'unavailable'));
   const streetViewRef = useRef<HTMLDivElement>(null);
   const panoramaRef = useRef<google.maps.StreetViewPanorama | null>(null);
   const streetViewInitialized = useRef(false);
@@ -165,12 +164,7 @@ function ResolvedLocationSection({
   }, [apiKey, lat, lng]);
 
   // Wait for the Google Maps JS API to be ready (loaded by APIProvider), then init Street View
-  useLayoutEffect(() => {
-    if (!apiKey) {
-      setStreetViewStatus('unavailable');
-      return;
-    }
-
+  useEffect(() => {
     // Check if Google Maps is immediately available
     if (
       typeof window !== 'undefined' &&
@@ -178,7 +172,7 @@ function ResolvedLocationSection({
       google.maps &&
       google.maps.StreetViewService
     ) {
-      initStreetView();
+      queueMicrotask(initStreetView);
       return;
     }
 
