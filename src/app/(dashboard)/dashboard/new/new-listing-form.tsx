@@ -7,20 +7,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  DEKUT_AREAS,
+  AREA_OPTIONS,
+  DISTANCE_CATEGORY_OPTIONS,
+} from '@/lib/constants/dekut-areas';
 
 // Dynamically imported with ssr:false because @googlemaps/js-api-loader
 // references `window` at module-evaluation time, which crashes Next.js SSR.
 const GoogleLocationInput = dynamic(
   () =>
     import('@/components/ui/google-location-input').then(
-      (mod) => mod.GoogleLocationInput
+      (mod) => mod.GoogleLocationInput,
     ),
   {
     ssr: false,
     loading: () => (
       <div className="h-11 w-full rounded-md bg-slate-100 animate-pulse" />
     ),
-  }
+  },
 );
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, UploadCloud, Youtube } from 'lucide-react';
@@ -69,6 +74,11 @@ interface InitialListingData {
   is_active?: boolean | null;
   county?: string | null;
   area?: string | null;
+  specific_location?: string | null;
+  price_single?: number | string | null;
+  price_sharing?: number | string | null;
+  mpesa_details?: string | null;
+  distance_category?: string | null;
   listing_images?: Array<{
     id?: string;
     r2_url: string;
@@ -86,10 +96,15 @@ interface InitialListingData {
 function extractYoutubeId(urlOrId: string): string {
   if (!urlOrId) return '';
   const trimmed = urlOrId.trim();
-  if (trimmed.length === 11 && !trimmed.includes('/') && !trimmed.includes('?')) {
+  if (
+    trimmed.length === 11 &&
+    !trimmed.includes('/') &&
+    !trimmed.includes('?')
+  ) {
     return trimmed;
   }
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = trimmed.match(regExp);
   if (match && match[2].length === 11) {
     return match[2];
@@ -138,63 +153,141 @@ export function NewListingForm({
   const isEditing = mode === 'edit' && !!initialListing;
 
   const [title, setTitle] = useState(initialListing?.title || '');
-  const [description, setDescription] = useState(initialListing?.description || '');
+  const [description, setDescription] = useState(
+    initialListing?.description || '',
+  );
   const [price, setPrice] = useState(String(initialListing?.price || ''));
   const [location, setLocation] = useState(initialListing?.location || '');
   const [youtubeId, setYoutubeId] = useState(initialListing?.youtube_id || '');
-  const [roomType, setRoomType] = useState(initialListing?.room_type || 'Single');
-  const [amenities, setAmenities] = useState<string[]>(initialListing?.amenities || []);
+  const [roomType, setRoomType] = useState(
+    initialListing?.room_type || 'Single',
+  );
+  const [amenities, setAmenities] = useState<string[]>(
+    initialListing?.amenities || [],
+  );
   const [whatsappNumber, setWhatsappNumber] = useState(agentWhatsapp || '');
-  const [images, setImages] = useState<UploadedImage[]>(() => initialImages(initialListing));
-  
+  const [images, setImages] = useState<UploadedImage[]>(() =>
+    initialImages(initialListing),
+  );
+
+  // Location and area fields
+  const [area, setArea] = useState(initialListing?.area || '');
+  const [specificLocation, setSpecificLocation] = useState(
+    initialListing?.specific_location || '',
+  );
+
+  // Pricing fields
+  const [priceSingle, setPriceSingle] = useState(
+    String(initialListing?.price_single || ''),
+  );
+  const [priceSharing, setPriceSharing] = useState(
+    String(initialListing?.price_sharing || ''),
+  );
+
+  // Payment details
+  const [mpesaDetails, setMpesaDetails] = useState(
+    initialListing?.mpesa_details || '',
+  );
+
+  // Distance category for badge
+  const [distanceCategory, setDistanceCategory] = useState(
+    initialListing?.distance_category || '',
+  );
+
   // New production-ready fields
-  const [bathroomType, setBathroomType] = useState(initialListing?.bathroom_type || 'Shared');
-  const [distanceToCampus, setDistanceToCampus] = useState(initialListing?.distance_to_campus || '3 mins walk');
-  const [securityType, setSecurityType] = useState(initialListing?.security_type || '24/7 CCTV & Guards');
-  const [waterIncluded, setWaterIncluded] = useState(initialListing?.water_included ?? true);
-  const [electricityIncluded, setElectricityIncluded] = useState(initialListing?.electricity_included ?? true);
-  const [wifiIncluded, setWifiIncluded] = useState(initialListing?.wifi_included ?? true);
-  const [latitude, setLatitude] = useState<number | null>(() => toNullableNumber(initialListing?.latitude));
-  const [longitude, setLongitude] = useState<number | null>(() => toNullableNumber(initialListing?.longitude));
-  const [gender, setGender] = useState<'mixed' | 'male' | 'female'>(initialListing?.gender || 'mixed');
-  const [proximityDescription, setProximityDescription] = useState(initialListing?.proximity_description || '');
+  const [bathroomType, setBathroomType] = useState(
+    initialListing?.bathroom_type || 'Shared',
+  );
+  const [distanceToCampus, setDistanceToCampus] = useState(
+    initialListing?.distance_to_campus || '3 mins walk',
+  );
+  const [securityType, setSecurityType] = useState(
+    initialListing?.security_type || '24/7 CCTV & Guards',
+  );
+  const [waterIncluded, setWaterIncluded] = useState(
+    initialListing?.water_included ?? true,
+  );
+  const [electricityIncluded, setElectricityIncluded] = useState(
+    initialListing?.electricity_included ?? true,
+  );
+  const [wifiIncluded, setWifiIncluded] = useState(
+    initialListing?.wifi_included ?? true,
+  );
+  const [latitude, setLatitude] = useState<number | null>(() =>
+    toNullableNumber(initialListing?.latitude),
+  );
+  const [longitude, setLongitude] = useState<number | null>(() =>
+    toNullableNumber(initialListing?.longitude),
+  );
+  const [gender, setGender] = useState<'mixed' | 'male' | 'female'>(
+    initialListing?.gender || 'mixed',
+  );
+  const [proximityDescription, setProximityDescription] = useState(
+    initialListing?.proximity_description || '',
+  );
 
   // Dynamic list of room types
-  const [roomTypes, setRoomTypes] = useState<FormRoomType[]>(() => initialRoomTypes(initialListing));
-  
+  const [roomTypes, setRoomTypes] = useState<FormRoomType[]>(() =>
+    initialRoomTypes(initialListing),
+  );
+
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDraft, setIsDraft] = useState(false);
 
   const toggleAmenity = (amenity: string) => {
-    setAmenities((prev) => 
-      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    setAmenities((prev) =>
+      prev.includes(amenity)
+        ? prev.filter((a) => a !== amenity)
+        : [...prev, amenity],
     );
   };
 
+  const handleAreaChange = useCallback((selectedArea: string) => {
+    setArea(selectedArea);
+    // Automatically set coordinates based on selected area
+    const areaCoordinates = DEKUT_AREAS[selectedArea];
+    if (areaCoordinates) {
+      setLatitude(areaCoordinates.latitude);
+      setLongitude(areaCoordinates.longitude);
+    }
+  }, []);
+
   const addRoomTypeField = () => {
-    setRoomTypes((prev) => [...prev, { room_type: 'Double Room', price: '', is_available: true }]);
+    setRoomTypes((prev) => [
+      ...prev,
+      { room_type: 'Double Room', price: '', is_available: true },
+    ]);
   };
 
   const removeRoomTypeField = (index: number) => {
     setRoomTypes((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateRoomTypeField = (index: number, key: keyof FormRoomType, value: any) => {
+  const updateRoomTypeField = (
+    index: number,
+    key: keyof FormRoomType,
+    value: any,
+  ) => {
     setRoomTypes((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item))
+      prev.map((item, idx) =>
+        idx === index ? { ...item, [key]: value } : item,
+      ),
     );
   };
 
-  const handleLocationChange = useCallback((resolved: {
-    address: string;
-    latitude: number | null;
-    longitude: number | null;
-  }) => {
-    setLocation(resolved.address);
-    setLatitude(resolved.latitude);
-    setLongitude(resolved.longitude);
-  }, []);
+  const handleLocationChange = useCallback(
+    (resolved: {
+      address: string;
+      latitude: number | null;
+      longitude: number | null;
+    }) => {
+      setLocation(resolved.address);
+      setLatitude(resolved.latitude);
+      setLongitude(resolved.longitude);
+    },
+    [],
+  );
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -207,7 +300,7 @@ export function NewListingForm({
       try {
         // Fetch presigned URL from API
         const urlResponse = await fetch(
-          `/api/upload-url?filename=${encodeURIComponent(file.name)}&filetype=${encodeURIComponent(file.type)}`
+          `/api/upload-url?filename=${encodeURIComponent(file.name)}&filetype=${encodeURIComponent(file.type)}`,
         );
 
         if (!urlResponse.ok) {
@@ -254,8 +347,18 @@ export function NewListingForm({
     e.preventDefault();
     if (isSaving || isUploading) return;
 
-    if (!title || !price || !location || !whatsappNumber) {
-      toast.error('Please fill in all required fields');
+    if (!title || !area || !whatsappNumber) {
+      toast.error(
+        'Please fill in all required fields: Title, Area, and WhatsApp number',
+      );
+      return;
+    }
+
+    // At least one price must be provided
+    if (!priceSingle && !priceSharing) {
+      toast.error(
+        'Please enter at least one price: Single Occupancy or Shared Occupancy',
+      );
       return;
     }
 
@@ -263,13 +366,13 @@ export function NewListingForm({
     setIsDraft(asDraft);
 
     try {
-      const { createListingAction, updateListingAction } = await import('@/app/actions/listings');
-      
+      const { createListingAction, updateListingAction } =
+        await import('@/app/actions/listings');
+
       const payload = {
         listing_id: initialListing?.id,
         title,
         description,
-        price,
         location,
         agent_id: agentId,
         agent_whatsapp: whatsappNumber,
@@ -288,9 +391,14 @@ export function NewListingForm({
         latitude,
         longitude,
         county: initialListing?.county || 'nyeri',
-        area: initialListing?.area || 'dekut',
+        area: area,
+        specific_location: specificLocation,
+        price_single: priceSingle ? Number(priceSingle) : null,
+        price_sharing: priceSharing ? Number(priceSharing) : null,
+        mpesa_details: mpesaDetails,
+        distance_category: distanceCategory,
         images: images,
-        roomTypes: roomTypes
+        roomTypes: roomTypes,
       };
 
       const result = isEditing
@@ -301,7 +409,11 @@ export function NewListingForm({
         throw new Error(result.error || 'Failed to insert listing');
       }
 
-      toast.success(isEditing ? 'Listing updated successfully!' : 'Listing created successfully!');
+      toast.success(
+        isEditing
+          ? 'Listing updated successfully!'
+          : 'Listing created successfully!',
+      );
       router.push('/dashboard');
       router.refresh();
     } catch (error: any) {
@@ -314,7 +426,9 @@ export function NewListingForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
-        <h2 className="text-xl font-bold text-slate-900">Listing Information</h2>
+        <h2 className="text-xl font-bold text-slate-900">
+          Listing Information
+        </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Title */}
@@ -331,38 +445,9 @@ export function NewListingForm({
             />
           </div>
 
-          {/* Price */}
-          <div className="space-y-2">
-            <Label htmlFor="price">Monthly Rent (KES) *</Label>
-            <Input
-              id="price"
-              type="number"
-              required
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="e.g. 12000"
-              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
-            />
-          </div>
-
-          {/* Location */}
+          {/* Gender - moved to top, directly below title */}
           <div className="sm:col-span-2 space-y-2">
-            <Label htmlFor="location">Location *</Label>
-            <GoogleLocationInput
-              id="location"
-              required
-              value={location}
-              latitude={latitude}
-              longitude={longitude}
-              onChange={handleLocationChange}
-              placeholder="e.g. Nyaribo, Gichugu Road, or hostel name"
-              inputClassName="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
-            />
-          </div>
-
-          {/* Gender */}
-          <div className="space-y-2">
-            <Label htmlFor="gender">Accommodation Gender</Label>
+            <Label htmlFor="gender">Accommodation Gender *</Label>
             <select
               id="gender"
               value={gender}
@@ -373,21 +458,51 @@ export function NewListingForm({
               <option value="female">Female Only (Ladies)</option>
               <option value="male">Male Only (Gents)</option>
             </select>
+            <p className="text-[11px] text-slate-400 font-medium">
+              Students filter by this first. Make it clear and prominent.
+            </p>
           </div>
 
-          {/* Proximity Description */}
-          <div className="space-y-2">
-            <Label htmlFor="proximityDescription">Proximity to Campus</Label>
+          {/* Area - replaces old location field */}
+          <div className="sm:col-span-2 space-y-2">
+            <Label htmlFor="area">Hostel Area *</Label>
+            <select
+              id="area"
+              required
+              value={area}
+              onChange={(e) => handleAreaChange(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 font-medium"
+            >
+              <option value="">Select an area...</option>
+              {AREA_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-slate-400 font-medium">
+              Choose the area your hostel is located in. This matches official
+              DeKUT groupings.
+            </p>
+          </div>
+
+          {/* Specific Location - optional text description */}
+          <div className="sm:col-span-2 space-y-2">
+            <Label htmlFor="specificLocation">
+              Specific Location (Optional)
+            </Label>
             <Input
-              id="proximityDescription"
+              id="specificLocation"
               type="text"
-              value={proximityDescription}
-              onChange={(e) => setProximityDescription(e.target.value)}
-              placeholder="e.g. 50m from Gate A, 200m from Resource Centre"
+              maxLength={60}
+              value={specificLocation}
+              onChange={(e) => setSpecificLocation(e.target.value.slice(0, 60))}
+              placeholder="e.g. opposite the petrol station, next to Arch Bishop Kirima"
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
             <p className="text-[11px] text-slate-400 font-medium">
-              Used by the smart search to match "gate A" or "near campus" queries.
+              A short human description to help students find your exact
+              location (max 60 characters).
             </p>
           </div>
 
@@ -406,8 +521,95 @@ export function NewListingForm({
             </select>
           </div>
 
+          {/* Dual Pricing Fields */}
+          <div className="sm:col-span-2 space-y-4 bg-emerald-50/30 p-4 rounded-xl border border-emerald-200/50">
+            <Label className="font-bold text-slate-800">
+              Pricing (at least one required)
+            </Label>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Single Occupancy Price */}
+              <div className="space-y-2">
+                <Label htmlFor="priceSingle">
+                  Single Occupancy — KES per month
+                </Label>
+                <Input
+                  id="priceSingle"
+                  type="number"
+                  value={priceSingle}
+                  onChange={(e) => setPriceSingle(e.target.value)}
+                  placeholder="e.g. 7500"
+                  className="h-11 bg-white border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+                />
+                <p className="text-[11px] text-slate-500 font-medium">
+                  Price for a student taking a room alone.
+                </p>
+              </div>
+
+              {/* Shared Occupancy Price */}
+              <div className="space-y-2">
+                <Label htmlFor="priceSharing">
+                  Shared Occupancy — KES per person per month
+                </Label>
+                <Input
+                  id="priceSharing"
+                  type="number"
+                  value={priceSharing}
+                  onChange={(e) => setPriceSharing(e.target.value)}
+                  placeholder="e.g. 4500"
+                  className="h-11 bg-white border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+                />
+                <p className="text-[11px] text-slate-500 font-medium">
+                  Price per person when a room is shared between two students.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* M-Pesa Payment Details */}
+          <div className="sm:col-span-2 space-y-2">
+            <Label htmlFor="mpesaDetails">
+              M-Pesa Payment Details (Optional)
+            </Label>
+            <Input
+              id="mpesaDetails"
+              type="text"
+              maxLength={100}
+              value={mpesaDetails}
+              onChange={(e) => setMpesaDetails(e.target.value.slice(0, 100))}
+              placeholder="e.g. Paybill 247247, A/C 435800 or Till Number 9383225"
+              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
+            <p className="text-[11px] text-slate-400 font-medium">
+              Enter the M-Pesa Paybill number, Account number, or Till Number
+              that students use to pay rent. Display exactly as you type it.
+            </p>
+          </div>
+
+          {/* Distance Category */}
+          <div className="sm:col-span-2 space-y-2">
+            <Label htmlFor="distanceCategory">Distance from Campus</Label>
+            <select
+              id="distanceCategory"
+              value={distanceCategory}
+              onChange={(e) => setDistanceCategory(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 font-medium"
+            >
+              <option value="">Select distance category...</option>
+              {DISTANCE_CATEGORY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-slate-400 font-medium">
+              This drives a visible distance badge on listing cards and the
+              listing page.
+            </p>
+          </div>
+
           {/* Agent WhatsApp */}
-          <div className="space-y-2">
+          <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="agentWhatsapp">Agent WhatsApp *</Label>
             <Input
               id="agentWhatsapp"
@@ -419,7 +621,8 @@ export function NewListingForm({
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
             <p className="text-[11px] text-slate-400 font-medium">
-              This updates your agent profile and is the number students will contact on WhatsApp.
+              This updates your agent profile and is the number students will
+              contact on WhatsApp.
             </p>
           </div>
 
@@ -427,7 +630,16 @@ export function NewListingForm({
           <div className="sm:col-span-2 space-y-3">
             <Label>Amenities</Label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {['WiFi', 'Water', 'Electricity', 'Security', 'Parking', 'Study Area', 'Laundry Area', 'Kitchen'].map((amenity) => (
+              {[
+                'WiFi',
+                'Water',
+                'Electricity',
+                'Security',
+                'Parking',
+                'Study Area',
+                'Laundry Area',
+                'Kitchen',
+              ].map((amenity) => (
                 <div key={amenity} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -436,7 +648,10 @@ export function NewListingForm({
                     onChange={() => toggleAmenity(amenity)}
                     className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
                   />
-                  <Label htmlFor={`amenity-${amenity}`} className="text-sm font-medium leading-none cursor-pointer">
+                  <Label
+                    htmlFor={`amenity-${amenity}`}
+                    className="text-sm font-medium leading-none cursor-pointer"
+                  >
                     {amenity}
                   </Label>
                 </div>
@@ -498,7 +713,10 @@ export function NewListingForm({
                   onChange={(e) => setWaterIncluded(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
                 />
-                <Label htmlFor="waterIncluded" className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer">
+                <Label
+                  htmlFor="waterIncluded"
+                  className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer"
+                >
                   <Droplets className="h-4 w-4 text-blue-500" />
                   Water Included
                 </Label>
@@ -511,7 +729,10 @@ export function NewListingForm({
                   onChange={(e) => setElectricityIncluded(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
                 />
-                <Label htmlFor="electricityIncluded" className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer">
+                <Label
+                  htmlFor="electricityIncluded"
+                  className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer"
+                >
                   <Zap className="h-4 w-4 text-amber-500" />
                   Electricity Included
                 </Label>
@@ -524,7 +745,10 @@ export function NewListingForm({
                   onChange={(e) => setWifiIncluded(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
                 />
-                <Label htmlFor="wifiIncluded" className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer">
+                <Label
+                  htmlFor="wifiIncluded"
+                  className="text-sm font-semibold flex items-center gap-1.5 cursor-pointer"
+                >
                   <Wifi className="h-4 w-4 text-emerald-500" />
                   WiFi Included
                 </Label>
@@ -535,7 +759,9 @@ export function NewListingForm({
           {/* Dynamic Room Types list */}
           <div className="sm:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-bold text-slate-800">Room Categories & Pricing</Label>
+              <Label className="text-base font-bold text-slate-800">
+                Room Categories & Pricing
+              </Label>
               <Button
                 type="button"
                 variant="outline"
@@ -547,28 +773,39 @@ export function NewListingForm({
                 Add Room Category
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {roomTypes.map((rt, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100/80">
+                <div
+                  key={idx}
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100/80"
+                >
                   <div className="flex-1 w-full space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Room Type Name</Label>
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Room Type Name
+                    </Label>
                     <Input
                       type="text"
                       required
                       value={rt.room_type}
-                      onChange={(e) => updateRoomTypeField(idx, 'room_type', e.target.value)}
+                      onChange={(e) =>
+                        updateRoomTypeField(idx, 'room_type', e.target.value)
+                      }
                       placeholder="e.g. Single Room, Self-Contained"
                       className="h-10 bg-white border-slate-200"
                     />
                   </div>
                   <div className="w-full sm:w-36 space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Rent (KES)</Label>
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Rent (KES)
+                    </Label>
                     <Input
                       type="number"
                       required
                       value={rt.price}
-                      onChange={(e) => updateRoomTypeField(idx, 'price', e.target.value)}
+                      onChange={(e) =>
+                        updateRoomTypeField(idx, 'price', e.target.value)
+                      }
                       placeholder="7500"
                       className="h-10 bg-white border-slate-200"
                     />
@@ -578,10 +815,19 @@ export function NewListingForm({
                       type="checkbox"
                       id={`avail-${idx}`}
                       checked={rt.is_available}
-                      onChange={(e) => updateRoomTypeField(idx, 'is_available', e.target.checked)}
+                      onChange={(e) =>
+                        updateRoomTypeField(
+                          idx,
+                          'is_available',
+                          e.target.checked,
+                        )
+                      }
                       className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
                     />
-                    <Label htmlFor={`avail-${idx}`} className="text-xs font-semibold text-slate-600 cursor-pointer">
+                    <Label
+                      htmlFor={`avail-${idx}`}
+                      className="text-xs font-semibold text-slate-600 cursor-pointer"
+                    >
                       Available
                     </Label>
                   </div>
@@ -615,20 +861,22 @@ export function NewListingForm({
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
             <p className="text-[11px] text-slate-400 font-medium">
-              Paste the entire YouTube video URL (e.g. youtube.com/watch?v=...) or just the 11-character code. We'll automatically extract the ID to display the tour.
+              Paste the entire YouTube video URL (e.g. youtube.com/watch?v=...)
+              or just the 11-character code. We'll automatically extract the ID
+              to display the tour.
             </p>
             {youtubeId && youtubeId.length >= 10 && (
-               <div className="mt-3 aspect-video max-w-sm rounded-xl overflow-hidden border border-slate-200 shadow-xs">
-                 <iframe
-                   width="100%"
-                   height="100%"
-                   src={`https://www.youtube.com/embed/${youtubeId}`}
-                   title="YouTube video player"
-                   frameBorder="0"
-                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                   allowFullScreen
-                 ></iframe>
-               </div>
+              <div className="mt-3 aspect-video max-w-sm rounded-xl overflow-hidden border border-slate-200 shadow-xs">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${youtubeId}`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             )}
           </div>
 
@@ -652,7 +900,8 @@ export function NewListingForm({
         <div>
           <h2 className="text-xl font-bold text-slate-900">Property Photos</h2>
           <p className="text-xs text-slate-400 font-medium mt-0.5">
-            Upload images to showcase the room. The first image will be the primary cover photo.
+            Upload images to showcase the room. The first image will be the
+            primary cover photo.
           </p>
         </div>
 
@@ -666,10 +915,12 @@ export function NewListingForm({
             disabled={isUploading}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          
+
           <UploadCloud className="h-10 w-10 text-slate-400 mb-3" />
           <p className="text-sm font-bold text-slate-700">
-            {isUploading ? 'Uploading files to storage...' : 'Click or drag photos here to upload'}
+            {isUploading
+              ? 'Uploading files to storage...'
+              : 'Click or drag photos here to upload'}
           </p>
           <p className="text-xs text-slate-400 mt-1 font-medium">
             PNG, JPG, or WEBP formats up to 10MB each
@@ -692,7 +943,11 @@ export function NewListingForm({
                 key={idx}
                 className="relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group shadow-xs flex flex-col justify-between"
               >
-                <img src={img.url} alt={`Listing upload ${idx + 1}`} className="absolute inset-0 object-cover w-full h-full" />
+                <img
+                  src={img.url}
+                  alt={`Listing upload ${idx + 1}`}
+                  className="absolute inset-0 object-cover w-full h-full"
+                />
                 <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                   <button
                     type="button"
@@ -703,7 +958,7 @@ export function NewListingForm({
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-                
+
                 {/* Cover indicator */}
                 <div className="absolute top-2 left-2 bg-slate-900/80 px-1.5 py-0.5 rounded text-[9px] font-bold text-white uppercase tracking-wider z-20">
                   {idx === 0 ? 'Cover Photo' : `Image ${idx + 1}`}
@@ -759,8 +1014,10 @@ export function NewListingForm({
               <Loader2 className="h-4.5 w-4.5 animate-spin mr-1.5" />
               Publishing...
             </>
+          ) : isEditing ? (
+            'Update Listing'
           ) : (
-            isEditing ? 'Update Listing' : 'Publish Listing'
+            'Publish Listing'
           )}
         </Button>
       </div>

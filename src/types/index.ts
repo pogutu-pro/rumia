@@ -17,6 +17,19 @@ export interface Listing {
   youtube_id?: string | null;
   agent_id: string | number;
   is_active: boolean;
+  // New hostel detail fields
+  area?: string | null;
+  specific_location?: string | null;
+  price_single?: number | null;
+  price_sharing?: number | null;
+  mpesa_details?: string | null;
+  distance_category?: string | null;
+  gender?: 'mixed' | 'male' | 'female' | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  bathroom_type?: string | null;
+  amenities?: string[] | null;
+  room_type?: string | null;
 }
 
 export interface ListingImage {

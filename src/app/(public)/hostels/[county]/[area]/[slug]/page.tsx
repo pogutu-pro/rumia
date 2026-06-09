@@ -3,7 +3,15 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, ArrowLeft, ArrowRight, Heart, Eye, Star, CheckCircle2 } from 'lucide-react';
+import {
+  MapPin,
+  ArrowLeft,
+  ArrowRight,
+  Heart,
+  Eye,
+  Star,
+  CheckCircle2,
+} from 'lucide-react';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
 import { WhatsappButton } from '@/app/(public)/listing/[id]/whatsapp-button';
 import { QuickFacts } from '@/app/(public)/listing/[id]/quick-facts';
@@ -15,7 +23,11 @@ import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
 import { ListingDescription } from './listing-description';
-import { formatListingViewLine, getListingViewCounts } from '@/lib/listing-views';
+import {
+  formatListingViewLine,
+  getListingViewCounts,
+} from '@/lib/listing-views';
+import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 
 export const revalidate = 3600;
 
@@ -27,15 +39,18 @@ async function getListing(slug: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('listings')
-    .select(`
+    .select(
+      `
       id, title, description, price, location, agent_id, youtube_id,
       is_active, amenities, rating, views, bathroom_type, distance_to_campus,
       security_type, electricity_included, water_included, wifi_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
+      gender, specific_location, price_single, price_sharing, mpesa_details, distance_category,
       listing_images ( id, r2_url, display_order ),
       agents ( id, name, phone, whatsapp, slug ),
       listing_room_types ( id, room_type, price, is_available )
-    `)
+    `,
+    )
     .eq('slug', slug)
     .eq('is_active', true)
     .single();
@@ -49,12 +64,14 @@ async function getNearbyListings(listing: any) {
 
   const { data, error } = await supabase
     .from('listings')
-    .select(`
+    .select(
+      `
       id, title, description, price, location, slug, county, area,
       room_type, distance_to_campus,
       listing_images ( r2_url, display_order ),
       agents ( name )
-    `)
+    `,
+    )
     .eq('is_active', true)
     .eq('county', listing.county || 'nyeri')
     .eq('area', listing.area || 'dekut')
@@ -66,16 +83,27 @@ async function getNearbyListings(listing: any) {
   return data as any[];
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { county, area, slug } = await params;
   const listing = await getListing(slug);
   if (!listing) return { title: 'Hostel Not Found' };
 
-  const roomType = listing.listing_room_types?.[0]?.room_type ?? listing.room_type ?? 'Self Contained';
+  const roomType =
+    listing.listing_room_types?.[0]?.room_type ??
+    listing.room_type ??
+    'Self Contained';
   const title = `${listing.title} — ${roomType} Near DeKUT`;
-  const description = `${listing.title} offers ${roomType.toLowerCase()} rooms from KES ${listing.price.toLocaleString()}/month near Dedan Kimathi University in Nyeri. ${listing.distance_to_campus ? `${listing.distance_to_campus} from campus. ` : ''}Contact agent on WhatsApp today.`.slice(0, 155);
+  const description =
+    `${listing.title} offers ${roomType.toLowerCase()} rooms from KES ${listing.price.toLocaleString()}/month near Dedan Kimathi University in Nyeri. ${listing.distance_to_campus ? `${listing.distance_to_campus} from campus. ` : ''}Contact agent on WhatsApp today.`.slice(
+      0,
+      155,
+    );
   const canonicalUrl = `https://rumia.co.ke/hostels/${county}/${area}/${slug}`;
-  const coverImage = listing.listing_images?.sort((a: any, b: any) => a.display_order - b.display_order)[0]?.r2_url;
+  const coverImage = listing.listing_images?.sort(
+    (a: any, b: any) => a.display_order - b.display_order,
+  )[0]?.r2_url;
   const previewImage = `${canonicalUrl}/opengraph-image`;
   const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
 
@@ -91,7 +119,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: 'website',
       images: [
         { url: previewImage, width: 1200, height: 630, alt: imageAlt },
-        ...(coverImage ? [{ url: coverImage, width: 1200, height: 630, alt: imageAlt }] : []),
+        ...(coverImage
+          ? [{ url: coverImage, width: 1200, height: 630, alt: imageAlt }]
+          : []),
       ],
     },
     twitter: {
@@ -109,12 +139,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
   if (!listing) notFound();
 
   const images = (listing.listing_images || []).sort(
-    (a: any, b: any) => a.display_order - b.display_order
+    (a: any, b: any) => a.display_order - b.display_order,
   );
   const canonicalUrl = `https://rumia.co.ke/hostels/${county}/${area}/${slug}`;
   const shareText = [
     `${listing.room_type || listing.listing_room_types?.[0]?.room_type || 'Student hostel'} from KES ${listing.price.toLocaleString()}/month`,
-    listing.distance_to_campus ? `${listing.distance_to_campus} from DeKUT` : null,
+    listing.distance_to_campus
+      ? `${listing.distance_to_campus} from DeKUT`
+      : null,
     listing.location,
   ]
     .filter(Boolean)
@@ -143,14 +175,22 @@ export default async function ListingSlugPage({ params }: PageProps) {
       addressCountry: 'KE',
     },
     ...(listing.latitude && listing.longitude
-      ? { geo: { '@type': 'GeoCoordinates', latitude: listing.latitude, longitude: listing.longitude } }
+      ? {
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: listing.latitude,
+            longitude: listing.longitude,
+          },
+        }
       : {}),
     priceRange: `KES ${listing.price.toLocaleString()} per month`,
     provider: listing.agents
       ? {
           '@type': 'Person',
           name: listing.agents.name,
-          url: agentSlug ? `https://rumia.co.ke/agents/${agentSlug}` : undefined,
+          url: agentSlug
+            ? `https://rumia.co.ke/agents/${agentSlug}`
+            : undefined,
         }
       : undefined,
   };
@@ -227,6 +267,38 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 {listing.title}
               </h1>
 
+              {/* Area, Specific Location, and Distance Badge - directly below title */}
+              <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-600">
+                <span>{listing.area || 'Hostel Area'}</span>
+                {listing.specific_location && (
+                  <>
+                    <span className="text-slate-300">·</span>
+                    <span>{listing.specific_location}</span>
+                  </>
+                )}
+                {listing.distance_category && (
+                  <>
+                    <span className="text-slate-300">·</span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-200 text-slate-700 text-xs font-bold">
+                      {getDistanceBadgeText(listing.distance_category)}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Gender Badge - display prominently if not mixed */}
+              {listing.gender && listing.gender !== 'mixed' && (
+                <div
+                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-white ${
+                    listing.gender === 'female' ? 'bg-pink-600' : 'bg-blue-600'
+                  }`}
+                >
+                  {listing.gender === 'female'
+                    ? '👩 Ladies Only'
+                    : '👨 Gents Only'}
+                </div>
+              )}
+
               <p className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700">
                 <Eye className="h-4 w-4" />
                 {formatListingViewLine(viewCounts)}
@@ -238,10 +310,19 @@ export default async function ListingSlugPage({ params }: PageProps) {
               </h2>
 
               <p className="text-sm text-slate-600 font-medium">
-                Room type: <span className="font-semibold text-slate-900">{listing.room_type || 'Self Contained'}</span>
-                {' · '}Price from: <span className="font-semibold text-slate-900">KES {listing.price.toLocaleString()}/month</span>
+                Room type:{' '}
+                <span className="font-semibold text-slate-900">
+                  {listing.room_type || 'Self Contained'}
+                </span>
+                {' · '}Price from:{' '}
+                <span className="font-semibold text-slate-900">
+                  KES {listing.price.toLocaleString()}/month
+                </span>
                 {listing.distance_to_campus && (
-                  <>{' · '}<span>{listing.distance_to_campus} from DeKUT</span></>
+                  <>
+                    {' · '}
+                    <span>{listing.distance_to_campus} from DeKUT</span>
+                  </>
                 )}
               </p>
             </div>
@@ -260,12 +341,35 @@ export default async function ListingSlugPage({ params }: PageProps) {
             <hr className="border-slate-100" />
 
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-slate-950">About this hostel</h2>
+              <h2 className="text-xl font-bold text-slate-950">
+                About this hostel
+              </h2>
               <ListingDescription description={listing.description} />
             </div>
 
             <hr className="border-slate-100" />
             <AmenitiesGrid amenities={listing.amenities || []} />
+
+            {/* How to Pay Rent section - only if mpesa_details exist */}
+            {listing.mpesa_details && (
+              <>
+                <hr className="border-slate-100" />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-slate-950">
+                      How to Pay Rent
+                    </h2>
+                    {/* M-Pesa icon/emoji */}
+                    <span className="text-xl">📱</span>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <p className="text-sm font-semibold text-slate-700">
+                      {listing.mpesa_details}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
 
             {hasCoordinates && (
               <>
@@ -279,12 +383,17 @@ export default async function ListingSlugPage({ params }: PageProps) {
             )}
 
             <hr className="border-slate-100" />
-            <RoomTypes roomTypes={listing.listing_room_types || []} fallbackPrice={listing.price} />
+            <RoomTypes
+              roomTypes={listing.listing_room_types || []}
+              fallbackPrice={listing.price}
+            />
             <hr className="border-slate-100" />
 
             {listing.youtube_id && (
               <div className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-950">Take a Video Tour</h2>
+                <h2 className="text-xl font-bold text-slate-950">
+                  Take a Video Tour
+                </h2>
                 <LazyYouTube
                   videoId={listing.youtube_id}
                   title={`${listing.title} — hostel walkthrough video`}
@@ -298,9 +407,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
             {listing.youtube_id && <hr className="border-slate-100" />}
 
             <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-3">
-              <h2 className="text-lg font-bold text-slate-900">Student Reviews</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                Student Reviews
+              </h2>
               <p className="text-sm font-semibold text-slate-500 leading-normal">
-                Reviews are currently being verified for authenticity. They will appear here once complete.
+                Reviews are currently being verified for authenticity. They will
+                appear here once complete.
               </p>
             </div>
           </div>
@@ -309,17 +421,49 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <aside className="hidden lg:block">
             <div className="sticky top-28 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Starting Price</span>
-                <div className="flex items-baseline gap-1 mt-1.5 text-slate-900">
-                  <span className="text-3xl font-black">KES {listing.price.toLocaleString()}</span>
-                  <span className="text-sm font-semibold text-slate-500">/ month</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                  Pricing
+                </span>
+                <div className="mt-3 space-y-2.5">
+                  {listing.price_single && (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-slate-900">
+                        KES {listing.price_single.toLocaleString()}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-600">
+                        Single occupancy/month
+                      </span>
+                    </div>
+                  )}
+                  {listing.price_sharing && (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-slate-900">
+                        KES {listing.price_sharing.toLocaleString()}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-600">
+                        Shared per person/month
+                      </span>
+                    </div>
+                  )}
+                  {!listing.price_single && !listing.price_sharing && (
+                    <div className="flex items-baseline gap-1 mt-1.5 text-slate-900">
+                      <span className="text-3xl font-black">
+                        KES {listing.price.toLocaleString()}
+                      </span>
+                      <span className="text-sm font-semibold text-slate-500">
+                        / month
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="h-px bg-slate-100" />
               <div className="space-y-3.5">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Water {listing.water_included ? 'Included' : 'Available'}</span>
+                  <span>
+                    Water {listing.water_included ? 'Included' : 'Available'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -335,7 +479,9 @@ export default async function ListingSlugPage({ params }: PageProps) {
               <WhatsappButton
                 listingId={listing.id}
                 agentId={listing.agents?.id}
-                agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+                agentPhone={
+                  listing.agents?.whatsapp || listing.agents?.phone || ''
+                }
               />
               {listing.agents && (
                 <div className="pt-4 border-t border-slate-100 text-center space-y-3">
@@ -345,13 +491,20 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     </div>
                     <div className="text-left">
                       {agentSlug ? (
-                        <Link href={`/agents/${agentSlug}`} className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block">
+                        <Link
+                          href={`/agents/${agentSlug}`}
+                          className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block"
+                        >
                           {listing.agents.name}
                         </Link>
                       ) : (
-                        <h3 className="font-bold text-sm text-slate-900 leading-tight">{listing.agents.name}</h3>
+                        <h3 className="font-bold text-sm text-slate-900 leading-tight">
+                          {listing.agents.name}
+                        </h3>
                       )}
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Verified Agent</span>
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                        Verified Agent
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -385,7 +538,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {nearbyListings.map((item) => {
                 const sortedImages = (item.listing_images || []).sort(
-                  (a: any, b: any) => a.display_order - b.display_order
+                  (a: any, b: any) => a.display_order - b.display_order,
                 );
                 const imageUrl = sortedImages[0]?.r2_url;
                 const href = item.slug
@@ -426,7 +579,9 @@ export default async function ListingSlugPage({ params }: PageProps) {
                         {item.title}
                       </h3>
                       <p className="mt-1 line-clamp-2 flex-1 text-sm text-slate-500">
-                        {item.distance_to_campus || item.room_type || item.description}
+                        {item.distance_to_campus ||
+                          item.room_type ||
+                          item.description}
                       </p>
                       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
                         <span className="truncate font-semibold text-slate-400">
@@ -449,10 +604,50 @@ export default async function ListingSlugPage({ params }: PageProps) {
       {/* Mobile sticky footer */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 flex items-center justify-between md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
         <div>
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-lg font-black text-slate-950">KES {listing.price.toLocaleString()}</span>
-            <span className="text-xs font-semibold text-slate-500">/mo</span>
-          </div>
+          {listing.price_single && listing.price_sharing && (
+            <div className="text-sm">
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-base font-black text-slate-950">
+                  KES {listing.price_single.toLocaleString()}
+                </span>
+                <span className="text-xs font-semibold text-slate-500">
+                  single
+                </span>
+              </div>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-base font-black text-slate-950">
+                  KES {listing.price_sharing.toLocaleString()}
+                </span>
+                <span className="text-xs font-semibold text-slate-500">
+                  sharing
+                </span>
+              </div>
+            </div>
+          )}
+          {listing.price_single && !listing.price_sharing && (
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-lg font-black text-slate-950">
+                KES {listing.price_single.toLocaleString()}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">/mo</span>
+            </div>
+          )}
+          {listing.price_sharing && !listing.price_single && (
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-lg font-black text-slate-950">
+                KES {listing.price_sharing.toLocaleString()}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">/mo</span>
+            </div>
+          )}
+          {!listing.price_single && !listing.price_sharing && (
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-lg font-black text-slate-950">
+                KES {listing.price.toLocaleString()}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">/mo</span>
+            </div>
+          )}
         </div>
         <div className="w-[60%]">
           <WhatsappButton

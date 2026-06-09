@@ -8,6 +8,7 @@ import { Search, MapPin, X, Eye } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
 import { useDebounce } from '@/hooks/use-debounce';
+import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -17,6 +18,7 @@ interface ParsedFilters {
   gender?: 'male' | 'female';
   roomType?: string;
   amenities: string[];
+  area?: string;
   proximityGate?: 'A' | 'B';
   sortByProximity: boolean;
   freeText: string;
@@ -36,6 +38,11 @@ interface Listing {
   slug: string | null;
   county: string | null;
   area: string | null;
+  gender?: 'mixed' | 'male' | 'female' | null;
+  specific_location?: string | null;
+  price_single?: number | null;
+  price_sharing?: number | null;
+  distance_category?: string | null;
   listing_images: { r2_url: string; display_order: number }[];
   agents: { name: string } | null;
 }
@@ -45,6 +52,15 @@ interface Listing {
 const PRICE_WORDS = ['cheap', 'affordable', 'budget'];
 const GENDER_FEMALE = ['ladies', 'girls', 'female'];
 const GENDER_MALE = ['gents', 'boys', 'male'];
+const AREA_KEYWORDS: [string[], string][] = [
+  [['near gate a', 'gate a'], 'Near Gate A'],
+  [['near gate b', 'gate b'], 'Near Gate B'],
+  [['near gate c', 'gate c', 'boma'], 'Near Gate C (Boma)'],
+  [['nyeri view'], 'Nyeri View'],
+  [['kahawa ridge'], 'Kahawa Ridge'],
+  [['embassy'], 'Embassy Area'],
+  [['nyaribo'], 'Nyaribo'],
+];
 const ROOM_TYPES: [string[], string][] = [
   [['self contained', 'ensuite'], 'self_contained'],
   [['bedsitter', 'bed sitter'], 'bedsitter'],
@@ -64,20 +80,27 @@ const AMENITY_MAP: [string[], string][] = [
 
 function parseQuery(input: string): ParsedFilters {
   const lower = input.toLowerCase();
-  const filters: ParsedFilters = { amenities: [], sortByProximity: false, freeText: '' };
+  const filters: ParsedFilters = {
+    amenities: [],
+    sortByProximity: false,
+    freeText: '',
+  };
   let remaining = lower;
 
   // Price: cheap / affordable / budget → max 5000
   if (PRICE_WORDS.some((w) => lower.includes(w))) {
     filters.maxPrice = 5000;
-    PRICE_WORDS.forEach((w) => { remaining = remaining.replace(w, ''); });
+    PRICE_WORDS.forEach((w) => {
+      remaining = remaining.replace(w, '');
+    });
   }
 
   // Price: under/below N or Nk
   const underMatch = remaining.match(/(?:under|below)\s+(\d+\.?\d*)\s*k?/);
   if (underMatch) {
     const num = parseFloat(underMatch[1]);
-    filters.maxPrice = underMatch[0].includes('k') && num < 1000 ? num * 1000 : num;
+    filters.maxPrice =
+      underMatch[0].includes('k') && num < 1000 ? num * 1000 : num;
     remaining = remaining.replace(underMatch[0], '');
   }
 
@@ -96,10 +119,14 @@ function parseQuery(input: string): ParsedFilters {
   // Gender
   if (GENDER_FEMALE.some((w) => lower.includes(w))) {
     filters.gender = 'female';
-    GENDER_FEMALE.forEach((w) => { remaining = remaining.replace(w, ''); });
+    GENDER_FEMALE.forEach((w) => {
+      remaining = remaining.replace(w, '');
+    });
   } else if (GENDER_MALE.some((w) => lower.includes(w))) {
     filters.gender = 'male';
-    GENDER_MALE.forEach((w) => { remaining = remaining.replace(w, ''); });
+    GENDER_MALE.forEach((w) => {
+      remaining = remaining.replace(w, '');
+    });
   }
 
   // Room type (check multi-word phrases first)
@@ -124,6 +151,18 @@ function parseQuery(input: string): ParsedFilters {
     }
   }
 
+  // Area (check multi-word phrases first, before proximity gates)
+  for (const [patterns, areaName] of AREA_KEYWORDS) {
+    for (const p of patterns) {
+      if (lower.includes(p)) {
+        filters.area = areaName;
+        remaining = remaining.replace(p, '');
+        break;
+      }
+    }
+    if (filters.area) break;
+  }
+
   // Proximity
   if (lower.includes('gate a')) {
     filters.proximityGate = 'A';
@@ -143,20 +182,48 @@ function parseQuery(input: string): ParsedFilters {
 
 function buildTags(filters: ParsedFilters): ActiveTag[] {
   const tags: ActiveTag[] = [];
-  if (filters.maxPrice) tags.push({ label: `Under KES ${filters.maxPrice.toLocaleString()}`, removeWord: 'cheap' });
-  if (filters.exactPrice) tags.push({ label: `~KES ${filters.exactPrice.toLocaleString()}`, removeWord: String(filters.exactPrice) });
-  if (filters.gender === 'female') tags.push({ label: 'Ladies Only', removeWord: 'ladies' });
-  if (filters.gender === 'male') tags.push({ label: 'Gents Only', removeWord: 'gents' });
+  if (filters.maxPrice)
+    tags.push({
+      label: `Under KES ${filters.maxPrice.toLocaleString()}`,
+      removeWord: 'cheap',
+    });
+  if (filters.exactPrice)
+    tags.push({
+      label: `~KES ${filters.exactPrice.toLocaleString()}`,
+      removeWord: String(filters.exactPrice),
+    });
+  if (filters.gender === 'female')
+    tags.push({ label: 'Ladies Only', removeWord: 'ladies' });
+  if (filters.gender === 'male')
+    tags.push({ label: 'Gents Only', removeWord: 'gents' });
   if (filters.roomType) {
     const labels: Record<string, string> = {
-      self_contained: 'Self Contained', bedsitter: 'Bedsitter',
-      single: 'Single Room', double: 'Double Room', shared: 'Shared',
+      self_contained: 'Self Contained',
+      bedsitter: 'Bedsitter',
+      single: 'Single Room',
+      double: 'Double Room',
+      shared: 'Shared',
     };
-    tags.push({ label: labels[filters.roomType] ?? filters.roomType, removeWord: filters.roomType.replace('_', ' ') });
+    tags.push({
+      label: labels[filters.roomType] ?? filters.roomType,
+      removeWord: filters.roomType.replace('_', ' '),
+    });
   }
-  filters.amenities.forEach((a) => tags.push({ label: a, removeWord: a.toLowerCase() }));
-  if (filters.proximityGate) tags.push({ label: `Near Gate ${filters.proximityGate}`, removeWord: `gate ${filters.proximityGate.toLowerCase()}` });
-  if (filters.sortByProximity) tags.push({ label: 'Near Campus', removeWord: 'near campus' });
+  filters.amenities.forEach((a) =>
+    tags.push({ label: a, removeWord: a.toLowerCase() }),
+  );
+  if (filters.area)
+    tags.push({
+      label: filters.area,
+      removeWord: filters.area.split(' ')[0].toLowerCase(),
+    });
+  if (filters.proximityGate)
+    tags.push({
+      label: `Near Gate ${filters.proximityGate}`,
+      removeWord: `gate ${filters.proximityGate.toLowerCase()}`,
+    });
+  if (filters.sortByProximity)
+    tags.push({ label: 'Near Campus', removeWord: 'near campus' });
   return tags;
 }
 
@@ -166,20 +233,28 @@ async function fetchListings(filters: ParsedFilters): Promise<Listing[]> {
   const supabase = createClient();
   let q = supabase
     .from('listings')
-    .select('id, title, description, price, location, slug, county, area, listing_images(r2_url, display_order), agents(name)')
+    .select(
+      'id, title, description, price, location, slug, county, area, gender, specific_location, price_single, price_sharing, distance_category, listing_images(r2_url, display_order), agents(name)',
+    )
     .eq('is_active', true);
 
   if (filters.maxPrice) q = q.lte('price', filters.maxPrice);
   if (filters.exactPrice) {
-    q = q.gte('price', filters.exactPrice - 500).lte('price', filters.exactPrice + 500);
+    q = q
+      .gte('price', filters.exactPrice - 500)
+      .lte('price', filters.exactPrice + 500);
   }
   if (filters.gender) q = q.eq('gender', filters.gender);
   if (filters.roomType) q = q.eq('room_type_enum', filters.roomType);
-  filters.amenities.forEach((a) => { q = q.contains('amenities', [a]); });
-  if (filters.proximityGate) q = q.ilike('proximity_description', `%Gate ${filters.proximityGate}%`);
+  filters.amenities.forEach((a) => {
+    q = q.contains('amenities', [a]);
+  });
+  if (filters.area) q = q.eq('area', filters.area);
+  if (filters.proximityGate)
+    q = q.ilike('proximity_description', `%Gate ${filters.proximityGate}%`);
   if (filters.freeText) {
     q = q.or(
-      `title.ilike.%${filters.freeText}%,description.ilike.%${filters.freeText}%,location.ilike.%${filters.freeText}%`
+      `title.ilike.%${filters.freeText}%,description.ilike.%${filters.freeText}%,location.ilike.%${filters.freeText}%`,
     );
   }
 
@@ -197,7 +272,10 @@ function ListingSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="bg-white border border-slate-100 rounded-2xl overflow-hidden animate-pulse">
+        <div
+          key={i}
+          className="bg-white border border-slate-100 rounded-2xl overflow-hidden animate-pulse"
+        >
           <div className="aspect-4/3 bg-slate-200" />
           <div className="p-4 space-y-2">
             <div className="h-3 bg-slate-200 rounded w-1/2" />
@@ -235,13 +313,18 @@ export default function HostelsPage() {
 
   // Sync URL and fire query when debounced value changes
   useEffect(() => {
-    const url = debouncedQuery ? `/hostels?q=${encodeURIComponent(debouncedQuery)}` : '/hostels';
+    const url = debouncedQuery
+      ? `/hostels?q=${encodeURIComponent(debouncedQuery)}`
+      : '/hostels';
     router.replace(url);
     runSearch(debouncedQuery);
   }, [debouncedQuery, router, runSearch]);
 
   const removeTag = (removeWord: string) => {
-    const regex = new RegExp(`\\b${removeWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    const regex = new RegExp(
+      `\\b${removeWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+      'gi',
+    );
     setQuery((prev) => prev.replace(regex, '').replace(/\s+/g, ' ').trim());
   };
 
@@ -249,9 +332,12 @@ export default function HostelsPage() {
 
   const emptyMessage = () => {
     const parts: string[] = [];
-    if (filters.gender) parts.push(filters.gender === 'female' ? 'ladies only' : 'gents only');
-    if (filters.maxPrice) parts.push(`under KES ${filters.maxPrice.toLocaleString()}`);
-    if (filters.exactPrice) parts.push(`~KES ${filters.exactPrice.toLocaleString()}`);
+    if (filters.gender)
+      parts.push(filters.gender === 'female' ? 'ladies only' : 'gents only');
+    if (filters.maxPrice)
+      parts.push(`under KES ${filters.maxPrice.toLocaleString()}`);
+    if (filters.exactPrice)
+      parts.push(`~KES ${filters.exactPrice.toLocaleString()}`);
     if (filters.roomType) parts.push(filters.roomType.replace('_', ' '));
     filters.amenities.forEach((a) => parts.push(a.toLowerCase()));
     if (filters.freeText) parts.push(`"${filters.freeText}"`);
@@ -265,8 +351,12 @@ export default function HostelsPage() {
       <div className="container mx-auto px-4 lg:px-8 max-w-6xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Student Hostels Near DeKUT</h1>
-          <p className="text-slate-500 font-medium mt-1">Type anything — room type, price, amenities, or location.</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+            Student Hostels Near DeKUT
+          </h1>
+          <p className="text-slate-500 font-medium mt-1">
+            Type anything — room type, price, amenities, or location.
+          </p>
         </div>
 
         {/* Search Input */}
@@ -309,8 +399,20 @@ export default function HostelsPage() {
         {/* Results count */}
         {!loading && (
           <p className="text-sm text-slate-400 font-semibold mb-5 px-1">
-            {listings.length} {listings.length === 1 ? 'hostel' : 'hostels'} found
-            {hasFilters && <span className="text-slate-300"> · <button onClick={() => setQuery('')} className="text-rose-400 hover:text-rose-500">Clear all</button></span>}
+            {listings.length} {listings.length === 1 ? 'hostel' : 'hostels'}{' '}
+            found
+            {hasFilters && (
+              <span className="text-slate-300">
+                {' '}
+                ·{' '}
+                <button
+                  onClick={() => setQuery('')}
+                  className="text-rose-400 hover:text-rose-500"
+                >
+                  Clear all
+                </button>
+              </span>
+            )}
           </p>
         )}
 
@@ -320,11 +422,36 @@ export default function HostelsPage() {
         ) : listings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((item) => {
-              const sorted = [...(item.listing_images || [])].sort((a, b) => a.display_order - b.display_order);
-              const imageUrl = sorted[0]?.r2_url ?? 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+              const sorted = [...(item.listing_images || [])].sort(
+                (a, b) => a.display_order - b.display_order,
+              );
+              const imageUrl =
+                sorted[0]?.r2_url ??
+                'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
               const href = item.slug
                 ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
                 : `/listing/${item.id}`;
+
+              // Format distance badge
+              const distanceBadge = getDistanceBadgeText(
+                item.distance_category,
+              );
+
+              // Format prices display
+              let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
+              if (item.price_single && item.price_sharing) {
+                priceDisplay = `KES ${item.price_single.toLocaleString()} single · KES ${item.price_sharing.toLocaleString()} sharing`;
+              } else if (item.price_single) {
+                priceDisplay = `KES ${item.price_single.toLocaleString()}/mo single`;
+              } else if (item.price_sharing) {
+                priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
+              }
+
+              // Area display with specific location
+              let areaDisplay = item.area || 'Hostel Area';
+              if (item.specific_location) {
+                areaDisplay = `${areaDisplay} · ${item.specific_location}`;
+              }
 
               return (
                 <Link
@@ -340,20 +467,63 @@ export default function HostelsPage() {
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
-                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-900 border border-slate-100/50">
-                      KES {item.price.toLocaleString()}/mo
-                    </div>
+
+                    {/* Distance Badge - Top Left */}
+                    {distanceBadge && (
+                      <div className="absolute top-3 left-3 bg-slate-900/70 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white">
+                        {distanceBadge}
+                      </div>
+                    )}
+
+                    {/* Gender Badge - Top Right */}
+                    {item.gender && item.gender !== 'mixed' && (
+                      <div
+                        className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white ${
+                          item.gender === 'female'
+                            ? 'bg-pink-600/90'
+                            : 'bg-blue-600/90'
+                        } backdrop-blur-sm`}
+                      >
+                        {item.gender === 'female'
+                          ? 'Ladies Only'
+                          : 'Gents Only'}
+                      </div>
+                    )}
+
+                    {/* Price - If not showing area below, show here */}
+                    {!item.area && (
+                      <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-900 border border-slate-100/50">
+                        {priceDisplay.split('/')[0]}
+                      </div>
+                    )}
                   </div>
+
                   <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
-                      <MapPin className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{item.location}</span>
-                    </div>
+                    {/* Title */}
                     <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-slate-500 text-xs line-clamp-2 mt-1 mb-4 flex-1">{item.description}</p>
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+
+                    {/* Area and Specific Location - Below Title */}
+                    <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mt-1 mb-2 truncate">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{areaDisplay}</span>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-slate-500 text-xs line-clamp-2 mb-4 flex-1">
+                      {item.description}
+                    </p>
+
+                    {/* Pricing - Always show clearly */}
+                    <div className="mb-3 pt-2 border-t border-slate-100">
+                      <p className="text-sm font-bold text-emerald-600">
+                        {priceDisplay}
+                      </p>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
                       <span>Agent: {item.agents?.name ?? 'Rumia Agent'}</span>
                       <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5">
                         <Eye className="h-3.5 w-3.5" /> View
@@ -366,7 +536,9 @@ export default function HostelsPage() {
           </div>
         ) : (
           <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
-            <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">{emptyMessage()}</p>
+            <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">
+              {emptyMessage()}
+            </p>
             {tags.length > 0 && (
               <button
                 onClick={() => setQuery('')}

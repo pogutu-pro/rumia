@@ -20,7 +20,7 @@ function listingPayload(formData: any, agentId: string) {
     county: formData.county || 'nyeri',
     area: formData.area || 'dekut',
     description: formData.description,
-    price: parseFloat(formData.price),
+    price: parseFloat(formData.price) || null,
     location: formData.location,
     agent_id: agentId,
     youtube_id: formData.youtube_id || null,
@@ -38,14 +38,31 @@ function listingPayload(formData: any, agentId: string) {
     longitude: nullableCoordinate(formData.longitude),
     gender: formData.gender || 'mixed',
     proximity_description: formData.proximity_description || '',
+    // New hostel detail fields
+    specific_location: formData.specific_location || null,
+    price_single: formData.price_single
+      ? parseInt(formData.price_single)
+      : null,
+    price_sharing: formData.price_sharing
+      ? parseInt(formData.price_sharing)
+      : null,
+    mpesa_details: formData.mpesa_details || null,
+    distance_category: formData.distance_category || null,
   };
 }
 
-async function updateAgentWhatsapp(supabase: any, agentId: string, value: unknown) {
+async function updateAgentWhatsapp(
+  supabase: any,
+  agentId: string,
+  value: unknown,
+) {
   const whatsapp = cleanText(value);
 
   if (!whatsapp) {
-    return { success: false, error: 'Please enter your agent WhatsApp number.' };
+    return {
+      success: false,
+      error: 'Please enter your agent WhatsApp number.',
+    };
   }
 
   const { error } = await supabase
@@ -61,7 +78,11 @@ async function updateAgentWhatsapp(supabase: any, agentId: string, value: unknow
   return { success: true };
 }
 
-async function replaceListingImages(supabase: any, listingId: string, images: any[] = []) {
+async function replaceListingImages(
+  supabase: any,
+  listingId: string,
+  images: any[] = [],
+) {
   const { error: deleteError } = await supabase
     .from('listing_images')
     .delete()
@@ -84,7 +105,11 @@ async function replaceListingImages(supabase: any, listingId: string, images: an
   return error;
 }
 
-async function replaceRoomTypes(supabase: any, listingId: string, roomTypes: any[] = []) {
+async function replaceRoomTypes(
+  supabase: any,
+  listingId: string,
+  roomTypes: any[] = [],
+) {
   const { error: deleteError } = await supabase
     .from('listing_room_types')
     .delete()
@@ -105,11 +130,17 @@ async function replaceRoomTypes(supabase: any, listingId: string, roomTypes: any
 
   if (validRoomTypes.length === 0) return null;
 
-  const { error } = await supabase.from('listing_room_types').insert(validRoomTypes);
+  const { error } = await supabase
+    .from('listing_room_types')
+    .insert(validRoomTypes);
   return error;
 }
 
-function revalidateListingSurfaces(county = 'nyeri', area = 'dekut', slug?: string | null) {
+function revalidateListingSurfaces(
+  county = 'nyeri',
+  area = 'dekut',
+  slug?: string | null,
+) {
   revalidatePath('/');
   revalidatePath('/hostels');
   revalidatePath('/dashboard');
@@ -125,8 +156,11 @@ export async function createListingAction(formData: any) {
   const supabase = await createClient();
 
   // Verify authentication securely on the server
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
   if (authError || !user) {
     return { success: false, error: 'Unauthorized. Please log in.' };
   }
@@ -142,7 +176,11 @@ export async function createListingAction(formData: any) {
     return { success: false, error: 'Unauthorized. Invalid agent profile.' };
   }
 
-  const whatsappUpdate = await updateAgentWhatsapp(supabase, agent.id, formData.agent_whatsapp);
+  const whatsappUpdate = await updateAgentWhatsapp(
+    supabase,
+    agent.id,
+    formData.agent_whatsapp,
+  );
   if (!whatsappUpdate.success) {
     return whatsappUpdate;
   }
@@ -153,7 +191,11 @@ export async function createListingAction(formData: any) {
     const county = formData.county || 'nyeri';
     const baseSlug = generateListingSlug(formData.title, area);
     const slug = await uniqueSlug(baseSlug, async (s) => {
-      const { data } = await supabase.from('listings').select('id').eq('slug', s).maybeSingle();
+      const { data } = await supabase
+        .from('listings')
+        .select('id')
+        .eq('slug', s)
+        .maybeSingle();
       return !!data;
     });
 
@@ -169,21 +211,38 @@ export async function createListingAction(formData: any) {
 
     if (listingError || !listing) {
       console.error('Listing insert error:', listingError);
-      return { success: false, error: listingError?.message || 'Failed to insert listing' };
+      return {
+        success: false,
+        error: listingError?.message || 'Failed to insert listing',
+      };
     }
 
     // 2. Insert images
-    const imagesError = await replaceListingImages(supabase, listing.id, formData.images || []);
+    const imagesError = await replaceListingImages(
+      supabase,
+      listing.id,
+      formData.images || [],
+    );
     if (imagesError) {
       console.error('Error inserting images:', imagesError);
-      return { success: false, error: 'Listing created, but failed to save some images' };
+      return {
+        success: false,
+        error: 'Listing created, but failed to save some images',
+      };
     }
 
     // 3. Insert room types
-    const rtError = await replaceRoomTypes(supabase, listing.id, formData.roomTypes || []);
+    const rtError = await replaceRoomTypes(
+      supabase,
+      listing.id,
+      formData.roomTypes || [],
+    );
     if (rtError) {
       console.error('Error inserting room types:', rtError);
-      return { success: false, error: 'Listing created, but failed to save some room types' };
+      return {
+        success: false,
+        error: 'Listing created, but failed to save some room types',
+      };
     }
 
     revalidateListingSurfaces(county, area, slug);
@@ -195,14 +254,20 @@ export async function createListingAction(formData: any) {
     };
   } catch (error: any) {
     console.error('Server action error:', error);
-    return { success: false, error: error.message || 'An unexpected error occurred' };
+    return {
+      success: false,
+      error: error.message || 'An unexpected error occurred',
+    };
   }
 }
 
 export async function updateListingAction(formData: any) {
   const supabase = await createClient();
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   if (authError || !user) {
     return { success: false, error: 'Unauthorized. Please log in.' };
@@ -234,7 +299,11 @@ export async function updateListingAction(formData: any) {
       return { success: false, error: 'Listing not found or unauthorized.' };
     }
 
-    const whatsappUpdate = await updateAgentWhatsapp(supabase, agent.id, formData.agent_whatsapp);
+    const whatsappUpdate = await updateAgentWhatsapp(
+      supabase,
+      agent.id,
+      formData.agent_whatsapp,
+    );
     if (!whatsappUpdate.success) {
       return whatsappUpdate;
     }
@@ -249,25 +318,42 @@ export async function updateListingAction(formData: any) {
 
     if (listingError || !listing) {
       console.error('Listing update error:', listingError);
-      return { success: false, error: listingError?.message || 'Failed to update listing' };
+      return {
+        success: false,
+        error: listingError?.message || 'Failed to update listing',
+      };
     }
 
-    const imagesError = await replaceListingImages(supabase, listing.id, formData.images || []);
+    const imagesError = await replaceListingImages(
+      supabase,
+      listing.id,
+      formData.images || [],
+    );
     if (imagesError) {
       console.error('Error updating images:', imagesError);
-      return { success: false, error: 'Listing updated, but failed to save some images' };
+      return {
+        success: false,
+        error: 'Listing updated, but failed to save some images',
+      };
     }
 
-    const rtError = await replaceRoomTypes(supabase, listing.id, formData.roomTypes || []);
+    const rtError = await replaceRoomTypes(
+      supabase,
+      listing.id,
+      formData.roomTypes || [],
+    );
     if (rtError) {
       console.error('Error updating room types:', rtError);
-      return { success: false, error: 'Listing updated, but failed to save some room types' };
+      return {
+        success: false,
+        error: 'Listing updated, but failed to save some room types',
+      };
     }
 
     revalidateListingSurfaces(
       listing.county || existing.county || 'nyeri',
       listing.area || existing.area || 'dekut',
-      listing.slug || existing.slug
+      listing.slug || existing.slug,
     );
 
     return {
@@ -277,6 +363,9 @@ export async function updateListingAction(formData: any) {
     };
   } catch (error: any) {
     console.error('Server action error:', error);
-    return { success: false, error: error.message || 'An unexpected error occurred' };
+    return {
+      success: false,
+      error: error.message || 'An unexpected error occurred',
+    };
   }
 }
