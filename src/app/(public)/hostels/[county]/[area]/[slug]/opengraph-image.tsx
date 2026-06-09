@@ -65,7 +65,7 @@ export default async function ListingOgImage({ params }: Props) {
         {/* Content */}
         <div style={{ position: 'relative', padding: '48px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
-            Student Hostel · {location}
+            {`Student Hostel · ${location}`}
           </div>
           <div style={{ fontSize: '52px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '800px' }}>
             {title}
