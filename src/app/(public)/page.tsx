@@ -102,11 +102,6 @@ export default async function HomePage() {
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500 via-transparent to-transparent" />
 
         <div className="container relative z-10 mx-auto px-4 text-center max-w-4xl">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-6 animate-fade-in">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Verified Campus Housing
-          </span>
-
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] mb-4">
             Student Hostels Near DeKUT, Nyeri
           </h1>

@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Heart,
   Eye,
-  Star,
   CheckCircle2,
 } from 'lucide-react';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
@@ -262,13 +261,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-                  <Star className="h-3.5 w-3.5 fill-current" />
-                  {listing.rating || '4.7'} Rating
-                </span>
-              </div>
-
               <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
                 {listing.title}
               </h1>
