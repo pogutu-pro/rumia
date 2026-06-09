@@ -124,7 +124,7 @@ async function replaceRoomTypes(
     .map((rt: any) => ({
       listing_id: listingId,
       room_type: rt.room_type,
-      price: parseFloat(rt.price),
+      price: Math.round(parseFloat(rt.price)),
       is_available: rt.is_available,
     }));
 
