@@ -34,7 +34,8 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'Rumia',
   url: 'https://rumia.co.ke',
-  description: 'Verified student hostel listings near Dedan Kimathi University of Technology, Nyeri, Kenya.',
+  description:
+    'Verified student hostel listings near Dedan Kimathi University of Technology, Nyeri, Kenya.',
   areaServed: { '@type': 'City', name: 'Nyeri', addressCountry: 'KE' },
 };
 
@@ -44,7 +45,8 @@ export default async function HomePage() {
   // Fetch active listings with their first image and agent name
   const { data: listingsData } = await supabase
     .from('listings')
-    .select(`
+    .select(
+      `
       id,
       title,
       description,
@@ -62,29 +64,32 @@ export default async function HomePage() {
       agents (
         name
       )
-    `)
+    `,
+    )
     .eq('is_active', true)
     .limit(8);
 
   let listings = (listingsData || []) as any[];
-
-
 
   // Get unique locations for quick search suggestions
   const { data: locsData } = await supabase
     .from('listings')
     .select('location')
     .eq('is_active', true);
-  
+
   let uniqueLocations: string[];
   if (locsData && locsData.length > 0) {
-    uniqueLocations = (Array.from(
-      new Set(locsData.map((l: any) => l.location.split(',')[0].trim()))
-    ) as string[]).slice(0, 4);
+    uniqueLocations = (
+      Array.from(
+        new Set(locsData.map((l: any) => l.location.split(',')[0].trim())),
+      ) as string[]
+    ).slice(0, 4);
   } else {
-    uniqueLocations = (Array.from(
-      new Set(listings.map((l: any) => l.location.split(',')[0].trim()))
-    ) as string[]).slice(0, 4);
+    uniqueLocations = (
+      Array.from(
+        new Set(listings.map((l: any) => l.location.split(',')[0].trim())),
+      ) as string[]
+    ).slice(0, 4);
   }
 
   return (
@@ -95,22 +100,24 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1600')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-slate-950/60" />
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500 via-transparent to-transparent" />
-        
+
         <div className="container relative z-10 mx-auto px-4 text-center max-w-4xl">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-6 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             Verified Campus Housing
           </span>
-          
+
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] mb-4">
             Student Hostels Near DeKUT, Nyeri
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-            Rumia lists verified student hostels near{' '}
-            <strong className="text-white">Dedan Kimathi University of Technology</strong> in Nyeri,
-            Kenya. Browse self-contained bedsitters, shared rooms, and ensuite singles —
-            then contact the agent directly on WhatsApp. No booking fees.
+            Discover verified student hostels near{' '}
+            <strong className="text-white">
+              Dedan Kimathi University of Technology
+            </strong>{' '}
+            in Nyeri, Kenya.Contact hostel agents directly on WhatsApp with no
+            booking fees.
           </p>
 
           {/* Search Bar Widget */}
@@ -139,7 +146,9 @@ export default async function HomePage() {
           {/* Quick Locations */}
           {uniqueLocations.length > 0 && (
             <div className="mt-8 flex items-center justify-center flex-wrap gap-2 text-sm text-slate-400">
-              <span className="font-semibold text-slate-300 mr-1">Popular:</span>
+              <span className="font-semibold text-slate-300 mr-1">
+                Popular:
+              </span>
               {uniqueLocations.map((loc) => (
                 <Link
                   key={loc}
@@ -165,7 +174,10 @@ export default async function HomePage() {
               Explore the latest premium student rooms available right now.
             </p>
           </div>
-          <Link href="/hostels" className="group hidden sm:flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors">
+          <Link
+            href="/hostels"
+            className="group hidden sm:flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors"
+          >
             View all listings
             <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
@@ -176,7 +188,7 @@ export default async function HomePage() {
             {listings.map((item) => {
               // Get display image or fallback
               const sortedImages = (item.listing_images || []).sort(
-                (a: any, b: any) => a.display_order - b.display_order
+                (a: any, b: any) => a.display_order - b.display_order,
               );
               const imageUrl =
                 sortedImages[0]?.r2_url ||
@@ -185,7 +197,11 @@ export default async function HomePage() {
               return (
                 <Link
                   key={item.id}
-                  href={item.slug ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}` : `/listing/${item.id}`}
+                  href={
+                    item.slug
+                      ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+                      : `/listing/${item.id}`
+                  }
                   className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full"
                 >
                   <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
@@ -200,17 +216,17 @@ export default async function HomePage() {
                       KES {item.price.toLocaleString()}/mo
                     </div>
                   </div>
-                  
+
                   <div className="p-4 flex-1 flex flex-col">
                     <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
                       <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
                       <span className="truncate">{item.location}</span>
                     </div>
-                    
+
                     <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
                       {item.title}
                     </h3>
-                    
+
                     <p className="text-slate-500 text-sm line-clamp-2 mt-1 mb-4 flex-1">
                       {item.description}
                     </p>
@@ -230,14 +246,20 @@ export default async function HomePage() {
         ) : (
           <div className="text-center py-20 bg-white border border-slate-100 rounded-3xl">
             <p className="text-slate-400 font-medium">No listings found.</p>
-            <Link href="/dashboard/new" className="mt-4 inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors">
+            <Link
+              href="/dashboard/new"
+              className="mt-4 inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors"
+            >
               Create First Listing
             </Link>
           </div>
         )}
 
         <div className="mt-10 text-center sm:hidden">
-          <Link href="/hostels" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors">
+          <Link
+            href="/hostels"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors"
+          >
             View All Listings
             <ArrowRight className="h-4 w-4" />
           </Link>
