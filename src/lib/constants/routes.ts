@@ -9,6 +9,12 @@ export const PUBLIC_ROUTES = {
 
 export const AUTH_ROUTES = {
   LOGIN: '/auth/login',
+  CALLBACK: '/auth/callback',
+};
+
+export const STUDENT_ROUTES = {
+  SAVED: '/saved',
+  ACCOUNT: '/account',
 };
 
 export const DASHBOARD_ROUTES = {

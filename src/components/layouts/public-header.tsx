@@ -51,6 +51,7 @@ export const PublicHeader = React.memo(function PublicHeader() {
                   width={56}
                   height={56}
                   priority
+                  style={{ height: 'auto' }}
                 />
               </div>
               <span className={cn(

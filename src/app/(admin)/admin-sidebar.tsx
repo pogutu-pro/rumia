@@ -47,7 +47,7 @@ function SidebarContent({
       {/* Logo */}
       <div className="px-6 py-5 border-b border-gray-100">
         <Link href="/admin" className="inline-flex items-center" onClick={onNavigate}>
-          <Image src="/images/logo/logo.svg" alt="Rumia" width={100} height={32} priority />
+          <Image src="/images/logo/logo.svg" alt="Rumia" width={100} height={32} priority style={{ height: 'auto' }} />
         </Link>
       </div>
 
@@ -120,7 +120,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 flex items-center justify-between px-4 h-14">
         <Link href="/admin">
-          <Image src="/images/logo/logo.svg" alt="Rumia" width={80} height={26} priority />
+          <Image src="/images/logo/logo.svg" alt="Rumia" width={80} height={26} priority style={{ height: 'auto' }} />
         </Link>
         <button
           onClick={() => setOpen(true)}

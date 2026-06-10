@@ -111,10 +111,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // If authenticated user visits /auth/login, redirect to dashboard
+  // If authenticated user visits /auth/login, redirect to saved
   if (user && pathname.startsWith('/auth/login')) {
     const origin = new URL(request.url).origin;
-    return NextResponse.redirect(new URL('/dashboard', origin));
+    return NextResponse.redirect(new URL('/saved', origin));
   }
 
   // Security headers

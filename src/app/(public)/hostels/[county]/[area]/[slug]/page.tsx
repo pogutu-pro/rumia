@@ -8,7 +8,6 @@ import {
   MapPin,
   ArrowLeft,
   ArrowRight,
-  Heart,
   Eye,
   CheckCircle2,
 } from 'lucide-react';
@@ -18,6 +17,7 @@ import { QuickFacts } from '@/app/(public)/listing/[id]/quick-facts';
 import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
 import { LocationSection } from '@/app/(public)/listing/[id]/location-section';
 import { RoomTypes } from '@/app/(public)/listing/[id]/room-types';
+import { SaveButton } from '@/components/ui/save-button';
 import { ShareButton } from '@/components/ui/share-button';
 import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -244,9 +244,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
               size="sm"
               className="h-8 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             />
-            <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors">
-              <Heart className="h-4 w-4" /> Save
-            </button>
+            <SaveButton listingId={listing.id} />
           </div>
         </div>
       </div>
