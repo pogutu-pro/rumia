@@ -178,12 +178,14 @@ export function NewListingForm({
 
   // Pricing fields
   const [priceSingle, setPriceSingle] = useState(
-    initialListing?.price_single && initialListing.price_single > 0
+    initialListing?.price_single &&
+      Number(initialListing.price_single) > 0
       ? String(initialListing.price_single)
       : '',
   );
   const [priceSharing, setPriceSharing] = useState(
-    initialListing?.price_sharing && initialListing.price_sharing > 0
+    initialListing?.price_sharing &&
+      Number(initialListing.price_sharing) > 0
       ? String(initialListing.price_sharing)
       : '',
   );
