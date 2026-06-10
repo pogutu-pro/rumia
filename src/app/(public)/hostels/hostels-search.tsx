@@ -368,7 +368,6 @@ export default function HostelsPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder='e.g. "cheap ladies wifi gate A" or "self contained near campus"'
             className="pl-12 h-13 text-base bg-white border-slate-200 focus-visible:ring-emerald-500 rounded-2xl shadow-sm"
-            autoFocus
           />
           {query && (
             <button

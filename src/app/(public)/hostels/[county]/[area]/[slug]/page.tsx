@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Eye,
   CheckCircle2,
+  Check,
 } from 'lucide-react';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
 import { WhatsappButton } from '@/app/(public)/listing/[id]/whatsapp-button';
@@ -207,9 +208,9 @@ export default async function ListingSlugPage({ params }: PageProps) {
 
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 pt-4 md:hidden">
         <Link
-          href={`/hostels/${county}/${area}`}
+          href="/hostels"
           className="pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-slate-950"
-          aria-label={`Back to ${area.toUpperCase()} hostels`}
+          aria-label="Back to hostels"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -229,11 +230,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
       <div className="border-b border-slate-100 bg-white sticky top-0 z-30 hidden md:block">
         <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
           <Link
-            href={`/hostels/${county}/${area}`}
+            href="/hostels"
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to {area.toUpperCase()} hostels
+            Back to hostels
           </Link>
           <div className="flex items-center gap-4">
             <ShareButton
@@ -345,6 +346,42 @@ export default async function ListingSlugPage({ params }: PageProps) {
 
             <hr className="border-slate-100" />
             <AmenitiesGrid amenities={listing.amenities || []} />
+
+            <hr className="border-slate-100" />
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-900">
+                Included in Rent
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-semibold text-slate-700">
+                    Water {listing.water_included ? 'Included' : 'Available'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-semibold text-slate-700">
+                    Security{' '}
+                    {listing.security_type || 'Available'}
+                  </span>
+                </div>
+                {listing.wifi_included && (
+                  <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                      <Check className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">
+                      WiFi Included
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* How to Pay Rent section - only if mpesa_details exist */}
             {listing.mpesa_details && (
