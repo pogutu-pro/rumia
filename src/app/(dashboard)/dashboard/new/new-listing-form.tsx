@@ -178,10 +178,14 @@ export function NewListingForm({
 
   // Pricing fields
   const [priceSingle, setPriceSingle] = useState(
-    String(initialListing?.price_single || ''),
+    initialListing?.price_single && initialListing.price_single > 0
+      ? String(initialListing.price_single)
+      : '',
   );
   const [priceSharing, setPriceSharing] = useState(
-    String(initialListing?.price_sharing || ''),
+    initialListing?.price_sharing && initialListing.price_sharing > 0
+      ? String(initialListing.price_sharing)
+      : '',
   );
 
   // Payment details
@@ -354,11 +358,9 @@ export function NewListingForm({
       return;
     }
 
-    // At least one price must be provided
-    if (!priceSingle && !priceSharing) {
-      toast.error(
-        'Please enter at least one price: Single Occupancy or Shared Occupancy',
-      );
+    // Single Occupancy price is required
+    if (!priceSingle) {
+      toast.error('Please enter the Single Occupancy price');
       return;
     }
 
@@ -524,7 +526,7 @@ export function NewListingForm({
           {/* Dual Pricing Fields */}
           <div className="sm:col-span-2 space-y-4 bg-emerald-50/30 p-4 rounded-xl border border-emerald-200/50">
             <Label className="font-bold text-slate-800">
-              Pricing (at least one required)
+              Pricing — Single Occupancy required
             </Label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -536,6 +538,7 @@ export function NewListingForm({
                 <Input
                   id="priceSingle"
                   type="number"
+                  min={0}
                   value={priceSingle}
                   onChange={(e) => setPriceSingle(e.target.value)}
                   placeholder="e.g. 7500"
@@ -549,11 +552,12 @@ export function NewListingForm({
               {/* Shared Occupancy Price */}
               <div className="space-y-2">
                 <Label htmlFor="priceSharing">
-                  Shared Occupancy — KES per person per month
+                  Shared Occupancy — KES per person per month <span className="text-slate-400 font-normal">(Optional)</span>
                 </Label>
                 <Input
                   id="priceSharing"
                   type="number"
+                  min={0}
                   value={priceSharing}
                   onChange={(e) => setPriceSharing(e.target.value)}
                   placeholder="e.g. 4500"

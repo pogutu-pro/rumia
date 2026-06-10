@@ -40,10 +40,10 @@ function listingPayload(formData: any, agentId: string) {
     proximity_description: formData.proximity_description || '',
     // New hostel detail fields
     specific_location: formData.specific_location || null,
-    price_single: formData.price_single
+    price_single: formData.price_single && parseInt(formData.price_single) > 0
       ? parseInt(formData.price_single)
       : null,
-    price_sharing: formData.price_sharing
+    price_sharing: formData.price_sharing && parseInt(formData.price_sharing) > 0
       ? parseInt(formData.price_sharing)
       : null,
     mpesa_details: formData.mpesa_details || null,

@@ -22,7 +22,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+  console.error(
+    '❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local',
+  );
   process.exit(1);
 }
 
@@ -46,7 +48,9 @@ function slugify(text: string): string {
 function randomTimestampThisMonth(): string {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  return new Date(start + Math.random() * (now.getTime() - start)).toISOString();
+  return new Date(
+    start + Math.random() * (now.getTime() - start),
+  ).toISOString();
 }
 
 function fakeIpHash(seed: number): string {
@@ -61,7 +65,11 @@ function unique(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-async function deleteRows(table: string, column: string, values: string[]): Promise<number> {
+async function deleteRows(
+  table: string,
+  column: string,
+  values: string[],
+): Promise<number> {
   const ids = unique(values);
   if (ids.length === 0) return 0;
 
@@ -77,13 +85,18 @@ async function assertRequiredSchema() {
   const checks = [
     {
       label: 'agents profile fields',
-      query: supabase.from('agents').select('id, user_id, status, slug').limit(1),
+      query: supabase
+        .from('agents')
+        .select('id, user_id, status, slug')
+        .limit(1),
     },
     {
       label: 'listing SEO/search fields',
       query: supabase
         .from('listings')
-        .select('id, slug, county, area, gender, proximity_description, room_type_enum, youtube_id')
+        .select(
+          'id, slug, county, area, gender, proximity_description, room_type_enum, youtube_id',
+        )
         .limit(1),
     },
     {
@@ -98,8 +111,12 @@ async function assertRequiredSchema() {
   for (const check of checks) {
     const { error } = await check.query;
     if (error) {
-      console.error(`❌ Missing required schema for ${check.label}: ${error.message}`);
-      console.error('   Run Supabase migrations first, then rerun: pnpm exec tsx scripts/seed-test-data.ts');
+      console.error(
+        `❌ Missing required schema for ${check.label}: ${error.message}`,
+      );
+      console.error(
+        '   Run Supabase migrations first, then rerun: pnpm exec tsx scripts/seed-test-data.ts',
+      );
       process.exit(1);
     }
   }
@@ -162,15 +179,33 @@ const LISTING_TEMPLATES = [
     proximity_description: '3 mins walk to DeKUT Gate A',
     is_active: true,
     latitude: -0.4167,
-    longitude: 36.9500,
+    longitude: 36.95,
     youtube_id: 'qL0Z3sGXBas',
     images: [
-      { url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800', category: 'Kitchen' },
-      { url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800', category: 'Bathroom' },
-      { url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800', category: 'Common Area' },
+      {
+        url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800',
+        category: 'Kitchen',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+        category: 'Bathroom',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800',
+        category: 'Common Area',
+      },
     ],
     room_types: [
       { room_type: 'Self-Contained Single', price: 12000, is_available: true },
@@ -191,19 +226,32 @@ const LISTING_TEMPLATES = [
     gender: 'mixed',
     proximity_description: '7 mins walk to DeKUT main gate',
     is_active: true,
-    latitude: -0.4210,
-    longitude: 36.9480,
+    latitude: -0.421,
+    longitude: 36.948,
     youtube_id: 'DczLkNIRgFE',
     images: [
-      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800', category: 'Common Area' },
-      { url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800', category: 'Bathroom' },
+      {
+        url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800',
+        category: 'Common Area',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800',
+        category: 'Bathroom',
+      },
     ],
-    room_types: [
-      { room_type: 'Bedsitter', price: 7500, is_available: true },
-    ],
+    room_types: [{ room_type: 'Bedsitter', price: 7500, is_available: true }],
   },
   {
     agentIndex: 0,
@@ -219,15 +267,30 @@ const LISTING_TEMPLATES = [
     gender: 'male',
     proximity_description: '5 mins walk to DeKUT Gate B',
     is_active: true,
-    latitude: -0.4190,
-    longitude: 36.9520,
+    latitude: -0.419,
+    longitude: 36.952,
     youtube_id: 'K4TOrB7at0Y',
     images: [
-      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800', category: 'Bathroom' },
-      { url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800', category: 'Common Area' },
+      {
+        url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+        category: 'Bathroom',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800',
+        category: 'Common Area',
+      },
     ],
     room_types: [
       { room_type: 'Single Room', price: 5000, is_available: true },
@@ -251,19 +314,35 @@ const LISTING_TEMPLATES = [
     proximity_description: '4 mins walk to DeKUT Gate A',
     is_active: true,
     latitude: -0.4155,
-    longitude: 36.9510,
+    longitude: 36.951,
     youtube_id: 'LXb3EKWsInQ',
     images: [
-      { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800', category: 'Kitchen' },
-      { url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800', category: 'Bathroom' },
-      { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800', category: 'Common Area' },
+      {
+        url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800',
+        category: 'Kitchen',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+        category: 'Bathroom',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800',
+        category: 'Common Area',
+      },
     ],
-    room_types: [
-      { room_type: 'Studio', price: 18000, is_available: true },
-    ],
+    room_types: [{ room_type: 'Studio', price: 18000, is_available: true }],
   },
   {
     agentIndex: 1,
@@ -279,14 +358,26 @@ const LISTING_TEMPLATES = [
     gender: 'mixed',
     proximity_description: '10 mins matatu to DeKUT',
     is_active: false,
-    latitude: -0.4230,
+    latitude: -0.423,
     longitude: 36.9455,
     youtube_id: 'rO9bMQxmV2E',
     images: [
-      { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800', category: 'Kitchen' },
-      { url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800', category: 'Bathroom' },
-      { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800', category: 'Room' },
+      {
+        url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800',
+        category: 'Kitchen',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+        category: 'Bathroom',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800',
+        category: 'Room',
+      },
     ],
     room_types: [
       { room_type: 'One Bedroom', price: 20000, is_available: false },
@@ -306,15 +397,30 @@ const LISTING_TEMPLATES = [
     gender: 'female',
     proximity_description: '6 mins walk to DeKUT main gate',
     is_active: true,
-    latitude: -0.4200,
-    longitude: 36.9490,
+    latitude: -0.42,
+    longitude: 36.949,
     youtube_id: 'qL0Z3sGXBas',
     images: [
-      { url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800', category: 'Common Area' },
-      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800', category: 'Kitchen' },
+      {
+        url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800',
+        category: 'Common Area',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800',
+        category: 'Kitchen',
+      },
     ],
     room_types: [
       { room_type: 'Single Room', price: 6500, is_available: true },
@@ -338,18 +444,31 @@ const LISTING_TEMPLATES = [
     proximity_description: '8 mins walk to DeKUT Gate A',
     is_active: true,
     latitude: -0.4175,
-    longitude: 36.9530,
+    longitude: 36.953,
     youtube_id: 'DczLkNIRgFE',
     images: [
-      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800', category: 'Common Area' },
-      { url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800', category: 'Bathroom' },
+      {
+        url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800',
+        category: 'Common Area',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+        category: 'Bathroom',
+      },
     ],
-    room_types: [
-      { room_type: 'Single Room', price: 4500, is_available: true },
-    ],
+    room_types: [{ room_type: 'Single Room', price: 4500, is_available: true }],
   },
   {
     agentIndex: 2,
@@ -369,15 +488,28 @@ const LISTING_TEMPLATES = [
     longitude: 36.9515,
     youtube_id: 'K4TOrB7at0Y',
     images: [
-      { url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800', category: 'Kitchen' },
-      { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800', category: 'Common Area' },
+      {
+        url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800',
+        category: 'Kitchen',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800',
+        category: 'Common Area',
+      },
     ],
-    room_types: [
-      { room_type: 'Bedsitter', price: 5500, is_available: true },
-    ],
+    room_types: [{ room_type: 'Bedsitter', price: 5500, is_available: true }],
   },
   {
     agentIndex: 2,
@@ -393,19 +525,42 @@ const LISTING_TEMPLATES = [
     gender: 'male',
     proximity_description: '10 mins walk to DeKUT main gate',
     is_active: true,
-    latitude: -0.4220,
-    longitude: 36.9470,
+    latitude: -0.422,
+    longitude: 36.947,
     youtube_id: 'LXb3EKWsInQ',
     images: [
-      { url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800', category: 'Exterior' },
-      { url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800', category: 'Room' },
-      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800', category: 'Common Area' },
-      { url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800', category: 'Bathroom' },
+      {
+        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800',
+        category: 'Exterior',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800',
+        category: 'Room',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800',
+        category: 'Common Area',
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=800',
+        category: 'Bathroom',
+      },
     ],
     room_types: [
-      { room_type: 'Shared Double (per person)', price: 3000, is_available: true },
-      { room_type: 'Shared Triple (per person)', price: 2500, is_available: true },
+      {
+        room_type: 'Shared Double (per person)',
+        price: 3000,
+        is_available: true,
+      },
+      {
+        room_type: 'Shared Triple (per person)',
+        price: 2500,
+        is_available: true,
+      },
     ],
   },
 ];
@@ -426,7 +581,7 @@ const LEGACY_SEED_LISTING_TITLES = [
 ];
 
 const SEED_AUTH_EMAILS = [...TEST_ADMINS, ...TEST_AGENTS].map((account) =>
-  account.email.toLowerCase()
+  account.email.toLowerCase(),
 );
 
 // ─── Main Seed Function ───────────────────────────────────────────────────────
@@ -447,16 +602,20 @@ async function cleanupSeedData() {
   }
 
   const seedAuthUsers = users.filter(
-    (user) => user.email && SEED_AUTH_EMAILS.includes(user.email.toLowerCase())
+    (user) => user.email && SEED_AUTH_EMAILS.includes(user.email.toLowerCase()),
   );
   const seedUserIds = seedAuthUsers.map((user) => user.id);
   const seedPhones = TEST_AGENTS.map((agent) => agent.phone);
 
   const agentQueries = [];
   if (seedUserIds.length > 0) {
-    agentQueries.push(supabase.from('agents').select('id').in('user_id', seedUserIds));
+    agentQueries.push(
+      supabase.from('agents').select('id').in('user_id', seedUserIds),
+    );
   }
-  agentQueries.push(supabase.from('agents').select('id').in('phone', seedPhones));
+  agentQueries.push(
+    supabase.from('agents').select('id').in('phone', seedPhones),
+  );
 
   const agentResults = await Promise.all(agentQueries);
   for (const result of agentResults) {
@@ -466,7 +625,9 @@ async function cleanupSeedData() {
     }
   }
 
-  const agentIds = unique(agentResults.flatMap((result) => (result.data ?? []).map((row) => row.id)));
+  const agentIds = unique(
+    agentResults.flatMap((result) => (result.data ?? []).map((row) => row.id)),
+  );
 
   let listingIds: string[] = [];
   if (agentIds.length > 0) {
@@ -476,7 +637,9 @@ async function cleanupSeedData() {
       .in('agent_id', agentIds);
 
     if (listingLookupError) {
-      console.error(`❌ Could not find seeded listings: ${listingLookupError.message}`);
+      console.error(
+        `❌ Could not find seeded listings: ${listingLookupError.message}`,
+      );
       process.exit(1);
     }
 
@@ -491,14 +654,18 @@ async function cleanupSeedData() {
     await deleteRows('listings', 'id', listingIds);
     await deleteRows('agents', 'id', agentIds);
   } catch (err) {
-    console.error(`❌ Cleanup failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    console.error(
+      `❌ Cleanup failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+    );
     process.exit(1);
   }
 
   for (const user of seedAuthUsers) {
     const { error } = await supabase.auth.admin.deleteUser(user.id);
     if (error) {
-      console.error(`❌ Failed to delete auth user ${user.email}: ${error.message}`);
+      console.error(
+        `❌ Failed to delete auth user ${user.email}: ${error.message}`,
+      );
       process.exit(1);
     }
   }
@@ -507,7 +674,9 @@ async function cleanupSeedData() {
   console.log(`   Auth users removed: ${seedAuthUsers.length}`);
   console.log(`   Agents removed:     ${agentIds.length}`);
   console.log(`   Listings removed:   ${listingIds.length}`);
-  console.log('\nRun pnpm exec tsx scripts/seed-test-data.ts to recreate test data.\n');
+  console.log(
+    '\nRun pnpm exec tsx scripts/seed-test-data.ts to recreate test data.\n',
+  );
 }
 
 async function seed() {
@@ -516,8 +685,10 @@ async function seed() {
   await assertRequiredSchema();
 
   // ── 1. Fetch existing auth users ─────────────────────────────────────────
-  const { data: { users: existingAuthUsers }, error: listErr } =
-    await supabase.auth.admin.listUsers();
+  const {
+    data: { users: existingAuthUsers },
+    error: listErr,
+  } = await supabase.auth.admin.listUsers();
   if (listErr) {
     console.error('❌ Could not list auth users:', listErr.message);
     process.exit(1);
@@ -527,32 +698,37 @@ async function seed() {
   for (const adminDef of TEST_ADMINS) {
     console.log(`🔐 Processing admin: ${adminDef.email}`);
 
-    const existingAuthUser = existingAuthUsers.find((u) => u.email === adminDef.email);
+    const existingAuthUser = existingAuthUsers.find(
+      (u) => u.email === adminDef.email,
+    );
 
     if (existingAuthUser) {
-      const { error: authUpdateError } = await supabase.auth.admin.updateUserById(
-        existingAuthUser.id,
-        {
+      const { error: authUpdateError } =
+        await supabase.auth.admin.updateUserById(existingAuthUser.id, {
           password: adminDef.password,
           email_confirm: true,
-        }
-      );
+        });
 
       if (authUpdateError) {
-        console.error(`   ❌ Failed to refresh admin login: ${authUpdateError.message}`);
+        console.error(
+          `   ❌ Failed to refresh admin login: ${authUpdateError.message}`,
+        );
         process.exit(1);
       }
 
       console.log(`   Admin auth login refreshed (${existingAuthUser.id})`);
     } else {
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: adminDef.email,
-        password: adminDef.password,
-        email_confirm: true,
-      });
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.createUser({
+          email: adminDef.email,
+          password: adminDef.password,
+          email_confirm: true,
+        });
 
       if (authError || !authData.user) {
-        console.error(`   ❌ Failed to create admin auth user: ${authError?.message}`);
+        console.error(
+          `   ❌ Failed to create admin auth user: ${authError?.message}`,
+        );
         process.exit(1);
       }
 
@@ -567,31 +743,39 @@ async function seed() {
     console.log(`👤 Processing agent: ${agentDef.name} (${agentDef.email})`);
 
     let userId: string;
-    const existingAuthUser = existingAuthUsers.find((u) => u.email === agentDef.email);
+    const existingAuthUser = existingAuthUsers.find(
+      (u) => u.email === agentDef.email,
+    );
 
     if (existingAuthUser) {
       console.log(`   Auth user already exists (${existingAuthUser.id})`);
       userId = existingAuthUser.id;
 
-      const { error: authUpdateError } = await supabase.auth.admin.updateUserById(userId, {
-        password: agentDef.password,
-        email_confirm: true,
-      });
+      const { error: authUpdateError } =
+        await supabase.auth.admin.updateUserById(userId, {
+          password: agentDef.password,
+          email_confirm: true,
+        });
 
       if (authUpdateError) {
-        console.error(`   ❌ Failed to refresh auth login: ${authUpdateError.message}`);
+        console.error(
+          `   ❌ Failed to refresh auth login: ${authUpdateError.message}`,
+        );
         continue;
       }
 
       console.log('   Auth login refreshed');
     } else {
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: agentDef.email,
-        password: agentDef.password,
-        email_confirm: true,
-      });
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.createUser({
+          email: agentDef.email,
+          password: agentDef.password,
+          email_confirm: true,
+        });
       if (authError || !authData.user) {
-        console.error(`   ❌ Failed to create auth user: ${authError?.message}`);
+        console.error(
+          `   ❌ Failed to create auth user: ${authError?.message}`,
+        );
         continue;
       }
       userId = authData.user.id;
@@ -623,7 +807,9 @@ async function seed() {
         .eq('id', existingAgent.id);
 
       if (agentUpdateError) {
-        console.error(`   ❌ Failed to update agent: ${agentUpdateError.message}`);
+        console.error(
+          `   ❌ Failed to update agent: ${agentUpdateError.message}`,
+        );
         continue;
       }
 
@@ -670,9 +856,13 @@ async function seed() {
     .in('title', LEGACY_SEED_LISTING_TITLES);
 
   if (legacyCleanupError) {
-    console.error(`❌ Failed to remove legacy seed listings: ${legacyCleanupError.message}`);
+    console.error(
+      `❌ Failed to remove legacy seed listings: ${legacyCleanupError.message}`,
+    );
   } else if (legacyTitleCleanupError) {
-    console.error(`❌ Failed to remove legacy titled listings: ${legacyTitleCleanupError.message}`);
+    console.error(
+      `❌ Failed to remove legacy titled listings: ${legacyTitleCleanupError.message}`,
+    );
   } else {
     console.log('🧹 Legacy Juja/Nairobi seed listings removed if present\n');
   }
@@ -710,7 +900,8 @@ async function seed() {
           proximity_description: t.proximity_description,
           room_type_enum: t.room_type_enum,
           amenities: ['WiFi', 'Water', 'Security', 'Parking'],
-          bathroom_type: t.room_type_enum === 'self_contained' ? 'Private' : 'Shared',
+          bathroom_type:
+            t.room_type_enum === 'self_contained' ? 'Private' : 'Shared',
           distance_to_campus: t.proximity_description,
           security_type: 'CCTV & Guard',
           electricity_included: true,
@@ -723,7 +914,9 @@ async function seed() {
         .eq('id', existing.id);
 
       if (listingUpdateError) {
-        console.error(`❌ Failed to update "${t.title}": ${listingUpdateError.message}`);
+        console.error(
+          `❌ Failed to update "${t.title}": ${listingUpdateError.message}`,
+        );
         listingIds.push('');
         listingFailures++;
         continue;
@@ -735,14 +928,16 @@ async function seed() {
         .delete()
         .eq('listing_id', existing.id);
 
-      const { error: imageInsertError } = await supabase.from('listing_images').insert(
-        t.images.map((img, idx) => ({
-          listing_id: existing.id,
-          r2_url: img.url,
-          display_order: idx,
-          category: img.category,
-        }))
-      );
+      const { error: imageInsertError } = await supabase
+        .from('listing_images')
+        .insert(
+          t.images.map((img, idx) => ({
+            listing_id: existing.id,
+            r2_url: img.url,
+            display_order: idx,
+            category: img.category,
+          })),
+        );
 
       const { error: roomTypeDeleteError } = await supabase
         .from('listing_room_types')
@@ -757,23 +952,28 @@ async function seed() {
             room_type: rt.room_type,
             price: rt.price,
             is_available: rt.is_available,
-          }))
+          })),
         );
         roomTypeInsertError = result.error;
       }
 
       const relatedError =
-        imageDeleteError || imageInsertError || roomTypeDeleteError || roomTypeInsertError;
+        imageDeleteError ||
+        imageInsertError ||
+        roomTypeDeleteError ||
+        roomTypeInsertError;
 
       if (relatedError) {
-        console.error(`❌ Failed to refresh related data for "${t.title}": ${relatedError.message}`);
+        console.error(
+          `❌ Failed to refresh related data for "${t.title}": ${relatedError.message}`,
+        );
         listingIds.push('');
         listingFailures++;
         continue;
       }
 
       console.log(
-        `🏠 Updated "${t.title}" — ${t.images.length} images, ${t.room_types.length} room types, YouTube ${youtubeUrl(t.youtube_id)}`
+        `🏠 Updated "${t.title}" — ${t.images.length} images, ${t.room_types.length} room types, YouTube ${youtubeUrl(t.youtube_id)}`,
       );
       listingIds.push(existing.id);
       continue;
@@ -798,7 +998,8 @@ async function seed() {
         gender: t.gender,
         proximity_description: t.proximity_description,
         amenities: ['WiFi', 'Water', 'Security', 'Parking'],
-        bathroom_type: t.room_type_enum === 'self_contained' ? 'Private' : 'Shared',
+        bathroom_type:
+          t.room_type_enum === 'self_contained' ? 'Private' : 'Shared',
         distance_to_campus: t.proximity_description,
         security_type: 'CCTV & Guard',
         electricity_included: true,
@@ -811,36 +1012,44 @@ async function seed() {
       .single();
 
     if (listingError || !newListing) {
-      console.error(`❌ Failed to create "${t.title}": ${listingError?.message}`);
+      console.error(
+        `❌ Failed to create "${t.title}": ${listingError?.message}`,
+      );
       listingIds.push('');
       listingFailures++;
       continue;
     }
 
     // All images in one batch insert
-    const { error: imageInsertError } = await supabase.from('listing_images').insert(
-      t.images.map((img, idx) => ({
-        listing_id: newListing.id,
-        r2_url: img.url,
-        display_order: idx,
-        category: img.category,
-      }))
-    );
+    const { error: imageInsertError } = await supabase
+      .from('listing_images')
+      .insert(
+        t.images.map((img, idx) => ({
+          listing_id: newListing.id,
+          r2_url: img.url,
+          display_order: idx,
+          category: img.category,
+        })),
+      );
 
     // Room types
-    const { error: roomTypeInsertError } = await supabase.from('listing_room_types').insert(
-      t.room_types.map((rt) => ({
-        listing_id: newListing.id,
-        room_type: rt.room_type,
-        price: rt.price,
-        is_available: rt.is_available,
-      }))
-    );
+    const { error: roomTypeInsertError } = await supabase
+      .from('listing_room_types')
+      .insert(
+        t.room_types.map((rt) => ({
+          listing_id: newListing.id,
+          room_type: rt.room_type,
+          price: rt.price,
+          is_available: rt.is_available,
+        })),
+      );
 
     const relatedError = imageInsertError || roomTypeInsertError;
 
     if (relatedError) {
-      console.error(`❌ Failed to attach related data for "${t.title}": ${relatedError.message}`);
+      console.error(
+        `❌ Failed to attach related data for "${t.title}": ${relatedError.message}`,
+      );
       listingIds.push('');
       listingFailures++;
       continue;
@@ -848,28 +1057,32 @@ async function seed() {
 
     listingIds.push(newListing.id);
     console.log(
-      `✅ Created listing: "${t.title}" — ${t.images.length} images, YouTube ${youtubeUrl(t.youtube_id)} (${newListing.id})`
+      `✅ Created listing: "${t.title}" — ${t.images.length} images, YouTube ${youtubeUrl(t.youtube_id)} (${newListing.id})`,
     );
   }
 
-  console.log(`\n✅ Listings ready: ${listingIds.filter(Boolean).length} total\n`);
+  console.log(
+    `\n✅ Listings ready: ${listingIds.filter(Boolean).length} total\n`,
+  );
 
   if (listingFailures > 0) {
-    console.error(`❌ Seed stopped because ${listingFailures} listing(s) failed.`);
+    console.error(
+      `❌ Seed stopped because ${listingFailures} listing(s) failed.`,
+    );
     process.exit(1);
   }
 
   // ── 4. Leads (active listings only) ──────────────────────────────────────
   // Target counts per listing index
   const leadDistribution: Array<{ idx: number; count: number }> = [
-    { idx: 0, count: 7 },  // Kariuki Gardens
-    { idx: 1, count: 5 },  // Sunrise Bedsitter
-    { idx: 2, count: 4 },  // Kariuki Annex
-    { idx: 3, count: 6 },  // Amina Court
-    { idx: 5, count: 4 },  // Amina Ladies Hostel
-    { idx: 6, count: 5 },  // Mutua Annexe
-    { idx: 7, count: 4 },  // Eastern View
-    { idx: 8, count: 3 },  // Mutua Guestrooms
+    { idx: 0, count: 7 }, // Kariuki Gardens
+    { idx: 1, count: 5 }, // Sunrise Bedsitter
+    { idx: 2, count: 4 }, // Kariuki Annex
+    { idx: 3, count: 6 }, // Amina Court
+    { idx: 5, count: 4 }, // Amina Ladies Hostel
+    { idx: 6, count: 5 }, // Mutua Annexe
+    { idx: 7, count: 4 }, // Eastern View
+    { idx: 8, count: 3 }, // Mutua Guestrooms
   ];
 
   let leadsCreated = 0;
@@ -902,25 +1115,81 @@ async function seed() {
       if (!error) leadsCreated++;
     }
 
-    console.log(`📱 Leads for "${template.title}": ${existing + toCreate} total (${toCreate} new)`);
+    console.log(
+      `Leads for "${template.title}": ${existing + toCreate} total (${toCreate} new)`,
+    );
   }
 
-  console.log(`\n✅ ${leadsCreated} new leads created\n`);
+  console.log(`\n ${leadsCreated} new leads created\n`);
 
   // ── 5. Commissions (2 per agent: 1 pending + 1 paid) ─────────────────────
   const commissionTemplates = [
     // James
-    { agentIndex: 0, listingIndex: 0, amount: 1200, status: 'pending', paid_at: null },
-    { agentIndex: 0, listingIndex: 1, amount: 750, status: 'paid', paid_at: new Date(Date.now() - 7 * 86400000).toISOString() },
-    { agentIndex: 0, listingIndex: 2, amount: 500, status: 'pending', paid_at: null },
+    {
+      agentIndex: 0,
+      listingIndex: 0,
+      amount: 1200,
+      status: 'pending',
+      paid_at: null,
+    },
+    {
+      agentIndex: 0,
+      listingIndex: 1,
+      amount: 750,
+      status: 'paid',
+      paid_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+    },
+    {
+      agentIndex: 0,
+      listingIndex: 2,
+      amount: 500,
+      status: 'pending',
+      paid_at: null,
+    },
     // Amina
-    { agentIndex: 1, listingIndex: 3, amount: 2200, status: 'pending', paid_at: null },
-    { agentIndex: 1, listingIndex: 3, amount: 2200, status: 'paid', paid_at: new Date(Date.now() - 14 * 86400000).toISOString() },
-    { agentIndex: 1, listingIndex: 5, amount: 900, status: 'pending', paid_at: null },
+    {
+      agentIndex: 1,
+      listingIndex: 3,
+      amount: 2200,
+      status: 'pending',
+      paid_at: null,
+    },
+    {
+      agentIndex: 1,
+      listingIndex: 3,
+      amount: 2200,
+      status: 'paid',
+      paid_at: new Date(Date.now() - 14 * 86400000).toISOString(),
+    },
+    {
+      agentIndex: 1,
+      listingIndex: 5,
+      amount: 900,
+      status: 'pending',
+      paid_at: null,
+    },
     // Brian
-    { agentIndex: 2, listingIndex: 6, amount: 550, status: 'pending', paid_at: null },
-    { agentIndex: 2, listingIndex: 7, amount: 600, status: 'paid', paid_at: new Date(Date.now() - 3 * 86400000).toISOString() },
-    { agentIndex: 2, listingIndex: 8, amount: 350, status: 'pending', paid_at: null },
+    {
+      agentIndex: 2,
+      listingIndex: 6,
+      amount: 550,
+      status: 'pending',
+      paid_at: null,
+    },
+    {
+      agentIndex: 2,
+      listingIndex: 7,
+      amount: 600,
+      status: 'paid',
+      paid_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+    },
+    {
+      agentIndex: 2,
+      listingIndex: 8,
+      amount: 350,
+      status: 'pending',
+      paid_at: null,
+    },
   ];
 
   const expectedCommissionKeys = new Set(
@@ -931,16 +1200,19 @@ async function seed() {
         if (!agentId || !listingId) return null;
         return `${agentId}:${listingId}:${ct.amount}:${ct.status}`;
       })
-      .filter(Boolean)
+      .filter(Boolean),
   );
 
-  const { data: existingSeedCommissions, error: staleCommissionLookupError } = await supabase
-    .from('commissions')
-    .select('id, agent_id, listing_id, amount, status')
-    .in('agent_id', agentIds);
+  const { data: existingSeedCommissions, error: staleCommissionLookupError } =
+    await supabase
+      .from('commissions')
+      .select('id, agent_id, listing_id, amount, status')
+      .in('agent_id', agentIds);
 
   if (staleCommissionLookupError) {
-    console.error(`❌ Stale commission lookup failed: ${staleCommissionLookupError.message}`);
+    console.error(
+      `❌ Stale commission lookup failed: ${staleCommissionLookupError.message}`,
+    );
     process.exit(1);
   }
 
@@ -958,11 +1230,15 @@ async function seed() {
       .in('id', staleCommissionIds);
 
     if (staleCommissionDeleteError) {
-      console.error(`❌ Failed to remove stale commissions: ${staleCommissionDeleteError.message}`);
+      console.error(
+        `❌ Failed to remove stale commissions: ${staleCommissionDeleteError.message}`,
+      );
       process.exit(1);
     }
 
-    console.log(`🧹 Removed ${staleCommissionIds.length} stale commission(s) not in the current seed template`);
+    console.log(
+      `🧹 Removed ${staleCommissionIds.length} stale commission(s) not in the current seed template`,
+    );
   }
 
   let commissionsCreated = 0;
@@ -972,17 +1248,20 @@ async function seed() {
     const listingId = listingIds[ct.listingIndex];
     if (!agentId || !listingId) continue;
 
-    const { data: existingRows, error: existingCommissionError } = await supabase
-      .from('commissions')
-      .select('id')
-      .eq('agent_id', agentId)
-      .eq('listing_id', listingId)
-      .eq('amount', ct.amount)
-      .eq('status', ct.status)
-      .order('created_at', { ascending: true });
+    const { data: existingRows, error: existingCommissionError } =
+      await supabase
+        .from('commissions')
+        .select('id')
+        .eq('agent_id', agentId)
+        .eq('listing_id', listingId)
+        .eq('amount', ct.amount)
+        .eq('status', ct.status)
+        .order('created_at', { ascending: true });
 
     if (existingCommissionError) {
-      console.error(`❌ Commission lookup failed: ${existingCommissionError.message}`);
+      console.error(
+        `❌ Commission lookup failed: ${existingCommissionError.message}`,
+      );
       continue;
     }
 
@@ -996,15 +1275,19 @@ async function seed() {
           .in('id', duplicateIds);
 
         if (duplicateDeleteError) {
-          console.error(`❌ Failed to remove duplicate commissions: ${duplicateDeleteError.message}`);
+          console.error(
+            `❌ Failed to remove duplicate commissions: ${duplicateDeleteError.message}`,
+          );
           continue;
         }
       }
 
       console.log(
         `💰 Commission already exists: KES ${ct.amount} (${ct.status})${
-          duplicateIds.length > 0 ? ` — removed ${duplicateIds.length} duplicate(s)` : ''
-        }`
+          duplicateIds.length > 0
+            ? ` — removed ${duplicateIds.length} duplicate(s)`
+            : ''
+        }`,
       );
       continue;
     }
@@ -1022,7 +1305,9 @@ async function seed() {
       console.error(`❌ Commission insert failed: ${error.message}`);
     } else {
       commissionsCreated++;
-      console.log(`✅ Commission: KES ${ct.amount} — ${ct.status} (${TEST_AGENTS[ct.agentIndex].name})`);
+      console.log(
+        `✅ Commission: KES ${ct.amount} — ${ct.status} (${TEST_AGENTS[ct.agentIndex].name})`,
+      );
     }
   }
 
