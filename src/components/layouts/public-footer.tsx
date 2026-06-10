@@ -61,9 +61,17 @@ export const Footer = React.memo(function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & Legal Links */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
           <p>&copy; {currentYear} RUMIA. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href="/policy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+          </div>
           <p>Built with ❤️ for university students in Kenya.</p>
         </div>
       </div>
