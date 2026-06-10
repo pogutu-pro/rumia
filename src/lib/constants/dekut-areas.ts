@@ -12,8 +12,8 @@ export interface AreaCoordinates {
 export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
   'Near Gate A': {
     name: 'Near Gate A',
-    latitude: -0.3969393,
-    longitude: 36.9570816,
+    latitude: -0.397509,
+    longitude: 36.9566783,
   },
   'Near Gate B': {
     name: 'Near Gate B',
