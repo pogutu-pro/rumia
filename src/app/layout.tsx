@@ -3,6 +3,11 @@ import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
+import { NavigationProvider } from '@/context/NavigationContext';
+import { SwipeNavigator } from '@/components/pwa/SwipeNavigator';
+import { BottomNav } from '@/components/pwa/BottomNav';
+import { GestureTutorial } from '@/components/pwa/GestureTutorial';
+import { AnimatedMain } from '@/components/pwa/AnimatedMain';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -70,12 +75,29 @@ export default function RootLayout({
       className={cn(inter.variable, jakarta.variable)}
       data-scroll-behavior="smooth"
     >
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Rumia" />
+        <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png" />
+      </head>
       <body
         className={cn(
           'min-h-screen bg-slate-50 font-sans antialiased overflow-x-hidden'
         )}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <NavigationProvider>
+            <SwipeNavigator>
+              <AnimatedMain>
+                {children}
+              </AnimatedMain>
+            </SwipeNavigator>
+            <BottomNav />
+            <GestureTutorial />
+          </NavigationProvider>
+        </Providers>
         <Analytics />
       </body>
     </html>

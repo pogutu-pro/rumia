@@ -4,10 +4,8 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { InstallButton } from '@/components/pwa/InstallButton';
 
 const NAV_LINKS = [
   { href: '/hostels', label: 'Browse All' },
@@ -18,7 +16,6 @@ export const PublicHeader = React.memo(function PublicHeader() {
   const pathname = usePathname();
   const isHome = pathname === '/';
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -90,47 +87,9 @@ export const PublicHeader = React.memo(function PublicHeader() {
               ))}
             </nav>
 
-            {/* Mobile menu */}
-            <div className="lg:hidden">
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      isScrolled || !isHome ? 'text-slate-900' : 'text-white'
-                    )}
-                  >
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[280px]">
-                  <SheetHeader className="sr-only">
-                    <SheetTitle>Navigation Menu</SheetTitle>
-                    <SheetDescription>Main navigation for Rumia marketplace.</SheetDescription>
-                  </SheetHeader>
-                  <nav className="flex flex-col gap-2 pt-10">
-                    {[
-                      { href: '/', label: 'Home' },
-                      ...NAV_LINKS,
-                    ].map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className={cn(
-                          'px-4 py-3 text-sm font-bold rounded-xl transition-colors',
-                          pathname === item.href
-                            ? 'text-emerald-600 bg-emerald-50'
-                            : 'text-slate-600 hover:bg-slate-50'
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-                </SheetContent>
-              </Sheet>
+            {/* Install button — top right, all pages, all screen sizes */}
+            <div className="shrink-0">
+              <InstallButton />
             </div>
           </div>
         </div>

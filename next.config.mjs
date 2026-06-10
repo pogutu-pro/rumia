@@ -1,11 +1,13 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import withSerwistInit from "@serwist/next";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {},
   output: 'standalone',
   reactStrictMode: true,
   typescript: {
@@ -80,4 +82,10 @@ const nextConfig = {
 
 };
 
-export default nextConfig;
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV !== "production",
+});
+
+export default withSerwist(nextConfig);
