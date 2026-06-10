@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useNavigationDirection } from "@/context/NavigationContext";
 
@@ -24,7 +24,6 @@ export function SwipeNavigator({ children }: { children: React.ReactNode }) {
   const { setDirection } = useNavigationDirection();
 
   const currentIndex = getCurrentIndex(pathname);
-
   const isDetailPage = pathname.startsWith("/hostels/");
   const isSwipeable = currentIndex !== -1 && !isDetailPage;
 
@@ -34,34 +33,32 @@ export function SwipeNavigator({ children }: { children: React.ReactNode }) {
   const lastSampleTimeRef = useRef(0);
   const isDraggingRef = useRef(false);
   const pointerIdRef = useRef<number | null>(null);
+  const currentIndexRef = useRef(currentIndex);
 
-  const [translateX, setTranslateX] = useState(0);
-  const [isExiting, setIsExiting] = useState(false);
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
-  if (!isSwipeable) return <>{children}</>;
+  // Reset transform after navigation completes
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.transform = "translateX(0)";
+  }, [pathname]);
 
-  const navigateTo = useCallback(
-    (targetIndex: number, swipedLeft: boolean) => {
-      const screenWidth = window.innerWidth;
-      const exitX = swipedLeft ? -screenWidth : screenWidth;
-
-      setIsExiting(true);
-      setTranslateX(exitX);
-
-      setTimeout(() => {
-        setDirection(swipedLeft ? "left" : "right");
-        router.push(TAB_ROUTES[targetIndex]);
-        setTranslateX(0);
-        setIsExiting(false);
-      }, 210);
-    },
-    [router, setDirection]
-  );
+  const initialStyle: React.CSSProperties = {
+    transform: "translateX(0px)",
+    transition: "none",
+    willChange: "transform",
+    touchAction: "pan-y",
+    userSelect: "none",
+    WebkitUserSelect: "none",
+  };
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (e.pointerType === "mouse") return;
-      if (isExiting) return;
 
       isDraggingRef.current = true;
       pointerIdRef.current = e.pointerId;
@@ -69,9 +66,13 @@ export function SwipeNavigator({ children }: { children: React.ReactNode }) {
       lastSampleXRef.current = e.clientX;
       lastSampleTimeRef.current = Date.now();
 
-      containerRef.current?.setPointerCapture(e.pointerId);
+      const el = containerRef.current;
+      if (el) {
+        el.setPointerCapture(e.pointerId);
+        el.style.transition = "none";
+      }
     },
-    [isExiting]
+    []
   );
 
   const handlePointerMove = useCallback(
@@ -79,8 +80,9 @@ export function SwipeNavigator({ children }: { children: React.ReactNode }) {
       if (!isDraggingRef.current || e.pointerId !== pointerIdRef.current) return;
 
       const delta = e.clientX - startXRef.current;
-      const atLeftEdge = currentIndex === 0 && delta > 0;
-      const atRightEdge = currentIndex === TAB_ROUTES.length - 1 && delta < 0;
+      const idx = currentIndexRef.current;
+      const atLeftEdge = idx === 0 && delta > 0;
+      const atRightEdge = idx === TAB_ROUTES.length - 1 && delta < 0;
 
       const resistance = atLeftEdge || atRightEdge ? 0.12 : 1;
 
@@ -90,9 +92,12 @@ export function SwipeNavigator({ children }: { children: React.ReactNode }) {
         lastSampleTimeRef.current = now;
       }
 
-      setTranslateX(delta * resistance);
+      const el = containerRef.current;
+      if (el) {
+        el.style.transform = `translateX(${delta * resistance}px)`;
+      }
     },
-    [currentIndex]
+    []
   );
 
   const handlePointerUp = useCallback(
@@ -104,56 +109,57 @@ export function SwipeNavigator({ children }: { children: React.ReactNode }) {
 
       const delta = e.clientX - startXRef.current;
       const screenWidth = window.innerWidth;
+      const idx = currentIndexRef.current;
 
       const recentDelta = e.clientX - lastSampleXRef.current;
       const recentElapsed = Math.max(Date.now() - lastSampleTimeRef.current, 1);
       const velocity = Math.abs(recentDelta) / recentElapsed;
 
-      const shouldComplete =
-        Math.abs(delta) > 10 &&
-        (Math.abs(delta) > screenWidth * 0.28 || velocity > 0.4);
+      const shouldNavigate =
+        Math.abs(delta) > 8 &&
+        (Math.abs(delta) > screenWidth * 0.25 || velocity > 0.35);
 
-      if (shouldComplete) {
+      if (shouldNavigate) {
         const swipedLeft = delta < 0;
-        const targetIndex = currentIndex + (swipedLeft ? 1 : -1);
+        const targetIndex = idx + (swipedLeft ? 1 : -1);
         if (targetIndex >= 0 && targetIndex < TAB_ROUTES.length) {
-          navigateTo(targetIndex, swipedLeft);
+          setDirection(swipedLeft ? "left" : "right");
+          router.push(TAB_ROUTES[targetIndex]);
           return;
         }
       }
 
-      setTranslateX(0);
+      // Spring back
+      const el = containerRef.current;
+      if (el) {
+        el.style.transition = "transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1)";
+        el.style.transform = "translateX(0)";
+      }
     },
-    [currentIndex, navigateTo]
+    [router, setDirection]
   );
 
   const handlePointerCancel = useCallback(() => {
     isDraggingRef.current = false;
     pointerIdRef.current = null;
-    setTranslateX(0);
+    const el = containerRef.current;
+    if (el) {
+      el.style.transition = "transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1)";
+      el.style.transform = "translateX(0)";
+    }
   }, []);
 
-  const getTransition = (): string => {
-    if (isDraggingRef.current) return "none";
-    if (isExiting) return "transform 210ms cubic-bezier(0.4, 0, 1, 1)";
-    return "transform 380ms cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-  };
+  if (!isSwipeable) return <>{children}</>;
 
   return (
     <div
       ref={containerRef}
+      className="swipe-container"
+      style={initialStyle}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
-      style={{
-        transform: `translateX(${translateX}px)`,
-        transition: getTransition(),
-        willChange: "transform",
-        touchAction: "pan-y",
-        userSelect: "none",
-        WebkitUserSelect: "none",
-      }}
     >
       {children}
     </div>

@@ -21,7 +21,6 @@ export const Footer = React.memo(function Footer() {
                   alt="Rumia Logo"
                   width={40}
                   height={40}
-                  style={{ height: 'auto' }}
                 />
               </div>
               <span className="font-black text-2xl text-white tracking-tight">RUMIA</span>

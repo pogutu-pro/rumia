@@ -424,6 +424,14 @@
 }
 
 /* ── Swipe navigation ── */
+.swipe-container {
+  will-change: transform;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Swipe navigation ── */
 @keyframes slideInFromRight {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
