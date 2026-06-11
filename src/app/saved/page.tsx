@@ -6,6 +6,7 @@ import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { Heart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 
 interface SavedListing {
   id: string;
@@ -118,12 +119,15 @@ export default function SavedPage() {
 
   if (savedListings.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
-        <Heart className="h-12 w-12 text-muted-foreground/40 mb-4" />
-        <h2 className="text-lg font-semibold">No saved hostels yet</h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Tap the heart on any listing to save it for later.
-        </p>
+      <div className="max-w-2xl mx-auto px-4 py-16 space-y-8">
+        <div className="text-center">
+          <Heart className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-slate-700">No saved hostels yet</h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Tap the heart on any listing to save it for later.
+          </p>
+        </div>
+        <EarlyAccessBanner />
       </div>
     );
   }
@@ -174,6 +178,7 @@ export default function SavedPage() {
           );
         })}
       </div>
+      <EarlyAccessBanner />
     </div>
   );
 }

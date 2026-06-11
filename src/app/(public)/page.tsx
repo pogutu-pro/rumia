@@ -4,6 +4,7 @@ import { Search, MapPin, ArrowRight } from 'lucide-react';
 import { Metadata } from 'next';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/server';
+import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { JsonLd } from '@/components/seo/json-ld';
 
 export const revalidate = 0;
@@ -259,6 +260,10 @@ export default async function HomePage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+      </section>
+
+      <section className="container mx-auto px-4 pb-16 sm:pb-24">
+        <EarlyAccessBanner />
       </section>
     </div>
   );

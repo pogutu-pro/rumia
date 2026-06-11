@@ -63,7 +63,9 @@ export async function middleware(request: NextRequest) {
 
   // ── Auth protection ───────────────────────────────────────────────────────────
   const isProtectedRoute =
-    pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/account');
 
   let response = NextResponse.next({
     request: { headers: request.headers },

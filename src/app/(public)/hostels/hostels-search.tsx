@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
 import { useDebounce } from '@/hooks/use-debounce';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
+import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -548,6 +549,10 @@ export default function HostelsPage() {
             )}
           </div>
         )}
+
+        <div className="mt-8">
+          <EarlyAccessBanner />
+        </div>
       </div>
     </div>
   );
