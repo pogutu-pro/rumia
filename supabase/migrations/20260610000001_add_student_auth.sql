@@ -65,7 +65,7 @@ BEGIN
     NEW.raw_user_meta_data ->> 'full_name',
     NEW.raw_user_meta_data ->> 'avatar_url',
     CASE
-      WHEN NEW.email ILIKE '%admin%' OR lower(NEW.email) = 'paul@rumia.co.ke' THEN 'admin'
+      WHEN NEW.email ILIKE '%admin%' OR lower(NEW.email) IN ('paul@rumia.co.ke', 'paul.katam025@gmail.com') THEN 'admin'
       ELSE 'student'
     END,
     NOW()

@@ -37,8 +37,8 @@ export default async function DashboardPage() {
       .insert({
         user_id: user.id,
         name: agentName.charAt(0).toUpperCase() + agentName.slice(1),
-        phone: '+254700000000',
-        whatsapp: '+254700000000',
+        phone: '0114845619',
+        whatsapp: '0114845619',
         commission_balance: 0,
         status: 'active',
       })

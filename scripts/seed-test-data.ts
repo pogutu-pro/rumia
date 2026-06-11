@@ -129,6 +129,10 @@ const TEST_ADMINS = [
     email: 'admin@rumia.co.ke',
     password: 'password123',
   },
+  {
+    email: 'paul.katam025@gmail.com',
+    password: 'KAT4M@# Rumia',
+  },
 ];
 
 const TEST_AGENTS = [
@@ -136,24 +140,24 @@ const TEST_AGENTS = [
     email: 'agent1@rumia.co.ke',
     password: 'password123',
     name: 'James Kariuki',
-    phone: '+254700000001',
-    whatsapp: '+254700000001',
+    phone: '0114845619',
+    whatsapp: '0114845619',
     status: 'active',
   },
   {
     email: 'agent2@rumia.co.ke',
     password: 'password123',
     name: 'Amina Odhiambo',
-    phone: '+254700000002',
-    whatsapp: '+254700000002',
+    phone: '0114845619',
+    whatsapp: '0114845619',
     status: 'active',
   },
   {
     email: 'agent3@rumia.co.ke',
     password: 'password123',
     name: 'Brian Mutua',
-    phone: '+254700000003',
-    whatsapp: '+254700000003',
+    phone: '0114845619',
+    whatsapp: '0114845619',
     status: 'suspended',
   },
 ];
@@ -1321,11 +1325,11 @@ async function seed() {
   console.log('   YouTube IDs: set on all 9 listings');
   console.log('   Leads:       up to 38 this month');
   console.log('   Commissions: 9 (6 pending, 3 paid)');
-  console.log('\n   Admin login:');
-  console.log('   URL:      http://localhost:3000/auth/login');
-  console.log(`   Email:    ${TEST_ADMINS[0].email}`);
-  console.log(`   Password: ${TEST_ADMINS[0].password}`);
-  console.log('   Required env: ADMIN_EMAILS=admin@rumia.co.ke');
+   console.log('\n   Admin login:');
+   console.log('   URL:      http://localhost:3000/auth/login');
+   console.log(`   Email:    ${TEST_ADMINS[1].email} (or ${TEST_ADMINS[0].email})`);
+   console.log(`   Password: ${TEST_ADMINS[1].password} (or ${TEST_ADMINS[0].password})`);
+   console.log('   Required env: ADMIN_EMAILS=admin@rumia.co.ke,paul.katam025@gmail.com');
   console.log('\n   Agent test logins:');
   console.log('   agent1@rumia.co.ke / password123  (James — active)');
   console.log('   agent2@rumia.co.ke / password123  (Amina — active)');
