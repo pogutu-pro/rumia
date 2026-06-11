@@ -46,7 +46,7 @@ export const Footer = React.memo(function Footer() {
             {[
               { href: 'https://www.instagram.com/rumia_kenya', icon: <FaInstagram className="h-5 w-5" />, label: 'Instagram' },
               { href: 'https://www.tiktok.com/@rumia_kenya', icon: <FaTiktok className="h-5 w-5" />, label: 'TikTok' },
-              { href: 'https://wa.me/254114845619', icon: <FaWhatsapp className="h-5 w-5" />, label: 'WhatsApp' },
+              { href: 'https://wa.me/254114845619?text=Hi%20Rumia%2C%20I%20found%20you%20on%20your%20website.%20I%27m%20looking%20for%20a%20hostel%20near%20DeKUT.', icon: <FaWhatsapp className="h-5 w-5" />, label: 'WhatsApp' },
               { href: 'https://www.linkedin.com/company/127854119', icon: <FaLinkedinIn className="h-5 w-5" />, label: 'LinkedIn' },
             ].map((social, idx) => (
               <a
