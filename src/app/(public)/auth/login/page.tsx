@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { signInWithGoogle, signOut, getSession } from '@/lib/supabase/auth';
+import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,27 +12,11 @@ import {
   KeyRound,
   Mail,
   Loader2,
-  User,
-  Phone,
-  Calendar,
-  LogOut,
 } from 'lucide-react';
-
-interface Profile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  phone: string | null;
-  created_at: string | null;
-}
 
 export default function LoginPage() {
   const router = useRouter();
-  const [session, setSession] = useState<any>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [signingOut, setSigningOut] = useState(false);
 
   // Sign-in form state
   const [email, setEmail] = useState('');
@@ -48,33 +32,16 @@ export default function LoginPage() {
   useEffect(() => {
     (async () => {
       const { session: s } = await getSession();
-      setSession(s);
-
       if (s?.user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', s.user.id)
-          .single();
-        setProfile(data);
+        // Already authenticated — redirect to account page instead of
+        // rendering a duplicate profile view without the feedback form.
+        router.replace('/account');
+        return;
       }
 
       setLoading(false);
     })();
   }, []);
-
-  async function handleSignOut() {
-    setSigningOut(true);
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Failed to sign out');
-    } else {
-      setSession(null);
-      setProfile(null);
-      router.refresh();
-    }
-    setSigningOut(false);
-  }
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,80 +122,6 @@ export default function LoginPage() {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  // ── Authenticated: Show profile ─────────────────────────────────────
-  if (session) {
-    return (
-      <div className="min-h-[80vh] bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
-            <div className="bg-emerald-600 px-8 py-10 text-center">
-              <div className="w-20 h-20 rounded-full bg-white/20 mx-auto flex items-center justify-center mb-4">
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={profile?.full_name || 'Profile'}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="h-10 w-10 text-white" />
-                )}
-              </div>
-              <h1 className="text-2xl font-bold text-white">
-                {profile?.full_name || 'Student'}
-              </h1>
-              <p className="text-emerald-100 text-sm mt-1">Student Account</p>
-            </div>
-
-            <div className="px-8 py-6 space-y-5">
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="h-4 w-4 text-slate-400" />
-                <span className="text-slate-700">
-                  {profile?.email || session.user?.email}
-                </span>
-              </div>
-
-              {profile?.phone && (
-                <div className="flex items-center gap-3 text-sm">
-                  <Phone className="h-4 w-4 text-slate-400" />
-                  <span className="text-slate-700">{profile.phone}</span>
-                </div>
-              )}
-
-              {profile?.created_at && (
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="h-4 w-4 text-slate-400" />
-                  <span className="text-slate-500">
-                    Member since{' '}
-                    {new Date(profile.created_at).toLocaleDateString('en-KE', {
-                      year: 'numeric',
-                      month: 'long',
-                    })}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <Button
-              variant="outline"
-              onClick={handleSignOut}
-              disabled={signingOut}
-              className="inline-flex items-center gap-2"
-            >
-              {signingOut ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <LogOut className="h-4 w-4" />
-              )}
-              Sign Out
-            </Button>
-          </div>
-        </div>
       </div>
     );
   }
