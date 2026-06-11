@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { User, Mail, Phone, Calendar, HeartHandshake, MessageSquareText } from 'lucide-react';
+import { User, Mail, Phone, Calendar } from 'lucide-react';
 import { FeedbackForm } from '@/components/feedback/feedback-form';
 
 interface Profile {
@@ -28,22 +28,34 @@ export default async function AccountPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Welcome banner */}
-        <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-3xl shadow-xl p-8 sm:p-10 text-white">
-          <HeartHandshake className="h-10 w-10 text-emerald-100 mb-4" />
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Hey{profile?.full_name ? ` ${profile.full_name.split(' ')[0]}` : ''}, welcome to Rumia
+      <div className="max-w-4xl mx-auto">
+        {/* Compact welcome */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            Hey{profile?.full_name ? ` ${profile.full_name.split(' ')[0]}` : ''} 👋
           </h1>
-          <p className="mt-3 text-emerald-100 text-base sm:text-lg max-w-xl leading-relaxed">
-            Every student deserves a simpler way to find a place to live.
-            We just launched and you&apos;re one of our first users — your feedback
-            shapes what we build next.
+          <p className="text-sm text-slate-500 mt-1 max-w-xl">
+            You&apos;re an early user of Rumia — your feedback directly shapes what we build. What&apos;s on your mind?
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile card — sidebar on desktop */}
+          {/* Feedback form — hero */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8">
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-slate-900">
+                  Share your feedback
+                </h2>
+                <p className="text-sm text-slate-500 mt-0.5">
+                  All fields optional — just tell us what you think.
+                </p>
+              </div>
+              <FeedbackForm />
+            </div>
+          </div>
+
+          {/* Profile card — sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="bg-emerald-600 px-6 py-8 text-center">
@@ -92,28 +104,6 @@ export default async function AccountPage() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Feedback card — main area */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                  <MessageSquareText className="h-5 w-5 text-emerald-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    We&apos;re all ears
-                  </h2>
-                  <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">
-                    Rumia is brand new and we&apos;re building it with students
-                    like you. Found a bug? Missing a hostel? Want a feature?
-                    Tell us — every message gets read.
-                  </p>
-                </div>
-              </div>
-              <FeedbackForm />
             </div>
           </div>
         </div>

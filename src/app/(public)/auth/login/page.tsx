@@ -141,7 +141,7 @@ export default function LoginPage() {
         router.refresh();
       } else {
         toast.success('Signed in successfully');
-        router.push(getNextParam() || '/auth/login');
+        router.push(getNextParam() || '/account');
         router.refresh();
       }
     } catch {
@@ -248,7 +248,7 @@ export default function LoginPage() {
 
         {/* Google Sign-In — prominent */}
         <button
-          onClick={() => signInWithGoogle(getNextParam() || '/auth/login')}
+          onClick={() => signInWithGoogle(getNextParam() || '/account')}
           className="w-full flex items-center justify-center gap-3 h-13 py-3.5 border-2 border-slate-200 rounded-xl font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm"
         >
           <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
