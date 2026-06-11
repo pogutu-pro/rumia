@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { User, Mail, Phone, Calendar } from 'lucide-react';
 import { FeedbackForm } from '@/components/feedback/feedback-form';
+import { LogoutButton } from '@/components/logout-button';
 import { AccountDashboardBar } from './account-dashboard-bar';
 
 interface Profile {
@@ -125,6 +126,9 @@ export default async function AccountPage() {
                     </span>
                   </div>
                 )}
+
+                <hr className="border-gray-100" />
+                <LogoutButton />
               </div>
             </div>
           </div>
