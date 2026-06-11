@@ -14,7 +14,22 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache,
+  runtimeCaching: [
+    {
+      matcher: ({ url }) => url.hostname === "maps.googleapis.com",
+      handler: {
+        handle: async ({ request }) => {
+          try {
+            const response = await fetch(request);
+            return response;
+          } catch {
+            return new Response(null, { status: 204 });
+          }
+        },
+      },
+    },
+    ...defaultCache,
+  ],
 });
 
 serwist.addEventListeners();

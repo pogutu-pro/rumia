@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Twitter, Instagram, Facebook, Linkedin } from 'lucide-react';
+import { FaInstagram, FaTiktok, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6';
 
 export const Footer = React.memo(function Footer() {
   const currentYear = new Date().getFullYear();
@@ -44,16 +44,18 @@ export const Footer = React.memo(function Footer() {
           {/* Social Links */}
           <div className="flex justify-center md:justify-end gap-4">
             {[
-              { href: '#', icon: <Twitter className="h-5 w-5" />, label: 'Twitter' },
-              { href: '#', icon: <Instagram className="h-5 w-5" />, label: 'Instagram' },
-              { href: '#', icon: <Facebook className="h-5 w-5" />, label: 'Facebook' },
-              { href: '#', icon: <Linkedin className="h-5 w-5" />, label: 'LinkedIn' },
+              { href: 'https://www.instagram.com/rumia_kenya', icon: <FaInstagram className="h-5 w-5" />, label: 'Instagram' },
+              { href: 'https://www.tiktok.com/@rumia_kenya', icon: <FaTiktok className="h-5 w-5" />, label: 'TikTok' },
+              { href: 'https://wa.me/254114845619', icon: <FaWhatsapp className="h-5 w-5" />, label: 'WhatsApp' },
+              { href: 'https://www.linkedin.com/company/127854119', icon: <FaLinkedinIn className="h-5 w-5" />, label: 'LinkedIn' },
             ].map((social, idx) => (
               <a
                 key={idx}
                 href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={social.label}
-                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 hover:text-white transition-all duration-300"
+                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/30 hover:text-emerald-400 transition-all duration-300"
               >
                 {social.icon}
               </a>

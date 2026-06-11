@@ -12,7 +12,7 @@ export function AnimatedMain({ children }: { children: React.ReactNode }) {
     direction === "right" ? "slide-in-from-left"  : "";
 
   return (
-    <main className={`pb-[calc(4rem+env(safe-area-inset-bottom))] ${animationClass}`}>
+    <main className={`pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 ${animationClass}`}>
       {children}
     </main>
   );
