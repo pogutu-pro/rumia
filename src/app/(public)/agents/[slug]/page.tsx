@@ -69,6 +69,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
   const listings = (listingsData || []) as any[];
   const cleanPhone = (agent.whatsapp || agent.phone || '').replace(/[^\d+]/g, '');
+  const waPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.replace(/^0?/, '+254');
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-10">
@@ -102,7 +103,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
                 )}
                 {agent.whatsapp && (
                   <a
-                    href={`https://wa.me/${cleanPhone}`}
+                    href={`https://wa.me/${waPhone}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-emerald-600 hover:underline"

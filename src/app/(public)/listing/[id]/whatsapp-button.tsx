@@ -46,7 +46,8 @@ export function WhatsappButton({
         window.open(data.whatsappUrl, '_blank');
       } else {
         const cleanPhone = agentPhone.replace(/[^\d+]/g, '');
-        window.open(`https://wa.me/${cleanPhone}`, '_blank');
+        const waPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.replace(/^0?/, '+254');
+        window.open(`https://wa.me/${waPhone}`, '_blank');
       }
       
       toast.success('Connecting to agent via WhatsApp...');
@@ -54,7 +55,8 @@ export function WhatsappButton({
       console.error('Lead attribution error:', error);
       // Fallback redirect directly to WhatsApp
       const cleanPhone = agentPhone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanPhone}`, '_blank');
+      const waPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.replace(/^0?/, '+254');
+      window.open(`https://wa.me/${waPhone}`, '_blank');
       toast.error('Lead tracking failed, connecting directly to agent...');
     } finally {
       setIsLoading(false);

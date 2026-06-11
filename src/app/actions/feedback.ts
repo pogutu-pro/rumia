@@ -21,6 +21,8 @@ export async function submitFeedbackAction(
   try {
     const { error } = await supabase.from('feedback').insert({
       user_id: user.id,
+      user_email: user.email,
+      user_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       category,
       message,
     });

@@ -11,6 +11,8 @@ import {
   Building2,
   MousePointerClick,
   DollarSign,
+  MessageSquare,
+  Repeat,
   LogOut,
   Menu,
   X,
@@ -20,6 +22,7 @@ import { createClient } from '@/lib/supabase/client';
 export interface AdminSidebarProps {
   userName: string;
   userEmail: string;
+  hasAgent?: boolean;
 }
 
 const navLinks = [
@@ -29,11 +32,13 @@ const navLinks = [
   { label: 'Listings', href: '/admin/listings', icon: Building2, exact: false },
   { label: 'Leads', href: '/admin/leads', icon: MousePointerClick, exact: false },
   { label: 'Commissions', href: '/admin/commissions', icon: DollarSign, exact: false },
+  { label: 'Feedback', href: '/admin/feedback', icon: MessageSquare, exact: false },
 ];
 
 function SidebarContent({
   userName,
   userEmail,
+  hasAgent,
   pathname,
   onNavigate,
   onSignOut,
@@ -69,6 +74,17 @@ function SidebarContent({
             </Link>
           );
         })}
+
+        {hasAgent && (
+          <Link
+            href="/dashboard"
+            onClick={onNavigate}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-amber-600 hover:bg-amber-50 hover:text-amber-700 font-medium mt-4"
+          >
+            <Repeat className="h-4 w-4 shrink-0" />
+            Agent Dashboard
+          </Link>
+        )}
       </nav>
 
       <div className="px-4 py-4 border-t border-gray-100">
@@ -88,7 +104,7 @@ function SidebarContent({
   );
 }
 
-export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
+export function AdminSidebar({ userName, userEmail, hasAgent }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -107,6 +123,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
         <SidebarContent
           userName={userName}
           userEmail={userEmail}
+          hasAgent={hasAgent}
           pathname={pathname}
           onNavigate={() => {}}
           onSignOut={handleSignOut}
@@ -153,6 +170,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
         <SidebarContent
           userName={userName}
           userEmail={userEmail}
+          hasAgent={hasAgent}
           pathname={pathname}
           onNavigate={() => setOpen(false)}
           onSignOut={handleSignOut}

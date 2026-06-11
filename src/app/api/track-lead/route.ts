@@ -111,10 +111,12 @@ export async function POST(request: NextRequest) {
     const formattedPhone = agent.whatsapp || agent.phone || '';
     // Strip non-numeric characters except maybe starting '+'
     const cleanPhone = formattedPhone.replace(/[^\d+]/g, '');
+    // Normalize to Kenyan international format if no country code
+    const waPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.replace(/^0?/, '+254');
 
     // Format greeting message
     const message = `Hello, I'm interested in your listing: "${listing.title}" on Rumia. Is it still available?`;
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
 
     return NextResponse.json({ success: true, whatsappUrl });
   } catch (error) {

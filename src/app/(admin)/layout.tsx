@@ -24,19 +24,21 @@ export default async function AdminLayout({
   }
 
   let userName = user.email ?? '';
+  let hasAgent = false;
   const { data: agent } = await (supabase as any)
     .from('agents')
     .select('name')
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
   if (agent?.name) {
     userName = agent.name;
+    hasAgent = true;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminSidebar userName={userName} userEmail={user.email ?? ''} />
+      <AdminSidebar userName={userName} userEmail={user.email ?? ''} hasAgent={hasAgent} />
       <main className="lg:ml-60 pt-14 lg:pt-0 min-h-screen">
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pb-20 lg:pb-8 max-w-7xl mx-auto">
           {children}
