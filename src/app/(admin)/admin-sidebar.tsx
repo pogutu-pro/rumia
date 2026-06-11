@@ -44,14 +44,12 @@ function SidebarContent({
 }) {
   return (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="px-6 py-5 border-b border-gray-100">
         <Link href="/admin" className="inline-flex items-center" onClick={onNavigate}>
           <Image src="/images/logo/logo.svg" alt="Rumia" width={100} height={32} priority style={{ height: 'auto' }} />
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navLinks.map(({ label, href, icon: Icon, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href);
@@ -60,12 +58,11 @@ function SidebarContent({
               key={href}
               href={href}
               onClick={onNavigate}
-              className={[
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                 isActive
-                  ? 'bg-gray-100 text-gray-900 font-semibold'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
-              ].join(' ')}
+                  ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+              }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
               {label}
@@ -74,7 +71,6 @@ function SidebarContent({
         })}
       </nav>
 
-      {/* User / Logout */}
       <div className="px-4 py-4 border-t border-gray-100">
         <div className="mb-3">
           <p className="text-sm font-semibold text-gray-900 truncate">{userName}</p>
@@ -82,7 +78,7 @@ function SidebarContent({
         </div>
         <button
           onClick={onSignOut}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors w-full"
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors w-full rounded-xl px-3 py-2 hover:bg-red-50"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           Logout
@@ -107,7 +103,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-60 bg-white border-r border-gray-200 flex-col h-full fixed left-0 top-0">
+      <aside className="hidden lg:flex w-60 bg-white border-r border-gray-200 flex-col fixed left-0 top-0 h-full z-30">
         <SidebarContent
           userName={userName}
           userEmail={userEmail}
@@ -118,13 +114,13 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 flex items-center justify-between px-4 h-14">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 flex items-center justify-between px-4 h-14">
         <Link href="/admin">
           <Image src="/images/logo/logo.svg" alt="Rumia" width={80} height={26} priority style={{ height: 'auto' }} />
         </Link>
         <button
           onClick={() => setOpen(true)}
-          className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors active:scale-95"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -134,22 +130,21 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
       {/* Backdrop */}
       {open && (
         <div
-          className="lg:hidden fixed inset-0 z-50 bg-black/40"
+          className="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* Mobile drawer */}
       <aside
-        className={[
-          'lg:hidden fixed top-0 left-0 h-full w-64 bg-white z-50 shadow-xl transition-transform duration-300',
-          open ? 'translate-x-0' : '-translate-x-full',
-        ].join(' ')}
+        className={`lg:hidden fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl transition-transform duration-300 ease-out ${
+          open ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
         <div className="absolute top-3 right-3">
           <button
             onClick={() => setOpen(false)}
-            className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors active:scale-95"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />

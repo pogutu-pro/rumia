@@ -29,38 +29,22 @@ type SelectedLead = {
   listingTitle: string;
 } | null;
 
-export function LeadsTableClient({
-  leads,
-  agents,
-  listings,
-}: LeadsTableClientProps) {
-  // Filter state
+export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientProps) {
   const [agentFilter, setAgentFilter] = useState('');
   const [listingFilter, setListingFilter] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
-  // Commission modal state
   const [selectedLead, setSelectedLead] = useState<SelectedLead>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const hasActiveFilters =
-    agentFilter !== '' || listingFilter !== '' || startDate !== '' || endDate !== '';
+  const hasActiveFilters = agentFilter !== '' || listingFilter !== '' || startDate !== '' || endDate !== '';
 
   function clearFilters() {
-    setAgentFilter('');
-    setListingFilter('');
-    setStartDate('');
-    setEndDate('');
+    setAgentFilter(''); setListingFilter(''); setStartDate(''); setEndDate('');
   }
 
-  // Convert date inputs to ISO strings for filterLeads
-  const startISO = startDate
-    ? new Date(startDate + 'T00:00:00.000Z').toISOString()
-    : undefined;
-  const endISO = endDate
-    ? new Date(endDate + 'T00:00:00.000Z').toISOString()
-    : undefined;
+  const startISO = startDate ? new Date(startDate + 'T00:00:00.000Z').toISOString() : undefined;
+  const endISO = endDate ? new Date(endDate + 'T00:00:00.000Z').toISOString() : undefined;
 
   const filtered = filterLeads(leads, {
     agentId: agentFilter || undefined,
@@ -81,192 +65,93 @@ export function LeadsTableClient({
 
   return (
     <div>
-      {/* Page title */}
-      <h1 className="text-2xl font-semibold mb-2">Leads</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Each row represents one WhatsApp button click. Commissions are created manually
-        by admin after verifying placement.
-      </p>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Leads</h1>
+      <p className="text-sm text-gray-500 mb-6">{leads.length} lead{leads.length !== 1 ? 's' : ''} recorded</p>
 
-      {/* Filter bar */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 flex gap-4 flex-wrap items-center">
-        {/* Agent dropdown */}
-        <select
-          value={agentFilter}
-          onChange={(e) => setAgentFilter(e.target.value)}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
+        <select value={agentFilter} onChange={(e) => setAgentFilter(e.target.value)}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="">All Agents</option>
-          {agents.map((agent) => (
-            <option key={agent.id} value={agent.id}>
-              {agent.name}
-            </option>
-          ))}
+          {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
-
-        {/* Listing dropdown */}
-        <select
-          value={listingFilter}
-          onChange={(e) => setListingFilter(e.target.value)}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+        <select value={listingFilter} onChange={(e) => setListingFilter(e.target.value)}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="">All Listings</option>
-          {listings.map((listing) => (
-            <option key={listing.id} value={listing.id}>
-              {listing.title}
-            </option>
-          ))}
+          {listings.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
         </select>
-
-        {/* Start date */}
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-
-        {/* End date */}
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-
-        {/* Clear filters button */}
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
-            Clear filters
-          </Button>
-        )}
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-lg">Clear</Button>}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Date &amp; Time
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Listing Name
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Agent Name
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                IP Hash
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Actions
-              </th>
+            <tr className="border-b border-gray-100 bg-gray-50">
+              {['Date & Time', 'Listing', 'Agent', 'IP Hash', 'Actions'].map((h) => (
+                <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-50">
             {filtered.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="text-sm text-gray-500 text-center px-6 py-8"
-                >
-                  {hasActiveFilters ? (
-                    <span>
-                      No results match your filters.{' '}
-                      <button
-                        onClick={clearFilters}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Clear filters
-                      </button>
-                    </span>
-                  ) : (
-                    'No leads recorded.'
-                  )}
-                </td>
-              </tr>
-            ) : (
-              filtered.map((lead) => {
-                const date = new Date(lead.clicked_at);
-                const dateStr = date.toLocaleDateString();
-                const timeStr = date.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
-                const ipTruncated =
-                  lead.ip_hash.length > 12
-                    ? lead.ip_hash.slice(0, 12) + '...'
-                    : lead.ip_hash;
-
-                return (
-                  <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
-                    {/* Date & Time */}
-                    <td className="text-sm text-gray-600 px-6 py-4 whitespace-nowrap">
-                      {dateStr} {timeStr}
-                    </td>
-
-                    {/* Listing Name */}
-                    <td className="text-sm px-6 py-4">
-                      {lead.listings ? (
-                        <Link
-                          href={`/listing/${lead.listings.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          {lead.listings.title}
-                        </Link>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-
-                    {/* Agent Name */}
-                    <td className="text-sm px-6 py-4">
-                      {lead.agents ? (
-                        <Link
-                          href={`/admin/agents/${lead.agents.id}`}
-                          className="text-blue-600 hover:underline"
-                        >
-                          {lead.agents.name}
-                        </Link>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-
-                    {/* IP Hash */}
-                    <td className="text-sm text-gray-600 px-6 py-4">
-                      <span title={lead.ip_hash} className="font-mono text-xs">
-                        {ipTruncated}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openCommissionModal(lead)}
-                      >
-                        Create Commission
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+              <tr><td colSpan={5} className="text-sm text-gray-400 text-center px-5 py-8">No leads recorded.</td></tr>
+            ) : filtered.map((lead) => {
+              const date = new Date(lead.clicked_at);
+              return (
+                <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="text-sm text-gray-600 px-5 py-4 whitespace-nowrap">
+                    {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                  <td className="text-sm px-5 py-4">
+                    {lead.listings ? (
+                      <Link href={`/listing/${lead.listings.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">{lead.listings.title}</Link>
+                    ) : <span className="text-gray-400">—</span>}
+                  </td>
+                  <td className="text-sm px-5 py-4">
+                    {lead.agents ? (
+                      <Link href={`/admin/agents/${lead.agents.id}`} className="text-emerald-600 hover:underline font-medium">{lead.agents.name}</Link>
+                    ) : <span className="text-gray-400">—</span>}
+                  </td>
+                  <td className="text-sm text-gray-500 px-5 py-4 font-mono text-xs">{lead.ip_hash.slice(0, 12)}...</td>
+                  <td className="px-5 py-4">
+                    <Button size="sm" variant="outline" onClick={() => openCommissionModal(lead)} className="rounded-lg text-xs h-8">Create Commission</Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      {/* Create Commission Modal */}
-      <CreateCommissionModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        lead={selectedLead}
-      />
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No leads recorded.</div>
+        ) : filtered.map((lead) => (
+          <div key={lead.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-900 truncate">{lead.listings?.title ?? 'Unknown Listing'}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{lead.agents?.name ?? 'Unknown Agent'}</p>
+              </div>
+              <span className="text-xs text-gray-400 shrink-0 ml-2">
+                {new Date(lead.clicked_at).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400 font-mono">{lead.ip_hash.slice(0, 12)}...</span>
+              <Button size="sm" variant="outline" onClick={() => openCommissionModal(lead)} className="rounded-lg text-xs h-8">Create Commission</Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <CreateCommissionModal open={modalOpen} onOpenChange={setModalOpen} lead={selectedLead} />
     </div>
   );
 }

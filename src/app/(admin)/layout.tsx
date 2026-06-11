@@ -23,7 +23,6 @@ export default async function AdminLayout({
     redirect('/dashboard');
   }
 
-  // Fetch display name from agents table, fall back to email
   let userName = user.email ?? '';
   const { data: agent } = await (supabase as any)
     .from('agents')
@@ -36,9 +35,13 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <AdminSidebar userName={userName} userEmail={user.email ?? ''} />
-      <main className="flex-1 lg:ml-60 overflow-auto pt-14 lg:pt-0 p-4 lg:p-8">{children}</main>
+      <main className="lg:ml-60 pt-14 lg:pt-0 min-h-screen">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pb-20 lg:pb-8 max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

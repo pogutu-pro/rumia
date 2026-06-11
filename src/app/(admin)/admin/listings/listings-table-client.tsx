@@ -30,299 +30,151 @@ const PAGE_SIZE = 20;
 
 export function ListingsTableClient({ listings, agents }: ListingsTableClientProps) {
   const router = useRouter();
-
-  // Filter state
   const [agentFilter, setAgentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [locationFilter, setLocationFilter] = useState('');
-
-  // Load-more state
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  // Pending action state
   const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const hasActiveFilters =
-    agentFilter !== '' || statusFilter !== 'all' || locationFilter !== '';
+  const hasActiveFilters = agentFilter !== '' || statusFilter !== 'all' || locationFilter !== '';
 
   function clearFilters() {
-    setAgentFilter('');
-    setStatusFilter('all');
-    setLocationFilter('');
-    setVisibleCount(PAGE_SIZE);
+    setAgentFilter(''); setStatusFilter('all'); setLocationFilter(''); setVisibleCount(PAGE_SIZE);
   }
 
-  const filtered = filterListings(listings, {
-    agentId: agentFilter || undefined,
-    status: statusFilter,
-    location: locationFilter || undefined,
-  });
-
+  const filtered = filterListings(listings, { agentId: agentFilter || undefined, status: statusFilter, location: locationFilter || undefined });
   const visible = filtered.slice(0, visibleCount);
   const hasMore = filtered.length > visibleCount;
 
   async function handleToggleActive(listing: ListingRow) {
-    if (listing.is_active) {
-      const confirmed = window.confirm(
-        `Deactivate "${listing.title}"? It will no longer appear in search results.`
-      );
-      if (!confirmed) return;
-    }
-
+    if (listing.is_active && !window.confirm(`Deactivate "${listing.title}"?`)) return;
     setPendingId(listing.id);
     const result = await updateListingActiveAction(listing.id, !listing.is_active);
     setPendingId(null);
-
-    if (result.success) {
-      toast.success(listing.is_active ? 'Listing deactivated' : 'Listing activated');
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+    if (result.success) { toast.success(listing.is_active ? 'Deactivated' : 'Activated'); router.refresh(); }
+    else { toast.error(result.error); }
   }
 
   async function handleDelete(listing: ListingRow) {
-    const confirmed = window.confirm(
-      `Permanently delete "${listing.title}"? This action cannot be undone.`
-    );
-    if (!confirmed) return;
-
+    if (!window.confirm(`Permanently delete "${listing.title}"?`)) return;
     setPendingId(listing.id);
     const result = await deleteListingAction(listing.id);
     setPendingId(null);
-
-    if (result.success) {
-      toast.success('Listing deleted');
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+    if (result.success) { toast.success('Deleted'); router.refresh(); }
+    else { toast.error(result.error); }
   }
 
   return (
     <div>
-      {/* Page title */}
-      <h1 className="text-2xl font-semibold mb-6">Listings</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Listings</h1>
+      <p className="text-sm text-gray-500 mb-6">{listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
 
-      {/* Filter bar */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 flex gap-4 items-center flex-wrap">
-        {/* Agent dropdown */}
-        <select
-          value={agentFilter}
-          onChange={(e) => {
-            setAgentFilter(e.target.value);
-            setVisibleCount(PAGE_SIZE);
-          }}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
+        <select value={agentFilter} onChange={(e) => { setAgentFilter(e.target.value); setVisibleCount(PAGE_SIZE); }}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="">All Agents</option>
-          {agents.map((agent) => (
-            <option key={agent.id} value={agent.id}>
-              {agent.name}
-            </option>
-          ))}
+          {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
-
-        {/* Status dropdown */}
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value as 'all' | 'active' | 'inactive');
-            setVisibleCount(PAGE_SIZE);
-          }}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as any); setVisibleCount(PAGE_SIZE); }}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="all">All</option><option value="active">Active</option><option value="inactive">Inactive</option>
         </select>
-
-        {/* Location text input */}
-        <input
-          type="text"
-          placeholder="Search by location..."
-          value={locationFilter}
-          onChange={(e) => {
-            setLocationFilter(e.target.value);
-            setVisibleCount(PAGE_SIZE);
-          }}
-          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-w-[200px]"
-        />
-
-        {/* Clear filters button — only when a filter is active */}
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
-            Clear filters
-          </Button>
-        )}
+        <input type="text" placeholder="Search location..." value={locationFilter}
+          onChange={(e) => { setLocationFilter(e.target.value); setVisibleCount(PAGE_SIZE); }}
+          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-[160px] flex-1" />
+        {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-lg">Clear</Button>}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Photo
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Hostel Name
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Location
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Price (KES)
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Agent
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Leads
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Status
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Created
-              </th>
-              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-6 py-3">
-                Actions
-              </th>
+            <tr className="border-b border-gray-100 bg-gray-50">
+              {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Created', 'Actions'].map((h) => (
+                <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-50">
             {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="text-sm text-gray-500 text-center px-6 py-8">
-                  {hasActiveFilters ? (
-                    <span>
-                      No results match your filters.{' '}
-                      <button
-                        onClick={clearFilters}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Clear filters
-                      </button>
-                    </span>
+              <tr><td colSpan={9} className="text-sm text-gray-400 text-center px-5 py-8">No listings found.</td></tr>
+            ) : visible.map((listing) => (
+              <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-5 py-4">
+                  {listing.cover_image ? (
+                    <img src={listing.cover_image} alt={listing.title} className="h-10 w-14 object-cover rounded-lg" />
+                  ) : <div className="h-10 w-14 bg-gray-100 rounded-lg" />}
+                </td>
+                <td className="text-sm px-5 py-4 font-medium text-gray-900">{listing.title}</td>
+                <td className="text-sm text-gray-500 px-5 py-4">{listing.location}</td>
+                <td className="text-sm text-gray-700 px-5 py-4">{listing.price.toLocaleString()}</td>
+                <td className="text-sm text-gray-600 px-5 py-4">{listing.agent_name}</td>
+                <td className="text-sm text-gray-600 px-5 py-4">{listing.leads_count}</td>
+                <td className="px-5 py-4">
+                  {listing.is_active ? (
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
                   ) : (
-                    'No listings found.'
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Inactive</span>
                   )}
                 </td>
+                <td className="text-sm text-gray-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
+                <td className="px-5 py-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">Live</a>
+                    <button onClick={() => handleToggleActive(listing)} disabled={pendingId === listing.id}
+                      className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {listing.is_active ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button onClick={() => handleDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 font-medium hover:underline disabled:opacity-50">Delete</button>
+                  </div>
+                </td>
               </tr>
-            ) : (
-              visible.map((listing) => (
-                <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
-                  {/* Photo */}
-                  <td className="px-6 py-4">
-                    {listing.cover_image ? (
-                      <img
-                        src={listing.cover_image}
-                        alt={listing.title}
-                        className="h-10 w-14 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="h-10 w-14 bg-gray-200 rounded" />
-                    )}
-                  </td>
-
-                  {/* Hostel Name */}
-                  <td className="text-sm px-6 py-4">
-                    <Link
-                      href={`/listing/${listing.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-gray-900 hover:text-blue-600 hover:underline"
-                    >
-                      {listing.title}
-                    </Link>
-                  </td>
-
-                  {/* Location */}
-                  <td className="text-sm text-gray-600 px-6 py-4">
-                    {listing.location}
-                  </td>
-
-                  {/* Price */}
-                  <td className="text-sm text-gray-600 px-6 py-4">
-                    {listing.price.toLocaleString()}
-                  </td>
-
-                  {/* Agent */}
-                  <td className="text-sm text-gray-600 px-6 py-4">
-                    {listing.agent_name}
-                  </td>
-
-                  {/* Leads */}
-                  <td className="text-sm text-gray-600 px-6 py-4">
-                    {listing.leads_count}
-                  </td>
-
-                  {/* Status Badge */}
-                  <td className="px-6 py-4">
-                    {listing.is_active ? (
-                      <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-100 text-green-800">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                        Inactive
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Created */}
-                  <td className="text-sm text-gray-600 px-6 py-4">
-                    {new Date(listing.created_at).toLocaleDateString()}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3 text-sm">
-                      <a
-                        href={`/listing/${listing.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline whitespace-nowrap"
-                      >
-                        View Live
-                      </a>
-                      <button
-                        onClick={() => handleToggleActive(listing)}
-                        disabled={pendingId === listing.id}
-                        className="text-amber-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                      >
-                        {pendingId === listing.id
-                          ? '...'
-                          : listing.is_active
-                          ? 'Deactivate'
-                          : 'Activate'}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(listing)}
-                        disabled={pendingId === listing.id}
-                        className="text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Load More */}
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No listings found.</div>
+        ) : visible.map((listing) => (
+          <div key={listing.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3">
+            <div className="flex items-start gap-3">
+              {listing.cover_image ? (
+                <img src={listing.cover_image} alt={listing.title} className="h-14 w-20 object-cover rounded-lg shrink-0" />
+              ) : <div className="h-14 w-20 bg-gray-100 rounded-lg shrink-0" />}
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 leading-snug">{listing.title}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{listing.location}</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">KES {listing.price.toLocaleString()}</p>
+              </div>
+              {listing.is_active ? (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Active</span>
+              ) : (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 shrink-0">Inactive</span>
+              )}
+            </div>
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>{listing.agent_name} &middot; {listing.leads_count} leads</span>
+              <span>{new Date(listing.created_at).toLocaleDateString()}</span>
+            </div>
+            <div className="flex items-center gap-3 pt-1 text-xs font-medium">
+              <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">View Live</a>
+              <button onClick={() => handleToggleActive(listing)} disabled={pendingId === listing.id}
+                className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
+                {listing.is_active ? 'Deactivate' : 'Activate'}
+              </button>
+              <button onClick={() => handleDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 hover:underline disabled:opacity-50">Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {hasMore && (
         <div className="mt-4 text-center">
-          <Button
-            variant="outline"
-            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-          >
-            Load More
-          </Button>
+          <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)} className="rounded-xl">Load More</Button>
         </div>
       )}
     </div>
