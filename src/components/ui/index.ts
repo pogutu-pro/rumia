@@ -29,6 +29,9 @@ export * from './tabs';
 export * from './textarea';
 export * from './tooltip';
 
+export { ShareModal } from './share-modal';
+export type { ShareModalProps } from './share-modal';
+
 // Prop types
 export type { ButtonProps } from './button';
 export type { InputProps } from './input';

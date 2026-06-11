@@ -19,7 +19,7 @@ import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
 import { LocationSection } from '@/app/(public)/listing/[id]/location-section';
 import { RoomTypes } from '@/app/(public)/listing/[id]/room-types';
 import { SaveButton } from '@/components/ui/save-button';
-import { ShareButton } from '@/components/ui/share-button';
+import { ShareListingButton } from '@/components/ui/share-listing-button';
 import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
@@ -215,12 +215,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="pointer-events-auto">
-          <ShareButton
-            title={listing.title}
-            text={shareText}
-            url={canonicalUrl}
-            showLabel={false}
-            size="icon"
+          <ShareListingButton
+            variant="icon"
+            listing={{
+              name: listing.title,
+              area: listing.area,
+              url: canonicalUrl,
+              imageUrl: images[0]?.r2_url,
+            }}
             className="h-11 w-11 rounded-full border-white/70 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm hover:bg-white hover:text-slate-950"
           />
         </div>
@@ -237,12 +239,13 @@ export default async function ListingSlugPage({ params }: PageProps) {
             Back to hostels
           </Link>
           <div className="flex items-center gap-4">
-            <ShareButton
-              title={listing.title}
-              text={shareText}
-              url={canonicalUrl}
-              variant="ghost"
-              size="sm"
+            <ShareListingButton
+              listing={{
+                name: listing.title,
+                area: listing.area,
+                url: canonicalUrl,
+                imageUrl: images[0]?.r2_url,
+              }}
               className="h-8 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             />
             <SaveButton listingId={listing.id} />
