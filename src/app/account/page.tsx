@@ -14,7 +14,9 @@ interface Profile {
 
 export default async function AccountPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/auth/login');
@@ -32,10 +34,12 @@ export default async function AccountPage() {
         {/* Compact welcome */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Hey{profile?.full_name ? ` ${profile.full_name.split(' ')[0]}` : ''} 👋
+            Hey{profile?.full_name ? ` ${profile.full_name.split(' ')[0]}` : ''}{' '}
+            👋
           </h1>
           <p className="text-sm text-slate-500 mt-1 max-w-xl">
-            You&apos;re an early user of Rumia — your feedback directly shapes what we build. What&apos;s on your mind?
+            You&apos;re an early user of Rumia, your feedback directly shapes
+            what we build. What&apos;s on your mind?
           </p>
         </div>
 
@@ -48,7 +52,7 @@ export default async function AccountPage() {
                   Share your feedback
                 </h2>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  All fields optional — just tell us what you think.
+                  All fields are optional, just tell us what you think.
                 </p>
               </div>
               <FeedbackForm />
@@ -73,7 +77,7 @@ export default async function AccountPage() {
                 <h2 className="text-lg font-bold text-white">
                   {profile?.full_name || 'Student'}
                 </h2>
-                <p className="text-emerald-100 text-xs mt-0.5">Student Account</p>
+                <p className="text-emerald-100 text-xs mt-0.5">User Account</p>
               </div>
 
               <div className="px-6 py-5 space-y-4">
@@ -96,10 +100,13 @@ export default async function AccountPage() {
                     <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
                     <span className="text-slate-500">
                       Joined{' '}
-                      {new Date(profile.created_at).toLocaleDateString('en-KE', {
-                        year: 'numeric',
-                        month: 'long',
-                      })}
+                      {new Date(profile.created_at).toLocaleDateString(
+                        'en-KE',
+                        {
+                          year: 'numeric',
+                          month: 'long',
+                        },
+                      )}
                     </span>
                   </div>
                 )}

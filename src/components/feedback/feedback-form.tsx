@@ -22,10 +22,11 @@ const CATEGORIES = [
 ] as const;
 
 const PLACEHOLDERS: Record<string, string> = {
-  suggest_hostel: 'Which hostel should we add? Name, location, anything you know...',
+  suggest_hostel:
+    'Which hostel should we add? Name, location, anything you know...',
   feature_request: 'What would make Rumia more useful for you?',
-  report_problem: 'Tell us what went wrong — broken link, wrong info, anything.',
-  general: 'Go for it — praise, ideas, whatever comes to mind.',
+  report_problem: 'Tell us what went wrong ,broken link, wrong info, anything.',
+  general: 'Go for it , praise, ideas, whatever comes to mind.',
 };
 
 export function FeedbackForm() {
@@ -109,7 +110,8 @@ export function FeedbackForm() {
 
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-slate-400">
-          {message.length > 0 && `${message.length} character${message.length === 1 ? '' : 's'}`}
+          {message.length > 0 &&
+            `${message.length} character${message.length === 1 ? '' : 's'}`}
         </span>
         <Button
           type="submit"
