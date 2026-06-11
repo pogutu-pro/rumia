@@ -8,17 +8,18 @@ import {
   LayoutDashboard,
   Building2,
   Plus,
-  ShieldAlert,
   LogOut,
   Menu,
   X,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { DashboardSwitcher } from '@/components/dashboard-switcher';
 
 export interface AgentSidebarProps {
   agentName: string;
   userEmail: string;
   isAdmin: boolean;
+  hasAgent?: boolean;
 }
 
 const navLinks = [
@@ -30,6 +31,7 @@ function SidebarContent({
   agentName,
   userEmail,
   isAdmin,
+  hasAgent = true,
   pathname,
   onNavigate,
   onSignOut,
@@ -78,16 +80,7 @@ function SidebarContent({
           New Listing
         </Link>
 
-        {isAdmin && (
-          <Link
-            href="/admin"
-            onClick={onNavigate}
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-medium mt-2"
-          >
-            <ShieldAlert className="h-4 w-4 shrink-0" />
-            Admin Panel
-          </Link>
-        )}
+        <DashboardSwitcher isAdmin={isAdmin} hasAgent={hasAgent} />
       </nav>
 
       {/* User / Logout */}
@@ -111,7 +104,7 @@ function SidebarContent({
   );
 }
 
-export function AgentSidebar({ agentName, userEmail, isAdmin }: AgentSidebarProps) {
+export function AgentSidebar({ agentName, userEmail, isAdmin, hasAgent = true }: AgentSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -131,6 +124,7 @@ export function AgentSidebar({ agentName, userEmail, isAdmin }: AgentSidebarProp
           agentName={agentName}
           userEmail={userEmail}
           isAdmin={isAdmin}
+          hasAgent={hasAgent}
           pathname={pathname}
           onNavigate={() => {}}
           onSignOut={handleSignOut}
@@ -179,6 +173,7 @@ export function AgentSidebar({ agentName, userEmail, isAdmin }: AgentSidebarProp
           agentName={agentName}
           userEmail={userEmail}
           isAdmin={isAdmin}
+          hasAgent={hasAgent}
           pathname={pathname}
           onNavigate={() => setOpen(false)}
           onSignOut={handleSignOut}

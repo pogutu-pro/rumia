@@ -263,6 +263,40 @@ export async function createCommissionAction(
 }
 
 /**
+ * Updates a user's profile role. Admins can promote agents to admin,
+ * or demote admins back to agent.
+ *
+ * Validates: Admin-only action
+ */
+export async function updateUserRoleAction(
+  userId: string,
+  newRole: 'student' | 'agent' | 'admin'
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole })
+      .eq('id', userId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Marks a commission as paid and records the paid timestamp.
  *
  * NOTE: The `commissions` table must have the `paid_at` column. If it doesn't

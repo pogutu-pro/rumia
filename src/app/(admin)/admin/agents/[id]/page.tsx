@@ -25,6 +25,16 @@ export default async function AgentDetailPage({ params }: AgentDetailPageProps) 
     redirect('/admin/agents');
   }
 
+  let role: string | undefined;
+  if (data.user_id) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user_id)
+      .maybeSingle();
+    role = profile?.role;
+  }
+
   const agent = {
     id: data.id as string,
     name: data.name as string,
@@ -32,6 +42,8 @@ export default async function AgentDetailPage({ params }: AgentDetailPageProps) 
     whatsapp: data.whatsapp as string,
     status: data.status as string,
     created_at: data.created_at as string,
+    user_id: data.user_id as string,
+    role: role as 'student' | 'agent' | 'admin' | undefined,
   };
 
   const listings = (data.listings ?? []) as Array<{

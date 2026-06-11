@@ -70,6 +70,7 @@ export interface AdminAgent {
   active_listings_count?: number;
   total_leads_count?: number;
   pending_commissions_sum?: number;
+  role?: 'student' | 'agent' | 'admin';
 }
 
 // Extended Commission with timestamps

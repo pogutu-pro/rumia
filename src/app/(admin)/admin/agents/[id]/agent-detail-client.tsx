@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   updateListingActiveAction,
   markCommissionPaidAction,
+  updateUserRoleAction,
 } from '@/app/actions/admin';
 
 interface AgentDetailClientProps {
@@ -16,6 +18,8 @@ interface AgentDetailClientProps {
     whatsapp: string;
     status: string;
     created_at: string;
+    user_id?: string;
+    role?: 'student' | 'agent' | 'admin';
   };
   listings: Array<{
     id: string;
@@ -42,6 +46,21 @@ interface AgentDetailClientProps {
 export function AgentDetailClient({ agent, listings, leads, commissions }: AgentDetailClientProps) {
   const router = useRouter();
 
+  const [promoting, setPromoting] = useState(false);
+
+  async function handleToggleRole() {
+    if (!agent.user_id) return;
+    const newRole = agent.role === 'admin' ? 'agent' : 'admin';
+    const label = newRole === 'admin' ? 'promote' : 'demote';
+    const confirmed = window.confirm(`Are you sure you want to ${label} this user?`);
+    if (!confirmed) return;
+    setPromoting(true);
+    const result = await updateUserRoleAction(agent.user_id, newRole);
+    setPromoting(false);
+    if (result.success) { toast.success(`User ${label}d to ${newRole}`); router.refresh(); }
+    else { toast.error(result.error); }
+  }
+
   async function handleToggleListing(listingId: string, currentActive: boolean) {
     const result = currentActive
       ? await updateListingActiveAction(listingId, false)
@@ -64,11 +83,31 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
       <div className="bg-white rounded-xl border border-gray-100 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{agent.name}</h1>
-          {agent.status === 'active' ? (
-            <span className="text-xs font-medium px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 self-start">Active</span>
-          ) : (
-            <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600 self-start">Suspended</span>
-          )}
+          <div className="flex items-center gap-2 flex-wrap self-start">
+            {agent.role === 'admin' ? (
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-purple-50 text-purple-700">Admin</span>
+            ) : (
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-700">Agent</span>
+            )}
+            {agent.status === 'active' ? (
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+            ) : (
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600">Suspended</span>
+            )}
+            {agent.user_id && (
+              <button
+                onClick={handleToggleRole}
+                disabled={promoting}
+                className={`text-xs font-medium px-3 py-1 rounded-full border transition-colors disabled:opacity-50 ${
+                  agent.role === 'admin'
+                    ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
+                    : 'border-purple-200 text-purple-700 hover:bg-purple-50'
+                }`}
+              >
+                {promoting ? '...' : agent.role === 'admin' ? 'Demote to Agent' : 'Promote to Admin'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[

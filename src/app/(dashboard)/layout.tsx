@@ -17,16 +17,17 @@ export default async function DashboardLayout({
 
   const isAdmin = await isAdminUser(supabase, user.id);
 
-  let agentName = user.email ?? '';
   const { data: agent } = await (supabase as any)
     .from('agents')
     .select('name')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (agent?.name) {
-    agentName = agent.name;
+  if (!agent) {
+    redirect('/account');
   }
+
+  let agentName = agent.name || user.email || '';
 
   return (
     <div className="flex h-screen bg-gray-50">
