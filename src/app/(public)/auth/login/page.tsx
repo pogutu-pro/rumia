@@ -116,10 +116,13 @@ export default function LoginPage() {
         return;
       }
 
-      if (
-        email.toLowerCase().includes('admin') ||
-        email.toLowerCase() === 'paul@rumia.co.ke'
-      ) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profile?.role === 'admin') {
         toast.success('Logged in as administrator');
         router.push('/admin');
         router.refresh();

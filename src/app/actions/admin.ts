@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { isAdminEmail } from '@/lib/utils/admin';
+import { isAdminUser } from '@/lib/utils/admin';
 import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
 import type { CreateAgentInput, CreateCommissionInput } from '@/types';
 
@@ -40,11 +40,13 @@ async function getAdminUser() {
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user || !user.email) {
+  if (error || !user) {
     return null;
   }
 
-  if (!isAdminEmail(user.email)) {
+  const isAdmin = await isAdminUser(supabase, user.id);
+
+  if (!isAdmin) {
     return null;
   }
 

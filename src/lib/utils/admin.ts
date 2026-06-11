@@ -1,20 +1,14 @@
-/**
- * Admin utility functions for Rumia Admin Panel.
- */
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-function getAdminEmails(): Set<string> {
-  return new Set(
-    (process.env.ADMIN_EMAILS ?? '')
-      .split(',')
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean)
-  );
-}
+export async function isAdminUser(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .maybeSingle();
 
-/**
- * Returns true if the given email belongs to an admin.
- * Validates: Requirements 1.3
- */
-export function isAdminEmail(email: string): boolean {
-  return getAdminEmails().has(email.trim().toLowerCase());
+  return profile?.role === 'admin';
 }

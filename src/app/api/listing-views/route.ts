@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { isAdminEmail } from '@/lib/utils/admin';
+import { isAdminUser } from '@/lib/utils/admin';
 
 async function sha256(value: string) {
   const encoder = new TextEncoder();
@@ -34,8 +34,11 @@ export async function POST(request: NextRequest) {
     let userId: string | null = user?.id || null;
     let shouldSkipTracking = false;
 
-    if (user?.email && isAdminEmail(user.email)) {
-      shouldSkipTracking = true;
+    if (user) {
+      const isAdmin = await isAdminUser(supabase, user.id);
+      if (isAdmin) {
+        shouldSkipTracking = true;
+      }
     }
 
     if (userId) {

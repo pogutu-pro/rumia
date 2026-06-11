@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AgentSidebar } from './agent-sidebar';
-import { isAdminEmail } from '@/lib/utils/admin';
+import { isAdminUser } from '@/lib/utils/admin';
 
 export default async function DashboardLayout({
   children,
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     redirect('/auth/login');
   }
 
-  const isAdmin = isAdminEmail(user.email ?? '');
+  const isAdmin = await isAdminUser(supabase, user.id);
 
   let agentName = user.email ?? '';
   const { data: agent } = await (supabase as any)

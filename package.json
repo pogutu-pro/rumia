@@ -11,8 +11,6 @@
     "dev": "NODE_OPTIONS='--no-deprecation' next dev",
     "build": "next build --webpack",
     "start": "NODE_OPTIONS='--no-deprecation' next start",
-    "seed:test": "tsx scripts/seed-test-data.ts",
-    "seed:test:cleanup": "tsx scripts/seed-test-data.ts --cleanup",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
     "test": "jest",
