@@ -12,6 +12,7 @@ import {
   AREA_OPTIONS,
   DISTANCE_CATEGORY_OPTIONS,
 } from '@/lib/constants/dekut-areas';
+import { compressImage } from '@/lib/utils/image';
 
 // Dynamically imported with ssr:false because @googlemaps/js-api-loader
 // references `window` at module-evaluation time, which crashes Next.js SSR.
@@ -301,12 +302,29 @@ export function NewListingForm({
 
     const files = Array.from(e.target.files);
     const newImages: UploadedImage[] = [...images];
+    let uploadedCount = 0;
 
     for (const file of files) {
       try {
-        // Fetch presigned URL from API
+        let uploadFile = file;
+        let fileType = file.type;
+        let fileName = file.name;
+
+        if (file.type.startsWith('image/')) {
+          const compressed = await compressImage(file, {
+            maxWidth: 1600,
+            quality: 0.8,
+            format: 'image/webp',
+          });
+          uploadFile = new File([compressed.blob], compressed.fileName, {
+            type: compressed.fileType,
+          });
+          fileType = compressed.fileType;
+          fileName = compressed.fileName;
+        }
+
         const urlResponse = await fetch(
-          `/api/upload-url?filename=${encodeURIComponent(file.name)}&filetype=${encodeURIComponent(file.type)}`,
+          `/api/upload-url?filename=${encodeURIComponent(fileName)}&filetype=${encodeURIComponent(fileType)}`,
         );
 
         if (!urlResponse.ok) {
@@ -315,13 +333,12 @@ export function NewListingForm({
 
         const { uploadUrl, publicUrl } = await urlResponse.json();
 
-        // Upload the file directly to R2 / Mock endpoint using PUT
         const uploadResponse = await fetch(uploadUrl, {
           method: 'PUT',
           headers: {
-            'Content-Type': file.type,
+            'Content-Type': fileType,
           },
-          body: file,
+          body: uploadFile,
         });
 
         if (!uploadResponse.ok) {
@@ -330,14 +347,18 @@ export function NewListingForm({
 
         newImages.push({
           url: publicUrl,
-          name: file.name,
+          name: fileName,
           category: 'Room',
         });
-        toast.success(`Uploaded: ${file.name}`);
+        uploadedCount++;
       } catch (error) {
         console.error('File upload error:', error);
         toast.error(`Failed to upload ${file.name}`);
       }
+    }
+
+    if (uploadedCount > 0) {
+      toast.success(`${uploadedCount} image${uploadedCount > 1 ? 's' : ''} uploaded successfully`);
     }
 
     setImages(newImages);

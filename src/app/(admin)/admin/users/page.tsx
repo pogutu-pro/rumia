@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { UsersTableClient } from './users-table-client';
 
 export interface UserRow {
@@ -17,14 +17,12 @@ export interface UserRow {
 }
 
 export default async function UsersPage() {
-  const supabase = await createClient();
-
-  const { data: profiles } = await supabase
+  const { data: profiles } = await supabaseAdmin
     .from('profiles')
     .select('id, email, full_name, avatar_url, phone, role, created_at, updated_at')
     .order('created_at', { ascending: false });
 
-  const { data: agents } = await supabase
+  const { data: agents } = await supabaseAdmin
     .from('agents')
     .select('user_id, name, status, slug');
 

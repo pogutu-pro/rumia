@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { LayoutGrid, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
 
 interface GalleryImage {
@@ -54,10 +55,13 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     <div className="relative w-full">
       {/* Mobile view slider */}
       <div className="md:hidden relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-        <img
+        <Image
           src={displayImages[mobileIndex]?.r2_url}
           alt={`Property image ${mobileIndex + 1}`}
-          className="object-cover w-full h-full"
+          fill
+          className="object-cover"
+          sizes="100vw"
+          priority={mobileIndex === 0}
           onClick={() => setIsModalOpen(true)}
         />
         
@@ -86,67 +90,78 @@ export function ImageGallery({ images }: ImageGalleryProps) {
       <div className="hidden md:grid grid-cols-4 gap-2 aspect-[21/9] w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 relative group">
         {displayImages.length === 1 ? (
           <div className="col-span-4 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-            <img src={displayImages[0].r2_url} alt="Property display" className="object-cover w-full h-full hover:scale-[1.01] transition-transform duration-500 cursor-pointer" />
+            <Image src={displayImages[0].r2_url} alt="Property display" fill className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer" sizes="100vw" priority />
           </div>
         ) : displayImages.length === 2 ? (
           <>
-            <div className="col-span-2 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img src={displayImages[0].r2_url} alt="Property display 1" className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer" />
+            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image src={displayImages[0].r2_url} alt="Property display 1" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority />
             </div>
-            <div className="col-span-2 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img src={displayImages[1].r2_url} alt="Property display 2" className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer" />
+            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image src={displayImages[1].r2_url} alt="Property display 2" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" />
             </div>
           </>
         ) : displayImages.length === 3 ? (
           <>
-            <div className="col-span-2 row-span-2 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img src={displayImages[0].r2_url} alt="Property display 1" className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer" />
+            <div className="col-span-2 row-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image src={displayImages[0].r2_url} alt="Property display 1" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority />
             </div>
-            <div className="col-span-2 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img src={displayImages[1].r2_url} alt="Property display 2" className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer" />
+            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image src={displayImages[1].r2_url} alt="Property display 2" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" />
             </div>
-            <div className="col-span-2 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img src={displayImages[2].r2_url} alt="Property display 3" className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer" />
+            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image src={displayImages[2].r2_url} alt="Property display 3" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" />
             </div>
           </>
         ) : (
           <>
             {/* Left large photo */}
-            <div className="col-span-2 row-span-2 h-full overflow-hidden relative" onClick={() => setIsModalOpen(true)}>
-              <img
+            <div className="col-span-2 row-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image
                 src={displayImages[0].r2_url}
                 alt="Property main display"
-                className="object-cover w-full h-full hover:scale-[1.01] transition-transform duration-500 cursor-pointer"
+                fill
+                className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
               />
             </div>
             {/* Top Right photos */}
-            <div className="col-span-1 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img
+            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image
                 src={displayImages[1]?.r2_url || fallbackImage}
                 alt="Property detail 1"
-                className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="(max-width: 768px) 100vw, 25vw"
               />
             </div>
-            <div className="col-span-1 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img
+            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image
                 src={displayImages[2]?.r2_url || fallbackImage}
                 alt="Property detail 2"
-                className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="(max-width: 768px) 100vw, 25vw"
               />
             </div>
             {/* Bottom Right photos */}
-            <div className="col-span-1 h-full overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <img
+            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image
                 src={displayImages[3]?.r2_url || fallbackImage}
                 alt="Property detail 3"
-                className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="(max-width: 768px) 100vw, 25vw"
               />
             </div>
-            <div className="col-span-1 h-full overflow-hidden relative" onClick={() => setIsModalOpen(true)}>
-              <img
+            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
+              <Image
                 src={displayImages[4]?.r2_url || displayImages[0].r2_url}
                 alt="Property detail 4"
-                className="object-cover w-full h-full hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="(max-width: 768px) 100vw, 25vw"
               />
             </div>
           </>

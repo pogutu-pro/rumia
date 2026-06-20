@@ -110,6 +110,9 @@ export async function generateMetadata({
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
   const ogImageUrl = `${canonicalUrl}/opengraph-image`;
   const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
+  const coverImage = listing.listing_images?.sort(
+    (a: any, b: any) => a.display_order - b.display_order,
+  )[0]?.r2_url;
 
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }];
 
