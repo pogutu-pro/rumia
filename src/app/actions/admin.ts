@@ -136,81 +136,7 @@ export async function createAgentAction(
     }
 
     revalidatePath('/admin/agents');
-    return { success: true };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unexpected error';
-    return { success: false, error: message };
-  }
-}
-
-/**
- * Updates an agent's status to 'active' or 'suspended'.
- *
- * Validates: Requirements 6.5, 6.6, 8.6
- */
-export async function updateAgentStatusAction(
-  agentId: string,
-  status: 'active' | 'suspended'
-): Promise<ActionResult> {
-  const user = await getAdminUser();
-  if (!user) {
-    return { success: false, error: 'Unauthorized' };
-  }
-
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from('agents')
-      .update({ status })
-      .eq('id', agentId);
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    revalidatePath('/admin/agents');
-    revalidatePath(`/admin/agents/${agentId}`);
-    return { success: true };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unexpected error';
-    return { success: false, error: message };
-  }
-}
-
-/**
- * Updates an agent's name, phone, and/or whatsapp.
- * Uses the service-role client to bypass RLS.
- */
-export async function updateAgentAction(
-  agentId: string,
-  data: { name?: string; phone?: string; whatsapp?: string }
-): Promise<ActionResult> {
-  const user = await getAdminUser();
-  if (!user) {
-    return { success: false, error: 'Unauthorized' };
-  }
-
-  try {
-    const updateData: Record<string, string> = {};
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.phone !== undefined) updateData.phone = normalizePhone(data.phone);
-    if (data.whatsapp !== undefined) updateData.whatsapp = normalizePhone(data.whatsapp);
-
-    if (Object.keys(updateData).length === 0) {
-      return { success: false, error: 'No fields to update' };
-    }
-
-    const { error } = await supabaseAdmin
-      .from('agents')
-      .update(updateData)
-      .eq('id', agentId);
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    revalidatePath('/admin/agents');
-    revalidatePath(`/admin/agents/${agentId}`);
+    revalidatePath('/admin/users');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error';
@@ -312,6 +238,61 @@ export async function createCommissionAction(
 
     revalidatePath('/admin/commissions');
     revalidatePath('/admin/leads');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Promotes an existing student to an agent by creating an agent record
+ * linked to their existing auth user. Does NOT create a new auth user.
+ */
+export async function promoteStudentToAgentAction(
+  userId: string,
+  data: { name: string; phone: string; whatsapp: string }
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const normalizedPhone = normalizePhone(data.phone);
+    const normalizedWhatsapp = normalizePhone(data.whatsapp);
+
+    const baseSlug = generateAgentSlug(data.name);
+    const slug = await uniqueSlug(baseSlug, async (s) => {
+      const { data: existing } = await supabaseAdmin.from('agents').select('id').eq('slug', s).maybeSingle();
+      return !!existing;
+    });
+
+    const { error: insertError } = await supabaseAdmin.from('agents').insert({
+      name: data.name,
+      phone: normalizedPhone,
+      whatsapp: normalizedWhatsapp,
+      user_id: userId,
+      status: 'active',
+      slug,
+    });
+
+    if (insertError) {
+      return { success: false, error: insertError.message ?? 'Failed to create agent record' };
+    }
+
+    // Also update profile role to 'agent'
+    const { error: roleError } = await supabaseAdmin
+      .from('profiles')
+      .update({ role: 'agent' })
+      .eq('id', userId);
+
+    if (roleError) {
+      return { success: false, error: roleError.message };
+    }
+
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/agents');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error';
