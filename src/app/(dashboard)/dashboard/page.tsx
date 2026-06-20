@@ -31,12 +31,13 @@ export default async function DashboardPage() {
 
   if (!agent) {
     // Attempt auto-creation of agent profile for developer/tester convenience
-    const agentName = user.email?.split('@')[0] || 'New Agent';
+    const displayName = user.user_metadata?.full_name || user.user_metadata?.name || null;
+    const agentName = displayName || 'New Agent';
     const { data: newAgent, error: createError } = await supabase
       .from('agents')
       .insert({
         user_id: user.id,
-        name: agentName.charAt(0).toUpperCase() + agentName.slice(1),
+        name: agentName,
         phone: '+254114845619',
         whatsapp: '+254114845619',
         commission_balance: 0,

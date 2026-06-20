@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import HostelsSearch from './hostels-search';
+import { createClient } from '@/lib/supabase/server';
+import HostelsSearch, { type Listing } from './hostels-search';
 
 export const metadata: Metadata = {
   title: 'Student Hostels Near DeKUT Nyeri — Search & Filter',
@@ -17,10 +18,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HostelsPage() {
+async function getInitialListings(): Promise<Listing[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('listings')
+    .select(
+      'id, title, description, price, location, slug, county, area, gender, specific_location, price_single, price_sharing, distance_category, listing_images(r2_url, display_order), agents(name)',
+    )
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  return (data as unknown as Listing[]) || [];
+}
+
+export default async function HostelsPage() {
+  const initialListings = await getInitialListings();
+
   return (
     <Suspense>
-      <HostelsSearch />
+      <HostelsSearch initialListings={initialListings} />
     </Suspense>
   );
 }

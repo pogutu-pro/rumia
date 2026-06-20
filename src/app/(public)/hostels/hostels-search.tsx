@@ -30,7 +30,7 @@ interface ActiveTag {
   removeWord: string;
 }
 
-interface Listing {
+export interface Listing {
   id: string;
   title: string;
   description: string;
@@ -292,13 +292,18 @@ function ListingSkeleton() {
 
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
-export default function HostelsPage() {
+interface HostelsSearchProps {
+  initialListings: Listing[];
+}
+
+export default function HostelsPage({ initialListings }: HostelsSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [query, setQuery] = useState(searchParams.get('q') ?? '');
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialQuery = searchParams.get('q') ?? '';
+  const [query, setQuery] = useState(initialQuery);
+  const [listings, setListings] = useState<Listing[]>(initialQuery ? [] : initialListings);
+  const [loading, setLoading] = useState(!!initialQuery);
 
   const debouncedQuery = useDebounce(query, 300);
   const filters = parseQuery(debouncedQuery);

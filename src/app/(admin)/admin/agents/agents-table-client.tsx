@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { updateAgentStatusAction, updateUserRoleAction } from '@/app/actions/admin';
 import type { AdminAgent } from '@/types';
 import { AddAgentSheet } from './add-agent-sheet';
+import { EditAgentSheet } from './[id]/edit-agent-sheet';
 
 interface AgentsTableClientProps {
   agents: AdminAgent[];
@@ -16,6 +17,7 @@ interface AgentsTableClientProps {
 export function AgentsTableClient({ agents }: AgentsTableClientProps) {
   const router = useRouter();
   const [addSheetOpen, setAddSheetOpen] = useState(false);
+  const [editAgent, setEditAgent] = useState<{ id: string; name: string; phone: string; whatsapp: string } | null>(null);
   const [pendingAgentId, setPendingAgentId] = useState<string | null>(null);
   const [pendingRoleId, setPendingRoleId] = useState<string | null>(null);
 
@@ -127,6 +129,12 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3 text-sm">
                     <Link href={`/admin/agents/${agent.id}`} className="text-emerald-600 hover:underline font-medium">View</Link>
+                    <button
+                      onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })}
+                      className="text-gray-500 hover:text-gray-700 hover:underline font-medium"
+                    >
+                      Edit
+                    </button>
                     {agent.status === 'active' ? (
                       <button onClick={() => handleSuspend(agent.id)} disabled={pendingAgentId === agent.id} className="text-red-500 hover:underline disabled:opacity-50">
                         {pendingAgentId === agent.id ? '...' : 'Suspend'}
@@ -184,6 +192,9 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
             </div>
             <div className="flex items-center gap-3 pt-1 flex-wrap">
               <Link href={`/admin/agents/${agent.id}`} className="text-xs font-medium text-emerald-600 hover:underline">View Profile</Link>
+              <button onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })} className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">
+                Edit
+              </button>
               {agent.role === 'admin' ? (
                 <button onClick={() => handleDemoteToAgent(agent.user_id, agent.id)} disabled={pendingRoleId === agent.id} className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
                   {pendingRoleId === agent.id ? '...' : 'Demote to Agent'}
@@ -208,6 +219,13 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
       </div>
 
       <AddAgentSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
+      {editAgent && (
+        <EditAgentSheet
+          open={!!editAgent}
+          onOpenChange={(open: boolean) => { if (!open) setEditAgent(null); }}
+          agent={editAgent}
+        />
+      )}
     </div>
   );
 }

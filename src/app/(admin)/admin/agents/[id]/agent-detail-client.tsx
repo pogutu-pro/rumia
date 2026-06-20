@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 import {
   updateListingActiveAction,
   markCommissionPaidAction,
   updateUserRoleAction,
 } from '@/app/actions/admin';
+import { EditAgentSheet } from './edit-agent-sheet';
 
 interface AgentDetailClientProps {
   agent: {
@@ -47,6 +49,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
   const router = useRouter();
 
   const [promoting, setPromoting] = useState(false);
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
 
   async function handleToggleRole() {
     if (!agent.user_id) return;
@@ -82,7 +85,16 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
       {/* Profile Header */}
       <div className="bg-white rounded-xl border border-gray-100 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{agent.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{agent.name}</h1>
+            <button
+              onClick={() => setEditSheetOpen(true)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              title="Edit agent details"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          </div>
           <div className="flex items-center gap-2 flex-wrap self-start">
             {agent.role === 'admin' ? (
               <span className="text-xs font-medium px-3 py-1 rounded-full bg-purple-50 text-purple-700">Admin</span>
@@ -259,6 +271,11 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
           </>
         )}
       </div>
+      <EditAgentSheet
+        open={editSheetOpen}
+        onOpenChange={setEditSheetOpen}
+        agent={{ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp }}
+      />
     </div>
   );
 }

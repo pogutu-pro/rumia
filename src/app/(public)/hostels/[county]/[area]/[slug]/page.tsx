@@ -111,7 +111,18 @@ export async function generateMetadata({
     (a: any, b: any) => a.display_order - b.display_order,
   )[0]?.r2_url;
   const previewImage = `${canonicalUrl}/opengraph-image`;
+  const fallbackImage = 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200';
   const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
+
+  const ogImages = coverImage
+    ? [
+        { url: coverImage, width: 1200, height: 630, alt: imageAlt },
+        { url: previewImage, width: 1200, height: 630, alt: imageAlt },
+      ]
+    : [
+        { url: previewImage, width: 1200, height: 630, alt: imageAlt },
+        { url: fallbackImage, width: 1200, height: 630, alt: 'Student hostel near DeKUT Nyeri' },
+      ];
 
   return {
     title,
@@ -123,18 +134,13 @@ export async function generateMetadata({
       url: canonicalUrl,
       siteName: 'Rumia',
       type: 'website',
-      images: [
-        { url: previewImage, width: 1200, height: 630, alt: imageAlt },
-        ...(coverImage
-          ? [{ url: coverImage, width: 1200, height: 630, alt: imageAlt }]
-          : []),
-      ],
+      images: ogImages,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [previewImage],
+      images: [coverImage || previewImage],
     },
   };
 }

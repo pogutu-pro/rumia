@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { isAdminUser } from '@/lib/utils/admin';
 import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
@@ -13,6 +14,20 @@ type ActionResult = { success: true } | { success: false; error: string };
  * Returns a Supabase admin client using the service role key.
  * Required for supabase.auth.admin.* operations.
  */
+function normalizePhone(raw: string): string {
+  const cleaned = raw.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('0') && cleaned.length > 1) {
+    return '+254' + cleaned.slice(1);
+  }
+  if (cleaned.startsWith('254') && !cleaned.startsWith('+')) {
+    return '+' + cleaned;
+  }
+  if (!cleaned.startsWith('+')) {
+    return '+254' + cleaned;
+  }
+  return cleaned;
+}
+
 function getAdminSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -91,20 +106,21 @@ export async function createAgentAction(
       };
     }
 
-    // Auth user created — now insert the agent row
-    const supabase = await createClient();
+    // Auth user created — now insert the agent row (use admin client to bypass RLS)
+    const normalizedPhone = normalizePhone(data.phone);
+    const normalizedWhatsapp = normalizePhone(data.whatsapp);
 
     // Generate unique slug from agent name
     const baseSlug = generateAgentSlug(data.name);
     const slug = await uniqueSlug(baseSlug, async (s) => {
-      const { data: existing } = await supabase.from('agents').select('id').eq('slug', s).maybeSingle();
+      const { data: existing } = await supabaseAdmin.from('agents').select('id').eq('slug', s).maybeSingle();
       return !!existing;
     });
 
-    const { error: insertError } = await supabase.from('agents').insert({
+    const { error: insertError } = await supabaseAdmin.from('agents').insert({
       name: data.name,
-      phone: data.phone,
-      whatsapp: data.whatsapp,
+      phone: normalizedPhone,
+      whatsapp: normalizedWhatsapp,
       user_id: authData.user.id,
       status: 'active',
       slug,
@@ -146,6 +162,47 @@ export async function updateAgentStatusAction(
     const { error } = await supabase
       .from('agents')
       .update({ status })
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath(`/admin/agents/${agentId}`);
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Updates an agent's name, phone, and/or whatsapp.
+ * Uses the service-role client to bypass RLS.
+ */
+export async function updateAgentAction(
+  agentId: string,
+  data: { name?: string; phone?: string; whatsapp?: string }
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const updateData: Record<string, string> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.phone !== undefined) updateData.phone = normalizePhone(data.phone);
+    if (data.whatsapp !== undefined) updateData.whatsapp = normalizePhone(data.whatsapp);
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: 'No fields to update' };
+    }
+
+    const { error } = await supabaseAdmin
+      .from('agents')
+      .update(updateData)
       .eq('id', agentId);
 
     if (error) {
