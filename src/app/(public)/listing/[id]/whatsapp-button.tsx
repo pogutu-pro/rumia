@@ -70,7 +70,7 @@ export function WhatsappButton({
       className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 hover:scale-[1.01] text-white font-bold rounded-xl transition-all duration-300 shadow-md shadow-emerald-600/10 flex items-center justify-center gap-2 border-0"
     >
       <MessageCircle className="h-5 w-5 fill-current" />
-      {isLoading ? 'Connecting...' : 'Check Availability on WhatsApp'}
+      {isLoading ? 'Connecting...' : 'Book a Tour'}
     </Button>
   );
 }
