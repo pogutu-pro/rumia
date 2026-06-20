@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin', '/dashboard', '/api/'],
       },
     ],
-    sitemap: 'https://rumia.co.ke/sitemap.xml',
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke'}/sitemap.xml`,
   };
 }

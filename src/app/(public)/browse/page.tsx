@@ -8,11 +8,13 @@ import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 0;
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+
 export const metadata: Metadata = {
   title: 'Browse Student Hostels Near DeKUT',
   description:
     'Browse all verified student hostels near Dedan Kimathi University of Technology in Nyeri, Kenya. Filter by price and location.',
-  alternates: { canonical: 'https://rumia.co.ke/browse' },
+  alternates: { canonical: `${baseUrl}/browse` },
 };
 
 interface PageProps {

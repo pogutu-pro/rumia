@@ -327,6 +327,78 @@ export async function updateUserRoleAction(
     }
 
     revalidatePath('/admin/agents');
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Updates an agent's status to 'active' or 'suspended'.
+ */
+export async function updateAgentStatusAction(
+  agentId: string,
+  status: 'active' | 'suspended'
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('agents')
+      .update({ status })
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath(`/admin/agents/${agentId}`);
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Updates an agent's name, phone, and/or whatsapp.
+ */
+export async function updateAgentAction(
+  agentId: string,
+  data: { name?: string; phone?: string; whatsapp?: string }
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const updateData: Record<string, string> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.phone !== undefined) updateData.phone = normalizePhone(data.phone);
+    if (data.whatsapp !== undefined) updateData.whatsapp = normalizePhone(data.whatsapp);
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: 'No fields to update' };
+    }
+
+    const { error } = await supabaseAdmin
+      .from('agents')
+      .update(updateData)
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath(`/admin/agents/${agentId}`);
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error';

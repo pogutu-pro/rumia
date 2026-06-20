@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     icon: [{ url: '/images/logo/logo.svg', type: 'image/svg+xml' }],
   },
   alternates: {
-    canonical: 'https://rumia.co.ke',
+    canonical: process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke',
   },
 };
 

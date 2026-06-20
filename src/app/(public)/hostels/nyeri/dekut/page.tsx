@@ -7,7 +7,8 @@ import { JsonLd } from '@/components/seo/json-ld';
 
 export const revalidate = 3600;
 
-const CANONICAL = 'https://rumia.co.ke/hostels/nyeri/dekut';
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+const CANONICAL = `${BASE}/hostels/nyeri/dekut`;
 
 export const metadata: Metadata = {
   title: 'Student Hostels Near DeKUT Nyeri — Browse Verified Rooms',
@@ -42,7 +43,7 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Rumia',
-  url: 'https://rumia.co.ke',
+  url: BASE,
   description: 'Verified student hostel listings near universities in Kenya.',
   areaServed: { '@type': 'City', name: 'Nyeri', addressCountry: 'KE' },
 };

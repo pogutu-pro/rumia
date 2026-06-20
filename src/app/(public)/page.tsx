@@ -9,16 +9,18 @@ import { JsonLd } from '@/components/seo/json-ld';
 
 export const revalidate = 0;
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+
 export const metadata: Metadata = {
   title: 'Find Student Hostels Near DeKUT Nyeri',
   description:
     'Discover verified student hostels near Dedan Kimathi University of Technology, Nyeri. Browse self-contained & shared rooms. Contact agents directly on WhatsApp.',
-  alternates: { canonical: 'https://rumia.co.ke' },
+  alternates: { canonical: baseUrl },
   openGraph: {
     title: 'Find Student Hostels Near DeKUT Nyeri | Rumia',
     description:
       'Discover verified student hostels near Dedan Kimathi University of Technology, Nyeri. Browse self-contained & shared rooms. Contact agents directly on WhatsApp.',
-    url: 'https://rumia.co.ke',
+    url: baseUrl,
     siteName: 'Rumia',
     type: 'website',
   },
@@ -34,7 +36,7 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Rumia',
-  url: 'https://rumia.co.ke',
+  url: baseUrl,
   description:
     'Verified student hostel listings near Dedan Kimathi University of Technology, Nyeri, Kenya.',
   areaServed: { '@type': 'City', name: 'Nyeri', addressCountry: 'KE' },

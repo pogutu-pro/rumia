@@ -3,16 +3,18 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import HostelsSearch, { type Listing } from './hostels-search';
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+
 export const metadata: Metadata = {
   title: 'Student Hostels Near DeKUT Nyeri — Search & Filter',
   description:
     'Search verified student hostels near Dedan Kimathi University of Technology in Nyeri. Filter by price, gender, room type, and amenities in real time.',
-  alternates: { canonical: 'https://rumia.co.ke/hostels' },
+  alternates: { canonical: `${baseUrl}/hostels` },
   openGraph: {
     title: 'Student Hostels Near DeKUT Nyeri | Rumia',
     description:
       'Search verified student hostels near DeKUT in Nyeri. Filter by price, gender, room type, and amenities instantly.',
-    url: 'https://rumia.co.ke/hostels',
+    url: `${baseUrl}/hostels`,
     siteName: 'Rumia',
     type: 'website',
   },

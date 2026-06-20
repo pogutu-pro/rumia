@@ -30,7 +30,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${agent.name} — Student Hostel Agent Near DeKUT`;
   const description = `View all verified student hostel listings by ${agent.name} near Dedan Kimathi University in Nyeri, Kenya. Contact directly on WhatsApp.`;
-  const canonical = `https://rumia.co.ke/agents/${slug}`;
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+  const canonical = `${metadataBase}/agents/${slug}`;
 
   return {
     title,

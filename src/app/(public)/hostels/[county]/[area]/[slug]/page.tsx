@@ -106,23 +106,12 @@ export async function generateMetadata({
       0,
       155,
     );
-  const canonicalUrl = `https://rumia.co.ke/hostels/${county}/${area}/${slug}`;
-  const coverImage = listing.listing_images?.sort(
-    (a: any, b: any) => a.display_order - b.display_order,
-  )[0]?.r2_url;
-  const previewImage = `${canonicalUrl}/opengraph-image`;
-  const fallbackImage = 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+  const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
+  const ogImageUrl = `${canonicalUrl}/opengraph-image`;
   const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
 
-  const ogImages = coverImage
-    ? [
-        { url: coverImage, width: 1200, height: 630, alt: imageAlt },
-        { url: previewImage, width: 1200, height: 630, alt: imageAlt },
-      ]
-    : [
-        { url: previewImage, width: 1200, height: 630, alt: imageAlt },
-        { url: fallbackImage, width: 1200, height: 630, alt: 'Student hostel near DeKUT Nyeri' },
-      ];
+  const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }];
 
   return {
     title,
@@ -140,7 +129,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: [coverImage || previewImage],
+      images: [ogImageUrl],
     },
   };
 }
@@ -153,7 +142,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const images = (listing.listing_images || []).sort(
     (a: any, b: any) => a.display_order - b.display_order,
   );
-  const canonicalUrl = `https://rumia.co.ke/hostels/${county}/${area}/${slug}`;
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+  const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
   const shareText = [
     `${listing.room_type || listing.listing_room_types?.[0]?.room_type || 'Student hostel'} from KES ${listing.price.toLocaleString()}/month`,
     listing.distance_to_campus
@@ -201,7 +191,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
           '@type': 'Person',
           name: listing.agents.name,
           url: agentSlug
-            ? `https://rumia.co.ke/agents/${agentSlug}`
+            ? `${metadataBase}/agents/${agentSlug}`
             : undefined,
         }
       : undefined,
