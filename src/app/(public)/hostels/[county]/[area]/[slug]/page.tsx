@@ -108,11 +108,11 @@ export async function generateMetadata({
     );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
-  const ogImageUrl = `${canonicalUrl}/opengraph-image`;
-  const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
   const coverImage = listing.listing_images?.sort(
     (a: any, b: any) => a.display_order - b.display_order,
   )[0]?.r2_url;
+  const ogImageUrl = coverImage || `${metadataBase}/og-default.png`;
+  const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
 
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }];
 
