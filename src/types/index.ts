@@ -37,6 +37,7 @@ export interface ListingImage {
   listing_id: string | number;
   r2_url: string;
   display_order: number;
+  category?: string | null;
 }
 
 export interface Lead {

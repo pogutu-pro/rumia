@@ -47,7 +47,7 @@ const getListing = cache(async (slug: string) => {
       security_type, electricity_included, water_included, wifi_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category,
-      listing_images ( id, r2_url, display_order ),
+      listing_images ( id, r2_url, category, display_order ),
       agents ( id, name, phone, whatsapp, slug )
     `,
     )
@@ -108,10 +108,7 @@ export async function generateMetadata({
     );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
-  const coverImage = listing.listing_images?.sort(
-    (a: any, b: any) => a.display_order - b.display_order,
-  )[0]?.r2_url;
-  const ogImageUrl = coverImage || `${metadataBase}/og-default.png`;
+  const ogImageUrl = `${metadataBase}/api/og?slug=${encodeURIComponent(slug)}`;
   const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
 
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }];
