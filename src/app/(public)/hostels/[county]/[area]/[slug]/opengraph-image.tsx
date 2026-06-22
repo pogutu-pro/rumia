@@ -31,6 +31,15 @@ export default async function ListingOgImage({ params }: Props) {
     const images = (listing?.listing_images ?? []).sort((a: any, b: any) => a.display_order - b.display_order);
     const coverUrl = images[0]?.r2_url ?? null;
 
+    // Unified Solution: Pass the raw image through next/image proxy first.
+    // This solves two massive problems:
+    // 1. Converts unsupported formats like .webp to .jpeg so Satori/ImageResponse doesn't crash.
+    // 2. Shrinks 3MB+ raw images to ~100KB *before* generating the PNG, speeding up generation.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+    const optimizedUrl = coverUrl 
+      ? `${appUrl}/_next/image?url=${encodeURIComponent(coverUrl)}&w=640&q=75` 
+      : null;
+
     return new ImageResponse(
       (
         <div
@@ -45,10 +54,10 @@ export default async function ListingOgImage({ params }: Props) {
             backgroundColor: '#0f172a',
           }}
         >
-          {coverUrl && (
+          {optimizedUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={coverUrl}
+              src={optimizedUrl}
               alt=""
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
             />
