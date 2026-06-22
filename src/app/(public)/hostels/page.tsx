@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import HostelsSearch, { type Listing } from './hostels-search';
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
 export const metadata: Metadata = {
   title: 'Student Hostels Near DeKUT Nyeri — Search & Filter',

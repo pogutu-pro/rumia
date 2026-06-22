@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 
 export const revalidate = 3600;
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 const CANONICAL = `${BASE}/hostels/nyeri/dekut`;
 
 export const metadata: Metadata = {

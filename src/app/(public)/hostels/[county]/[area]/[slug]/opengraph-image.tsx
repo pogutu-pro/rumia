@@ -2,8 +2,9 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'nodejs';
 export const alt = 'Hostel listing preview';
-export const size = { width: 1200, height: 630 };
-export const contentType = 'image/png';
+// Smaller canvas + JPEG keeps output well under WhatsApp's 300 KB og:image limit
+export const size = { width: 800, height: 420 };
+export const contentType = 'image/jpeg';
 
 interface Props {
   params: Promise<{ county: string; area: string; slug: string }>;
@@ -14,10 +15,11 @@ export default async function ListingOgImage({ params }: Props) {
     const { slug } = await params;
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    // Use service-role key so RLS on listing_images never blocks the join
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/listings?slug=eq.${encodeURIComponent(slug)}&select=title,price,location,listing_images(r2_url,display_order)&limit=1`,
+      `${supabaseUrl}/rest/v1/listings?slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&select=title,price,location,listing_images(r2_url,display_order)&limit=1`,
       { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
     );
     const rows = res.ok ? await res.json() : [];
@@ -60,30 +62,30 @@ export default async function ListingOgImage({ params }: Props) {
             }}
           />
 
-          <div style={{ position: 'relative', padding: '48px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          <div style={{ position: 'relative', padding: '32px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
               {`Student Hostel · ${location}`}
             </div>
-            <div style={{ fontSize: '52px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '800px' }}>
+            <div style={{ fontSize: '36px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '600px' }}>
               {title}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
               {price && (
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
               )}
-              <div style={{ fontSize: '18px', color: '#94a3b8', fontWeight: 600 }}>Near DeKUT · Nyeri</div>
+              <div style={{ fontSize: '15px', color: '#94a3b8', fontWeight: 600 }}>Near DeKUT · Nyeri</div>
             </div>
           </div>
 
           <div
             style={{
               position: 'absolute',
-              top: '40px',
-              right: '48px',
+              top: '28px',
+              right: '32px',
               background: 'rgba(255,255,255,0.95)',
-              borderRadius: '12px',
-              padding: '10px 20px',
-              fontSize: '22px',
+              borderRadius: '10px',
+              padding: '8px 16px',
+              fontSize: '18px',
               fontWeight: 900,
               color: '#0f172a',
               letterSpacing: '-0.5px',
@@ -111,13 +113,13 @@ export default async function ListingOgImage({ params }: Props) {
             padding: '48px',
           }}
         >
-          <div style={{ fontSize: '64px', fontWeight: 900, color: '#34d399', marginBottom: '16px' }}>
+          <div style={{ fontSize: '52px', fontWeight: 900, color: '#34d399', marginBottom: '12px' }}>
             RUMIA
           </div>
-          <div style={{ fontSize: '32px', fontWeight: 700, color: '#ffffff', textAlign: 'center' }}>
+          <div style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff', textAlign: 'center' }}>
             Student Hostels Near DeKUT
           </div>
-          <div style={{ fontSize: '20px', color: '#94a3b8', marginTop: '12px' }}>
+          <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '10px' }}>
             Nyeri, Kenya
           </div>
         </div>

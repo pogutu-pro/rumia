@@ -106,13 +106,8 @@ export async function generateMetadata({
       0,
       155,
     );
-  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
-  const ogImageUrl = `${metadataBase}/api/og?slug=${encodeURIComponent(slug)}`;
-  const imageAlt = `${listing.title} — student hostel near DeKUT Nyeri`;
-
-  const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }];
-
   return {
     title,
     description,
@@ -123,13 +118,13 @@ export async function generateMetadata({
       url: canonicalUrl,
       siteName: 'Rumia',
       type: 'website',
-      images: ogImages,
+      // og:image is injected automatically from opengraph-image.tsx in this route segment
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImageUrl],
+      // twitter:image is also auto-wired from opengraph-image.tsx
     },
   };
 }
@@ -142,7 +137,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const images = (listing.listing_images || []).sort(
     (a: any, b: any) => a.display_order - b.display_order,
   );
-  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
   const shareText = [
     `${listing.room_type || listing.listing_room_types?.[0]?.room_type || 'Student hostel'} from KES ${listing.price.toLocaleString()}/month`,

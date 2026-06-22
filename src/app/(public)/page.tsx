@@ -9,7 +9,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 
 export const revalidate = 0;
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
 export const metadata: Metadata = {
   title: 'Find Student Hostels Near DeKUT Nyeri',
