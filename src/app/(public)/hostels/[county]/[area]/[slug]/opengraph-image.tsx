@@ -3,8 +3,8 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'nodejs';
 export const alt = 'Hostel listing preview';
 // Smaller canvas + JPEG keeps output well under WhatsApp's 300 KB og:image limit
-export const size = { width: 800, height: 420 };
-export const contentType = 'image/jpeg';
+export const size = { width: 600, height: 315 };
+export const contentType = 'image/png';
 
 interface Props {
   params: Promise<{ county: string; area: string; slug: string }>;
@@ -62,30 +62,30 @@ export default async function ListingOgImage({ params }: Props) {
             }}
           />
 
-          <div style={{ position: 'relative', padding: '32px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          <div style={{ position: 'relative', padding: '24px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
               {`Student Hostel · ${location}`}
             </div>
-            <div style={{ fontSize: '36px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '600px' }}>
+            <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '480px' }}>
               {title}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '2px' }}>
               {price && (
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
               )}
-              <div style={{ fontSize: '15px', color: '#94a3b8', fontWeight: 600 }}>Near DeKUT · Nyeri</div>
+              <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>Near DeKUT · Nyeri</div>
             </div>
           </div>
 
           <div
             style={{
               position: 'absolute',
-              top: '28px',
-              right: '32px',
+              top: '20px',
+              right: '24px',
               background: 'rgba(255,255,255,0.95)',
-              borderRadius: '10px',
-              padding: '8px 16px',
-              fontSize: '18px',
+              borderRadius: '8px',
+              padding: '6px 12px',
+              fontSize: '14px',
               fontWeight: 900,
               color: '#0f172a',
               letterSpacing: '-0.5px',
@@ -113,13 +113,13 @@ export default async function ListingOgImage({ params }: Props) {
             padding: '48px',
           }}
         >
-          <div style={{ fontSize: '52px', fontWeight: 900, color: '#34d399', marginBottom: '12px' }}>
+          <div style={{ fontSize: '42px', fontWeight: 900, color: '#34d399', marginBottom: '8px' }}>
             RUMIA
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff', textAlign: 'center' }}>
+          <div style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', textAlign: 'center' }}>
             Student Hostels Near DeKUT
           </div>
-          <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '10px' }}>
+          <div style={{ fontSize: '14px', color: '#94a3b8', marginTop: '8px' }}>
             Nyeri, Kenya
           </div>
         </div>
