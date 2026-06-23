@@ -6,7 +6,6 @@ import {
   Pin,
   APIProvider,
   useApiIsLoaded,
-  useMapsLibrary,
 } from '@vis.gl/react-google-maps';
 import { Compass, Eye } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -49,7 +48,7 @@ export function LocationSection({
         </h2>
 
         <div className="h-80 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-100">
-          <APIProvider apiKey={apiKey}>
+          <APIProvider apiKey={apiKey} libraries={['streetView']}>
             <Map
               defaultCenter={{ lat, lng }}
               defaultZoom={14}
@@ -83,7 +82,6 @@ export function LocationSection({
 
 function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
   const isLoaded = useApiIsLoaded();
-  const streetViewLib = useMapsLibrary('streetView');
   const streetViewRef = useRef<HTMLDivElement>(null);
   const panoramaRef = useRef<google.maps.StreetViewPanorama | null>(null);
   const [status, setStatus] = useState<
@@ -92,7 +90,7 @@ function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
   const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded || !streetViewLib) return;
+    if (!isLoaded) return;
 
     const container = streetViewRef.current;
     if (!container) return;
@@ -152,7 +150,7 @@ function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
         panoramaRef.current = null;
       }
     };
-  }, [isLoaded, lat, lng, useFallback, streetViewLib]);
+  }, [isLoaded, lat, lng, useFallback]);
 
   if (status === 'unavailable') return null;
 

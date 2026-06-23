@@ -70,7 +70,7 @@ export default function RumiVideo({
 
   // Extract YouTube ID
   const youtubeId = url.match(
-    /(?:youtube\.com.*v=|youtu\.be\/|youtube\.com\/embed\/)([^&#?]+)/i,
+    /(?:youtube\.com.*(?:v=|embed\/|shorts\/)|youtu\.be\/)([^&#?]+)/i,
   )?.[1];
 
   // Generate embed URL
