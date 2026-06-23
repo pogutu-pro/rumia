@@ -6,6 +6,7 @@ import {
   Pin,
   APIProvider,
   useApiIsLoaded,
+  useMapsLibrary,
 } from '@vis.gl/react-google-maps';
 import { Compass, Eye } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -82,14 +83,16 @@ export function LocationSection({
 
 function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
   const isLoaded = useApiIsLoaded();
+  const streetViewLib = useMapsLibrary('streetView');
   const streetViewRef = useRef<HTMLDivElement>(null);
   const panoramaRef = useRef<google.maps.StreetViewPanorama | null>(null);
   const [status, setStatus] = useState<
     'loading' | 'available' | 'unavailable'
   >('loading');
+  const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !streetViewLib) return;
 
     const container = streetViewRef.current;
     if (!container) return;
@@ -97,55 +100,48 @@ function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
     setStatus('loading');
 
     const sv = new google.maps.StreetViewService();
-    const listingLocation = new google.maps.LatLng(lat, lng);
+    const location = new google.maps.LatLng(
+      useFallback ? DEFAULT_STREETVIEW_LAT : lat,
+      useFallback ? DEFAULT_STREETVIEW_LNG : lng,
+    );
 
-    const tryPanorama = (coords: google.maps.LatLng) => {
-      sv.getPanorama(
-        {
-          location: coords,
-          radius: 50,
-          preference: google.maps.StreetViewPreference.NEAREST,
-        },
-        (data, statusCode) => {
-          if (
-            statusCode === google.maps.StreetViewStatus.OK &&
-            data?.location?.latLng &&
-            streetViewRef.current
-          ) {
-            setStatus('available');
-            panoramaRef.current = new google.maps.StreetViewPanorama(
-              streetViewRef.current,
-              {
-                position: data.location.latLng,
-                pov: { heading: 165, pitch: 0 },
-                zoom: 1,
-                addressControl: false,
-                showRoadLabels: true,
-                motionTracking: false,
-                motionTrackingControl: false,
-                zoomControl: false,
-                panControl: false,
-                enableCloseButton: false,
-                linksControl: false,
-                fullscreenControl: false,
-              },
-            );
-          } else {
-            const defaultCoords = new google.maps.LatLng(
-              DEFAULT_STREETVIEW_LAT,
-              DEFAULT_STREETVIEW_LNG,
-            );
-            if (coords.toString() !== defaultCoords.toString()) {
-              tryPanorama(defaultCoords);
-            } else {
-              setStatus('unavailable');
-            }
-          }
-        },
-      );
-    };
-
-    tryPanorama(listingLocation);
+    sv.getPanorama(
+      {
+        location,
+        radius: 50,
+        preference: google.maps.StreetViewPreference.NEAREST,
+      },
+      (data, statusCode) => {
+        if (
+          statusCode === google.maps.StreetViewStatus.OK &&
+          data?.location?.latLng &&
+          streetViewRef.current
+        ) {
+          setStatus('available');
+          panoramaRef.current = new google.maps.StreetViewPanorama(
+            streetViewRef.current,
+            {
+              position: data.location.latLng,
+              pov: { heading: 165, pitch: 0 },
+              zoom: 1,
+              addressControl: false,
+              showRoadLabels: true,
+              motionTracking: false,
+              motionTrackingControl: false,
+              zoomControl: false,
+              panControl: false,
+              enableCloseButton: false,
+              linksControl: false,
+              fullscreenControl: false,
+            },
+          );
+        } else if (!useFallback) {
+          setUseFallback(true);
+        } else {
+          setStatus('unavailable');
+        }
+      },
+    );
 
     return () => {
       if (panoramaRef.current) {
@@ -156,7 +152,7 @@ function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
         panoramaRef.current = null;
       }
     };
-  }, [isLoaded, lat, lng]);
+  }, [isLoaded, lat, lng, useFallback, streetViewLib]);
 
   if (status === 'unavailable') return null;
 
