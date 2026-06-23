@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { filterListings } from '@/lib/utils/admin-filters';
 import { updateListingActiveAction, deleteListingAction } from '@/app/actions/admin';
+import { TransferOwnershipModal } from './transfer-ownership-modal';
 
 interface ListingRow {
   id: string;
@@ -23,7 +24,7 @@ interface ListingRow {
 
 interface ListingsTableClientProps {
   listings: ListingRow[];
-  agents: Array<{ id: string; name: string }>;
+  agents: Array<{ id: string; name: string; status: string }>;
 }
 
 const PAGE_SIZE = 20;
@@ -35,6 +36,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
   const [locationFilter, setLocationFilter] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [transferListing, setTransferListing] = useState<ListingRow | null>(null);
 
   const hasActiveFilters = agentFilter !== '' || statusFilter !== 'all' || locationFilter !== '';
 
@@ -126,6 +128,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                       className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
                       {listing.is_active ? 'Deactivate' : 'Activate'}
                     </button>
+                    <button onClick={() => setTransferListing(listing)} className="text-indigo-600 font-medium hover:underline">Transfer</button>
                     <button onClick={() => handleDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 font-medium hover:underline disabled:opacity-50">Delete</button>
                   </div>
                 </td>
@@ -166,6 +169,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                 className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
                 {listing.is_active ? 'Deactivate' : 'Activate'}
               </button>
+              <button onClick={() => setTransferListing(listing)} className="text-indigo-600 hover:underline">Transfer</button>
               <button onClick={() => handleDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 hover:underline disabled:opacity-50">Delete</button>
             </div>
           </div>
@@ -177,6 +181,13 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
           <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)} className="rounded-xl">Load More</Button>
         </div>
       )}
+
+      <TransferOwnershipModal
+        open={!!transferListing}
+        onOpenChange={(open) => { if (!open) setTransferListing(null); }}
+        listing={transferListing ? { id: transferListing.id, title: transferListing.title, agent_name: transferListing.agent_name, agent_id: transferListing.agent_id } : null}
+        agents={agents}
+      />
     </div>
   );
 }

@@ -445,3 +445,81 @@ export async function markCommissionPaidAction(
     return { success: false, error: message };
   }
 }
+
+/**
+ * Transfers a hostel listing from its current owner to a new agent.
+ * Records the transfer in transfer_history for audit trail.
+ */
+export async function transferListingAction(
+  listingId: string,
+  newOwnerId: string
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    // Validate: new owner must be an active agent
+    const { data: newOwner, error: ownerError } = await supabaseAdmin
+      .from('agents')
+      .select('id, name, status')
+      .eq('id', newOwnerId)
+      .single();
+
+    if (ownerError || !newOwner) {
+      return { success: false, error: 'Selected agent not found' };
+    }
+
+    if (newOwner.status !== 'active') {
+      return { success: false, error: 'Cannot transfer to a suspended or inactive agent' };
+    }
+
+    // Get current listing to find previous owner
+    const { data: listing, error: listingError } = await supabaseAdmin
+      .from('listings')
+      .select('id, agent_id')
+      .eq('id', listingId)
+      .single();
+
+    if (listingError || !listing) {
+      return { success: false, error: 'Listing not found' };
+    }
+
+    // Prevent transfer to same owner
+    if (listing.agent_id === newOwnerId) {
+      return { success: false, error: 'Listing already belongs to this agent' };
+    }
+
+    // Update listing ownership (only agent_id changes, all other data preserved)
+    const { error: updateError } = await supabaseAdmin
+      .from('listings')
+      .update({ agent_id: newOwnerId })
+      .eq('id', listingId);
+
+    if (updateError) {
+      return { success: false, error: updateError.message };
+    }
+
+    // Record audit trail
+    const { error: historyError } = await supabaseAdmin
+      .from('transfer_history')
+      .insert({
+        listing_id: listingId,
+        previous_owner_id: listing.agent_id,
+        new_owner_id: newOwnerId,
+        transferred_by: user.id,
+      });
+
+    if (historyError) {
+      console.error('Failed to record transfer history:', historyError);
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}

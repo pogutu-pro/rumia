@@ -99,6 +99,19 @@ export interface AdminLead {
   agents?: { name: string; id: string } | null;
 }
 
+export interface TransferHistory {
+  id: string;
+  listing_id: string;
+  previous_owner_id: string;
+  new_owner_id: string;
+  transferred_by: string;
+  transferred_at: string;
+  // Join fields
+  previous_owner?: { name: string } | null;
+  new_owner?: { name: string } | null;
+  listing?: { title: string } | null;
+}
+
 export interface CreateAgentInput {
   name: string;
   phone: string;

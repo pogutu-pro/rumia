@@ -13,7 +13,7 @@ export default async function ListingsPage() {
 
   const { data: agentsRaw } = await (supabase as any)
     .from('agents')
-    .select('id, name')
+    .select('id, name, status')
     .order('name');
 
   const listings = (listingsRaw ?? []).map((listing: any) => {
@@ -36,8 +36,8 @@ export default async function ListingsPage() {
     };
   });
 
-  const agents: Array<{ id: string; name: string }> = (agentsRaw ?? []).map(
-    (a: any) => ({ id: a.id, name: a.name })
+  const agents: Array<{ id: string; name: string; status: string }> = (agentsRaw ?? []).map(
+    (a: any) => ({ id: a.id, name: a.name, status: a.status })
   );
 
   return <ListingsTableClient listings={listings} agents={agents} />;

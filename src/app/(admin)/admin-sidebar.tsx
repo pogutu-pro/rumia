@@ -13,6 +13,7 @@ import {
   MousePointerClick,
   DollarSign,
   MessageSquare,
+  ArrowLeftRight,
   LogOut,
   Menu,
   X,
@@ -35,6 +36,7 @@ const navLinks = [
   { label: 'Listings', href: '/admin/listings', icon: Building2, exact: false },
   { label: 'Leads', href: '/admin/leads', icon: MousePointerClick, exact: false },
   { label: 'Commissions', href: '/admin/commissions', icon: DollarSign, exact: false },
+  { label: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight, exact: false },
   { label: 'Feedback', href: '/admin/feedback', icon: MessageSquare, exact: false },
 ];
 
