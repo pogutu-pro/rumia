@@ -434,15 +434,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
 
             {listing.youtube_id && <hr className="border-slate-100" />}
 
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-3">
-              <h2 className="text-lg font-bold text-slate-900">
-                Student Reviews
-              </h2>
-              <p className="text-sm font-semibold text-slate-500 leading-normal">
-                Reviews are currently being verified for authenticity. They will
-                appear here once complete.
-              </p>
-            </div>
           </div>
 
           {/* Sidebar */}

@@ -20,11 +20,6 @@ export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
     latitude: -0.3975,
     longitude: 36.9602,
   },
-  'Near Gate C (Boma)': {
-    name: 'Near Gate C (Boma)',
-    latitude: -0.4005,
-    longitude: 36.9645,
-  },
   'Nyeri View': {
     name: 'Nyeri View',
     latitude: -0.3963,

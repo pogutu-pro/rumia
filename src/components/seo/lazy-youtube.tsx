@@ -15,9 +15,11 @@ export function LazyYouTube({ videoId, title = 'Video tour', isShort = false }: 
   const thumb = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   const aspectClass = isShort ? 'aspect-[9/16]' : 'aspect-video';
 
+  const sizeClass = isShort ? 'w-full lg:max-w-xs lg:mx-auto' : 'w-full';
+
   if (active) {
     return (
-      <div className={`relative ${aspectClass} w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm`}>
+      <div className={`relative ${aspectClass} ${sizeClass} overflow-hidden rounded-2xl border border-slate-100 shadow-sm`}>
         <iframe
           className="absolute inset-0 w-full h-full"
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
@@ -32,7 +34,7 @@ export function LazyYouTube({ videoId, title = 'Video tour', isShort = false }: 
   return (
     <button
       onClick={() => setActive(true)}
-      className={`relative ${aspectClass} w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm group cursor-pointer block`}
+      className={`relative ${aspectClass} ${sizeClass} overflow-hidden rounded-2xl border border-slate-100 shadow-sm group cursor-pointer block`}
       aria-label={`Play ${title}`}
     >
       <Image
