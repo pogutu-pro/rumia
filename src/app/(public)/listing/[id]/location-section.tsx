@@ -22,6 +22,9 @@ function toCoordinate(value: number | string | null) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+const DEFAULT_STREETVIEW_LAT = -0.397509;
+const DEFAULT_STREETVIEW_LNG = 36.9566783;
+
 export function LocationSection({
   listingTitle,
   latitude,
@@ -94,43 +97,55 @@ function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
     setStatus('loading');
 
     const sv = new google.maps.StreetViewService();
-    const location = new google.maps.LatLng(lat, lng);
+    const listingLocation = new google.maps.LatLng(lat, lng);
 
-    sv.getPanorama(
-      {
-        location,
-        radius: 50,
-        preference: google.maps.StreetViewPreference.NEAREST,
-      },
-      (data, statusCode) => {
-        if (
-          statusCode === google.maps.StreetViewStatus.OK &&
-          data?.location?.latLng &&
-          streetViewRef.current
-        ) {
-          setStatus('available');
-          panoramaRef.current = new google.maps.StreetViewPanorama(
-            streetViewRef.current,
-            {
-              position: data.location.latLng,
-              pov: { heading: 165, pitch: 0 },
-              zoom: 1,
-              addressControl: false,
-              showRoadLabels: true,
-              motionTracking: false,
-              motionTrackingControl: false,
-              zoomControl: false,
-              panControl: false,
-              enableCloseButton: false,
-              linksControl: false,
-              fullscreenControl: false,
-            },
-          );
-        } else {
-          setStatus('unavailable');
-        }
-      },
-    );
+    const tryPanorama = (coords: google.maps.LatLng) => {
+      sv.getPanorama(
+        {
+          location: coords,
+          radius: 50,
+          preference: google.maps.StreetViewPreference.NEAREST,
+        },
+        (data, statusCode) => {
+          if (
+            statusCode === google.maps.StreetViewStatus.OK &&
+            data?.location?.latLng &&
+            streetViewRef.current
+          ) {
+            setStatus('available');
+            panoramaRef.current = new google.maps.StreetViewPanorama(
+              streetViewRef.current,
+              {
+                position: data.location.latLng,
+                pov: { heading: 165, pitch: 0 },
+                zoom: 1,
+                addressControl: false,
+                showRoadLabels: true,
+                motionTracking: false,
+                motionTrackingControl: false,
+                zoomControl: false,
+                panControl: false,
+                enableCloseButton: false,
+                linksControl: false,
+                fullscreenControl: false,
+              },
+            );
+          } else {
+            const defaultCoords = new google.maps.LatLng(
+              DEFAULT_STREETVIEW_LAT,
+              DEFAULT_STREETVIEW_LNG,
+            );
+            if (coords.toString() !== defaultCoords.toString()) {
+              tryPanorama(defaultCoords);
+            } else {
+              setStatus('unavailable');
+            }
+          }
+        },
+      );
+    };
+
+    tryPanorama(listingLocation);
 
     return () => {
       if (panoramaRef.current) {
