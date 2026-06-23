@@ -22,8 +22,8 @@ function toCoordinate(value: number | string | null) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-const DEFAULT_STREETVIEW_LAT = -0.397509;
-const DEFAULT_STREETVIEW_LNG = 36.9566783;
+const DEFAULT_STREETVIEW_LAT = -0.3946;
+const DEFAULT_STREETVIEW_LNG = 36.9635;
 
 export function LocationSection({
   listingTitle,
