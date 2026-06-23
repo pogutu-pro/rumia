@@ -47,8 +47,8 @@ export function LocationSection({
           Map
         </h2>
 
-        <div className="h-80 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-100">
-          <APIProvider apiKey={apiKey} libraries={['streetView']}>
+        <APIProvider apiKey={apiKey} libraries={['streetView']}>
+          <div className="h-80 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-100">
             <Map
               defaultCenter={{ lat, lng }}
               defaultZoom={14}
@@ -71,10 +71,10 @@ export function LocationSection({
                 </div>
               </AdvancedMarker>
             </Map>
+          </div>
 
-            <StreetViewContent lat={lat} lng={lng} />
-          </APIProvider>
-        </div>
+          <StreetViewContent lat={lat} lng={lng} />
+        </APIProvider>
       </div>
     </div>
   );
