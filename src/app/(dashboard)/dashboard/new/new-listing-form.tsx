@@ -60,6 +60,7 @@ interface InitialListingData {
   price: number | string;
   location: string;
   youtube_id?: string | null;
+  is_youtube_shorts?: boolean;
   room_type?: string | null;
   amenities?: string[] | null;
   bathroom_type?: string | null;
@@ -160,6 +161,7 @@ export function NewListingForm({
   const [price, setPrice] = useState(String(initialListing?.price || ''));
   const [location, setLocation] = useState(initialListing?.location || '');
   const [youtubeId, setYoutubeId] = useState(initialListing?.youtube_id || '');
+  const [isYoutubeShort, setIsYoutubeShort] = useState(!!initialListing?.is_youtube_shorts);
   const [roomType, setRoomType] = useState(
     initialListing?.room_type || 'Single',
   );
@@ -402,6 +404,7 @@ export function NewListingForm({
         agent_id: agentId,
         agent_whatsapp: whatsappNumber,
         youtube_id: youtubeId,
+        is_youtube_shorts: isYoutubeShort,
         is_active: !asDraft,
         room_type: roomType,
         amenities: amenities,
@@ -883,7 +886,12 @@ export function NewListingForm({
               id="youtubeId"
               type="text"
               value={youtubeId}
-              onChange={(e) => setYoutubeId(extractYoutubeId(e.target.value))}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const id = extractYoutubeId(raw);
+                setYoutubeId(id);
+                setIsYoutubeShort(id.length >= 10 && /\/shorts\//i.test(raw));
+              }}
               placeholder="Paste YouTube video link or 11-character ID"
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
@@ -893,7 +901,7 @@ export function NewListingForm({
               ID to display the tour.
             </p>
             {youtubeId && youtubeId.length >= 10 && (
-              <div className="mt-3 aspect-video max-w-sm rounded-xl overflow-hidden border border-slate-200 shadow-xs">
+              <div className={`mt-3 ${isYoutubeShort ? 'aspect-[9/16] max-w-[200px]' : 'aspect-video max-w-sm'} rounded-xl overflow-hidden border border-slate-200 shadow-xs`}>
                 <iframe
                   width="100%"
                   height="100%"

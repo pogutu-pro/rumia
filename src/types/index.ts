@@ -15,6 +15,7 @@ export interface Listing {
   price: number;
   location: string;
   youtube_id?: string | null;
+  is_youtube_shorts?: boolean;
   agent_id: string | number;
   is_active: boolean;
   // New hostel detail fields

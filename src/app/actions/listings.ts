@@ -24,6 +24,7 @@ function listingPayload(formData: any, agentId: string) {
     location: formData.location,
     agent_id: agentId,
     youtube_id: formData.youtube_id || null,
+    is_youtube_shorts: !!formData.is_youtube_shorts,
     is_active: formData.is_active,
     landlord_phone: null,
     room_type: formData.room_type,

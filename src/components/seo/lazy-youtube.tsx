@@ -7,15 +7,17 @@ import { Play } from 'lucide-react';
 interface LazyYouTubeProps {
   videoId: string;
   title?: string;
+  isShort?: boolean;
 }
 
-export function LazyYouTube({ videoId, title = 'Video tour' }: LazyYouTubeProps) {
+export function LazyYouTube({ videoId, title = 'Video tour', isShort = false }: LazyYouTubeProps) {
   const [active, setActive] = useState(false);
   const thumb = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  const aspectClass = isShort ? 'aspect-[9/16]' : 'aspect-video';
 
   if (active) {
     return (
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
+      <div className={`relative ${aspectClass} w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm`}>
         <iframe
           className="absolute inset-0 w-full h-full"
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
@@ -30,7 +32,7 @@ export function LazyYouTube({ videoId, title = 'Video tour' }: LazyYouTubeProps)
   return (
     <button
       onClick={() => setActive(true)}
-      className="relative aspect-video w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm group cursor-pointer block"
+      className={`relative ${aspectClass} w-full overflow-hidden rounded-2xl border border-slate-100 shadow-sm group cursor-pointer block`}
       aria-label={`Play ${title}`}
     >
       <Image

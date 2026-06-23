@@ -73,6 +73,8 @@ export default function RumiVideo({
     /(?:youtube\.com.*(?:v=|embed\/|shorts\/)|youtu\.be\/)([^&#?]+)/i,
   )?.[1];
 
+  const isShort = youtubeId ? /\/shorts\//i.test(url) : false;
+
   // Generate embed URL
   const mutedParam = muted ? '&mute=1' : '';
   const loopParam = loop && youtubeId ? `&loop=1&playlist=${youtubeId}` : '';
@@ -101,7 +103,7 @@ export default function RumiVideo({
     return (
       <div
         className={cn(
-          'relative w-full aspect-video rounded-2xl overflow-hidden shadow-xl bg-gray-900',
+          `relative w-full ${isShort ? 'aspect-[9/16] max-w-[280px]' : 'aspect-video'} rounded-2xl overflow-hidden shadow-xl bg-gray-900`,
           className,
         )}
       />
@@ -112,7 +114,7 @@ export default function RumiVideo({
     <div
       ref={containerRef}
       className={cn(
-        'relative w-full aspect-video rounded-xl overflow-hidden shadow-sm bg-gray-950',
+        `relative w-full ${isShort ? 'aspect-[9/16] max-w-[280px]' : 'aspect-video'} rounded-xl overflow-hidden shadow-sm bg-gray-950`,
         className,
       )}
     >

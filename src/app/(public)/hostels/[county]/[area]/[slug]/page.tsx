@@ -42,7 +42,7 @@ const getListing = cache(async (slug: string) => {
     .from('listings')
     .select(
       `
-      id, title, description, price, location, agent_id, youtube_id,
+      id, title, description, price, location, agent_id, youtube_id, is_youtube_shorts,
       is_active, amenities, rating, views, bathroom_type, distance_to_campus,
       security_type, electricity_included, water_included, wifi_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
@@ -424,6 +424,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 <LazyYouTube
                   videoId={listing.youtube_id}
                   title={`${listing.title} — hostel walkthrough video`}
+                  isShort={listing.is_youtube_shorts}
                 />
                 <p className="text-xs font-semibold text-slate-500">
                   Walkthrough video provided by the host.
