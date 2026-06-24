@@ -23,7 +23,7 @@ export function LazyYouTube({ videoId, title = 'Video tour', isShort = false, au
       <div className={`relative ${aspectClass} ${sizeClass} overflow-hidden rounded-2xl border border-slate-100 shadow-sm`}>
         <iframe
           className="absolute inset-0 w-full h-full"
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1${autoPlay ? '&mute=1' : ''}`}
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
           title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
