@@ -29,9 +29,26 @@ const GoogleLocationInput = dynamic(
   },
 );
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, UploadCloud, Youtube } from 'lucide-react';
+import { Loader2, Plus, Trash2, UploadCloud, Youtube, GripVertical, Star, ChevronUp, ChevronDown } from 'lucide-react';
 
 import { Zap, Droplets, Wifi } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface NewListingFormProps {
   agentId: string | number;
@@ -41,7 +58,7 @@ interface NewListingFormProps {
 }
 
 interface UploadedImage {
-  id?: string;
+  id: string;
   url: string;
   name: string;
   category: string; // Room, Bathroom, Exterior, Study Area, Laundry Area, Kitchen
@@ -124,7 +141,7 @@ function initialImages(listing?: InitialListingData): UploadedImage[] {
   return [...(listing?.listing_images || [])]
     .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
     .map((image, index) => ({
-      id: image.id,
+      id: image.id ? String(image.id) : `existing-${index}`,
       url: image.r2_url,
       name: `Existing image ${index + 1}`,
       category: image.category || 'Room',
@@ -143,6 +160,134 @@ function initialRoomTypes(listing?: InitialListingData): FormRoomType[] {
   }
 
   return [{ room_type: 'Single Room', price: '7500', is_available: true }];
+}
+
+function SortableImageCard({
+  img,
+  idx,
+  totalImages,
+  onRemove,
+  onSetCover,
+  onMoveUp,
+  onMoveDown,
+  onCategoryChange,
+}: {
+  img: UploadedImage;
+  idx: number;
+  totalImages: number;
+  onRemove: (idx: number) => void;
+  onSetCover: (idx: number) => void;
+  onMoveUp: (idx: number) => void;
+  onMoveDown: (idx: number) => void;
+  onCategoryChange: (idx: number, category: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: img.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs ${isDragging ? 'opacity-50 ring-2 ring-emerald-500' : ''}`}
+    >
+      <img
+        src={img.url}
+        alt={`Listing upload ${idx + 1}`}
+        className="absolute inset-0 object-cover w-full h-full"
+      />
+
+      {/* Cover badge - top left */}
+      <div className="absolute top-2 left-2 bg-slate-900/80 px-1.5 py-0.5 rounded text-[9px] font-bold text-white uppercase tracking-wider z-20">
+        {idx === 0 ? 'Cover Photo' : `Image ${idx + 1}`}
+      </div>
+
+      {/* Delete button - top right, always visible */}
+      <button
+        type="button"
+        onClick={() => onRemove(idx)}
+        className="absolute top-2 right-2 p-1.5 bg-rose-600/90 hover:bg-rose-500 text-white rounded-lg transition-colors z-20"
+        title="Delete photo"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+
+      {/* Bottom controls - always visible */}
+      <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 z-20">
+        {/* Category dropdown */}
+        <select
+          value={img.category}
+          onChange={(e) => onCategoryChange(idx, e.target.value)}
+          className="flex-1 min-w-0 text-[10px] font-bold h-7 bg-white/90 backdrop-blur-xs border border-slate-200 rounded px-1.5 text-slate-800 shadow-xs focus:outline-none"
+        >
+          <option value="Room">Room</option>
+          <option value="Bathroom">Bathroom</option>
+          <option value="Exterior">Exterior</option>
+          <option value="Study Area">Study Area</option>
+          <option value="Laundry Area">Laundry Area</option>
+          <option value="Kitchen">Kitchen</option>
+        </select>
+
+        {/* Set as Cover */}
+        {idx !== 0 && (
+          <button
+            type="button"
+            onClick={() => onSetCover(idx)}
+            className="p-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-lg shrink-0 transition-colors"
+            title="Set as cover photo"
+          >
+            <Star className="h-3.5 w-3.5" />
+          </button>
+        )}
+
+        {/* Move Up */}
+        {idx > 0 && (
+          <button
+            type="button"
+            onClick={() => onMoveUp(idx)}
+            className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-white rounded-lg shrink-0 transition-colors"
+            title="Move left"
+          >
+            <ChevronUp className="h-3.5 w-3.5" />
+          </button>
+        )}
+
+        {/* Move Down */}
+        {idx < totalImages - 1 && (
+          <button
+            type="button"
+            onClick={() => onMoveDown(idx)}
+            className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-white rounded-lg shrink-0 transition-colors"
+            title="Move right"
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+          </button>
+        )}
+
+        {/* Drag handle */}
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-white rounded-lg shrink-0 cursor-grab active:cursor-grabbing transition-colors"
+          title="Drag to reorder"
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function NewListingForm({
@@ -348,6 +493,7 @@ export function NewListingForm({
         }
 
         newImages.push({
+          id: crypto.randomUUID(),
           url: publicUrl,
           name: fileName,
           category: 'Room',
@@ -370,6 +516,62 @@ export function NewListingForm({
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setImages((prev) => {
+        const oldIndex = prev.findIndex((img) => img.id === active.id);
+        const newIndex = prev.findIndex((img) => img.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return prev;
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const handleSetCover = (index: number) => {
+    setImages((prev) => {
+      const updated = [...prev];
+      const [target] = updated.splice(index, 1);
+      updated.unshift(target);
+      return updated;
+    });
+  };
+
+  const handleCategoryChange = (index: number, category: string) => {
+    setImages((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], category };
+      return updated;
+    });
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    setImages((prev) => {
+      const updated = [...prev];
+      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      return updated;
+    });
+  };
+
+  const handleMoveDown = (index: number) => {
+    setImages((prev) => {
+      if (index >= prev.length - 1) return prev;
+      const updated = [...prev];
+      [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
@@ -935,8 +1137,8 @@ export function NewListingForm({
         <div>
           <h2 className="text-xl font-bold text-slate-900">Property Photos</h2>
           <p className="text-xs text-slate-400 font-medium mt-0.5">
-            Upload images to showcase the room. The first image will be the
-            primary cover photo.
+            Upload images to showcase the room. Drag to reorder or click
+            "Set as Cover" to choose the primary photo.
           </p>
         </div>
 
@@ -972,54 +1174,37 @@ export function NewListingForm({
 
         {/* Photo Previews */}
         {images.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
-            {images.map((img, idx) => (
-              <div
-                key={idx}
-                className="relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group shadow-xs flex flex-col justify-between"
+          <div>
+            <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1.5">
+              <GripVertical className="h-3 w-3" />
+              Drag images to reorder. The first image is the cover photo.
+            </p>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={images.map((img) => img.id)}
+                strategy={rectSortingStrategy}
               >
-                <img
-                  src={img.url}
-                  alt={`Listing upload ${idx + 1}`}
-                  className="absolute inset-0 object-cover w-full h-full"
-                />
-                <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(idx)}
-                    className="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition-colors"
-                    title="Delete photo"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+                  {images.map((img, idx) => (
+                    <SortableImageCard
+                      key={img.id}
+                      img={img}
+                      idx={idx}
+                      totalImages={images.length}
+                      onRemove={handleRemoveImage}
+                      onSetCover={handleSetCover}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
+                      onCategoryChange={handleCategoryChange}
+                    />
+                  ))}
                 </div>
-
-                {/* Cover indicator */}
-                <div className="absolute top-2 left-2 bg-slate-900/80 px-1.5 py-0.5 rounded text-[9px] font-bold text-white uppercase tracking-wider z-20">
-                  {idx === 0 ? 'Cover Photo' : `Image ${idx + 1}`}
-                </div>
-
-                {/* Category Dropdown */}
-                <div className="absolute bottom-2 left-2 right-2 z-20">
-                  <select
-                    value={img.category}
-                    onChange={(e) => {
-                      const updated = [...images];
-                      updated[idx].category = e.target.value;
-                      setImages(updated);
-                    }}
-                    className="w-full text-[10px] font-bold h-7 bg-white/90 backdrop-blur-xs border border-slate-200 rounded px-1.5 text-slate-800 shadow-xs focus:outline-none"
-                  >
-                    <option value="Room">Room</option>
-                    <option value="Bathroom">Bathroom</option>
-                    <option value="Exterior">Exterior</option>
-                    <option value="Study Area">Study Area</option>
-                    <option value="Laundry Area">Laundry Area</option>
-                    <option value="Kitchen">Kitchen</option>
-                  </select>
-                </div>
-              </div>
-            ))}
+              </SortableContext>
+            </DndContext>
           </div>
         )}
       </div>
