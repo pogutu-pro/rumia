@@ -114,7 +114,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
       </div>
 
       {/* Cover Image */}
-      <div className="relative w-full h-48 sm:h-64 mt-4 overflow-hidden">
+      <div className="relative w-full h-56 sm:h-72 lg:h-80 mt-4 overflow-hidden">
         {agent.cover_image_url ? (
           <Image
             src={agent.cover_image_url}
@@ -177,6 +177,18 @@ export default async function AgentSlugPage({ params }: PageProps) {
                   Helping students since {agent.helping_since}
                 </p>
               )}
+
+              {/* Social Handles — top placement */}
+              <div className="mt-4">
+                <AgentContactSection
+                  whatsapp={agent.whatsapp || agent.phone || ''}
+                  instagram={agent.instagram}
+                  linkedin={agent.linkedin}
+                  instagramPublic={agent.instagram_public}
+                  linkedinPublic={agent.linkedin_public}
+                  horizontal
+                />
+              </div>
             </div>
 
             {/* Bio */}
@@ -291,16 +303,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
           {/* Sidebar */}
           <aside className="lg:col-span-1">
             <div className="lg:sticky lg:top-24 space-y-4">
-              {/* Contact Section */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
-                <h2 className="text-lg font-bold text-slate-900">Contact</h2>
-                <AgentContactSection
-                  whatsapp={agent.whatsapp || agent.phone || ''}
-                  instagram={agent.instagram}
-                  linkedin={agent.linkedin}
-                  instagramPublic={agent.instagram_public}
-                  linkedinPublic={agent.linkedin_public}
-                />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                 <ShareAgentProfile
                   name={agent.name}
                   url={`/agents/${slug}`}

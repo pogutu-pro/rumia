@@ -11,12 +11,22 @@ const defaultOptions: CompressOptions = {
   format: 'image/webp',
 };
 
+let _supportsWebp: boolean | null = null;
+
+function supportsWebp(): boolean {
+  if (_supportsWebp !== null) return _supportsWebp;
+  const canvas = document.createElement('canvas');
+  _supportsWebp = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+  return _supportsWebp;
+}
+
 export function compressImage(file: File, options: CompressOptions = {}): Promise<{
   blob: Blob;
   fileName: string;
   fileType: string;
 }> {
   const opts = { ...defaultOptions, ...options };
+  const format = supportsWebp() ? (opts.format as 'image/webp' | 'image/jpeg') : 'image/jpeg';
 
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -44,8 +54,6 @@ export function compressImage(file: File, options: CompressOptions = {}): Promis
       }
 
       ctx.drawImage(img, 0, 0, width, height);
-
-      const format = opts.format || 'image/webp';
 
       canvas.toBlob(
         (blob) => {
