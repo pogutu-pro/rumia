@@ -207,6 +207,7 @@ export default async function HomePage() {
                       src={imageUrl}
                       alt={`${item.title} — student hostel near DeKUT Nyeri`}
                       fill
+                      unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />

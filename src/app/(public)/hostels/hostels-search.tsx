@@ -626,6 +626,7 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
                       src={imageUrl}
                       alt={`${item.title} — student hostel near DeKUT`}
                       fill
+                      unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />

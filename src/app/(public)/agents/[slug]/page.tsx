@@ -120,6 +120,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
             src={agent.cover_image_url}
             alt={`${agent.name}'s cover photo`}
             fill
+            unoptimized
             className="object-cover"
             priority
             sizes="100vw"

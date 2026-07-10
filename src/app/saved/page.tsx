@@ -154,6 +154,7 @@ export default function SavedPage() {
                     src={image}
                     alt={listing.title}
                     fill
+                    unoptimized
                     className="object-cover"
                     sizes="128px"
                   />
