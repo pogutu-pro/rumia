@@ -6,6 +6,23 @@ export interface Agent {
   phone: string;
   whatsapp: string;
   commission_balance: number;
+  // Profile fields
+  profile_photo_url?: string | null;
+  cover_image_url?: string | null;
+  bio?: string | null;
+  service_areas?: string[] | null;
+  languages?: string[] | null;
+  helping_since?: number | null;
+  instagram?: string | null;
+  linkedin?: string | null;
+  instagram_public?: boolean | null;
+  linkedin_public?: boolean | null;
+  verified?: boolean | null;
+  status?: 'active' | 'suspended';
+  slug?: string | null;
+  user_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Listing {

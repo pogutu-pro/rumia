@@ -11,6 +11,8 @@ import {
   Eye,
   CheckCircle2,
   Check,
+  ShieldCheck,
+  MessageCircle,
 } from 'lucide-react';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
 import { WhatsappButton } from '@/app/(public)/listing/[id]/whatsapp-button';
@@ -504,35 +506,78 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 }
               />
               {listing.agents && (
-                <div className="pt-4 border-t border-slate-100 text-center space-y-3">
-                  <div className="flex items-center gap-3 justify-center">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm uppercase">
+                <div className="pt-4 border-t border-slate-100 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm uppercase border border-emerald-100 shrink-0">
                       {listing.agents.name.substring(0, 2)}
                     </div>
-                    <div className="text-left">
+                    <div className="min-w-0">
                       {agentSlug ? (
                         <Link
                           href={`/agents/${agentSlug}`}
-                          className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block"
+                          className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block truncate"
                         >
                           {listing.agents.name}
                         </Link>
                       ) : (
-                        <h3 className="font-bold text-sm text-slate-900 leading-tight">
+                        <p className="font-bold text-sm text-slate-900 leading-tight truncate">
                           {listing.agents.name}
-                        </h3>
+                        </p>
                       )}
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                        <ShieldCheck className="h-3 w-3" />
                         Verified Agent
                       </span>
                     </div>
                   </div>
+                  {agentSlug && (
+                    <Link
+                      href={`/agents/${agentSlug}`}
+                      className="block w-full text-center h-11 rounded-xl border-2 border-slate-200 hover:border-emerald-200 text-slate-700 hover:text-emerald-700 text-sm font-bold transition-colors leading-[44px]"
+                    >
+                      View Profile
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
           </aside>
         </div>
       </div>
+
+      {/* Mobile Agent Card */}
+      {listing.agents && (
+        <div className="container mx-auto px-4 lg:px-8 pb-10 lg:hidden">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+              Your Agent
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-base uppercase border border-emerald-100 shrink-0">
+                {listing.agents.name.substring(0, 2)}
+              </div>
+              <div className="min-w-0">
+                {agentSlug ? (
+                  <Link
+                    href={`/agents/${agentSlug}`}
+                    className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block truncate"
+                  >
+                    {listing.agents.name}
+                  </Link>
+                ) : (
+                  <p className="font-bold text-sm text-slate-900 leading-tight truncate">
+                    {listing.agents.name}
+                  </p>
+                )}
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                  <ShieldCheck className="h-3 w-3" />
+                  Verified Agent
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {nearbyListings.length > 0 && (
         <section className="container mx-auto px-4 lg:px-8 pb-16">

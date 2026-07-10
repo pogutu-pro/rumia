@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  User,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
@@ -25,6 +26,7 @@ export interface AgentSidebarProps {
 const navLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
   { label: 'My Listings', href: '/dashboard/new', icon: Building2, exact: false },
+  { label: 'My Profile', href: '/dashboard/profile', icon: User, exact: false },
 ];
 
 function SidebarContent({

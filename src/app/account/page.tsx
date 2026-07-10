@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { User, Mail, Phone, Calendar } from 'lucide-react';
+import Link from 'next/link';
+import { User, Mail, Phone, Calendar, Heart, ArrowRight } from 'lucide-react';
 import { FeedbackForm } from '@/components/feedback/feedback-form';
 import { LogoutButton } from '@/components/logout-button';
 import { AccountDashboardBar } from './account-dashboard-bar';
@@ -58,6 +59,23 @@ export default async function AccountPage() {
             what we build. What&apos;s on your mind?
           </p>
         </div>
+
+        {/* Saved Hostels Link */}
+        <Link
+          href="/saved"
+          className="flex items-center justify-between bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
+              <Heart className="h-5 w-5 text-rose-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">Saved Hostels</p>
+              <p className="text-xs text-slate-500">View your saved listings</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-slate-400" />
+        </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Feedback form — hero */}

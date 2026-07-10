@@ -2,18 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Heart, User } from "lucide-react";
+import { Home, Search, User, Users } from "lucide-react";
 
 function isTabActive(tabHref: string, pathname: string): boolean {
   if (tabHref === "/") return pathname === "/";
   if (tabHref === "/hostels") return pathname === "/hostels";
-  if (tabHref === "/saved") return pathname.startsWith("/saved");
+  if (tabHref === "/agents") return pathname.startsWith("/agents");
   if (tabHref === "/auth/login")
     return (
       pathname.startsWith("/auth") ||
       pathname.startsWith("/dashboard") ||
       pathname.startsWith("/account") ||
-      pathname.startsWith("/admin")
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/saved")
     );
   return false;
 }
@@ -26,7 +27,7 @@ export function BottomNav() {
   const tabs = [
     { label: "Home",    href: "/",           icon: Home   },
     { label: "Search",  href: "/hostels",    icon: Search },
-    { label: "Saved",   href: "/saved",      icon: Heart  },
+    { label: "Agents",  href: "/agents",     icon: Users  },
     { label: "Account", href: "/auth/login", icon: User   },
   ];
 
