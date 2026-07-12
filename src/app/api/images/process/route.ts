@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { processImage, generateBlurPlaceholder, getImageMetadata } from '@/lib/image/processor';
 import { LISTING_VARIANTS, AGENT_VARIANTS } from '@/lib/image/variants';
 import { generateImageBasePath, getVariantKey, getBlurKey } from '@/lib/image/keys';
-import { validateUpload } from '@/lib/image/validate';
+import { ALLOWED_MIME_TYPES } from '@/lib/image/validate';
 import { uploadBuffer, uploadBuffers, getPublicUrl, isConfigured } from '@/lib/r2/client';
 
 interface ProcessRequest {
@@ -41,11 +41,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const fakeFile = new File([Buffer.from('')], filename, { type: contentType });
-  const validationErrors = validateUpload(fakeFile);
-  if (validationErrors.length > 0) {
+  if (!ALLOWED_MIME_TYPES.includes(contentType)) {
     return NextResponse.json(
-      { error: validationErrors.map((e) => e.message).join(' ') },
+      { error: `Unsupported format: ${contentType}. Allowed: JPEG, PNG, WebP, GIF, AVIF.` },
       { status: 400 },
     );
   }
@@ -56,6 +54,10 @@ export async function POST(req: NextRequest) {
     inputBuffer = Buffer.from(base64, 'base64');
   } catch {
     return NextResponse.json({ error: 'Invalid image data' }, { status: 400 });
+  }
+
+  if (inputBuffer.length === 0) {
+    return NextResponse.json({ error: 'Image data is empty' }, { status: 400 });
   }
 
   if (inputBuffer.length > 10 * 1024 * 1024) {
