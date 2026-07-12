@@ -102,12 +102,12 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden bg-slate-950 text-white">
         <Image
-          src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1600"
+          src="/dekut.jpeg"
           alt=""
           fill
           priority
           sizes="100vw"
-          quality={50}
+          quality={75}
           className="object-cover"
         />
         <div className="absolute inset-0 bg-slate-950/60" />
