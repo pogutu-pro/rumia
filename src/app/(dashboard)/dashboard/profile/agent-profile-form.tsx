@@ -10,8 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils/cn';
-import { uploadToR2 } from '@/lib/r2/upload';
-import { compressImage } from '@/lib/utils/image';
+import { processAndUploadImage } from '@/lib/r2/upload';
 import { updateAgentProfileAction } from '@/app/actions/agents';
 import { DEKUT_AREAS } from '@/lib/constants/dekut-areas';
 
@@ -92,14 +91,12 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
   const [existingCoverImage] = useState<string | null>(agent.cover_image_url || null);
   const [uploading, setUploading] = useState(false);
 
-  const uploadFile = useCallback(async (file: File, prefix: string): Promise<string | null> => {
+  const uploadFile = useCallback(async (file: File, purpose: 'listing' | 'agent'): Promise<string | null> => {
     try {
-      const compressed = await compressImage(file, { maxWidth: 1600, quality: 0.8, format: 'image/webp' });
-      const uploadFile = new File([compressed.blob], compressed.fileName, { type: compressed.fileType });
-      const url = await uploadToR2(uploadFile);
-      return url;
+      const result = await processAndUploadImage(file, purpose);
+      return result.url;
     } catch {
-      toast.error(`Failed to upload ${prefix}`);
+      toast.error(`Failed to upload ${purpose === 'agent' ? 'profile photo' : 'cover image'}`);
       return null;
     }
   }, []);
@@ -112,11 +109,11 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
     let coverImageUrl = existingCoverImage;
 
     if (profilePhotoFile) {
-      const url = await uploadFile(profilePhotoFile, 'profile photo');
+      const url = await uploadFile(profilePhotoFile, 'agent');
       if (url) profilePhotoUrl = url;
     }
     if (coverImageFile) {
-      const url = await uploadFile(coverImageFile, 'cover image');
+      const url = await uploadFile(coverImageFile, 'agent');
       if (url) coverImageUrl = url;
     }
 

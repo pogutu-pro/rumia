@@ -49,7 +49,7 @@ const getListing = cache(async (slug: string) => {
       security_type, electricity_included, water_included, wifi_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category,
-      listing_images ( id, r2_url, category, display_order ),
+      listing_images ( id, r2_url, category, display_order, blur_data_url, width, height, format ),
       agents ( id, name, phone, whatsapp, slug )
     `,
     )
@@ -76,7 +76,7 @@ async function getNearbyListings(listing: any) {
       `
       id, title, description, price, location, slug, county, area,
       room_type, distance_to_campus,
-      listing_images ( r2_url, display_order ),
+      listing_images ( r2_url, display_order, blur_data_url ),
       agents ( name )
     `,
     )
@@ -606,6 +606,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                   (a: any, b: any) => a.display_order - b.display_order,
                 );
                 const imageUrl = sortedImages[0]?.r2_url;
+                const blurDataUrl = sortedImages[0]?.blur_data_url;
                 const href = item.slug
                   ? `/hostels/${item.county || county}/${item.area || area}/${item.slug}`
                   : `/listing/${item.id}`;
@@ -622,9 +623,10 @@ export default async function ListingSlugPage({ params }: PageProps) {
                           src={imageUrl}
                           alt={`${item.title} - nearby student hostel near DeKUT Nyeri`}
                           fill
-                          unoptimized
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                          placeholder={blurDataUrl ? 'blur' : undefined}
+                          blurDataURL={blurDataUrl || undefined}
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-bold uppercase tracking-wider text-slate-400">

@@ -100,6 +100,11 @@ async function replaceListingImages(
     r2_url: img.url,
     display_order: idx,
     category: img.category || 'Room',
+    blur_data_url: img.blurDataUrl || img.blur_data_url || null,
+    width: img.width || null,
+    height: img.height || null,
+    format: img.format || null,
+    image_upload_id: img.imageUploadId || img.image_upload_id || null,
   }));
 
   const { error } = await supabase.from('listing_images').insert(imageInserts);

@@ -51,7 +51,7 @@ export interface Listing {
   price_single?: number | null;
   price_sharing?: number | null;
   distance_category?: string | null;
-  listing_images: { r2_url: string; display_order: number }[];
+  listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
   agents: { name: string } | null;
 }
 
@@ -192,12 +192,17 @@ function parseQuery(input: string): ParsedFilters {
 
 // ── Supabase Query ────────────────────────────────────────────────────────────
 
-async function fetchListings(filters: CombinedFilters): Promise<Listing[]> {
+async function fetchListings(
+  filters: CombinedFilters,
+  from: number = 0,
+  to: number = 23,
+): Promise<{ listings: Listing[]; count: number }> {
   const supabase = createClient();
   let q = supabase
     .from('listings')
     .select(
-      'id, title, description, price, location, slug, county, area, gender, specific_location, price_single, price_sharing, distance_category, listing_images(r2_url, display_order), agents(name)',
+      'id, title, description, price, location, slug, county, area, gender, specific_location, price_single, price_sharing, distance_category, listing_images(r2_url, display_order, blur_data_url), agents(name)',
+      { count: 'exact' },
     )
     .eq('is_active', true);
 
@@ -244,8 +249,13 @@ async function fetchListings(filters: CombinedFilters): Promise<Listing[]> {
     ? q.order('proximity_description', { ascending: true })
     : q.order('created_at', { ascending: false });
 
-  const { data } = await q;
-  return (data as Listing[]) || [];
+  q = q.range(from, to);
+
+  const { data, count } = await q;
+  return {
+    listings: (data as Listing[]) || [],
+    count: count || 0,
+  };
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -275,9 +285,11 @@ function ListingSkeleton() {
 
 interface HostelsSearchProps {
   initialListings: Listing[];
+  totalCount: number;
+  pageSize: number;
 }
 
-export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
+export default function HostelsSearch({ initialListings, totalCount, pageSize }: HostelsSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
@@ -289,6 +301,10 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
     initialQuery ? [] : initialListings,
   );
   const [loading, setLoading] = useState(!!initialQuery);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(initialListings.length >= pageSize);
+  const [offset, setOffset] = useState(initialListings.length);
+  const [totalCountState, setTotalCount] = useState(totalCount);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
 
   const {
@@ -342,14 +358,31 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
   const runSearch = useCallback(
     async (searchText: string) => {
       setLoading(true);
+      setOffset(0);
+      setHasMore(true);
       const combined = buildCombinedFilters(searchText);
-      const results = await fetchListings(combined);
-      setListings(results);
+      const result = await fetchListings(combined, 0, pageSize - 1);
+      setListings(result.listings);
+      setTotalCount(result.count);
+      setOffset(result.listings.length);
+      setHasMore(result.listings.length < result.count);
       setLoading(false);
     },
-    [buildCombinedFilters],
+    [buildCombinedFilters, pageSize],
   );
 
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const combined = buildCombinedFilters(debouncedQuery);
+    const result = await fetchListings(combined, offset, offset + pageSize - 1);
+    setListings((prev) => [...prev, ...result.listings]);
+    setOffset((prev) => prev + result.listings.length);
+    setHasMore(offset + result.listings.length < result.count);
+    setLoadingMore(false);
+  }, [loadingMore, hasMore, buildCombinedFilters, debouncedQuery, offset, pageSize]);
+
+  // URL sync — separate from search to avoid setState-in-effect lint error
   useEffect(() => {
     const filterParams = toParams();
     const qParam = debouncedQuery
@@ -361,19 +394,13 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
         ? `/hostels?${[qParam, filterStr].filter(Boolean).join('&')}`
         : '/hostels';
     router.replace(url, { scroll: false });
+  }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, router, toParams]);
+
+  // Search execution — fires when query or filters change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     runSearch(debouncedQuery);
-  }, [
-    debouncedQuery,
-    genders,
-    amenities,
-    roomTypes,
-    minPrice,
-    maxPrice,
-    zones,
-    router,
-    runSearch,
-    toParams,
-  ]);
+  }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, runSearch]);
 
   const handleClearAll = useCallback(() => {
     reset();
@@ -523,8 +550,8 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
                   <span className="text-slate-300">Searching...</span>
                 ) : (
                   <>
-                    {listings.length}{' '}
-                    {listings.length === 1 ? 'hostel' : 'hostels'} found
+                    {totalCountState}{' '}
+                    {totalCountState === 1 ? 'hostel' : 'hostels'} found
                   </>
                 )}
                 {hasAnyFilters && (
@@ -564,8 +591,8 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
         {/* Mobile results count */}
         {!isDesktop && !loading && (
           <p className="text-sm text-slate-400 font-semibold mb-5 px-1">
-            {listings.length}{' '}
-            {listings.length === 1 ? 'hostel' : 'hostels'} found
+            {totalCountState}{' '}
+            {totalCountState === 1 ? 'hostel' : 'hostels'} found
             {hasAnyFilters && (
               <span className="text-slate-300">
                 {' '}·{' '}
@@ -593,6 +620,7 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
               const imageUrl =
                 sorted[0]?.r2_url ??
                 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+              const blurDataUrl = sorted[0]?.blur_data_url;
               const href = item.slug
                 ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
                 : `/listing/${item.id}`;
@@ -626,9 +654,10 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
                       src={imageUrl}
                       alt={`${item.title} — student hostel near DeKUT`}
                       fill
-                      unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      placeholder={blurDataUrl ? 'blur' : undefined}
+                      blurDataURL={blurDataUrl || undefined}
                     />
 
                     {distanceBadge && (
@@ -703,6 +732,27 @@ export default function HostelsSearch({ initialListings }: HostelsSearchProps) {
                 Clear all filters
               </button>
             )}
+          </div>
+        )}
+
+        {/* Load More */}
+        {!loading && hasMore && listings.length > 0 && (
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingMore ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load more hostels'
+              )}
+            </button>
           </div>
         )}
 

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/cn';
 interface UserAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   imageUrl?: string | null;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 const sizeClasses = {
@@ -13,6 +13,7 @@ const sizeClasses = {
   md: 'h-10 w-10 text-sm',
   lg: 'h-16 w-16 text-lg',
   xl: 'h-24 w-24 text-xl font-bold',
+  '2xl': 'h-28 w-28 text-2xl font-bold',
 };
 
 export function UserAvatar({

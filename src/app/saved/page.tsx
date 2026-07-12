@@ -20,7 +20,7 @@ interface SavedListing {
     slug: string;
     county: string;
     area: string;
-    listing_images: { r2_url: string; display_order: number }[];
+    listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
   };
 }
 
@@ -44,7 +44,7 @@ export default function SavedPage() {
             created_at,
             listings (
               id, title, price, location, slug, county, area,
-              listing_images ( r2_url, display_order )
+              listing_images ( r2_url, display_order, blur_data_url )
             )
           `)
           .eq('user_id', currentSession.user.id)
@@ -140,7 +140,9 @@ export default function SavedPage() {
           const listing = saved.listings;
           const image = listing.listing_images?.sort(
             (a, b) => a.display_order - b.display_order,
-          )[0]?.r2_url;
+          )[0];
+          const imageUrl = image?.r2_url;
+          const blurDataUrl = image?.blur_data_url;
 
           return (
             <Link
@@ -151,12 +153,13 @@ export default function SavedPage() {
               <div className="relative w-32 h-32 shrink-0 bg-slate-100">
                 {image ? (
                   <Image
-                    src={image}
+                    src={imageUrl}
                     alt={listing.title}
                     fill
-                    unoptimized
                     className="object-cover"
                     sizes="128px"
+                    placeholder={blurDataUrl ? 'blur' : undefined}
+                    blurDataURL={blurDataUrl || undefined}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-xs text-slate-400">

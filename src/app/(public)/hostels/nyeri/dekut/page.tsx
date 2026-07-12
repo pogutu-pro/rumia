@@ -69,12 +69,13 @@ export default async function DeKUTLandingPage() {
     .select(
       `
       id, title, description, price, location, slug, county, area,
-      listing_images ( r2_url, display_order ),
+      listing_images ( r2_url, display_order, blur_data_url ),
       agents ( name )
     `,
     )
     .eq('is_active', true)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   const listings = (listingsData || []) as any[];
 
@@ -144,6 +145,7 @@ export default async function DeKUTLandingPage() {
               const imageUrl =
                 sortedImages[0]?.r2_url ??
                 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+              const blurDataUrl = sortedImages[0]?.blur_data_url;
               const href = item.slug
                 ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
                 : `/listing/${item.id}`;
@@ -159,9 +161,10 @@ export default async function DeKUTLandingPage() {
                       src={imageUrl}
                       alt={`${item.title} — student hostel near DeKUT Nyeri`}
                       fill
-                      unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      placeholder={blurDataUrl ? 'blur' : undefined}
+                      blurDataURL={blurDataUrl || undefined}
                     />
                     <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900 border border-slate-100/50">
                       KES {item.price.toLocaleString()}/mo

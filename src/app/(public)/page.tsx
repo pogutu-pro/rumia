@@ -62,7 +62,8 @@ export default async function HomePage() {
       area,
       listing_images (
         r2_url,
-        display_order
+        display_order,
+        blur_data_url
       ),
       agents (
         name
@@ -100,7 +101,15 @@ export default async function HomePage() {
       <JsonLd data={organizationSchema} />
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1600')] bg-cover bg-center" />
+        <Image
+          src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1600"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          quality={50}
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-slate-950/60" />
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500 via-transparent to-transparent" />
 
@@ -183,7 +192,7 @@ export default async function HomePage() {
 
         {listings && listings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {listings.map((item) => {
+            {listings.map((item, index) => {
               // Get display image or fallback
               const sortedImages = (item.listing_images || []).sort(
                 (a: any, b: any) => a.display_order - b.display_order,
@@ -191,6 +200,8 @@ export default async function HomePage() {
               const imageUrl =
                 sortedImages[0]?.r2_url ||
                 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+
+              const blurDataUrl = sortedImages[0]?.blur_data_url;
 
               return (
                 <Link
@@ -207,9 +218,11 @@ export default async function HomePage() {
                       src={imageUrl}
                       alt={`${item.title} — student hostel near DeKUT Nyeri`}
                       fill
-                      unoptimized
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      placeholder={blurDataUrl ? 'blur' : undefined}
+                      blurDataURL={blurDataUrl || undefined}
+                      priority={index === 0}
                     />
                     <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900 border border-slate-100/50">
                       KES {item.price.toLocaleString()}/mo

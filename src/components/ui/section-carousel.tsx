@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -48,7 +47,7 @@ export function SectionCarousel({
           <div
             key={index}
             className={cn(
-              "absolute inset-0 w-full h-full transition-all duration-700 ease-in-out transform",
+              "absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out",
               index === currentIndex ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-95"
             )}
           >

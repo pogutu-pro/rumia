@@ -29,6 +29,7 @@ export function BrandedLoader({
           alt="Rumia Logo"
           fill
           priority
+          sizes={`${size}px`}
           className="object-contain"
         />
       </div>

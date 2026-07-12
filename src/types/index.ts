@@ -56,6 +56,11 @@ export interface ListingImage {
   r2_url: string;
   display_order: number;
   category?: string | null;
+  blur_data_url?: string | null;
+  width?: number | null;
+  height?: number | null;
+  format?: string | null;
+  image_upload_id?: string | null;
 }
 
 export interface Lead {

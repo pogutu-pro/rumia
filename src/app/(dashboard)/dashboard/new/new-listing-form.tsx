@@ -12,7 +12,7 @@ import {
   AREA_OPTIONS,
   DISTANCE_CATEGORY_OPTIONS,
 } from '@/lib/constants/dekut-areas';
-import { compressImage } from '@/lib/utils/image';
+import { processAndUploadImage } from '@/lib/r2/upload';
 
 // Dynamically imported with ssr:false because @googlemaps/js-api-loader
 // references `window` at module-evaluation time, which crashes Next.js SSR.
@@ -61,7 +61,12 @@ interface UploadedImage {
   id: string;
   url: string;
   name: string;
-  category: string; // Room, Bathroom, Exterior, Study Area, Laundry Area, Kitchen
+  category: string;
+  blurDataUrl?: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  imageUploadId?: string;
 }
 
 interface FormRoomType {
@@ -103,6 +108,11 @@ interface InitialListingData {
     r2_url: string;
     category?: string | null;
     display_order?: number | null;
+    blur_data_url?: string | null;
+    width?: number | null;
+    height?: number | null;
+    format?: string | null;
+    image_upload_id?: string | null;
   }> | null;
   listing_room_types?: Array<{
     id?: string;
@@ -145,6 +155,11 @@ function initialImages(listing?: InitialListingData): UploadedImage[] {
       url: image.r2_url,
       name: `Existing image ${index + 1}`,
       category: image.category || 'Room',
+      blurDataUrl: image.blur_data_url || undefined,
+      width: image.width || undefined,
+      height: image.height || undefined,
+      format: image.format || undefined,
+      imageUploadId: image.image_upload_id || undefined,
     }));
 }
 
@@ -453,50 +468,18 @@ export function NewListingForm({
 
     for (const file of files) {
       try {
-        let uploadFile = file;
-        let fileType = file.type;
-        let fileName = file.name;
-
-        if (file.type.startsWith('image/')) {
-          const compressed = await compressImage(file, {
-            maxWidth: 1600,
-            quality: 0.8,
-            format: 'image/webp',
-          });
-          uploadFile = new File([compressed.blob], compressed.fileName, {
-            type: compressed.fileType,
-          });
-          fileType = compressed.fileType;
-          fileName = compressed.fileName;
-        }
-
-        const urlResponse = await fetch(
-          `/api/upload-url?filename=${encodeURIComponent(fileName)}&filetype=${encodeURIComponent(fileType)}`,
-        );
-
-        if (!urlResponse.ok) {
-          throw new Error('Failed to get signed upload URL');
-        }
-
-        const { uploadUrl, publicUrl } = await urlResponse.json();
-
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': fileType,
-          },
-          body: uploadFile,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('File upload to storage failed');
-        }
+        const result = await processAndUploadImage(file, 'listing');
 
         newImages.push({
           id: crypto.randomUUID(),
-          url: publicUrl,
-          name: fileName,
+          url: result.url,
+          name: file.name,
           category: 'Room',
+          blurDataUrl: result.blurUrl,
+          width: result.width,
+          height: result.height,
+          format: result.format,
+          imageUploadId: result.imageUploadId || undefined,
         });
         uploadedCount++;
       } catch (error) {
@@ -511,7 +494,7 @@ export function NewListingForm({
 
     setImages(newImages);
     setIsUploading(false);
-    e.target.value = ''; // Reset file input
+    e.target.value = '';
   };
 
   const handleRemoveImage = (index: number) => {

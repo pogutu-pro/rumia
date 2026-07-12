@@ -14,6 +14,10 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: 'https',
@@ -45,12 +49,10 @@ const nextConfig = {
         hostname: 'mt1.google.com',
       },
       {
-        // Cloudflare R2 public bucket
         protocol: 'https',
         hostname: 'pub-35395ff8fc144313adfa903807f2a359.r2.dev',
       },
       {
-        // Any other Cloudflare R2 public bucket (wildcard)
         protocol: 'https',
         hostname: '*.r2.dev',
       },
@@ -67,8 +69,17 @@ const nextConfig = {
         headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
       },
       {
-        // Security headers for all routes — middleware also sets these,
-        // this acts as a fallback for static/edge routes
+        // Cache optimized images aggressively — they have content-hash-based filenames
+        source: '/_next/image/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/og-dekut.png',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }],
+      },
+      {
         source: '/(.*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },

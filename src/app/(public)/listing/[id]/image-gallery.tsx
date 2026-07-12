@@ -7,6 +7,7 @@ import { LayoutGrid, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-reac
 interface GalleryImage {
   r2_url: string;
   category?: string;
+  blur_data_url?: string;
 }
 
 interface ImageGalleryProps {
@@ -16,16 +17,16 @@ interface ImageGalleryProps {
 export function ImageGallery({ images }: ImageGalleryProps) {
   const fallbackImage =
     'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200';
-  
-  // Normalize images array to always contain objects with r2_url and category
-  const displayImages: GalleryImage[] = images && images.length > 0 
+
+  const displayImages: GalleryImage[] = images && images.length > 0
     ? images.map((img) => {
         if (typeof img === 'string') {
           return { r2_url: img, category: 'Room' };
         }
-        return { 
-          r2_url: img.r2_url || (img as any).url || fallbackImage, 
-          category: img.category || 'Room' 
+        return {
+          r2_url: img.r2_url || (img as any).url || fallbackImage,
+          category: img.category || 'Room',
+          blur_data_url: img.blur_data_url || undefined,
         };
       })
     : [{ r2_url: fallbackImage, category: 'Room' }];
@@ -33,7 +34,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   const [mobileIndex, setMobileIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
 
   const handlePrev = () => {
     setMobileIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
@@ -43,10 +44,8 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     setMobileIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
   };
 
-  // Get unique categories present in the images
   const categories: string[] = ['All', ...Array.from(new Set(displayImages.map(img => img.category).filter((cat): cat is string => !!cat)))];
 
-  // Filter images based on selected category
   const filteredImages = activeCategory === 'All'
     ? displayImages
     : displayImages.filter(img => img.category === activeCategory);
@@ -55,26 +54,27 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     <div className="relative w-full">
       {/* Mobile view slider */}
       <div className="md:hidden relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-        <Image
-          src={displayImages[mobileIndex]?.r2_url}
-          alt={`Property image ${mobileIndex + 1}`}
-          fill
-          unoptimized
-          className="object-cover"
-          sizes="100vw"
-          priority={mobileIndex === 0}
-          onClick={() => setIsModalOpen(true)}
-        />
-        
+          <Image
+            src={displayImages[mobileIndex]?.r2_url}
+            alt={`Property image ${mobileIndex + 1}`}
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority={mobileIndex === 0}
+            placeholder={displayImages[mobileIndex]?.blur_data_url ? 'blur' : undefined}
+            blurDataURL={displayImages[mobileIndex]?.blur_data_url || undefined}
+            onClick={() => setIsModalOpen(true)}
+          />
+
         {displayImages.length > 1 && (
           <>
-            <button 
+            <button
               onClick={handlePrev}
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white transition-colors"
             >
               <ChevronLeft className="h-5 w-5 text-slate-700" />
             </button>
-            <button 
+            <button
               onClick={handleNext}
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white transition-colors"
             >
@@ -91,27 +91,27 @@ export function ImageGallery({ images }: ImageGalleryProps) {
       <div className="hidden md:grid grid-cols-4 gap-2 aspect-[21/9] w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 relative group">
         {displayImages.length === 1 ? (
           <div className="col-span-4 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-            <Image src={displayImages[0].r2_url} alt="Property display" fill unoptimized className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer" sizes="100vw" priority />
+            <Image src={displayImages[0].r2_url} alt="Property display" fill className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer" sizes="100vw" priority placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[0]?.blur_data_url || undefined} />
           </div>
         ) : displayImages.length === 2 ? (
           <>
             <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[0].r2_url} alt="Property display 1" fill unoptimized className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority />
+              <Image src={displayImages[0].r2_url} alt="Property display 1" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[0]?.blur_data_url || undefined} />
             </div>
             <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[1].r2_url} alt="Property display 2" fill unoptimized className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" />
+              <Image src={displayImages[1].r2_url} alt="Property display 2" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[1]?.blur_data_url || undefined} />
             </div>
           </>
         ) : displayImages.length === 3 ? (
           <>
             <div className="col-span-2 row-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[0].r2_url} alt="Property display 1" fill unoptimized className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority />
+              <Image src={displayImages[0].r2_url} alt="Property display 1" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[0]?.blur_data_url || undefined} />
             </div>
             <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[1].r2_url} alt="Property display 2" fill unoptimized className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" />
+              <Image src={displayImages[1].r2_url} alt="Property display 2" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[1]?.blur_data_url || undefined} />
             </div>
             <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[2].r2_url} alt="Property display 3" fill unoptimized className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" />
+              <Image src={displayImages[2].r2_url} alt="Property display 3" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" placeholder={displayImages[2]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[2]?.blur_data_url || undefined} />
             </div>
           </>
         ) : (
@@ -122,10 +122,11 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 src={displayImages[0].r2_url}
                 alt="Property main display"
                 fill
-                unoptimized
                 className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
+                placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[0]?.blur_data_url || undefined}
               />
             </div>
             {/* Top Right photos */}
@@ -134,9 +135,10 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 src={displayImages[1]?.r2_url || fallbackImage}
                 alt="Property detail 1"
                 fill
-                unoptimized
                 className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
                 sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[1]?.blur_data_url || undefined}
               />
             </div>
             <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
@@ -144,9 +146,10 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 src={displayImages[2]?.r2_url || fallbackImage}
                 alt="Property detail 2"
                 fill
-                unoptimized
                 className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
                 sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={displayImages[2]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[2]?.blur_data_url || undefined}
               />
             </div>
             {/* Bottom Right photos */}
@@ -155,9 +158,10 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 src={displayImages[3]?.r2_url || fallbackImage}
                 alt="Property detail 3"
                 fill
-                unoptimized
                 className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
                 sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={displayImages[3]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[3]?.blur_data_url || undefined}
               />
             </div>
             <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
@@ -165,9 +169,10 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 src={displayImages[4]?.r2_url || displayImages[0].r2_url}
                 alt="Property detail 4"
                 fill
-                unoptimized
                 className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
                 sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={(displayImages[4] || displayImages[0])?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={(displayImages[4] || displayImages[0])?.blur_data_url || undefined}
               />
             </div>
           </>
@@ -175,7 +180,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
 
         {/* Show all photos button */}
         {displayImages.length > 1 && (
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-800 font-bold text-xs py-2 px-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all hover:scale-[1.02] cursor-pointer z-20"
           >
@@ -210,8 +215,8 @@ export function ImageGallery({ images }: ImageGalleryProps) {
             {/* Sidebar filter tabs */}
             <div className="w-full md:w-64 bg-white border-r border-slate-100 p-6 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible shrink-0 scrollbar-none">
               {categories.map((cat) => {
-                const count = cat === 'All' 
-                  ? displayImages.length 
+                const count = cat === 'All'
+                  ? displayImages.length
                   : displayImages.filter(img => img.category === cat).length;
                 return (
                   <button
@@ -240,10 +245,18 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 {filteredImages.map((img, idx) => (
                   <div
                     key={idx}
-                    onClick={() => setSelectedImage(img.r2_url)}
+                    onClick={() => setSelectedImage(img)}
                     className="relative aspect-[3/2] w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 group cursor-pointer shadow-md transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:border-slate-200"
                   >
-                    <img src={img.r2_url} alt={`Property photo ${idx + 1}`} className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105" />
+                    <Image
+                      src={img.r2_url}
+                      alt={`Property photo ${idx + 1}`}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      placeholder={img.blur_data_url ? 'blur' : undefined}
+                      blurDataURL={img.blur_data_url || undefined}
+                    />
                     <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <div className="p-3 bg-white/95 backdrop-blur-xs rounded-full border border-slate-200 shadow-md scale-90 group-hover:scale-100 transition-transform duration-300 text-slate-700">
                         <Maximize2 className="h-5 w-5" />
@@ -271,7 +284,16 @@ export function ImageGallery({ images }: ImageGalleryProps) {
             <X className="h-6 w-6" />
           </button>
           <div className="max-w-5xl max-h-[85vh] overflow-hidden rounded-2xl border border-slate-800 shadow-2xl relative">
-            <img src={selectedImage} alt="Detailed view" className="object-contain max-h-[85vh] max-w-full" />
+            <Image
+              src={selectedImage.r2_url}
+              alt="Detailed view"
+              width={1200}
+              height={800}
+              className="object-contain max-h-[85vh] max-w-full"
+              placeholder={selectedImage.blur_data_url ? 'blur' : undefined}
+              blurDataURL={selectedImage.blur_data_url || undefined}
+              unoptimized
+            />
           </div>
         </div>
       )}

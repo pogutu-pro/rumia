@@ -96,7 +96,6 @@ export function ImageUpload({
               src={preview || currentImageUrl || ''}
               alt="Preview"
               fill
-              unoptimized
               className="object-cover rounded-xl"
               sizes="(max-width: 600px) 100vw, 50vw"
             />

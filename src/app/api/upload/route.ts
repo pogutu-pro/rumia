@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUploadUrl } from '@/lib/r2/client';
+import { getUploadUrl, isConfigured } from '@/lib/r2/client';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
@@ -14,6 +14,10 @@ export async function POST(req: NextRequest) {
 
   if (!filename || !contentType) {
     return NextResponse.json({ error: 'filename and contentType are required' }, { status: 400 });
+  }
+
+  if (!isConfigured()) {
+    return NextResponse.json({ error: 'Cloud storage is not configured.' }, { status: 500 });
   }
 
   const key = `${user.id}/${Date.now()}-${filename}`;

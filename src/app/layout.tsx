@@ -82,6 +82,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Rumia" />
         <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png" />
+        <link rel="dns-prefetch" href="https://pub-35395ff8fc144313adfa903807f2a359.r2.dev" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body
         className={cn(

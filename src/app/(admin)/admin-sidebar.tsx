@@ -57,7 +57,7 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       <div className="px-6 py-5 border-b border-gray-100">
         <Link href="/admin" className="inline-flex items-center" onClick={onNavigate}>
-          <Image src="/images/logo/logo.svg" alt="Rumia" width={100} height={32} priority style={{ height: 'auto' }} />
+          <Image src="/images/logo/logo.svg" alt="Rumia" width={100} height={32} priority sizes="100px" style={{ height: 'auto' }} />
         </Link>
       </div>
 
@@ -131,7 +131,7 @@ export function AdminSidebar({ userName, userEmail, isAdmin = true, hasAgent }: 
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 flex items-center justify-between px-4 h-14">
         <Link href="/admin">
-          <Image src="/images/logo/logo.svg" alt="Rumia" width={80} height={26} priority style={{ height: 'auto' }} />
+          <Image src="/images/logo/logo.svg" alt="Rumia" width={80} height={26} priority sizes="80px" style={{ height: 'auto' }} />
         </Link>
         <button
           onClick={() => setOpen(true)}

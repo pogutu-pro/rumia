@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowLeft, Calendar, ShieldCheck, Globe } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { JsonLd } from '@/components/seo/json-ld';
 import { AgentContactSection } from '@/components/agents/agent-contact-section';
@@ -103,84 +103,114 @@ export default async function AgentSlugPage({ params }: PageProps) {
       <JsonLd data={personSchema} />
 
       {/* Back link */}
-      <div className="container mx-auto px-4 lg:px-8 pt-6">
+      <div className="container mx-auto px-4 lg:px-8 pt-5">
         <Link
           href="/hostels"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           Back to listings
         </Link>
       </div>
 
-      {/* Cover Image */}
-      <div className="relative w-full h-56 sm:h-72 lg:h-80 mt-4 overflow-hidden">
-        {agent.cover_image_url ? (
-          <Image
-            src={agent.cover_image_url}
-            alt={`${agent.name}'s cover photo`}
-            fill
-            unoptimized
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-600">
-            <div className="absolute inset-0 opacity-10" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }} />
-          </div>
-        )}
+      {/* ═══════════════════════════════════════════════════════
+          HERO: Banner + Avatar
+          Key fix: overflow-hidden lives ONLY on the inner image
+          div — not on the outer wrapper. The avatar is positioned
+          relative to the outer wrapper and is never clipped.
+      ═══════════════════════════════════════════════════════ */}
+      <div className="relative w-full mt-4">
+        {/* Banner — image clipping scoped to this inner div only */}
+        <div
+          className="relative w-full overflow-hidden bg-slate-100"
+          style={{ height: 'clamp(190px, 22vw, 320px)' }}
+        >
+          {agent.cover_image_url ? (
+            <Image
+              src={agent.cover_image_url}
+              alt={`${agent.name}'s cover photo`}
+              fill
+              className="object-cover object-center"
+              priority
+              sizes="100vw"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-500">
+              <div
+                className="absolute inset-0 opacity-[0.07]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='2' fill='%23ffffff'/%3E%3C/svg%3E")`,
+                }}
+              />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-emerald-900/30 to-transparent" />
+            </div>
+          )}
+          {agent.cover_image_url && (
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+          )}
+        </div>
 
-        {/* Profile photo overlap */}
-        <div className="absolute -bottom-14 left-4 sm:left-8">
-          <div className="relative">
+        {/* Avatar — anchored to the OUTER wrapper (no overflow clip here).
+            translateY(50%) centres the avatar on the banner bottom edge. */}
+        <div
+          className="absolute left-5 sm:left-10 lg:left-12"
+          style={{ bottom: 0, transform: 'translateY(50%)' }}
+        >
+          <div className="relative inline-block">
             <UserAvatar
               name={agent.name}
               imageUrl={agent.profile_photo_url}
-              size="xl"
-              className="ring-4 ring-white shadow-lg"
+              size="2xl"
+              className="ring-[4px] ring-white shadow-xl shadow-black/10"
             />
+            {agent.verified && (
+              <span
+                className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 ring-[3px] ring-white shadow-sm"
+                title="Verified agent"
+                aria-label="Verified agent"
+              >
+                <ShieldCheck className="h-4 w-4 text-white" aria-hidden="true" />
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Spacer for profile photo overlap */}
-      <div className="h-16" />
+      {/* Spacer = half avatar height (h-28/2 = 56px) + comfortable gap */}
+      <div className="h-20 sm:h-24" />
 
-      {/* Profile Content */}
-      <div className="container mx-auto px-4 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Name & Badges */}
-            <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                  {agent.name}
-                </h1>
-                {agent.verified && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    Verified
-                  </span>
-                )}
-              </div>
-              <p className="text-sm font-semibold text-slate-500 mt-1">
-                Student Hostel Agent &middot; Nyeri, Kenya
+      {/* ═══════════════════════════════════════════════════════
+          PROFILE CONTENT
+      ═══════════════════════════════════════════════════════ */}
+      <div className="container mx-auto px-4 lg:px-8 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
+
+          {/* ── Main Column (2/3) ─────────────────────── */}
+          <div className="lg:col-span-2 space-y-10">
+
+            {/* Identity block */}
+            <div className="space-y-3">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                {agent.name}
+              </h1>
+
+              <p className="flex items-center gap-2 text-sm font-semibold text-slate-500 flex-wrap">
+                <span>Student Hostel Agent</span>
+                <span className="inline-block h-1 w-1 rounded-full bg-slate-300" aria-hidden="true" />
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  Nyeri, Kenya
+                </span>
               </p>
 
-              {/* Helping Since */}
               {agent.helping_since && (
-                <p className="inline-flex items-center gap-1.5 text-sm text-slate-500 mt-2">
-                  <Calendar className="h-4 w-4 text-slate-400" />
+                <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full">
+                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
                   Helping students since {agent.helping_since}
                 </p>
               )}
 
-              {/* Social Handles — top placement */}
-              <div className="mt-4">
+              <div className="pt-1">
                 <AgentContactSection
                   whatsapp={agent.whatsapp || agent.phone || ''}
                   instagram={agent.instagram}
@@ -192,54 +222,64 @@ export default async function AgentSlugPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Bio */}
+            <hr className="border-slate-100" />
+
             {agent.bio && (
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 mb-2">About</h2>
-                <p className="text-slate-600 leading-relaxed">{agent.bio}</p>
+              <div className="space-y-3">
+                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">About</h2>
+                <p className="text-[15px] text-slate-600 leading-relaxed">{agent.bio}</p>
               </div>
             )}
 
-            {/* Service Areas */}
             {agent.service_areas && agent.service_areas.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 mb-3">Service Areas</h2>
+              <div className="space-y-3">
+                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Service Areas</h2>
                 <div className="flex flex-wrap gap-2">
                   {agent.service_areas.map((area: string) => (
-                    <Badge key={area} variant="secondary" className="px-3 py-1.5 text-sm font-medium">
-                      <MapPin className="h-3 w-3 mr-1 inline" />
+                    <span
+                      key={area}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-700"
+                    >
+                      <MapPin className="h-3 w-3 shrink-0 text-emerald-500" />
                       {area}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Languages */}
             {agent.languages && agent.languages.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 mb-3">Languages</h2>
+              <div className="space-y-3">
+                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Languages</h2>
                 <div className="flex flex-wrap gap-2">
                   {agent.languages.map((lang: string) => (
-                    <Badge key={lang} variant="outline" className="px-3 py-1.5 text-sm font-medium">
-                      <Globe className="h-3 w-3 mr-1 inline" />
+                    <span
+                      key={lang}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-600"
+                    >
+                      <Globe className="h-3 w-3 shrink-0 text-slate-400" />
                       {lang}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Active Listings */}
-            <div>
-              <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight mb-6">
-                {listings.length > 0
-                  ? `Listings by ${agent.name}`
-                  : 'Current Hostels'}
-              </h2>
+            {/* Listings */}
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                  {listings.length > 0 ? `Listings by ${agent.name.split(' ')[0]}` : 'Current Hostels'}
+                </h2>
+                {listings.length > 0 && (
+                  <p className="text-sm text-slate-400 font-medium mt-0.5">
+                    {listings.length} active {listings.length === 1 ? 'listing' : 'listings'}
+                  </p>
+                )}
+              </div>
 
               {listings.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {listings.map((item) => {
                     const sortedImages = (item.listing_images || []).sort(
                       (a: any, b: any) => a.display_order - b.display_order,
@@ -253,35 +293,36 @@ export default async function AgentSlugPage({ params }: PageProps) {
                       <Link
                         key={item.id}
                         href={href}
-                        className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300"
+                        className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-slate-200 hover:shadow-lg hover:shadow-slate-100/80 transition-all duration-300"
                       >
-                        <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
+                        <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
                           {imageUrl ? (
                             <Image
                               src={imageUrl}
                               alt={`${item.title} — student hostel`}
                               fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                               sizes="(max-width: 640px) 100vw, 50vw"
                             />
                           ) : (
-                            <div className="flex h-full items-center justify-center text-xs font-bold uppercase tracking-wider text-slate-400">
+                            <div className="flex h-full items-center justify-center text-xs font-bold uppercase tracking-wider text-slate-300">
                               No image
                             </div>
                           )}
-                          <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900 border border-slate-100/50">
-                            KES {item.price.toLocaleString()}/mo
+                          <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900">
+                            KES {item.price.toLocaleString()}
+                            <span className="font-medium text-slate-400">/mo</span>
                           </div>
                         </div>
-                        <div className="p-4">
-                          <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
+                        <div className="p-4 flex-1">
+                          <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold mb-1.5 uppercase tracking-wider">
                             <MapPin className="h-3 w-3 shrink-0" />
                             <span className="truncate">{item.location}</span>
                           </div>
-                          <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                          <h3 className="font-bold text-[15px] text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
                             {item.title}
                           </h3>
-                          <p className="text-slate-500 text-xs line-clamp-2 mt-1">
+                          <p className="text-slate-400 text-xs line-clamp-2 mt-1 leading-relaxed">
                             {item.description}
                           </p>
                         </div>
@@ -290,50 +331,44 @@ export default async function AgentSlugPage({ params }: PageProps) {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-16 bg-slate-50 border border-slate-100 rounded-2xl">
-                  <div className="text-4xl mb-3">🏠</div>
-                  <p className="text-slate-500 font-medium">No active listings at the moment</p>
-                  <p className="text-slate-400 text-sm mt-1">
-                    Check back later or contact the agent directly.
-                  </p>
+                <div className="text-center py-16 bg-slate-50/80 border border-slate-100 rounded-2xl">
+                  <div className="text-3xl mb-3">🏠</div>
+                  <p className="text-slate-500 font-semibold">No active listings at the moment</p>
+                  <p className="text-slate-400 text-sm mt-1">Check back later or contact the agent directly.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* ── Sidebar (1/3) ─────────────────────── */}
           <aside className="lg:col-span-1">
             <div className="lg:sticky lg:top-24 space-y-4">
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                <ShareAgentProfile
-                  name={agent.name}
-                  url={`/agents/${slug}`}
-                />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <ShareAgentProfile name={agent.name} url={`/agents/${slug}`} />
               </div>
 
-              {/* Summary Card */}
               {listings.length > 0 && (
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                    Summary
-                  </h3>
-                  <div className="mt-3 space-y-3">
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="px-5 pt-4 pb-3 border-b border-slate-50">
+                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Summary</h3>
+                  </div>
+                  <div className="px-5 py-4 space-y-3.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">Active listings</span>
-                      <span className="text-sm font-bold text-slate-900">{listings.length}</span>
+                      <span className="text-sm text-slate-500">Active listings</span>
+                      <span className="text-sm font-bold text-slate-900 tabular-nums">{listings.length}</span>
                     </div>
                     {agent.helping_since && (
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">Experience</span>
+                        <span className="text-sm text-slate-500">Experience</span>
                         <span className="text-sm font-bold text-slate-900">
-                          {new Date().getFullYear() - agent.helping_since}+ years
+                          {new Date().getFullYear() - agent.helping_since}+ yrs
                         </span>
                       </div>
                     )}
                     {agent.service_areas && (
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">Areas covered</span>
-                        <span className="text-sm font-bold text-slate-900">{agent.service_areas.length}</span>
+                        <span className="text-sm text-slate-500">Areas covered</span>
+                        <span className="text-sm font-bold text-slate-900 tabular-nums">{agent.service_areas.length}</span>
                       </div>
                     )}
                   </div>
