@@ -14,11 +14,8 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-<<<<<<< HEAD
-=======
     loader: 'custom',
     loaderFile: './src/lib/image/r2-loader.ts',
->>>>>>> 1dc006c (image optimization)
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
