@@ -19,6 +19,7 @@ export async function updateAgentProfileAction(
     linkedin?: string | null;
     instagram_public?: boolean;
     linkedin_public?: boolean;
+    portfolio_url?: string | null;
   }
 ): Promise<ActionResult> {
   const supabase = await createClient();
@@ -47,6 +48,7 @@ export async function updateAgentProfileAction(
     'name', 'whatsapp', 'profile_photo_url', 'cover_image_url',
     'bio', 'service_areas', 'languages', 'helping_since',
     'instagram', 'linkedin', 'instagram_public', 'linkedin_public',
+    'portfolio_url',
   ] as const;
 
   for (const field of allowedFields) {

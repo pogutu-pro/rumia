@@ -367,6 +367,39 @@ export async function updateAgentStatusAction(
 }
 
 /**
+ * Toggles the is_featured flag for an agent.
+ * Featured agents appear first in the public directory and receive the
+ * "Official Rumia Agent" card treatment.
+ */
+export async function toggleAgentFeaturedAction(
+  agentId: string,
+  featured: boolean
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('agents')
+      .update({ is_featured: featured })
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath('/agents');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Updates an agent's name, phone, and/or whatsapp.
  */
 export async function updateAgentAction(

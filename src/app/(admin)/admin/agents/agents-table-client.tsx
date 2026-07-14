@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { updateAgentStatusAction, updateUserRoleAction } from '@/app/actions/admin';
+import { updateAgentStatusAction, updateUserRoleAction, toggleAgentFeaturedAction } from '@/app/actions/admin';
 import type { AdminAgent } from '@/types';
 import { AddAgentSheet } from './add-agent-sheet';
 import { EditAgentSheet } from './[id]/edit-agent-sheet';
@@ -20,6 +20,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
   const [editAgent, setEditAgent] = useState<{ id: string; name: string; phone: string; whatsapp: string } | null>(null);
   const [pendingAgentId, setPendingAgentId] = useState<string | null>(null);
   const [pendingRoleId, setPendingRoleId] = useState<string | null>(null);
+  const [pendingFeaturedId, setPendingFeaturedId] = useState<string | null>(null);
 
   async function handleSuspend(agentId: string) {
     const confirmed = window.confirm('Are you sure you want to suspend this agent?');
@@ -59,6 +60,18 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
     else { toast.error(result.error); }
   }
 
+  async function handleToggleFeatured(agentId: string, currentlyFeatured: boolean) {
+    setPendingFeaturedId(agentId);
+    const result = await toggleAgentFeaturedAction(agentId, !currentlyFeatured);
+    setPendingFeaturedId(null);
+    if (result.success) {
+      toast.success(currentlyFeatured ? 'Agent unfeatured' : 'Agent featured as Official');
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -74,7 +87,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50">
-              {['Name', 'Phone / WhatsApp', 'Active Listings', 'Total Leads', 'Commission Pending (KES)', 'Role', 'Status', 'Actions'].map((h) => (
+              {['Name', 'Phone / WhatsApp', 'Active Listings', 'Total Leads', 'Commission Pending (KES)', 'Role', 'Status', 'Featured', 'Actions'].map((h) => (
                 <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
               ))}
             </tr>
@@ -125,6 +138,20 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                   ) : (
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Suspended</span>
                   )}
+                </td>
+                <td className="px-5 py-4">
+                  <button
+                    onClick={() => handleToggleFeatured(agent.id, !!agent.is_featured)}
+                    disabled={pendingFeaturedId === agent.id}
+                    title={agent.is_featured ? 'Remove featured status' : 'Feature this agent'}
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
+                      agent.is_featured
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                        : 'bg-gray-50 text-gray-400 border border-gray-200 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200'
+                    }`}
+                  >
+                    {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Featured' : '☆ Feature'}
+                  </button>
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3 text-sm">
@@ -194,6 +221,15 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
               <Link href={`/admin/agents/${agent.id}`} className="text-xs font-medium text-emerald-600 hover:underline">View Profile</Link>
               <button onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })} className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">
                 Edit
+              </button>
+              <button
+                onClick={() => handleToggleFeatured(agent.id, !!agent.is_featured)}
+                disabled={pendingFeaturedId === agent.id}
+                className={`text-xs font-medium disabled:opacity-50 ${
+                  agent.is_featured ? 'text-amber-600 hover:underline' : 'text-gray-400 hover:text-amber-600 hover:underline'
+                }`}
+              >
+                {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Unfeature' : '☆ Feature'}
               </button>
               {agent.role === 'admin' ? (
                 <button onClick={() => handleDemoteToAgent(agent.user_id, agent.id)} disabled={pendingRoleId === agent.id} className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">

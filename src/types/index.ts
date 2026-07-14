@@ -18,6 +18,8 @@ export interface Agent {
   instagram_public?: boolean | null;
   linkedin_public?: boolean | null;
   verified?: boolean | null;
+  portfolio_url?: string | null;
+  is_featured?: boolean | null;
   status?: 'active' | 'suspended';
   slug?: string | null;
   user_id?: string | null;
@@ -107,6 +109,7 @@ export interface AdminAgent {
   status: 'active' | 'suspended';
   created_at: string;
   user_id: string;
+  is_featured?: boolean | null;
   // Computed fields (from joins/aggregations)
   active_listings_count?: number;
   total_leads_count?: number;

@@ -190,6 +190,10 @@ export function AgentsDirectoryClient({ agents }: AgentsDirectoryClientProps) {
       result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
 
+    const featured = result.filter((a) => a.is_featured);
+    const rest = result.filter((a) => !a.is_featured);
+    result = [...featured, ...rest];
+
     return result;
   }, [agents, search, selectedAreas, selectedLanguages, verifiedOnly, sortOrder]);
 

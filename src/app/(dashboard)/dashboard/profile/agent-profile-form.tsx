@@ -84,6 +84,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
   const [linkedin, setLinkedin] = useState(agent.linkedin || '');
   const [instagramPublic, setInstagramPublic] = useState(!!agent.instagram_public);
   const [linkedinPublic, setLinkedinPublic] = useState(!!agent.linkedin_public);
+  const [portfolioUrl, setPortfolioUrl] = useState(agent.portfolio_url || '');
 
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
@@ -133,6 +134,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
         linkedin_public: linkedinPublic,
         profile_photo_url: profilePhotoUrl,
         cover_image_url: coverImageUrl,
+        portfolio_url: portfolioUrl || null,
       });
 
       if (result.success) {
@@ -244,6 +246,19 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-slate-900">Social Links</h2>
         <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="portfolio-url">Portfolio Website (optional)</Label>
+            <Input
+              id="portfolio-url"
+              value={portfolioUrl}
+              onChange={(e) => setPortfolioUrl(e.target.value)}
+              placeholder="https://yoursite.com"
+              type="url"
+            />
+            <p className="text-xs text-slate-400">
+              Your personal website, portfolio, or LinkedIn profile
+            </p>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="instagram">Instagram Username (optional)</Label>
             <Input

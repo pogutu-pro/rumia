@@ -407,17 +407,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
               </>
             )}
 
-            {hasCoordinates && (
-              <>
-                <hr className="border-slate-100" />
-                <LocationSection
-                  listingTitle={listing.title}
-                  latitude={listing.latitude}
-                  longitude={listing.longitude}
-                />
-              </>
-            )}
-
             <hr className="border-slate-100" />
             <RoomTypes
               roomTypes={listing.listing_room_types || []}
@@ -426,23 +415,35 @@ export default async function ListingSlugPage({ params }: PageProps) {
             <hr className="border-slate-100" />
 
             {listing.youtube_id && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-950">
-                  Take a Video Tour
-                </h2>
-                <LazyYouTube
-                  videoId={listing.youtube_id}
-                  title={`${listing.title} — hostel walkthrough video`}
-                  isShort={listing.is_youtube_shorts}
-                  autoPlay
-                />
-                <p className="text-xs font-semibold text-slate-500">
-                  Walkthrough video provided by the host.
-                </p>
-              </div>
+              <>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold text-slate-950">
+                    Take a Video Tour
+                  </h2>
+                  <LazyYouTube
+                    videoId={listing.youtube_id}
+                    title={`${listing.title} — hostel walkthrough video`}
+                    isShort={listing.is_youtube_shorts}
+                    autoPlay
+                  />
+                  <p className="text-xs font-semibold text-slate-500">
+                    Walkthrough video provided by the host.
+                  </p>
+                </div>
+                <hr className="border-slate-100" />
+              </>
             )}
 
-            {listing.youtube_id && <hr className="border-slate-100" />}
+            {hasCoordinates && (
+              <>
+                <LocationSection
+                  listingTitle={listing.title}
+                  latitude={listing.latitude}
+                  longitude={listing.longitude}
+                />
+                <hr className="border-slate-100" />
+              </>
+            )}
 
           </div>
 

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, ArrowLeft, Calendar, ShieldCheck, Globe } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, ShieldCheck, Globe, ExternalLink } from 'lucide-react';
 
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -213,6 +213,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
               <div className="pt-1">
                 <AgentContactSection
                   whatsapp={agent.whatsapp || agent.phone || ''}
+                  agentName={agent.name}
                   instagram={agent.instagram}
                   linkedin={agent.linkedin}
                   instagramPublic={agent.instagram_public}
@@ -223,6 +224,26 @@ export default async function AgentSlugPage({ params }: PageProps) {
             </div>
 
             <hr className="border-slate-100" />
+
+            {agent.portfolio_url && (
+              <div className="flex items-center gap-2">
+                <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                <a
+                  href={agent.portfolio_url.startsWith('http') ? agent.portfolio_url : `https://${agent.portfolio_url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline truncate transition-colors"
+                  aria-label="Portfolio website"
+                >
+                  {(() => {
+                    try {
+                      const url = new URL(agent.portfolio_url.startsWith('http') ? agent.portfolio_url : `https://${agent.portfolio_url}`);
+                      return url.hostname + (url.pathname !== '/' ? url.pathname : '');
+                    } catch { return agent.portfolio_url; }
+                  })()}
+                </a>
+              </div>
+            )}
 
             {agent.bio && (
               <div className="space-y-3">

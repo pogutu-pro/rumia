@@ -2,6 +2,7 @@ import { MessageCircle, Camera, Linkedin } from 'lucide-react';
 
 interface AgentContactSectionProps {
   whatsapp: string;
+  agentName?: string | null;
   instagram?: string | null;
   linkedin?: string | null;
   instagramPublic?: boolean | null;
@@ -14,15 +15,23 @@ function cleanPhone(phone: string) {
   return clean.startsWith('+') ? clean : clean.replace(/^0?/, '+254');
 }
 
+function getWhatsAppUrl(phone: string, agentName?: string | null) {
+  const cleaned = cleanPhone(phone);
+  if (!agentName) return `https://wa.me/${cleaned}`;
+  const message = `Hi ${agentName}, I found your profile on Rumia while looking for student accommodation. I'm interested in finding a hostel and would appreciate your assistance. Could you please help me with available options, pricing, location, and arrange a viewing if possible? Thank you!`;
+  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+}
+
 export function AgentContactSection({
   whatsapp,
+  agentName,
   instagram,
   linkedin,
   instagramPublic,
   linkedinPublic,
   horizontal,
 }: AgentContactSectionProps) {
-  const waPhone = cleanPhone(whatsapp);
+  const waUrl = getWhatsAppUrl(whatsapp, agentName);
   const showInstagram = instagram && instagramPublic;
   const showLinkedin = linkedin && linkedinPublic;
 
@@ -30,7 +39,7 @@ export function AgentContactSection({
     return (
       <div className="flex flex-wrap gap-2">
         <a
-          href={`https://wa.me/${waPhone}`}
+          href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-emerald-600/10"
@@ -72,7 +81,7 @@ export function AgentContactSection({
   return (
     <div className="flex flex-wrap gap-3">
       <a
-        href={`https://wa.me/${waPhone}`}
+        href={waUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="flex-1 inline-flex items-center justify-center gap-2 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-emerald-600/10 min-w-[160px]"
