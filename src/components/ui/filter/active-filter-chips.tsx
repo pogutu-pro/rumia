@@ -31,6 +31,8 @@ interface ActiveFilterChipsProps {
   onRemoveRoomType: (value: string) => void;
   onRemovePrice: () => void;
   onRemoveZone: (value: string) => void;
+  onRemoveMaxDistance: () => void;
+  onRemoveSortByNearest: () => void;
   onClearAll: () => void;
 }
 
@@ -41,6 +43,8 @@ export function ActiveFilterChips({
   onRemoveRoomType,
   onRemovePrice,
   onRemoveZone,
+  onRemoveMaxDistance,
+  onRemoveSortByNearest,
   onClearAll,
 }: ActiveFilterChipsProps) {
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
@@ -85,6 +89,24 @@ export function ActiveFilterChips({
     });
   });
 
+  if (filters.maxDistance) {
+    chips.push({
+      key: 'distance',
+      label: filters.maxDistance < 1000
+        ? `Within ${filters.maxDistance}m`
+        : `Within ${filters.maxDistance / 1000}km`,
+      onRemove: onRemoveMaxDistance,
+    });
+  }
+
+  if (filters.sortByNearest) {
+    chips.push({
+      key: 'sort-nearest',
+      label: 'Nearest first',
+      onRemove: onRemoveSortByNearest,
+    });
+  }
+
   if (chips.length === 0) return null;
 
   return (
@@ -110,3 +132,4 @@ export function ActiveFilterChips({
     </div>
   );
 }
+

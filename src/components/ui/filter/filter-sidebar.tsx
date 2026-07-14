@@ -6,6 +6,7 @@ import { AmenitiesFilter } from './amenities-filter';
 import { RoomTypeFilter } from './room-type-filter';
 import { PriceRangeFilter } from './price-range-filter';
 import { LocationFilter } from './location-filter';
+import { DistanceFilter } from './distance-filter';
 import type { FilterState } from '@/stores/filter-store';
 
 interface FilterSidebarProps {
@@ -15,6 +16,8 @@ interface FilterSidebarProps {
   onSetRoomTypes: (v: string[]) => void;
   onSetPriceRange: (min: number | null, max: number | null) => void;
   onSetZones: (v: string[]) => void;
+  onSetMaxDistance: (dist: number | null) => void;
+  onSetSortByNearest: (sort: boolean) => void;
 }
 
 export function FilterSidebar({
@@ -24,6 +27,8 @@ export function FilterSidebar({
   onSetRoomTypes,
   onSetPriceRange,
   onSetZones,
+  onSetMaxDistance,
+  onSetSortByNearest,
 }: FilterSidebarProps) {
   return (
     <div className="space-y-6">
@@ -39,7 +44,15 @@ export function FilterSidebar({
         onChange={onSetPriceRange}
       />
       <Separator />
+      <DistanceFilter
+        maxDistance={filters.maxDistance}
+        sortByNearest={filters.sortByNearest}
+        onChangeMaxDistance={onSetMaxDistance}
+        onChangeSortByNearest={onSetSortByNearest}
+      />
+      <Separator />
       <LocationFilter selected={filters.zones} onChange={onSetZones} />
     </div>
   );
 }
+

@@ -9,6 +9,16 @@ const MIN_PRICE = 1000;
 const MAX_PRICE = 30000;
 const STEP = 500;
 
+const PRESETS = [
+  { label: 'Under KES 3,000', min: null, max: 3000 },
+  { label: 'Under KES 4,000', min: null, max: 4000 },
+  { label: 'Under KES 5,000', min: null, max: 5000 },
+  { label: 'Under KES 6,000', min: null, max: 6000 },
+  { label: 'Under KES 8,000', min: null, max: 8000 },
+  { label: 'Under KES 10,000', min: null, max: 10000 },
+  { label: 'Above KES 10,000', min: 10000, max: null },
+];
+
 interface PriceRangeFilterProps {
   minPrice: number | null;
   maxPrice: number | null;
@@ -134,6 +144,31 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
           {formatCurrency(minPrice ?? MIN_PRICE)} – {formatCurrency(maxPrice ?? MAX_PRICE)}
         </p>
       )}
+
+      <div className="space-y-2 pt-2 border-t border-slate-100">
+        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quick Presets</span>
+        <div className="grid grid-cols-2 gap-2">
+          {PRESETS.map((preset) => {
+            const isActive = minPrice === preset.min && maxPrice === preset.max;
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => onChange(preset.min, preset.max)}
+                className={cn(
+                  'rounded-xl border px-3 py-2 text-xs font-medium transition-all text-center cursor-pointer',
+                  isActive
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50',
+                )}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
+

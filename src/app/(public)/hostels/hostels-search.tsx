@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check } from 'lucide-react';
+import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
@@ -341,6 +341,10 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     setRoomTypes,
     setPriceRange,
     setZones,
+    maxDistance,
+    sortByNearest,
+    setMaxDistance,
+    setSortByNearest,
     reset,
     hydrateFromParams,
     toParams,
@@ -434,6 +438,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     minPrice,
     maxPrice,
     zones,
+    maxDistance,
+    sortByNearest,
   };
 
   const buildCombinedFilters = useCallback(
@@ -508,8 +514,18 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
       setRoomTypes(draft.roomTypes);
       setPriceRange(draft.minPrice, draft.maxPrice);
       setZones(draft.zones);
+      setMaxDistance(draft.maxDistance);
+      setSortByNearest(draft.sortByNearest);
     },
-    [setGenders, setAmenities, setRoomTypes, setPriceRange, setZones],
+    [
+      setGenders,
+      setAmenities,
+      setRoomTypes,
+      setPriceRange,
+      setZones,
+      setMaxDistance,
+      setSortByNearest,
+    ],
   );
 
   const activeFilterCount =
@@ -518,6 +534,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     roomTypes.length +
     (minPrice || maxPrice ? 1 : 0) +
     zones.length;
+
+  const priceFilterActive = minPrice || maxPrice ? 1 : 0;
+  const distanceFilterActive = maxDistance || sortByNearest ? 1 : 0;
 
   const parsedSmart = parseQuery(debouncedQuery);
   const hasSmartFilters =
@@ -588,6 +607,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         {/* Filter toolbar */}
         <div className="mb-5 space-y-3">
           <div className="flex flex-wrap items-center gap-3">
+            {/* Filters — advanced filtering (leave as is) */}
             {isDesktop ? (
               <Sheet
                 open={desktopFilterOpen}
@@ -596,7 +616,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                 <SheetTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                    className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
                   >
                     <SlidersHorizontal className="h-4 w-4" />
                     Filters
@@ -624,6 +644,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                       onSetRoomTypes={setRoomTypes}
                       onSetPriceRange={setPriceRange}
                       onSetZones={setZones}
+                      onSetMaxDistance={setMaxDistance}
+                      onSetSortByNearest={setSortByNearest}
                     />
                   </div>
                 </SheetContent>
@@ -634,6 +656,51 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                 onApply={handleMobileApply}
               />
             )}
+
+            {/* Price — coral/red-pink, the most-used quick filter */}
+            <FilterBottomSheet
+              currentFilters={filters}
+              mode="price"
+              onApply={(d) => setPriceRange(d.minPrice, d.maxPrice)}
+              trigger={
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
+                >
+                  <Tag className="h-4 w-4" />
+                  Price
+                  {priceFilterActive > 0 && (
+                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold">
+                      {priceFilterActive}
+                    </span>
+                  )}
+                </button>
+              }
+            />
+
+            {/* Distance — blue, associated with location */}
+            <FilterBottomSheet
+              currentFilters={filters}
+              mode="distance"
+              onApply={(d) => {
+                setMaxDistance(d.maxDistance);
+                setSortByNearest(d.sortByNearest);
+              }}
+              trigger={
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-blue-500 text-white shadow-sm shadow-blue-200 hover:bg-blue-600"
+                >
+                  <MapPin className="h-4 w-4" />
+                  Distance
+                  {distanceFilterActive > 0 && (
+                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold">
+                      {distanceFilterActive}
+                    </span>
+                  )}
+                </button>
+              }
+            />
 
             {isDesktop && (
               <p className="text-sm text-slate-400 font-semibold">
@@ -674,6 +741,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
             }
             onRemovePrice={() => setPriceRange(null, null)}
             onRemoveZone={(v) => setZones(zones.filter((z) => z !== v))}
+            onRemoveMaxDistance={() => setMaxDistance(null)}
+            onRemoveSortByNearest={() => setSortByNearest(false)}
             onClearAll={handleClearAll}
           />
         </div>
