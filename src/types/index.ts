@@ -35,19 +35,36 @@ export interface Listing {
   is_youtube_shorts?: boolean;
   agent_id: string | number;
   is_active: boolean;
-  // New hostel detail fields
+  created_at?: string;
+  // Location & area
   area?: string | null;
   specific_location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  // Pricing
   price_single?: number | null;
   price_sharing?: number | null;
   mpesa_details?: string | null;
-  distance_category?: string | null;
-  gender?: 'mixed' | 'male' | 'female' | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  bathroom_type?: string | null;
+  // Amenities & features (structured)
   amenities?: string[] | null;
   room_type?: string | null;
+  room_type_enum?: string | null;
+  bathroom_type?: string | null;
+  distance_category?: string | null;
+  distance_to_campus?: string | null;
+  gender?: 'mixed' | 'male' | 'female' | null;
+  // Utilities
+  wifi_included?: boolean | null;
+  water_included?: boolean | null;
+  electricity_included?: boolean | null;
+  security_type?: string | null;
+  // Contact
+  landlord_phone?: string | null;
+  // SEO
+  slug?: string | null;
+  county?: string | null;
+  // Search
+  proximity_description?: string | null;
 }
 
 export interface ListingImage {

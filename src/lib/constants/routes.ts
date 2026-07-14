@@ -3,6 +3,7 @@
 export const PUBLIC_ROUTES = {
   HOME: '/',
   HOSTELS: '/hostels',
+  COMPARE: '/compare',
   LISTING: (id: string | number) => `/listing/${id}`,
   AGENT: (id: string | number) => `/agent/${id}`,
 };

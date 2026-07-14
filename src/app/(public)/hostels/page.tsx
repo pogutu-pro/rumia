@@ -27,7 +27,13 @@ async function getInitialListings(): Promise<Listing[]> {
   const { data } = await supabase
     .from('listings')
     .select(
-      'id, title, description, price, location, slug, county, area, gender, specific_location, price_single, price_sharing, distance_category, listing_images(r2_url, display_order, blur_data_url), agents(name)',
+      `id, title, description, price, location, slug, county, area, gender, specific_location,
+       price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
+       amenities, room_type, room_type_enum, bathroom_type,
+       wifi_included, water_included, electricity_included, security_type,
+       latitude, longitude, proximity_description, created_at,
+       listing_images(r2_url, display_order, blur_data_url),
+       agents(name, phone, whatsapp)`,
     )
     .eq('is_active', true)
     .order('created_at', { ascending: false })

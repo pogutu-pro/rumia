@@ -1,0 +1,1119 @@
+'use client';
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import {
+  ArrowLeft,
+  Trash2,
+  Check,
+  X,
+  MessageCircle,
+  MapPin,
+  BedDouble,
+  ShieldCheck,
+  Wifi,
+  Droplets,
+  Zap,
+  Wallet,
+  Users,
+  Search,
+  GitCompareArrows,
+  Star,
+  Navigation,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useCompareStore, type CompareSelection } from '@/stores/compare-store';
+import { cn } from '@/lib/utils/cn';
+import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
+import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+
+function cleanPhone(phone: string): string {
+  const clean = phone.replace(/[^\d+]/g, '');
+  return clean.startsWith('+') ? clean : clean.replace(/^0?/, '+254');
+}
+
+// ── Animation Variants ──────────────────────────────────────────────────────
+
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06 },
+  },
+};
+
+const fadeSlideUp = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    transition: { duration: 0.2, ease: 'easeIn' as const },
+  },
+};
+
+const cardEntrance = {
+  hidden: { opacity: 0, scale: 0.97, y: 8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    transition: { duration: 0.2, ease: 'easeIn' as const },
+  },
+};
+
+// ── Best Value Badge ────────────────────────────────────────────────────────
+
+function BestValueBadge({
+  label,
+  icon: Icon,
+}: {
+  label: string;
+  icon: React.ElementType;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-bold text-amber-700 whitespace-nowrap">
+      <Icon className="h-3 w-3" />
+      {label}
+    </span>
+  );
+}
+
+// ── Boolean Display ─────────────────────────────────────────────────────────
+
+function BooleanValue({
+  value,
+  label,
+}: {
+  value: boolean | null | undefined;
+  label?: string;
+}) {
+  if (value === null || value === undefined) {
+    return (
+      <span className="text-slate-300 text-sm">—</span>
+    );
+  }
+  return value ? (
+    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100/80">
+        <Check className="h-3 w-3" />
+      </span>
+      {label || 'Included'}
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1.5 text-sm text-slate-400">
+      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100">
+        <X className="h-3 w-3" />
+      </span>
+      Not included
+    </span>
+  );
+}
+
+// ── Amenity Chips ───────────────────────────────────────────────────────────
+
+function AmenityChips({ amenities }: { amenities: string[] | null | undefined }) {
+  if (!amenities || amenities.length === 0) {
+    return <span className="text-slate-300 text-sm">—</span>;
+  }
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {amenities.map((a) => (
+        <span
+          key={a}
+          className="inline-flex items-center rounded-full bg-slate-100/80 border border-slate-200/60 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-200/60"
+        >
+          {a}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ── Price Display ───────────────────────────────────────────────────────────
+
+function PriceDisplay({
+  h,
+  isLowest,
+  size = 'default',
+}: {
+  h: CompareSelection;
+  isLowest?: boolean;
+  size?: 'default' | 'large';
+}) {
+  const price = h.price_single ?? h.price_sharing ?? h.price;
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={cn(
+          'font-black text-slate-900 tabular-nums',
+          size === 'large' ? 'text-lg' : 'text-sm',
+          isLowest && 'text-emerald-600',
+        )}
+      >
+        KES {price.toLocaleString()}
+      </span>
+      <span className="text-xs font-medium text-slate-400">/mo</span>
+      {isLowest && (
+        <BestValueBadge label="Best Price" icon={Star} />
+      )}
+    </div>
+  );
+}
+
+// ── Skeleton Loading ────────────────────────────────────────────────────────
+
+function CompareSkeleton() {
+  return (
+    <div className="min-h-screen bg-slate-50/50 py-6 lg:py-10">
+      <div className="mx-auto max-w-6xl px-4 lg:px-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9 rounded-xl" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+          <Skeleton className="h-9 w-24 rounded-xl" />
+        </div>
+
+        <div className="hidden md:grid gap-4" style={{ gridTemplateColumns: '120px repeat(3, 1fr)' }}>
+          <div />
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-slate-100 bg-white overflow-hidden">
+              <Skeleton className="aspect-4/3 w-full rounded-none" />
+              <div className="p-3 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden md:block mt-6 rounded-2xl border border-slate-100 bg-white p-6 space-y-4">
+          {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <div key={i} className="grid gap-4" style={{ gridTemplateColumns: '120px repeat(3, 1fr)' }}>
+              <Skeleton className="h-4 w-20" />
+              {[1, 2, 3].map((j) => (
+                <Skeleton key={j} className="h-4 w-full" />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Empty State ─────────────────────────────────────────────────────────────
+
+function EmptyState({ count }: { count: number }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="min-h-[60vh] flex items-center justify-center"
+    >
+      <div className="text-center space-y-6 max-w-sm">
+        <motion.div
+          initial={shouldReduceMotion ? undefined : { scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.15, duration: 0.4, type: 'spring', damping: 20 }}
+          className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 flex items-center justify-center ring-1 ring-emerald-200/60 shadow-sm"
+        >
+          {count === 0 ? (
+            <GitCompareArrows className="h-10 w-10 text-emerald-500" />
+          ) : (
+            <Users className="h-10 w-10 text-emerald-500" />
+          )}
+        </motion.div>
+
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            {count === 0
+              ? 'No hostels selected'
+              : 'Select at least 2 hostels'}
+          </h1>
+          <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+            {count === 0
+              ? 'Browse hostels and tap the compare icon to add them here. You can compare up to 4 hostels side by side.'
+              : 'Add one more hostel from the search results to start comparing prices, amenities, and locations.'}
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/hostels"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm shadow-emerald-600/20 transition-all hover:bg-emerald-500 hover:shadow-md hover:shadow-emerald-600/10 active:scale-[0.98]"
+          >
+            <Search className="h-4 w-4" />
+            Browse Hostels
+          </Link>
+          {count === 1 && (
+            <Link
+              href="/hostels"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-[0.98]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Results
+            </Link>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Desktop Comparison Row ──────────────────────────────────────────────────
+
+function DesktopCompareRow({
+  label,
+  icon: Icon,
+  children,
+  isHighlight,
+  className,
+}: {
+  label: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  isHighlight?: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'grid gap-4 py-3.5 px-6 border-b border-slate-100/80 last:border-0 transition-colors duration-200',
+        isHighlight && 'bg-emerald-50/30',
+        className,
+      )}
+      style={{ gridTemplateColumns: '140px 1fr' }}
+      role="row"
+    >
+      <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <Icon className="h-4 w-4 shrink-0 text-slate-400" />
+        {label}
+      </div>
+      <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${React.Children.count(children)}, 1fr)` }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── Desktop Comparison Cell ─────────────────────────────────────────────────
+
+function DesktopCell({
+  children,
+  isBest,
+  className,
+}: {
+  children: React.ReactNode;
+  isBest?: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'text-sm font-medium text-slate-700 flex items-center min-h-[28px]',
+        isBest && 'text-emerald-700 font-semibold',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── Desktop Table ───────────────────────────────────────────────────────────
+
+function DesktopCompareTable({
+  hostels,
+  onRemove,
+}: {
+  hostels: CompareSelection[];
+  onRemove: (id: string) => void;
+}) {
+  const cols = hostels.length;
+  const shouldReduceMotion = useReducedMotion();
+
+  const lowestPrice = Math.min(
+    ...hostels.map((h) => h.price_single ?? h.price_sharing ?? h.price),
+  );
+
+  const shortestDistance = hostels.reduce(
+    (best, h) => {
+      const order = ['walking-500m', '5-10min', '1-2km', '3km', 'over-3km'];
+      const idx = order.indexOf(h.distanceCategory || '');
+      if (idx === -1) return best;
+      if (best.idx === -1 || idx < best.idx) return { idx, id: h.id };
+      return best;
+    },
+    { idx: -1, id: '' },
+  );
+
+  return (
+    <div className="hidden md:block">
+      {/* Sticky Header Row */}
+      <div
+        className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm"
+      >
+        <div
+          className="grid gap-4 pb-4"
+          style={{ gridTemplateColumns: `140px repeat(${cols}, 1fr)` }}
+        >
+          <div className="flex items-end pb-2">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Attribute
+            </span>
+          </div>
+          <AnimatePresence mode="popLayout">
+            {hostels.map((h) => {
+              const href = h.slug
+                ? `/hostels/${h.county ?? 'nyeri'}/${h.area ?? 'dekut'}/${h.slug}`
+                : `/listing/${h.id}`;
+              const isLowestPrice =
+                (h.price_single ?? h.price_sharing ?? h.price) === lowestPrice &&
+                cols > 1;
+
+              return (
+                <motion.div
+                  key={h.id}
+                  variants={shouldReduceMotion ? undefined : cardEntrance}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  layout
+                  className="relative bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 group"
+                >
+                  <Link href={href} className="block">
+                    <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                      <Image
+                        src={h.imageUrl || FALLBACK_IMAGE}
+                        alt={h.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="300px"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                  </Link>
+
+                  <div className="p-3.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={href}
+                          className="font-bold text-sm text-slate-900 line-clamp-1 hover:text-emerald-600 transition-colors"
+                        >
+                          {h.title}
+                        </Link>
+                        {h.area && (
+                          <p className="text-xs text-slate-400 font-medium mt-0.5 flex items-center gap-1">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{h.area}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <PriceDisplay h={h} isLowest={isLowestPrice} />
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {h.gender && (
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
+                            h.gender === 'female'
+                              ? 'bg-pink-50 text-pink-600 border border-pink-200/60'
+                              : h.gender === 'male'
+                                ? 'bg-blue-50 text-blue-600 border border-blue-200/60'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200/60',
+                          )}
+                        >
+                          <Users className="h-2.5 w-2.5" />
+                          {h.gender === 'female'
+                            ? 'Ladies'
+                            : h.gender === 'male'
+                              ? 'Gents'
+                              : 'Mixed'}
+                        </span>
+                      )}
+                      {h.distanceCategory && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-200/60">
+                          <Navigation className="h-2.5 w-2.5" />
+                          {getDistanceBadgeText(h.distanceCategory) || h.distanceCategory}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    onClick={() => onRemove(h.id)}
+                    className="absolute top-2.5 right-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-slate-400 shadow-sm border border-slate-200/50 transition-all duration-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200/50 cursor-pointer opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    aria-label={`Remove ${h.title} from comparison`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Comparison Body */}
+      <motion.div
+        variants={shouldReduceMotion ? undefined : stagger}
+        initial="hidden"
+        animate="visible"
+        className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden"
+      >
+        {/* Price */}
+        <DesktopCompareRow label="Price" icon={Wallet}>
+          {hostels.map((h) => {
+            const isLowest =
+              (h.price_single ?? h.price_sharing ?? h.price) === lowestPrice &&
+              cols > 1;
+            return (
+              <DesktopCell key={h.id} isBest={isLowest}>
+                <PriceDisplay h={h} isLowest={isLowest} />
+              </DesktopCell>
+            );
+          })}
+        </DesktopCompareRow>
+
+        {/* Room Type */}
+        <DesktopCompareRow label="Room Type" icon={BedDouble}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <span className="truncate">
+                {h.roomType || h.roomTypeEnum?.replace('_', ' ') || '—'}
+              </span>
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Distance */}
+        <DesktopCompareRow label="Distance" icon={Navigation}>
+          {hostels.map((h) => {
+            const badge = getDistanceBadgeText(h.distanceCategory);
+            const text = badge
+              ? badge + (h.distanceToCampus ? ` (${h.distanceToCampus})` : '')
+              : h.distanceToCampus || '—';
+            const isClosest =
+              shortestDistance.id === h.id && cols > 1;
+            return (
+              <DesktopCell key={h.id} isBest={isClosest}>
+                <span className="flex items-center gap-2">
+                  <span className="truncate">{text}</span>
+                  {isClosest && <BestValueBadge label="Closest" icon={Star} />}
+                </span>
+              </DesktopCell>
+            );
+          })}
+        </DesktopCompareRow>
+
+        {/* Amenities */}
+        <DesktopCompareRow label="Amenities" icon={Check}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <AmenityChips amenities={h.amenities} />
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Bathroom */}
+        <DesktopCompareRow label="Bathroom" icon={Droplets}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <span className="truncate">{h.bathroomType || '—'}</span>
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* WiFi */}
+        <DesktopCompareRow label="WiFi" icon={Wifi}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <BooleanValue value={h.wifiIncluded} label="WiFi Included" />
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Water */}
+        <DesktopCompareRow label="Water" icon={Droplets}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <BooleanValue value={h.waterIncluded} label="Water Included" />
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Electricity */}
+        <DesktopCompareRow label="Electricity" icon={Zap}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <BooleanValue
+                value={h.electricityIncluded}
+                label="Electricity Included"
+              />
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Security */}
+        <DesktopCompareRow label="Security" icon={ShieldCheck}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              {h.securityType ? (
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <span className="truncate capitalize">{h.securityType}</span>
+                </span>
+              ) : (
+                <span className="text-slate-300">—</span>
+              )}
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Gender */}
+        <DesktopCompareRow label="Gender" icon={Users}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              {h.gender ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      'h-2 w-2 rounded-full shrink-0',
+                      h.gender === 'female'
+                        ? 'bg-pink-400'
+                        : h.gender === 'male'
+                          ? 'bg-blue-400'
+                          : 'bg-slate-400',
+                    )}
+                  />
+                  <span className="capitalize">
+                    {h.gender === 'female'
+                      ? 'Ladies Only'
+                      : h.gender === 'male'
+                        ? 'Gents Only'
+                        : 'Mixed'}
+                  </span>
+                </span>
+              ) : (
+                <span className="text-slate-300">—</span>
+              )}
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Payment */}
+        <DesktopCompareRow label="Payment" icon={CreditCard}>
+          {hostels.map((h) => (
+            <DesktopCell key={h.id}>
+              <span className="truncate text-sm">
+                {h.mpesaDetails || 'M-Pesa'}
+              </span>
+            </DesktopCell>
+          ))}
+        </DesktopCompareRow>
+
+        {/* Agent / WhatsApp CTA Row */}
+        <div
+          className="grid gap-4 py-5 px-6 border-t border-slate-200/80 bg-gradient-to-r from-slate-50/50 to-emerald-50/20"
+          style={{ gridTemplateColumns: `140px repeat(${cols}, 1fr)` }}
+        >
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <MessageCircle className="h-4 w-4 shrink-0 text-slate-400" />
+            Agent
+          </div>
+          {hostels.map((h) => {
+            const phone = h.agentWhatsapp || h.agentPhone || '';
+            const waPhone = phone ? cleanPhone(phone) : '';
+            return (
+              <div key={h.id} className="space-y-2.5">
+                <p className="text-sm font-semibold text-slate-700">
+                  {h.agentName || 'Rumia Agent'}
+                </p>
+                {waPhone ? (
+                  <a
+                    href={`https://wa.me/${waPhone}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-emerald-600/20 transition-all duration-200 hover:bg-emerald-500 hover:shadow-md hover:shadow-emerald-600/10 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                    aria-label={`Contact ${h.agentName || 'agent'} via WhatsApp`}
+                  >
+                    <MessageCircle className="h-4 w-4 fill-current" />
+                    Contact via WhatsApp
+                  </a>
+                ) : (
+                  <span className="text-xs text-slate-400 font-medium">
+                    No contact available
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Mobile Progress Dots ────────────────────────────────────────────────────
+
+function MobileProgressDots({
+  current,
+  total,
+}: {
+  current: number;
+  total: number;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-1.5 py-3" role="tablist" aria-label="Comparison progress">
+      {Array.from({ length: total }, (_, i) => (
+        <div
+          key={i}
+          className={cn(
+            'rounded-full transition-all duration-300',
+            i === current
+              ? 'h-2 w-6 bg-emerald-500'
+              : 'h-2 w-2 bg-slate-300',
+          )}
+          role="tab"
+          aria-selected={i === current}
+          aria-label={`Hostel ${i + 1} of ${total}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Mobile Scroll Cards ─────────────────────────────────────────────────────
+
+function MobileCompareCards({
+  hostels,
+  onRemove,
+}: {
+  hostels: CompareSelection[];
+  onRemove: (id: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+
+  const lowestPrice = Math.min(
+    ...hostels.map((h) => h.price_single ?? h.price_sharing ?? h.price),
+  );
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.offsetWidth * 0.85 + 16;
+    const index = Math.round(scrollLeft / cardWidth);
+    setActiveIndex(Math.min(Math.max(index, 0), hostels.length - 1));
+  }, [hostels.length]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const cardWidth = el.offsetWidth * 0.85 + 16;
+      el.scrollTo({ left: cardWidth * index, behavior: 'smooth' });
+    },
+    [],
+  );
+
+  const activeHostel = hostels[activeIndex];
+  const activePhone = activeHostel
+    ? activeHostel.agentWhatsapp || activeHostel.agentPhone || ''
+    : '';
+  const activeWaPhone = activePhone ? cleanPhone(activePhone) : '';
+
+  return (
+    <div className="md:hidden">
+      {/* Progress indicator */}
+      <MobileProgressDots current={activeIndex} total={hostels.length} />
+
+      {/* Navigation arrows */}
+      {hostels.length > 1 && (
+        <div className="flex items-center justify-between px-1 mb-2">
+          <button
+            type="button"
+            onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
+            disabled={activeIndex === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 cursor-pointer"
+            aria-label="Previous hostel"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="text-xs font-semibold text-slate-400 tabular-nums">
+            {activeIndex + 1} / {hostels.length}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              scrollTo(Math.min(hostels.length - 1, activeIndex + 1))
+            }
+            disabled={activeIndex === hostels.length - 1}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 cursor-pointer"
+            aria-label="Next hostel"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Scrollable cards */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-32 px-1 scrollbar-hide"
+        style={{ scrollPaddingInline: '0.5rem' }}
+        role="tabpanel"
+      >
+        <AnimatePresence mode="popLayout">
+          {hostels.map((h) => {
+            const href = h.slug
+              ? `/hostels/${h.county ?? 'nyeri'}/${h.area ?? 'dekut'}/${h.slug}`
+              : `/listing/${h.id}`;
+            const phone = h.agentWhatsapp || h.agentPhone || '';
+            const waPhone = phone ? cleanPhone(phone) : '';
+            const effectivePrice =
+              h.price_single ?? h.price_sharing ?? h.price;
+            const isLowest =
+              effectivePrice === lowestPrice && hostels.length > 1;
+
+            return (
+              <motion.div
+                key={h.id}
+                variants={shouldReduceMotion ? undefined : cardEntrance}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                layout
+                className="snap-center shrink-0 w-[85vw] max-w-sm bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden"
+              >
+                {/* Image */}
+                <div className="relative aspect-video bg-slate-100 overflow-hidden">
+                  <Image
+                    src={h.imageUrl || FALLBACK_IMAGE}
+                    alt={h.title}
+                    fill
+                    className="object-cover"
+                    sizes="85vw"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onRemove(h.id)}
+                    className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-slate-400 shadow-sm border border-white/50 transition-all hover:bg-red-50 hover:text-red-500 cursor-pointer"
+                    aria-label={`Remove ${h.title}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  {isLowest && (
+                    <div className="absolute top-3 left-3">
+                      <BestValueBadge label="Best Price" icon={Star} />
+                    </div>
+                  )}
+                  {h.gender && (
+                    <div className="absolute bottom-3 left-3">
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm',
+                          h.gender === 'female'
+                            ? 'bg-pink-500/80'
+                            : h.gender === 'male'
+                              ? 'bg-blue-500/80'
+                              : 'bg-slate-700/80',
+                        )}
+                      >
+                        <Users className="h-3 w-3" />
+                        {h.gender === 'female'
+                          ? 'Ladies'
+                          : h.gender === 'male'
+                            ? 'Gents'
+                            : 'Mixed'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-4 space-y-3">
+                  {/* Title & Location */}
+                  <div>
+                    <Link href={href}>
+                      <h3 className="font-bold text-slate-900 line-clamp-1 hover:text-emerald-600 transition-colors">
+                        {h.title}
+                      </h3>
+                    </Link>
+                    {h.area && (
+                      <p className="text-xs text-slate-400 font-medium mt-0.5 flex items-center gap-1">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        <span className="truncate">
+                          {h.area}
+                          {h.specificLocation && ` · ${h.specificLocation}`}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Price */}
+                  <div className="pt-3 border-t border-slate-100">
+                    <PriceDisplay h={h} isLowest={isLowest} size="large" />
+                    {h.price_single && h.price_sharing && (
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <span className="text-xs text-slate-500 font-medium">
+                          Single: KES {h.price_single.toLocaleString()}
+                        </span>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-xs text-slate-500 font-medium">
+                          Sharing: KES {h.price_sharing.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Key facts */}
+                  <div className="grid grid-cols-2 gap-2.5 text-xs">
+                    <div className="flex items-center gap-2 text-slate-600 bg-slate-50/80 rounded-xl px-3 py-2">
+                      <BedDouble className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium truncate">
+                        {h.roomType || h.roomTypeEnum?.replace('_', ' ') || '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600 bg-slate-50/80 rounded-xl px-3 py-2">
+                      <Navigation className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium truncate">
+                        {getDistanceBadgeText(h.distanceCategory) ||
+                          h.distanceToCampus ||
+                          '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600 bg-slate-50/80 rounded-xl px-3 py-2">
+                      <Droplets className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium truncate">
+                        {h.bathroomType || '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600 bg-slate-50/80 rounded-xl px-3 py-2">
+                      <ShieldCheck className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium truncate capitalize">
+                        {h.securityType || '—'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Utilities */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {h.wifiIncluded && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                        <Wifi className="h-3 w-3" /> WiFi
+                      </span>
+                    )}
+                    {h.waterIncluded && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 text-[10px] font-bold text-blue-600">
+                        <Droplets className="h-3 w-3" /> Water
+                      </span>
+                    )}
+                    {h.electricityIncluded && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">
+                        <Zap className="h-3 w-3" /> Power
+                      </span>
+                    )}
+                    {!h.wifiIncluded && !h.waterIncluded && !h.electricityIncluded && (
+                      <span className="text-xs text-slate-400 font-medium">No utilities listed</span>
+                    )}
+                  </div>
+
+                  {/* Amenities */}
+                  <AmenityChips amenities={h.amenities} />
+
+                  {/* Agent */}
+                  <div className="pt-3 border-t border-slate-100 space-y-2">
+                    <p className="text-xs font-semibold text-slate-500">
+                      {h.agentName || 'Rumia Agent'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Sticky Mobile CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 safe-bottom">
+        <div className="bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 py-3">
+          <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-900 line-clamp-1">
+                {activeHostel?.title || 'Select a hostel'}
+              </p>
+              <p className="text-xs font-semibold text-emerald-600 tabular-nums">
+                KES{' '}
+                {(activeHostel
+                  ? (
+                      activeHostel.price_single ||
+                      activeHostel.price_sharing ||
+                      activeHostel.price
+                    ).toLocaleString()
+                  : '0')}
+                <span className="text-slate-400 font-medium">/mo</span>
+              </p>
+            </div>
+            {activeWaPhone && (
+              <a
+                href={`https://wa.me/${activeWaPhone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-emerald-600/20 transition-all duration-200 hover:bg-emerald-500 active:scale-[0.98] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                aria-label={`Contact ${activeHostel?.agentName || 'agent'} via WhatsApp`}
+              >
+                <MessageCircle className="h-4 w-4 fill-current" />
+                WhatsApp
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Page ────────────────────────────────────────────────────────────────────
+
+export default function ComparePage() {
+  const hydrateCompare = useCompareStore((s) => s.hydrateFromStorage);
+  const hydrated = useCompareStore((s) => s.hydrated);
+  const selectedIds = useCompareStore((s) => s.selectedIds);
+  const selections = useCompareStore((s) => s.selections);
+  const removeSelection = useCompareStore((s) => s.removeSelection);
+  const clearSelection = useCompareStore((s) => s.clearSelection);
+
+  useEffect(() => {
+    hydrateCompare();
+  }, [hydrateCompare]);
+
+  const hostels = selectedIds
+    .map((id) => selections[id])
+    .filter(Boolean) as CompareSelection[];
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      removeSelection(id);
+      toast.success('Hostel removed', {
+        description: 'The hostel has been removed from your comparison.',
+      });
+    },
+    [removeSelection],
+  );
+
+  const handleClear = useCallback(() => {
+    clearSelection();
+    toast.success('Comparison cleared', {
+      description: 'All hostels have been removed.',
+    });
+  }, [clearSelection]);
+
+  if (!hydrated) {
+    return <CompareSkeleton />;
+  }
+
+  if (hostels.length === 0 || hostels.length === 1) {
+    return (
+      <div className="min-h-screen bg-slate-50/50 py-6 lg:py-10">
+        <div className="mx-auto max-w-6xl px-4 lg:px-8">
+          <EmptyState count={hostels.length} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50/50 py-6 lg:py-10">
+      <div className="mx-auto max-w-6xl px-4 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center justify-between mb-6"
+        >
+          <div className="flex items-center gap-3">
+            <Link
+              href="/hostels"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-md active:scale-[0.98] cursor-pointer"
+              aria-label="Back to search"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <div>
+              <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+                Compare Hostels
+              </h1>
+              <p className="text-sm text-slate-400 font-medium">
+                {hostels.length} of 4 hostels selected
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/hostels"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-[0.98] cursor-pointer"
+            >
+              <Search className="h-3.5 w-3.5" />
+              Add More
+            </Link>
+            <button
+              type="button"
+              onClick={handleClear}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-[0.98] cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Clear All
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Desktop Table */}
+        <DesktopCompareTable hostels={hostels} onRemove={handleRemove} />
+
+        {/* Mobile Scroll */}
+        <MobileCompareCards hostels={hostels} onRemove={handleRemove} />
+
+        <div className="mt-10">
+          <EarlyAccessBanner />
+        </div>
+      </div>
+    </div>
+  );
+}
