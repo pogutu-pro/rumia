@@ -6,7 +6,7 @@ export default async function AgentsPage() {
   const supabase = await createClient();
 
   const { data: agentsRaw } = await (supabase as any).from('agents').select(`
-    id, name, phone, whatsapp, status, created_at, user_id, is_featured,
+    id, name, phone, whatsapp, status, created_at, user_id, is_featured, is_founder,
     listings(id, is_active),
     leads(id),
     commissions(amount, status)
@@ -47,6 +47,7 @@ export default async function AgentsPage() {
         .reduce((sum, c) => sum + (c.amount ?? 0), 0),
       role: (roleMap[agent.user_id] as AdminAgent['role']) ?? 'agent',
       is_featured: agent.is_featured ?? false,
+      is_founder: agent.is_founder ?? false,
     };
   });
 

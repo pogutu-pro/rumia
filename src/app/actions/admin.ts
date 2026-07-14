@@ -400,6 +400,41 @@ export async function toggleAgentFeaturedAction(
 }
 
 /**
+ * Toggles the is_founder flag for an agent.
+ * Founder agents receive the "Founder" badge — separate from "Official".
+ * Admin decides independently who gets each badge.
+ */
+export async function toggleAgentFounderAction(
+  agentId: string,
+  founder: boolean
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('agents')
+      .update({ is_founder: founder })
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath('/agents');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+
+
+/**
  * Updates an agent's name, phone, and/or whatsapp.
  */
 export async function updateAgentAction(

@@ -20,6 +20,7 @@ export interface Agent {
   verified?: boolean | null;
   portfolio_url?: string | null;
   is_featured?: boolean | null;
+  is_founder?: boolean | null;
   status?: 'active' | 'suspended';
   slug?: string | null;
   user_id?: string | null;
@@ -110,6 +111,7 @@ export interface AdminAgent {
   created_at: string;
   user_id: string;
   is_featured?: boolean | null;
+  is_founder?: boolean | null;
   // Computed fields (from joins/aggregations)
   active_listings_count?: number;
   total_leads_count?: number;

@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { updateAgentStatusAction, updateUserRoleAction, toggleAgentFeaturedAction } from '@/app/actions/admin';
+import {
+  updateAgentStatusAction,
+  updateUserRoleAction,
+  toggleAgentFeaturedAction,
+  toggleAgentFounderAction,
+} from '@/app/actions/admin';
 import type { AdminAgent } from '@/types';
 import { AddAgentSheet } from './add-agent-sheet';
 import { EditAgentSheet } from './[id]/edit-agent-sheet';
@@ -21,6 +26,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
   const [pendingAgentId, setPendingAgentId] = useState<string | null>(null);
   const [pendingRoleId, setPendingRoleId] = useState<string | null>(null);
   const [pendingFeaturedId, setPendingFeaturedId] = useState<string | null>(null);
+  const [pendingFounderId, setPendingFounderId] = useState<string | null>(null);
 
   async function handleSuspend(agentId: string) {
     const confirmed = window.confirm('Are you sure you want to suspend this agent?');
@@ -60,12 +66,24 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
     else { toast.error(result.error); }
   }
 
-  async function handleToggleFeatured(agentId: string, currentlyFeatured: boolean) {
+  async function handleToggleOfficial(agentId: string, current: boolean) {
     setPendingFeaturedId(agentId);
-    const result = await toggleAgentFeaturedAction(agentId, !currentlyFeatured);
+    const result = await toggleAgentFeaturedAction(agentId, !current);
     setPendingFeaturedId(null);
     if (result.success) {
-      toast.success(currentlyFeatured ? 'Agent unfeatured' : 'Agent featured as Official');
+      toast.success(current ? 'Official badge removed' : 'Official badge granted');
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  async function handleToggleFounder(agentId: string, current: boolean) {
+    setPendingFounderId(agentId);
+    const result = await toggleAgentFounderAction(agentId, !current);
+    setPendingFounderId(null);
+    if (result.success) {
+      toast.success(current ? 'Founder badge removed' : 'Founder badge granted');
       router.refresh();
     } else {
       toast.error(result.error);
@@ -87,14 +105,14 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50">
-              {['Name', 'Phone / WhatsApp', 'Active Listings', 'Total Leads', 'Commission Pending (KES)', 'Role', 'Status', 'Featured', 'Actions'].map((h) => (
+              {['Name', 'Phone / WhatsApp', 'Active Listings', 'Total Leads', 'Commission Pending (KES)', 'Role', 'Status', 'Official', 'Founder', 'Actions'].map((h) => (
                 <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {agents.length === 0 ? (
-              <tr><td colSpan={8} className="text-sm text-gray-400 text-center px-5 py-8">No agents registered.</td></tr>
+              <tr><td colSpan={10} className="text-sm text-gray-400 text-center px-5 py-8">No agents registered.</td></tr>
             ) : agents.map((agent) => (
               <tr key={agent.id} className="hover:bg-gray-50 transition-colors">
                 <td className="text-sm px-5 py-4">
@@ -107,6 +125,8 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 <td className="text-sm text-gray-600 px-5 py-4">{agent.active_listings_count ?? 0}</td>
                 <td className="text-sm text-gray-600 px-5 py-4">{agent.total_leads_count ?? 0}</td>
                 <td className="text-sm text-gray-600 px-5 py-4">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</td>
+
+                {/* Role */}
                 <td className="px-5 py-4">
                   {agent.role === 'admin' ? (
                     <div className="flex items-center gap-2">
@@ -132,6 +152,8 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                     </div>
                   )}
                 </td>
+
+                {/* Status */}
                 <td className="px-5 py-4">
                   {agent.status === 'active' ? (
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
@@ -139,20 +161,40 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Suspended</span>
                   )}
                 </td>
+
+                {/* Official badge (is_featured) */}
                 <td className="px-5 py-4">
                   <button
-                    onClick={() => handleToggleFeatured(agent.id, !!agent.is_featured)}
+                    onClick={() => handleToggleOfficial(agent.id, !!agent.is_featured)}
                     disabled={pendingFeaturedId === agent.id}
-                    title={agent.is_featured ? 'Remove featured status' : 'Feature this agent'}
+                    title={agent.is_featured ? 'Remove Official badge' : 'Grant Official badge'}
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
                       agent.is_featured
                         ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
                         : 'bg-gray-50 text-gray-400 border border-gray-200 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200'
                     }`}
                   >
-                    {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Featured' : '☆ Feature'}
+                    {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Official' : '☆ Official'}
                   </button>
                 </td>
+
+                {/* Founder badge (is_founder) */}
+                <td className="px-5 py-4">
+                  <button
+                    onClick={() => handleToggleFounder(agent.id, !!agent.is_founder)}
+                    disabled={pendingFounderId === agent.id}
+                    title={agent.is_founder ? 'Remove Founder badge' : 'Grant Founder badge'}
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
+                      agent.is_founder
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100'
+                        : 'bg-gray-50 text-gray-400 border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'
+                    }`}
+                  >
+                    {pendingFounderId === agent.id ? '...' : agent.is_founder ? '🏅 Founder' : '○ Founder'}
+                  </button>
+                </td>
+
+                {/* Actions */}
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3 text-sm">
                     <Link href={`/admin/agents/${agent.id}`} className="text-emerald-600 hover:underline font-medium">View</Link>
@@ -190,7 +232,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 <Link href={`/admin/agents/${agent.id}`} className="text-sm font-semibold text-gray-900 hover:text-emerald-600">{agent.name}</Link>
                 <p className="text-xs text-gray-400 mt-0.5">{agent.phone}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap justify-end">
                 {agent.role === 'admin' ? (
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">Admin</span>
                 ) : (
@@ -201,8 +243,15 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 ) : (
                   <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Suspended</span>
                 )}
+                {agent.is_featured && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">★ Official</span>
+                )}
+                {agent.is_founder && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">🏅 Founder</span>
+                )}
               </div>
             </div>
+
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-gray-50 rounded-lg p-2">
                 <p className="text-xs text-gray-400">Listings</p>
@@ -217,20 +266,39 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 <p className="text-sm font-semibold text-gray-900">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</p>
               </div>
             </div>
+
             <div className="flex items-center gap-3 pt-1 flex-wrap">
               <Link href={`/admin/agents/${agent.id}`} className="text-xs font-medium text-emerald-600 hover:underline">View Profile</Link>
-              <button onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })} className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">
+              <button
+                onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })}
+                className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline"
+              >
                 Edit
               </button>
+
+              {/* Official toggle */}
               <button
-                onClick={() => handleToggleFeatured(agent.id, !!agent.is_featured)}
+                onClick={() => handleToggleOfficial(agent.id, !!agent.is_featured)}
                 disabled={pendingFeaturedId === agent.id}
                 className={`text-xs font-medium disabled:opacity-50 ${
                   agent.is_featured ? 'text-amber-600 hover:underline' : 'text-gray-400 hover:text-amber-600 hover:underline'
                 }`}
               >
-                {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Unfeature' : '☆ Feature'}
+                {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Remove Official' : '☆ Grant Official'}
               </button>
+
+              {/* Founder toggle */}
+              <button
+                onClick={() => handleToggleFounder(agent.id, !!agent.is_founder)}
+                disabled={pendingFounderId === agent.id}
+                className={`text-xs font-medium disabled:opacity-50 ${
+                  agent.is_founder ? 'text-indigo-600 hover:underline' : 'text-gray-400 hover:text-indigo-600 hover:underline'
+                }`}
+              >
+                {pendingFounderId === agent.id ? '...' : agent.is_founder ? '🏅 Remove Founder' : '○ Grant Founder'}
+              </button>
+
+              {/* Role */}
               {agent.role === 'admin' ? (
                 <button onClick={() => handleDemoteToAgent(agent.user_id, agent.id)} disabled={pendingRoleId === agent.id} className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
                   {pendingRoleId === agent.id ? '...' : 'Demote to Agent'}
@@ -240,6 +308,8 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                   {pendingRoleId === agent.id ? '...' : 'Promote to Admin'}
                 </button>
               )}
+
+              {/* Suspend / Activate */}
               {agent.status === 'active' ? (
                 <button onClick={() => handleSuspend(agent.id)} disabled={pendingAgentId === agent.id} className="text-xs font-medium text-red-500 hover:underline disabled:opacity-50">
                   {pendingAgentId === agent.id ? 'Suspending...' : 'Suspend'}
