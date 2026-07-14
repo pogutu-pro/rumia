@@ -8,6 +8,7 @@ import { SwipeNavigator } from '@/components/pwa/SwipeNavigator';
 import { BottomNav } from '@/components/pwa/BottomNav';
 import { GestureTutorial } from '@/components/pwa/GestureTutorial';
 import { AnimatedMain } from '@/components/pwa/AnimatedMain';
+import { CompareTray } from '@/components/compare/compare-tray';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import '@/styles/globals.css';
 
@@ -98,6 +99,7 @@ export default function RootLayout({
                 {children}
               </AnimatedMain>
             </SwipeNavigator>
+            <CompareTray />
             <BottomNav />
             <GestureTutorial />
           </NavigationProvider>

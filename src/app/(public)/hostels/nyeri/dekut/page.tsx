@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import Image from 'next/image';
-import { MapPin, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { JsonLd } from '@/components/seo/json-ld';
+import DeKutCompareGrid from './dekut-compare-grid';
 
 export const revalidate = 3600;
 
@@ -68,9 +68,13 @@ export default async function DeKUTLandingPage() {
     .from('listings')
     .select(
       `
-      id, title, description, price, location, slug, county, area,
+      id, title, description, price, location, slug, county, area, gender, specific_location,
+      price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
+      amenities, room_type, room_type_enum, bathroom_type,
+      wifi_included, water_included, electricity_included, security_type,
+      latitude, longitude,
       listing_images ( r2_url, display_order, blur_data_url ),
-      agents ( name )
+      agents ( name, phone, whatsapp )
     `,
     )
     .eq('is_active', true)
@@ -137,62 +141,7 @@ export default async function DeKUTLandingPage() {
         </div>
 
         {listings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {listings.map((item) => {
-              const sortedImages = (item.listing_images || []).sort(
-                (a: any, b: any) => a.display_order - b.display_order,
-              );
-              const imageUrl =
-                sortedImages[0]?.r2_url ??
-                'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
-              const blurDataUrl = sortedImages[0]?.blur_data_url;
-              const href = item.slug
-                ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
-                : `/listing/${item.id}`;
-
-              return (
-                <Link
-                  key={item.id}
-                  href={href}
-                  className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full"
-                >
-                  <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                    <Image
-                      src={imageUrl}
-                      alt={`${item.title} — student hostel near DeKUT Nyeri`}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      placeholder={blurDataUrl ? 'blur' : undefined}
-                      blurDataURL={blurDataUrl || undefined}
-                    />
-                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900 border border-slate-100/50">
-                      KES {item.price.toLocaleString()}/mo
-                    </div>
-                  </div>
-
-                  <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
-                      <MapPin className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{item.location}</span>
-                    </div>
-                    <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-500 text-xs line-clamp-2 mt-1 mb-4 flex-1">
-                      {item.description}
-                    </p>
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                      <span>Agent: {item.agents?.name || 'Rumia Agent'}</span>
-                      <span className="font-semibold text-emerald-600 flex items-center gap-0.5">
-                        View <ArrowRight className="h-3 w-3" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <DeKutCompareGrid listings={listings} />
         ) : (
           <div className="text-center py-20 bg-white border border-slate-100 rounded-2xl">
             <p className="text-slate-400 font-medium">

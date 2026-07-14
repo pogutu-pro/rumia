@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Trash2 } from 'lucide-react';
+import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
@@ -55,17 +55,14 @@ export interface Listing {
   distance_category?: string | null;
   distance_to_campus?: string | null;
   mpesa_details?: string | null;
-  // Amenities & features (structured)
   amenities?: string[] | null;
   room_type?: string | null;
   room_type_enum?: string | null;
   bathroom_type?: string | null;
-  // Utilities
   wifi_included?: boolean | null;
   water_included?: boolean | null;
   electricity_included?: boolean | null;
   security_type?: string | null;
-  // Location
   latitude?: number | null;
   longitude?: number | null;
   proximity_description?: string | null;
@@ -367,7 +364,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
   const compareSelectedIds = useCompareStore((s) => s.selectedIds);
   const addCompareSelection = useCompareStore((s) => s.addSelection);
   const removeCompareSelection = useCompareStore((s) => s.removeSelection);
-  const clearCompareSelection = useCompareStore((s) => s.clearSelection);
   const isCompareSelected = useCompareStore((s) => s.isSelected);
 
   const handleCompareToggle = useCallback(
@@ -376,12 +372,10 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         (a, b) => a.display_order - b.display_order,
       );
       const imageUrl = sorted[0]?.r2_url;
-      const href = item.slug
-        ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
-        : `/listing/${item.id}`;
 
       if (isCompareSelected(item.id)) {
         removeCompareSelection(item.id);
+        toast.info(`${item.title} removed from comparison`);
         return;
       }
 
@@ -415,13 +409,22 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         mpesaDetails: item.mpesa_details,
       });
 
-      if (!result.ok) {
-        if (result.reason === 'max_reached') {
-          toast.error('You can compare up to 4 hostels at a time. Remove one first.');
+      if (result.ok) {
+        const currentCount = compareSelectedIds.length + 1;
+        if (currentCount === 1) {
+          toast.success(`${item.title} added to comparison`, {
+            description: 'Select one more hostel to start comparing.',
+          });
+        } else {
+          toast.success(`${item.title} added to comparison`);
         }
+      } else if (result.reason === 'max_reached') {
+        toast.error('Maximum hostels reached', {
+          description: 'Remove a hostel first before adding another.',
+        });
       }
     },
-    [addCompareSelection, removeCompareSelection, isCompareSelected],
+    [addCompareSelection, removeCompareSelection, isCompareSelected, compareSelectedIds.length],
   );
 
   const filters: FilterState = {
@@ -473,7 +476,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     setLoadingMore(false);
   }, [loadingMore, hasMore, buildCombinedFilters, debouncedQuery, offset, pageSize]);
 
-  // URL sync — separate from search to avoid setState-in-effect lint error
+  // URL sync
   useEffect(() => {
     const filterParams = toParams();
     const qParam = debouncedQuery
@@ -487,7 +490,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     router.replace(url, { scroll: false });
   }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, router, toParams]);
 
-  // Search execution — fires when query or filters change
+  // Search execution
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     runSearch(debouncedQuery);
@@ -582,11 +585,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
           )}
         </div>
 
-        {/* Filter toolbar: button + active chips + results count */}
+        {/* Filter toolbar */}
         <div className="mb-5 space-y-3">
-          {/* Top row: filter button */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Desktop filter trigger */}
             {isDesktop ? (
               <Sheet
                 open={desktopFilterOpen}
@@ -634,7 +635,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               />
             )}
 
-            {/* Results count — inline on desktop, below on mobile */}
             {isDesktop && (
               <p className="text-sm text-slate-400 font-semibold">
                 {loading ? (
@@ -661,7 +661,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
             )}
           </div>
 
-          {/* Active filter chips */}
           <ActiveFilterChips
             filters={filters}
             onRemoveGender={(v) =>
@@ -719,6 +718,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               const distanceBadge = getDistanceBadgeText(
                 item.distance_category,
               );
+              const isSelected = isCompareSelected(item.id);
 
               let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
               if (item.price_single && item.price_sharing) {
@@ -738,7 +738,11 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                 <div key={item.id} className="relative group/card">
                   <Link
                     href={href}
-                    className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full cursor-pointer"
+                    className={`group flex flex-col bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full cursor-pointer ${
+                      isSelected
+                        ? 'border-2 border-emerald-400 shadow-md shadow-emerald-100'
+                        : 'border border-slate-100'
+                    }`}
                   >
                     <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                       <Image
@@ -800,34 +804,36 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
                       <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
                         <span>Agent: {item.agents?.name ?? 'Rumia Agent'}</span>
-                        <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5 cursor-pointer">
-                          <Eye className="h-3.5 w-3.5" /> View
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {/* Compare button — inline next to View */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleCompareToggle(item);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-white transition-all duration-200 cursor-pointer hover:bg-slate-700"
+                          >
+                            {isSelected ? (
+                              <>
+                                <Check className="h-3 w-3" />
+                                Added
+                              </>
+                            ) : (
+                              <>
+                                <GitCompareArrows className="h-3 w-3" />
+                                Compare
+                              </>
+                            )}
+                          </button>
+                          <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5 cursor-pointer">
+                            <Eye className="h-3.5 w-3.5" /> View Details
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>
-
-                  {/* Compare checkbox */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleCompareToggle(item);
-                    }}
-                    aria-label={
-                      isCompareSelected(item.id)
-                        ? `Remove ${item.title} from comparison`
-                        : `Add ${item.title} to comparison`
-                    }
-                    className={`absolute top-3 left-3 z-10 mt-8 flex h-7 w-7 items-center justify-center rounded-lg border-2 transition-all duration-200 cursor-pointer shadow-sm backdrop-blur-sm ${
-                      isCompareSelected(item.id)
-                        ? 'border-emerald-500 bg-emerald-500 text-white'
-                        : 'border-white/80 bg-white/80 text-slate-400 hover:border-emerald-300 hover:text-emerald-500'
-                    }`}
-                  >
-                    <GitCompareArrows className="h-3.5 w-3.5" />
-                  </button>
                 </div>
               );
             })}
@@ -874,48 +880,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
           <EarlyAccessBanner />
         </div>
       </div>
-
-      {/* Floating Compare Bar */}
-      {compareSelectedIds.length > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 z-50 px-4 pb-2 md:bottom-6 md:px-8 pointer-events-none">
-          <div className="mx-auto max-w-2xl pointer-events-auto bg-white rounded-2xl border border-slate-200 shadow-2xl px-4 py-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                <GitCompareArrows className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-slate-900 truncate">
-                  {compareSelectedIds.length} hostel{compareSelectedIds.length !== 1 ? 's' : ''} selected
-                </p>
-                <p className="text-xs text-slate-400 font-medium">
-                  Select up to 4 to compare
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={clearCompareSelection}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Clear
-              </button>
-              <Link
-                href="/compare"
-                className={`inline-flex h-9 items-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all duration-200 ${
-                  compareSelectedIds.length >= 2
-                    ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none'
-                }`}
-              >
-                <GitCompareArrows className="h-3.5 w-3.5" />
-                Compare Now
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

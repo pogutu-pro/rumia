@@ -3,8 +3,12 @@
 import { create } from 'zustand';
 
 const STORAGE_KEY = 'rumia-compare';
-const MAX_SELECTIONS = 4;
 const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function getMaxSelections(): number {
+  if (typeof window === 'undefined') return 4;
+  return window.innerWidth < 768 ? 2 : 4;
+}
 
 export interface CompareSelection {
   id: string;
@@ -57,6 +61,7 @@ interface CompareState {
   isSelected: (id: string) => boolean;
   getCount: () => number;
   hydrateFromStorage: () => void;
+  loadFromIds: (ids: string[], remoteSelections: Record<string, CompareSelection>) => void;
 }
 
 function loadFromStorage(): StoredCompareState | null {
@@ -105,6 +110,17 @@ export const useCompareStore = create<CompareState>()((set, get) => ({
     }
   },
 
+  loadFromIds: (ids, remoteSelections) => {
+    const validIds = ids.filter((id) => remoteSelections[id]).slice(0, getMaxSelections());
+    const nextSelections: Record<string, CompareSelection> = {};
+    validIds.forEach((id) => {
+      nextSelections[id] = remoteSelections[id];
+    });
+    const nextAt = Date.now();
+    set({ hydrated: true, selectedIds: validIds, selections: nextSelections, selectedAt: nextAt });
+    saveToStorage({ selectedIds: validIds, selections: nextSelections, selectedAt: nextAt });
+  },
+
   addSelection: (selection) => {
     const { selectedIds, selections } = get();
 
@@ -112,7 +128,7 @@ export const useCompareStore = create<CompareState>()((set, get) => ({
       return { ok: false, reason: 'already_selected' };
     }
 
-    if (selectedIds.length >= MAX_SELECTIONS) {
+    if (selectedIds.length >= getMaxSelections()) {
       return { ok: false, reason: 'max_reached' };
     }
 
