@@ -9,6 +9,7 @@ import { InstallButton } from '@/components/pwa/InstallButton';
 
 const NAV_LINKS = [
   { href: '/hostels', label: 'Browse All' },
+  { href: '/agents', label: 'Agents' },
   { href: '/saved', label: 'Saved' },
   { href: '/auth/login', label: 'Login' },
 ];
