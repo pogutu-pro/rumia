@@ -53,7 +53,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
   return (
     <div
       className={cn(
-        'group relative rounded-2xl overflow-hidden transition-all duration-200 flex flex-col justify-between min-h-[290px]',
+        'group relative rounded-2xl overflow-hidden transition-all duration-200 flex flex-col justify-between',
         isFeatured
           ? [
               'bg-gradient-to-br from-white via-emerald-50/10 to-white',
@@ -77,7 +77,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
     >
       <Link
         href={profileUrl}
-        className="block p-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded-t-2xl flex-1"
+        className="block p-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded-t-2xl"
         aria-label={`View ${agent.name}'s profile`}
       >
         <div className="flex items-start gap-4">
