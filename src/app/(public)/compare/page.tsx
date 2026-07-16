@@ -1095,29 +1095,10 @@ export default function ComparePage() {
   const clearSelection = useCompareStore((s) => s.clearSelection);
   const urlSyncDone = useRef(false);
 
-  // Hydrate from localStorage first
-  useEffect(() => {
-    hydrateCompare();
-  }, [hydrateCompare]);
-
-  // Handle URL-based comparison (?ids=id1,id2,...)
-  useEffect(() => {
-    if (urlSyncDone.current) return;
-    const idsParam = searchParams.get('ids');
-    if (!idsParam) return;
-
-    const urlIds = idsParam.split(',').map((s) => s.trim()).filter(Boolean);
-    if (urlIds.length === 0) return;
-
-    urlSyncDone.current = true;
-
-    // Check if these IDs are already in the store
-    const currentIds = useCompareStore.getState().selectedIds;
-    const alreadyLoaded = urlIds.every((id) => currentIds.includes(id));
-    if (alreadyLoaded) return;
-
-    // Fetch from Supabase
-    async function loadFromUrl() {
+  // Fetch full listing data from Supabase for the given IDs
+  const fetchListingsFromSupabase = useCallback(
+    async (ids: string[]) => {
+      if (ids.length === 0) return;
       const supabase = createClient();
       const { data } = await supabase
         .from('listings')
@@ -1130,7 +1111,7 @@ export default function ComparePage() {
            listing_images(r2_url, display_order),
            agents(name, phone, whatsapp)`,
         )
-        .in('id', urlIds)
+        .in('id', ids)
         .eq('is_active', true);
 
       if (!data || data.length === 0) return;
@@ -1171,11 +1152,67 @@ export default function ComparePage() {
         };
       });
 
-      loadFromIds(urlIds, remoteSelections);
+      loadFromIds(ids, remoteSelections);
+    },
+    [loadFromIds],
+  );
+
+  // Hydrate from localStorage first
+  useEffect(() => {
+    hydrateCompare();
+  }, [hydrateCompare]);
+
+  // After hydration, verify data completeness and refetch if any selection
+  // was stored from a source that only provided partial fields (e.g. homepage
+  // FeaturedHostelCard).  This fixes the "first comparison in session shows
+  // dashes for everything except price" bug.
+  const enrichedRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (enrichedRef.current) return;
+    const state = useCompareStore.getState();
+    if (state.selectedIds.length === 0) return;
+
+    const hasIncomplete = state.selectedIds.some((id) => {
+      const s = state.selections[id];
+      if (!s) return true;
+      return (
+        s.distanceCategory === undefined &&
+        s.roomType === undefined &&
+        s.amenities === undefined
+      );
+    });
+
+    if (!hasIncomplete) {
+      enrichedRef.current = true;
+      return;
     }
 
-    loadFromUrl();
-  }, [searchParams, loadFromIds]);
+    enrichedRef.current = true;
+    fetchListingsFromSupabase(state.selectedIds);
+  }, [hydrated, fetchListingsFromSupabase]);
+
+  // Handle URL-based comparison (?ids=id1,id2,...)
+  useEffect(() => {
+    if (urlSyncDone.current) return;
+    const idsParam = searchParams.get('ids');
+    if (!idsParam) return;
+
+    const urlIds = idsParam.split(',').map((s) => s.trim()).filter(Boolean);
+    if (urlIds.length === 0) return;
+
+    urlSyncDone.current = true;
+
+    // Check if these IDs are already in the store WITH complete data
+    const currentIds = useCompareStore.getState().selectedIds;
+    const alreadyLoaded = urlIds.every((id) => {
+      const s = useCompareStore.getState().selections[id];
+      return s && s.distanceCategory !== undefined;
+    });
+    if (alreadyLoaded) return;
+
+    fetchListingsFromSupabase(urlIds);
+  }, [searchParams, fetchListingsFromSupabase]);
 
   // Sync URL params when selections change
   useEffect(() => {

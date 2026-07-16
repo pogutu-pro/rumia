@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight, GitCompareArrows, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCompareStore, type CompareSelection } from '@/stores/compare-store';
+import { createClient } from '@/lib/supabase/client';
 
 interface Listing {
   id: string;
@@ -34,6 +35,7 @@ export function FeaturedHostelCard({
   const addSelection = useCompareStore((s) => s.addSelection);
   const removeSelection = useCompareStore((s) => s.removeSelection);
   const selected = useCompareStore((s) => s.isSelected(item.id));
+  const [fetching, setFetching] = useState(false);
 
   const sortedImages = (item.listing_images || []).sort(
     (a: any, b: any) => a.display_order - b.display_order,
@@ -48,7 +50,7 @@ export function FeaturedHostelCard({
     : `/listing/${item.id}`;
 
   const handleCompare = useCallback(
-    (e: React.MouseEvent) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (selected) {
@@ -56,29 +58,105 @@ export function FeaturedHostelCard({
         toast.info(`${item.title} removed from comparison`);
         return;
       }
-      const result = addSelection({
-        id: item.id,
-        title: item.title,
-        price: item.price,
-        imageUrl,
-        slug: item.slug,
-        county: item.county,
-        area: item.area,
-        agentName: item.agents?.name ?? null,
-      });
-      if (result.ok) {
-        const count = useCompareStore.getState().selectedIds.length;
-        if (count === 1) {
-          toast.success(`${item.title} added`, {
-            description: 'Select one more hostel to start comparing.',
-          });
-        } else {
-          toast.success(`${item.title} added to comparison`);
+
+      // Fetch full listing data so the comparison table has all fields
+      setFetching(true);
+      try {
+        let selection: CompareSelection;
+        try {
+          const supabase = createClient();
+          const { data } = await supabase
+            .from('listings')
+            .select(
+              `id, title, price, price_single, price_sharing, slug, county, area, gender, specific_location,
+               distance_category, distance_to_campus, mpesa_details,
+               amenities, room_type, room_type_enum, bathroom_type,
+               wifi_included, water_included, electricity_included, security_type,
+               latitude, longitude,
+               listing_images(r2_url, display_order),
+               agents(name, phone, whatsapp)`,
+            )
+            .eq('id', item.id)
+            .eq('is_active', true)
+            .single();
+
+          if (data) {
+            const sorted = [...(data.listing_images || [])].sort(
+              (a: any, b: any) => a.display_order - b.display_order,
+            );
+            selection = {
+              id: data.id,
+              title: data.title,
+              price: data.price,
+              price_single: data.price_single,
+              price_sharing: data.price_sharing,
+              imageUrl: sorted[0]?.r2_url || imageUrl,
+              slug: data.slug,
+              county: data.county,
+              area: data.area,
+              agentName: data.agents?.name ?? null,
+              agentPhone: data.agents?.phone ?? null,
+              agentWhatsapp: data.agents?.whatsapp ?? null,
+              amenities: data.amenities,
+              roomType: data.room_type,
+              roomTypeEnum: data.room_type_enum,
+              bathroomType: data.bathroom_type,
+              distanceCategory: data.distance_category,
+              distanceToCampus: data.distance_to_campus,
+              gender: data.gender,
+              wifiIncluded: data.wifi_included,
+              waterIncluded: data.water_included,
+              electricityIncluded: data.electricity_included,
+              securityType: data.security_type,
+              specificLocation: data.specific_location,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              mpesaDetails: data.mpesa_details,
+            };
+          } else {
+            // Fallback to basic data if fetch fails
+            selection = {
+              id: item.id,
+              title: item.title,
+              price: item.price,
+              imageUrl,
+              slug: item.slug,
+              county: item.county,
+              area: item.area,
+              agentName: item.agents?.name ?? null,
+            };
+          }
+        } catch {
+          // Fallback to basic data on network error
+          selection = {
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            imageUrl,
+            slug: item.slug,
+            county: item.county,
+            area: item.area,
+            agentName: item.agents?.name ?? null,
+          };
         }
-      } else if (result.reason === 'max_reached') {
-        toast.error('Maximum hostels reached', {
-          description: 'Remove a hostel first before adding another.',
-        });
+
+        const result = addSelection(selection);
+        if (result.ok) {
+          const count = useCompareStore.getState().selectedIds.length;
+          if (count === 1) {
+            toast.success(`${item.title} added`, {
+              description: 'Select one more hostel to start comparing.',
+            });
+          } else {
+            toast.success(`${item.title} added to comparison`);
+          }
+        } else if (result.reason === 'max_reached') {
+          toast.error('Maximum hostels reached', {
+            description: 'Remove a hostel first before adding another.',
+          });
+        }
+      } finally {
+        setFetching(false);
       }
     },
     [selected, item, imageUrl, addSelection, removeSelection],
@@ -126,10 +204,13 @@ export function FeaturedHostelCard({
             <button
               type="button"
               onClick={handleCompare}
-              className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-white transition-all duration-200 cursor-pointer hover:bg-slate-700"
+              disabled={fetching}
+              className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-white transition-all duration-200 cursor-pointer hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {selected ? (
                 <><Check className="h-3 w-3" /> Added</>
+              ) : fetching ? (
+                <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-white border-t-transparent" /> Adding…</span>
               ) : (
                 <><GitCompareArrows className="h-3 w-3" /> Compare</>
               )}
