@@ -75,7 +75,7 @@ export default async function DeKUTLandingPage() {
       wifi_included, water_included, electricity_included, security_type,
       latitude, longitude, created_at, sort_position,
       listing_images ( r2_url, display_order, blur_data_url ),
-      listing_room_types ( deposit, furnishing_items, label ),
+      listing_room_types ( deposit, furnishing_items, room_type ),
       agents ( name, phone, whatsapp )
     `,
     )

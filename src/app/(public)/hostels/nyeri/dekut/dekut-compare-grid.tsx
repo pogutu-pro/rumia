@@ -35,7 +35,7 @@ export interface DeKutListing {
   longitude?: number | null;
   listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
   agents: { name: string; phone?: string; whatsapp?: string } | null;
-  listing_room_types?: { deposit?: number | null; furnishing_items?: string[] | null; label?: string | null }[] | null;
+  listing_room_types?: { deposit?: number | null; furnishing_items?: string[] | null; room_type?: string | null }[] | null;
 }
 
 export default function DeKutCompareGrid({ listings }: { listings: DeKutListing[] }) {
@@ -94,7 +94,7 @@ export default function DeKutCompareGrid({ listings }: { listings: DeKutListing[
         mpesaDetails: item.mpesa_details,
         deposit: firstRoom.deposit ?? null,
         furnishingItems: firstRoom.furnishing_items ?? null,
-        roomTypeLabel: firstRoom.label ?? null,
+        roomTypeLabel: firstRoom.room_type ?? null,
       });
 
       if (result.ok) {

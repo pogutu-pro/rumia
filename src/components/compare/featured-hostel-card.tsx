@@ -74,7 +74,7 @@ export function FeaturedHostelCard({
                wifi_included, water_included, electricity_included, security_type,
                latitude, longitude,
                listing_images(r2_url, display_order),
-               listing_room_types(deposit, furnishing_items, label),
+                listing_room_types(deposit, furnishing_items, room_type),
                agents(name, phone, whatsapp)`,
             )
             .eq('id', item.id)
@@ -117,7 +117,7 @@ export function FeaturedHostelCard({
               mpesaDetails: data.mpesa_details,
               deposit: firstRoom.deposit ?? null,
               furnishingItems: firstRoom.furnishing_items ?? null,
-              roomTypeLabel: firstRoom.label ?? null,
+              roomTypeLabel: firstRoom.room_type ?? null,
             };
           } else {
             // Fallback to basic data if fetch fails

@@ -70,7 +70,7 @@ export interface Listing {
   sort_position?: number | null;
   listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
   agents: { name: string; phone?: string; whatsapp?: string } | null;
-  listing_room_types?: { deposit?: number | null; furnishing_items?: string[] | null; label?: string | null }[] | null;
+  listing_room_types?: { deposit?: number | null; furnishing_items?: string[] | null; room_type?: string | null }[] | null;
 }
 
 interface CombinedFilters {
@@ -225,7 +225,7 @@ async function fetchListings(
        wifi_included, water_included, electricity_included, security_type,
        latitude, longitude, proximity_description, created_at, sort_position,
        listing_images(r2_url, display_order, blur_data_url),
-       listing_room_types(deposit, furnishing_items, label),
+        listing_room_types(deposit, furnishing_items, room_type),
        agents(name, phone, whatsapp)`,
       { count: 'exact' },
     )
@@ -428,7 +428,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         mpesaDetails: item.mpesa_details,
         deposit: firstRoom.deposit ?? null,
         furnishingItems: firstRoom.furnishing_items ?? null,
-        roomTypeLabel: firstRoom.label ?? null,
+        roomTypeLabel: firstRoom.room_type ?? null,
       });
 
       if (result.ok) {
