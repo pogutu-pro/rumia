@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { JsonLd } from '@/components/seo/json-ld';
 import DeKutCompareGrid from './dekut-compare-grid';
+import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 
 export const revalidate = 3600;
 
@@ -72,8 +73,9 @@ export default async function DeKUTLandingPage() {
       price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
       amenities, room_type, room_type_enum, bathroom_type,
       wifi_included, water_included, electricity_included, security_type,
-      latitude, longitude,
+      latitude, longitude, created_at, sort_position,
       listing_images ( r2_url, display_order, blur_data_url ),
+      listing_room_types ( deposit, furnishing_items, label ),
       agents ( name, phone, whatsapp )
     `,
     )
@@ -81,7 +83,7 @@ export default async function DeKUTLandingPage() {
     .order('created_at', { ascending: false })
     .limit(50);
 
-  const listings = (listingsData || []) as any[];
+  const listings = sortListingsByPosition((listingsData || []) as any[]);
 
   return (
     <div className="min-h-screen bg-slate-50/50">

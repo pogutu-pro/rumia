@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/server';
+import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 
 export const revalidate = 0;
 
@@ -44,6 +45,8 @@ export default async function BrowsePage({ searchParams }: PageProps) {
       slug,
       county,
       area,
+      created_at,
+      sort_position,
       listing_images (
         r2_url,
         display_order
@@ -76,7 +79,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
   dbQuery = dbQuery.order('id', { ascending: false });
 
   const { data: listingsData } = await dbQuery;
-  let listings = (listingsData || []) as any[];
+  let listings = sortListingsByPosition((listingsData || []) as any[]);
 
 
 

@@ -5,7 +5,7 @@ export default async function ListingsPage() {
   const supabase = await createClient();
 
   const { data: listingsRaw } = await (supabase as any).from('listings').select(`
-    id, title, location, price, is_active, created_at,
+    id, title, location, price, is_active, created_at, sort_position,
     agents(id, name),
     leads(id),
     listing_images(r2_url, display_order)
@@ -29,11 +29,20 @@ export default async function ListingsPage() {
       price: listing.price,
       is_active: listing.is_active,
       created_at: listing.created_at,
+      sort_position: listing.sort_position ?? null,
       leads_count: listing.leads?.length ?? 0,
       agent_name: listing.agents?.name ?? '—',
       agent_id: listing.agents?.id ?? '',
       cover_image: coverImage,
     };
+  });
+
+  // Sort: positioned listings first (ascending), then unpositioned by created_at DESC
+  listings.sort((a: (typeof listings)[number], b: (typeof listings)[number]) => {
+    if (a.sort_position !== null && b.sort_position !== null) return a.sort_position - b.sort_position;
+    if (a.sort_position !== null) return -1;
+    if (b.sort_position !== null) return 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   const agents: Array<{ id: string; name: string; status: string }> = (agentsRaw ?? []).map(

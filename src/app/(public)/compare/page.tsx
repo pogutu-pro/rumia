@@ -352,6 +352,19 @@ function DesktopCompareTable({
     ...hostels.map((h) => h.price_single ?? h.price_sharing ?? h.price),
   );
 
+  const depositValues = hostels.map((h) =>
+    typeof h.deposit === 'number' ? h.deposit : Infinity,
+  );
+  const lowestDeposit = Math.min(...depositValues);
+  const hasAnyDeposit = depositValues.some((d) => d !== Infinity);
+
+  const moveInValues = hostels.map((h) => {
+    const p = h.price_single ?? h.price_sharing ?? h.price;
+    const d = typeof h.deposit === 'number' ? h.deposit : 0;
+    return p + d;
+  });
+  const bestMoveIn = Math.min(...moveInValues);
+
   const shortestDistance = hostels.reduce(
     (best, h) => {
       const order = ['walking-500m', '5-10min', '1-2km', '3km', 'over-3km'];
@@ -492,6 +505,56 @@ function DesktopCompareTable({
             return (
               <DesktopCell key={h.id} isBest={isLowest}>
                 <PriceDisplay h={h} isLowest={isLowest} />
+              </DesktopCell>
+            );
+          })}
+        </DesktopCompareRow>
+
+        {/* Deposit */}
+        <DesktopCompareRow label="Deposit" icon={CreditCard}>
+          {hostels.map((h) => {
+            const numDeposit =
+              typeof h.deposit === 'number' ? h.deposit : null;
+            const isLowest =
+              hasAnyDeposit &&
+              numDeposit !== null &&
+              numDeposit === lowestDeposit &&
+              cols > 1;
+            return (
+              <DesktopCell key={h.id} isBest={isLowest}>
+                <span className="flex items-center gap-2">
+                  <span className="truncate">
+                    {numDeposit !== null
+                      ? `KES ${numDeposit.toLocaleString()}`
+                      : '—'}
+                  </span>
+                  {isLowest && <BestValueBadge label="Lowest" icon={Star} />}
+                </span>
+              </DesktopCell>
+            );
+          })}
+        </DesktopCompareRow>
+
+        {/* Total to Move In */}
+        <DesktopCompareRow label="Total to Move In" icon={Wallet}>
+          {hostels.map((h) => {
+            const price =
+              h.price_single ?? h.price_sharing ?? h.price;
+            const deposit =
+              typeof h.deposit === 'number' ? h.deposit : 0;
+            const total = price + deposit;
+            const isBest = total === bestMoveIn && cols > 1;
+            return (
+              <DesktopCell key={h.id} isBest={isBest}>
+                <span className="flex flex-col gap-0.5">
+                  <span className="font-bold tabular-nums">
+                    KES {total.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] font-medium text-slate-400">
+                    rent + deposit
+                  </span>
+                  {isBest && <BestValueBadge label="Best Value" icon={Star} />}
+                </span>
               </DesktopCell>
             );
           })}
@@ -1243,7 +1306,7 @@ export default function ComparePage() {
         s.distanceCategory === undefined &&
         s.roomType === undefined &&
         s.amenities === undefined
-      );
+      ) || s.deposit === undefined;
     });
 
     if (!hasIncomplete) {

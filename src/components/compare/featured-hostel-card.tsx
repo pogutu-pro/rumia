@@ -74,6 +74,7 @@ export function FeaturedHostelCard({
                wifi_included, water_included, electricity_included, security_type,
                latitude, longitude,
                listing_images(r2_url, display_order),
+               listing_room_types(deposit, furnishing_items, label),
                agents(name, phone, whatsapp)`,
             )
             .eq('id', item.id)
@@ -84,6 +85,8 @@ export function FeaturedHostelCard({
             const sorted = [...(data.listing_images || [])].sort(
               (a: any, b: any) => a.display_order - b.display_order,
             );
+            const roomTypes = data.listing_room_types || [];
+            const firstRoom = roomTypes[0] || {};
             selection = {
               id: data.id,
               title: data.title,
@@ -112,6 +115,9 @@ export function FeaturedHostelCard({
               latitude: data.latitude,
               longitude: data.longitude,
               mpesaDetails: data.mpesa_details,
+              deposit: firstRoom.deposit ?? null,
+              furnishingItems: firstRoom.furnishing_items ?? null,
+              roomTypeLabel: firstRoom.label ?? null,
             };
           } else {
             // Fallback to basic data if fetch fails

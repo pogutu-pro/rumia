@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 import {
   MapPin,
   ArrowLeft,
@@ -75,7 +76,7 @@ async function getNearbyListings(listing: any) {
     .select(
       `
       id, title, description, price, location, slug, county, area,
-      room_type, distance_to_campus,
+      room_type, distance_to_campus, created_at, sort_position,
       listing_images ( r2_url, display_order, blur_data_url ),
       agents ( name )
     `,
@@ -88,7 +89,7 @@ async function getNearbyListings(listing: any) {
     .limit(4);
 
   if (error || !data) return [];
-  return data as any[];
+  return sortListingsByPosition(data as any[]);
 }
 
 export async function generateMetadata({

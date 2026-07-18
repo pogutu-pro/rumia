@@ -1,13 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { toast } from 'sonner';
+import { GripVertical, ArrowUpDown, Save, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { filterListings } from '@/lib/utils/admin-filters';
-import { updateListingActiveAction, deleteListingAction } from '@/app/actions/admin';
+import { updateListingActiveAction, deleteListingAction, updateListingsOrderAction } from '@/app/actions/admin';
 import { TransferOwnershipModal } from './transfer-ownership-modal';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ListingRow {
   id: string;
@@ -16,6 +33,7 @@ interface ListingRow {
   price: number;
   is_active: boolean;
   created_at: string;
+  sort_position: number | null;
   leads_count: number;
   agent_name: string;
   agent_id: string;
@@ -29,6 +47,170 @@ interface ListingsTableClientProps {
 
 const PAGE_SIZE = 20;
 
+function SortableRow({
+  listing,
+  index,
+  pendingId,
+  onToggleActive,
+  onTransfer,
+  onDelete,
+  isReorderMode,
+}: {
+  listing: ListingRow;
+  index: number;
+  pendingId: string | null;
+  onToggleActive: (l: ListingRow) => void;
+  onTransfer: (l: ListingRow) => void;
+  onDelete: (l: ListingRow) => void;
+  isReorderMode: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: listing.id, disabled: !isReorderMode });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={`hover:bg-gray-50 transition-colors ${isDragging ? 'bg-gray-50 shadow-lg opacity-80' : ''}`}
+    >
+      {isReorderMode && (
+        <td className="px-3 py-4 w-10">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        </td>
+      )}
+      <td className="px-5 py-4">
+        {listing.cover_image ? (
+          <img src={listing.cover_image} alt={listing.title} className="h-10 w-14 object-cover rounded-lg" />
+        ) : <div className="h-10 w-14 bg-gray-100 rounded-lg" />}
+      </td>
+      <td className="text-sm px-5 py-4 font-medium text-gray-900">{listing.title}</td>
+      <td className="text-sm text-gray-500 px-5 py-4">{listing.location}</td>
+      <td className="text-sm text-gray-700 px-5 py-4">{listing.price.toLocaleString()}</td>
+      <td className="text-sm text-gray-600 px-5 py-4">{listing.agent_name}</td>
+      <td className="text-sm text-gray-600 px-5 py-4">{listing.leads_count}</td>
+      <td className="px-5 py-4">
+        {listing.is_active ? (
+          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+        ) : (
+          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Inactive</span>
+        )}
+      </td>
+      <td className="text-sm text-gray-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
+      <td className="px-5 py-4">
+        <div className="flex items-center gap-2 text-sm">
+          <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">Live</a>
+          <button onClick={() => onToggleActive(listing)} disabled={pendingId === listing.id}
+            className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
+            {listing.is_active ? 'Deactivate' : 'Activate'}
+          </button>
+          <button onClick={() => onTransfer(listing)} className="text-indigo-600 font-medium hover:underline">Transfer</button>
+          <button onClick={() => onDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 font-medium hover:underline disabled:opacity-50">Delete</button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function SortableMobileCard({
+  listing,
+  index,
+  pendingId,
+  onToggleActive,
+  onTransfer,
+  onDelete,
+  isReorderMode,
+}: {
+  listing: ListingRow;
+  index: number;
+  pendingId: string | null;
+  onToggleActive: (l: ListingRow) => void;
+  onTransfer: (l: ListingRow) => void;
+  onDelete: (l: ListingRow) => void;
+  isReorderMode: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: listing.id, disabled: !isReorderMode });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3 ${isDragging ? 'shadow-lg opacity-80 border-emerald-300' : ''}`}
+    >
+      {isReorderMode && (
+        <div className="flex items-center gap-2 pb-2 border-b border-gray-50">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <span className="text-xs font-medium text-gray-400">#{index + 1}</span>
+        </div>
+      )}
+      <div className="flex items-start gap-3">
+        {listing.cover_image ? (
+          <img src={listing.cover_image} alt={listing.title} className="h-14 w-20 object-cover rounded-lg shrink-0" />
+        ) : <div className="h-14 w-20 bg-gray-100 rounded-lg shrink-0" />}
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-gray-900 leading-snug">{listing.title}</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{listing.location}</p>
+          <p className="text-sm font-bold text-gray-900 mt-1">KES {listing.price.toLocaleString()}</p>
+        </div>
+        {listing.is_active ? (
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Active</span>
+        ) : (
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 shrink-0">Inactive</span>
+        )}
+      </div>
+      <div className="flex items-center justify-between text-xs text-gray-500">
+        <span>{listing.agent_name} &middot; {listing.leads_count} leads</span>
+        <span>{new Date(listing.created_at).toLocaleDateString()}</span>
+      </div>
+      <div className="flex items-center gap-3 pt-1 text-xs font-medium">
+        <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">View Live</a>
+        <button onClick={() => onToggleActive(listing)} disabled={pendingId === listing.id}
+          className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
+          {listing.is_active ? 'Deactivate' : 'Activate'}
+        </button>
+        <button onClick={() => onTransfer(listing)} className="text-indigo-600 hover:underline">Transfer</button>
+        <button onClick={() => onDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 hover:underline disabled:opacity-50">Delete</button>
+      </div>
+    </div>
+  );
+}
+
 export function ListingsTableClient({ listings, agents }: ListingsTableClientProps) {
   const router = useRouter();
   const [agentFilter, setAgentFilter] = useState('');
@@ -37,6 +219,15 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [transferListing, setTransferListing] = useState<ListingRow | null>(null);
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [orderedListings, setOrderedListings] = useState<ListingRow[]>(listings);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [hasOrderChanges, setHasOrderChanges] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const hasActiveFilters = agentFilter !== '' || statusFilter !== 'all' || locationFilter !== '';
 
@@ -44,7 +235,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     setAgentFilter(''); setStatusFilter('all'); setLocationFilter(''); setVisibleCount(PAGE_SIZE);
   }
 
-  const filtered = filterListings(listings, { agentId: agentFilter || undefined, status: statusFilter, location: locationFilter || undefined });
+  const filtered = filterListings(orderedListings, { agentId: agentFilter || undefined, status: statusFilter, location: locationFilter || undefined });
   const visible = filtered.slice(0, visibleCount);
   const hasMore = filtered.length > visibleCount;
 
@@ -66,10 +257,101 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     else { toast.error(result.error); }
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = orderedListings.findIndex((l) => l.id === active.id);
+    const newIndex = orderedListings.findIndex((l) => l.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(orderedListings, oldIndex, newIndex);
+    setOrderedListings(reordered);
+    setHasOrderChanges(true);
+  }
+
+  async function handleSaveOrder() {
+    setIsSavingOrder(true);
+    const updates = orderedListings.map((listing, index) => ({
+      id: listing.id,
+      sort_position: index + 1,
+    }));
+
+    const result = await updateListingsOrderAction(updates);
+    setIsSavingOrder(false);
+
+    if (result.success) {
+      toast.success('Order saved');
+      setHasOrderChanges(false);
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  function handleCancelReorder() {
+    setOrderedListings(listings);
+    setIsReorderMode(false);
+    setHasOrderChanges(false);
+  }
+
+  function handleEnterReorderMode() {
+    setIsReorderMode(true);
+  }
+
+  const desktopColCount = isReorderMode ? 10 : 9;
+
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Listings</h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Listings</h1>
+        <div className="flex items-center gap-2">
+          {isReorderMode ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCancelReorder}
+                disabled={isSavingOrder}
+                className="rounded-lg"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveOrder}
+                disabled={isSavingOrder || !hasOrderChanges}
+                className="bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+              >
+                {isSavingOrder ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-1" />
+                )}
+                Save Order
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEnterReorderMode}
+              className="rounded-lg"
+            >
+              <ArrowUpDown className="h-4 w-4 mr-1" />
+              Reorder
+            </Button>
+          )}
+        </div>
+      </div>
       <p className="text-sm text-gray-500 mb-6">{listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
+
+      {isReorderMode && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-sm text-amber-800">
+          Drag listings to reorder. Position 1 appears first on the public page. Click <strong>Save Order</strong> when done.
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
@@ -90,91 +372,59 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
 
       {/* Desktop table */}
       <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
-              {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Created', 'Actions'].map((h) => (
-                <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filtered.length === 0 ? (
-              <tr><td colSpan={9} className="text-sm text-gray-400 text-center px-5 py-8">No listings found.</td></tr>
-            ) : visible.map((listing) => (
-              <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-5 py-4">
-                  {listing.cover_image ? (
-                    <img src={listing.cover_image} alt={listing.title} className="h-10 w-14 object-cover rounded-lg" />
-                  ) : <div className="h-10 w-14 bg-gray-100 rounded-lg" />}
-                </td>
-                <td className="text-sm px-5 py-4 font-medium text-gray-900">{listing.title}</td>
-                <td className="text-sm text-gray-500 px-5 py-4">{listing.location}</td>
-                <td className="text-sm text-gray-700 px-5 py-4">{listing.price.toLocaleString()}</td>
-                <td className="text-sm text-gray-600 px-5 py-4">{listing.agent_name}</td>
-                <td className="text-sm text-gray-600 px-5 py-4">{listing.leads_count}</td>
-                <td className="px-5 py-4">
-                  {listing.is_active ? (
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
-                  ) : (
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Inactive</span>
-                  )}
-                </td>
-                <td className="text-sm text-gray-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">Live</a>
-                    <button onClick={() => handleToggleActive(listing)} disabled={pendingId === listing.id}
-                      className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
-                      {listing.is_active ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button onClick={() => setTransferListing(listing)} className="text-indigo-600 font-medium hover:underline">Transfer</button>
-                    <button onClick={() => handleDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 font-medium hover:underline disabled:opacity-50">Delete</button>
-                  </div>
-                </td>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50">
+                {isReorderMode && <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-3 py-3 w-10"></th>}
+                {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Created', 'Actions'].map((h) => (
+                  <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <SortableContext items={orderedListings.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+              <tbody className="divide-y divide-gray-50">
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={desktopColCount} className="text-sm text-gray-400 text-center px-5 py-8">No listings found.</td></tr>
+                ) : visible.map((listing, index) => (
+                  <SortableRow
+                    key={listing.id}
+                    listing={listing}
+                    index={index}
+                    pendingId={pendingId}
+                    onToggleActive={handleToggleActive}
+                    onTransfer={setTransferListing}
+                    onDelete={handleDelete}
+                    isReorderMode={isReorderMode}
+                  />
+                ))}
+              </tbody>
+            </SortableContext>
+          </table>
+        </DndContext>
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
-        {filtered.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No listings found.</div>
-        ) : visible.map((listing) => (
-          <div key={listing.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3">
-            <div className="flex items-start gap-3">
-              {listing.cover_image ? (
-                <img src={listing.cover_image} alt={listing.title} className="h-14 w-20 object-cover rounded-lg shrink-0" />
-              ) : <div className="h-14 w-20 bg-gray-100 rounded-lg shrink-0" />}
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-gray-900 leading-snug">{listing.title}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{listing.location}</p>
-                <p className="text-sm font-bold text-gray-900 mt-1">KES {listing.price.toLocaleString()}</p>
-              </div>
-              {listing.is_active ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Active</span>
-              ) : (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 shrink-0">Inactive</span>
-              )}
-            </div>
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>{listing.agent_name} &middot; {listing.leads_count} leads</span>
-              <span>{new Date(listing.created_at).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center gap-3 pt-1 text-xs font-medium">
-              <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">View Live</a>
-              <button onClick={() => handleToggleActive(listing)} disabled={pendingId === listing.id}
-                className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
-                {listing.is_active ? 'Deactivate' : 'Activate'}
-              </button>
-              <button onClick={() => setTransferListing(listing)} className="text-indigo-600 hover:underline">Transfer</button>
-              <button onClick={() => handleDelete(listing)} disabled={pendingId === listing.id} className="text-red-500 hover:underline disabled:opacity-50">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className="md:hidden space-y-3">
+          <SortableContext items={orderedListings.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+            {filtered.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No listings found.</div>
+            ) : visible.map((listing, index) => (
+              <SortableMobileCard
+                key={listing.id}
+                listing={listing}
+                index={index}
+                pendingId={pendingId}
+                onToggleActive={handleToggleActive}
+                onTransfer={setTransferListing}
+                onDelete={handleDelete}
+                isReorderMode={isReorderMode}
+              />
+            ))}
+          </SortableContext>
+        </div>
+      </DndContext>
 
       {hasMore && (
         <div className="mt-4 text-center">

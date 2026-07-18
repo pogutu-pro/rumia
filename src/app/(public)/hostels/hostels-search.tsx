@@ -67,8 +67,10 @@ export interface Listing {
   longitude?: number | null;
   proximity_description?: string | null;
   created_at?: string;
+  sort_position?: number | null;
   listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
   agents: { name: string; phone?: string; whatsapp?: string } | null;
+  listing_room_types?: { deposit?: number | null; furnishing_items?: string[] | null; label?: string | null }[] | null;
 }
 
 interface CombinedFilters {
@@ -221,8 +223,9 @@ async function fetchListings(
        price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
        amenities, room_type, room_type_enum, bathroom_type,
        wifi_included, water_included, electricity_included, security_type,
-       latitude, longitude, proximity_description, created_at,
+       latitude, longitude, proximity_description, created_at, sort_position,
        listing_images(r2_url, display_order, blur_data_url),
+       listing_room_types(deposit, furnishing_items, label),
        agents(name, phone, whatsapp)`,
       { count: 'exact' },
     )
@@ -274,8 +277,18 @@ async function fetchListings(
   q = q.range(from, to);
 
   const { data, count } = await q;
+  const results = (data as Listing[]) || [];
+  // Admin-positioned listings always appear first
+  results.sort((a, b) => {
+    const aPos = (a as any).sort_position ?? null;
+    const bPos = (b as any).sort_position ?? null;
+    if (aPos !== null && bPos !== null) return aPos - bPos;
+    if (aPos !== null) return -1;
+    if (bPos !== null) return 1;
+    return 0;
+  });
   return {
-    listings: (data as Listing[]) || [],
+    listings: results,
     count: count || 0,
   };
 }
@@ -376,6 +389,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         (a, b) => a.display_order - b.display_order,
       );
       const imageUrl = sorted[0]?.r2_url;
+      const roomTypes = item.listing_room_types || [];
+      const firstRoom = roomTypes[0] || {};
 
       if (isCompareSelected(item.id)) {
         removeCompareSelection(item.id);
@@ -411,6 +426,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         latitude: item.latitude,
         longitude: item.longitude,
         mpesaDetails: item.mpesa_details,
+        deposit: firstRoom.deposit ?? null,
+        furnishingItems: firstRoom.furnishing_items ?? null,
+        roomTypeLabel: firstRoom.label ?? null,
       });
 
       if (result.ok) {

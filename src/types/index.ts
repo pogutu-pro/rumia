@@ -68,6 +68,8 @@ export interface Listing {
   county?: string | null;
   // Search
   proximity_description?: string | null;
+  // Admin ordering
+  sort_position?: number | null;
 }
 
 export interface ListingImage {
@@ -155,6 +157,15 @@ export interface TransferHistory {
   previous_owner?: { name: string } | null;
   new_owner?: { name: string } | null;
   listing?: { title: string } | null;
+}
+
+export interface ListingSortHistory {
+  id: string;
+  listing_id: string;
+  admin_id: string;
+  old_position: number | null;
+  new_position: number | null;
+  changed_at: string;
 }
 
 export interface CreateAgentInput {

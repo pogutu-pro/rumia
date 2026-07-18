@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { JsonLd } from '@/components/seo/json-ld';
 import { FeaturedHostelCard } from '@/components/compare/featured-hostel-card';
+import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 
 export const revalidate = 0;
 
@@ -61,6 +62,8 @@ export default async function HomePage() {
       slug,
       county,
       area,
+      created_at,
+      sort_position,
       listing_images (
         r2_url,
         display_order,
@@ -74,7 +77,7 @@ export default async function HomePage() {
     .eq('is_active', true)
     .limit(8);
 
-  let listings = (listingsData || []) as any[];
+  let listings = sortListingsByPosition((listingsData || []) as any[]);
 
   // Get unique locations for quick search suggestions
   const { data: locsData } = await supabase

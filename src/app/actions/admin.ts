@@ -515,6 +515,87 @@ export async function markCommissionPaidAction(
 }
 
 /**
+ * Updates sort_position for multiple listings in a single batch.
+ * Logs each change to listing_sort_history for audit trail.
+ * Listings with sort_position set appear first, ordered ascending.
+ * Null sort_position means "use default ordering" (created_at DESC).
+ */
+export async function updateListingsOrderAction(
+  updates: Array<{ id: string; sort_position: number | null }>
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    // Fetch current positions for audit logging
+    const listingIds = updates.map((u) => u.id);
+    const { data: currentListings, error: fetchError } = await supabaseAdmin
+      .from('listings')
+      .select('id, sort_position')
+      .in('id', listingIds);
+
+    if (fetchError) {
+      return { success: false, error: fetchError.message };
+    }
+
+    const oldPositionMap = new Map<string, number | null>();
+    for (const listing of currentListings ?? []) {
+      oldPositionMap.set(listing.id, listing.sort_position);
+    }
+
+    // Apply updates one by one (Supabase doesn't support bulk update with different values per row)
+    const auditEntries: Array<{
+      listing_id: string;
+      admin_id: string;
+      old_position: number | null;
+      new_position: number | null;
+    }> = [];
+
+    for (const update of updates) {
+      const oldPosition = oldPositionMap.get(update.id) ?? null;
+
+      const { error: updateError } = await supabaseAdmin
+        .from('listings')
+        .update({ sort_position: update.sort_position })
+        .eq('id', update.id);
+
+      if (updateError) {
+        return { success: false, error: `Failed to update listing ${update.id}: ${updateError.message}` };
+      }
+
+      auditEntries.push({
+        listing_id: update.id,
+        admin_id: user.id,
+        old_position: oldPosition,
+        new_position: update.sort_position,
+      });
+    }
+
+    // Batch insert audit log entries
+    if (auditEntries.length > 0) {
+      const { error: auditError } = await supabaseAdmin
+        .from('listing_sort_history')
+        .insert(auditEntries);
+
+      if (auditError) {
+        console.error('Failed to record sort history:', auditError);
+      }
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/admin');
+    revalidatePath('/hostels');
+    revalidatePath('/');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Transfers a hostel listing from its current owner to a new agent.
  * Records the transfer in transfer_history for audit trail.
  */

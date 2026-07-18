@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import HostelsSearch, { type Listing } from './hostels-search';
+import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
@@ -31,7 +32,7 @@ async function getInitialListings(): Promise<Listing[]> {
        price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
        amenities, room_type, room_type_enum, bathroom_type,
        wifi_included, water_included, electricity_included, security_type,
-       latitude, longitude, proximity_description, created_at,
+       latitude, longitude, proximity_description, created_at, sort_position,
        listing_images(r2_url, display_order, blur_data_url),
        agents(name, phone, whatsapp)`,
     )
@@ -39,7 +40,7 @@ async function getInitialListings(): Promise<Listing[]> {
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE);
 
-  return (data as unknown as Listing[]) || [];
+  return sortListingsByPosition(data as unknown as Listing[]) || [];
 }
 
 async function getListingCount(): Promise<number> {
