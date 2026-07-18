@@ -702,8 +702,13 @@ function buildMobileRows(ctx: MobileRowContext): MobileRow[] {
         const price = h.price_single ?? h.price_sharing ?? h.price;
         const isLowest = price === ctx.lowestPrice && ctx.cols > 1;
         return (
-          <span className={cn('font-bold tabular-nums', isLowest ? 'text-emerald-600' : 'text-slate-900')}>
-            KES {price.toLocaleString()}
+          <span className={cn('font-bold tabular-nums flex flex-col gap-0.5', isLowest ? 'text-emerald-600' : 'text-slate-900')}>
+            <span>KES {price.toLocaleString()}/mo</span>
+            {h.price_single && h.price_sharing && (
+              <span className="text-[10px] font-medium text-slate-400">
+                KES {h.price_single.toLocaleString()} for 1 · KES {h.price_sharing.toLocaleString()} sharing
+              </span>
+            )}
             {isLowest && (
               <BestValueBadge label="Best Price" icon={Star} />
             )}
@@ -819,10 +824,9 @@ function buildMobileRows(ctx: MobileRowContext): MobileRow[] {
       label: 'Deposit',
       icon: CreditCard,
       render: (h) => {
-        const deposit = (h as any).deposit;
-        const numDeposit = typeof deposit === 'number' ? deposit : null;
+        const numDeposit = typeof h.deposit === 'number' ? h.deposit : null;
         const allDeposits = ctx.hostels
-          .map((x: CompareSelection) => (typeof (x as any).deposit === 'number' ? (x as any).deposit : Infinity));
+          .map((x) => (typeof x.deposit === 'number' ? x.deposit : Infinity));
         const minDeposit = Math.min(...allDeposits);
         const isLowest = numDeposit !== null && numDeposit === minDeposit && ctx.cols > 1;
         return (
@@ -830,6 +834,59 @@ function buildMobileRows(ctx: MobileRowContext): MobileRow[] {
             <span>{numDeposit !== null ? `KES ${numDeposit.toLocaleString()}` : '—'}</span>
             {isLowest && <BestValueBadge label="Lowest" icon={Star} />}
           </span>
+        );
+      },
+    },
+    {
+      key: 'total_move_in',
+      label: 'Total to Move In',
+      icon: Wallet,
+      render: (h) => {
+        const price = h.price_single ?? h.price_sharing ?? h.price;
+        const deposit = typeof h.deposit === 'number' ? h.deposit : 0;
+        const total = price + deposit;
+        const allTotals = ctx.hostels.map((x) => {
+          const p = x.price_single ?? x.price_sharing ?? x.price;
+          const d = typeof x.deposit === 'number' ? x.deposit : 0;
+          return p + d;
+        });
+        const minTotal = Math.min(...allTotals);
+        const isLowest = total === minTotal && ctx.cols > 1;
+        return (
+          <span className={cn('font-bold tabular-nums flex flex-col gap-1', isLowest ? 'text-emerald-600' : 'text-slate-900')}>
+            <span>KES {total.toLocaleString()}</span>
+            <span className="text-[10px] font-medium text-slate-400">rent + deposit</span>
+            {isLowest && <BestValueBadge label="Best Value" icon={Star} />}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'furnishing',
+      label: 'Furnishing',
+      icon: BedDouble,
+      render: (h) => {
+        const items = h.furnishingItems;
+        const count = Array.isArray(items) ? items.length : 0;
+        const level = count === 0 ? 'Empty' : count <= 3 ? 'Semi-furnished' : 'Furnished';
+        const color = count === 0 ? 'text-slate-400' : count <= 3 ? 'text-amber-600' : 'text-emerald-600';
+        if (!Array.isArray(items) || count === 0) {
+          return <span className="text-slate-400">Empty</span>;
+        }
+        return (
+          <div className="flex flex-col gap-1">
+            <span className={cn('font-semibold', color)}>{level}</span>
+            <div className="flex flex-wrap gap-1">
+              {items.slice(0, 4).map((item) => (
+                <span key={item} className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-medium">
+                  {item}
+                </span>
+              ))}
+              {items.length > 4 && (
+                <span className="text-[10px] text-slate-400 font-medium">+{items.length - 4}</span>
+              )}
+            </div>
+          </div>
         );
       },
     },
@@ -1109,6 +1166,7 @@ export default function ComparePage() {
            wifi_included, water_included, electricity_included, security_type,
            latitude, longitude,
            listing_images(r2_url, display_order),
+           listing_room_types(deposit, furnishing_items, label),
            agents(name, phone, whatsapp)`,
         )
         .in('id', ids)
@@ -1121,6 +1179,8 @@ export default function ComparePage() {
         const sorted = [...(item.listing_images || [])].sort(
           (a: any, b: any) => a.display_order - b.display_order,
         );
+        const roomTypes = item.listing_room_types || [];
+        const firstRoom = roomTypes[0] || {};
         remoteSelections[item.id] = {
           id: item.id,
           title: item.title,
@@ -1149,6 +1209,9 @@ export default function ComparePage() {
           latitude: item.latitude,
           longitude: item.longitude,
           mpesaDetails: item.mpesa_details,
+          deposit: firstRoom.deposit ?? null,
+          furnishingItems: firstRoom.furnishing_items ?? null,
+          roomTypeLabel: firstRoom.label ?? null,
         };
       });
 

@@ -42,6 +42,10 @@ export interface CompareSelection {
   longitude?: number | null;
   // Payment
   mpesaDetails?: string | null;
+  // Room type structured fields
+  deposit?: number | null;
+  furnishingItems?: string[] | null;
+  roomTypeLabel?: string | null;
 }
 
 interface StoredCompareState {
