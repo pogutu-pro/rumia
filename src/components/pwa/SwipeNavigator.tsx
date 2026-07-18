@@ -4,12 +4,12 @@ import { useRef, useCallback, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useNavigationDirection } from "@/context/NavigationContext";
 
-const TAB_ROUTES = ["/", "/hostels", "/saved", "/auth/login"] as const;
+const TAB_ROUTES = ["/", "/hostels", "/agents", "/auth/login"] as const;
 
 function getCurrentIndex(pathname: string): number {
   if (pathname === "/") return 0;
   if (pathname === "/hostels") return 1;
-  if (pathname.startsWith("/saved")) return 2;
+  if (pathname.startsWith("/agents")) return 2;
   if (
     pathname.startsWith("/auth") ||
     pathname.startsWith("/dashboard") ||

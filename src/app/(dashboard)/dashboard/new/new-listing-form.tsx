@@ -183,7 +183,7 @@ const CATEGORY_OPTIONS = [
 ] as const;
 
 const OCCUPANCY_OPTIONS = [
-  { value: 'alone', label: 'Alone (1 person)' },
+  { value: 'alone', label: '1 person' },
   { value: 'sharing_2', label: 'Sharing (2 people)' },
   { value: 'sharing_3', label: 'Sharing (3 people)' },
 ] as const;
@@ -226,7 +226,7 @@ function generateRoomTypeLabel(
   };
 
   const occupancyMap: Record<string, string> = {
-    alone: 'Alone',
+    alone: '1 person',
     sharing_2: 'Sharing',
     sharing_3: 'Sharing',
   };
@@ -828,7 +828,7 @@ export function NewListingForm({
               onChange={(e) => setRoomType(e.target.value)}
               className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
             >
-              <option value="Single">Alone (1 person)</option>
+              <option value="Single">1 person</option>
               <option value="Double">Sharing (2 people)</option>
               <option value="Self-Contained">Self-Contained</option>
             </select>

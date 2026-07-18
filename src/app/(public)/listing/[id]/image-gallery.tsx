@@ -80,7 +80,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
             >
               <ChevronRight className="h-5 w-5 text-slate-700" />
             </button>
-            <div className="absolute bottom-4 right-4 bg-slate-900/80 px-2 py-1 rounded-md text-[11px] font-bold text-white uppercase tracking-wider">
+            <div className="absolute bottom-4 left-4 bg-slate-900/80 px-2 py-1 rounded-md text-[11px] font-bold text-white uppercase tracking-wider">
               {mobileIndex + 1} / {displayImages.length}
             </div>
           </>
@@ -88,7 +88,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         {displayImages.length > 1 && (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="absolute bottom-4 left-4 bg-white/95 hover:bg-white text-slate-800 font-bold text-[11px] py-2 px-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer z-20"
+            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-800 font-bold text-[11px] py-2 px-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer z-20"
           >
             <LayoutGrid className="h-3.5 w-3.5" />
             Show all photos

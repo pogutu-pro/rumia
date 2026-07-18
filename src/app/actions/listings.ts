@@ -127,7 +127,7 @@ function generateRoomTypeLabel(
   };
 
   const occupancyMap: Record<string, string> = {
-    alone: 'Alone',
+    alone: '1 person',
     sharing_2: 'Sharing',
     sharing_3: 'Sharing',
   };

@@ -606,7 +606,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
         {/* Filter toolbar */}
         <div className="mb-5 space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-nowrap items-center gap-3 overflow-x-auto scrollbar-none">
             {/* Filters — advanced filtering (leave as is) */}
             {isDesktop ? (
               <Sheet
@@ -616,7 +616,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                 <SheetTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                    className="shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
                   >
                     <SlidersHorizontal className="h-4 w-4" />
                     Filters
@@ -665,7 +665,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               trigger={
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
+                  className="shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
                 >
                   <Tag className="h-4 w-4" />
                   Price
@@ -689,7 +689,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               trigger={
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-blue-500 text-white shadow-sm shadow-blue-200 hover:bg-blue-600"
+                  className="shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-blue-500 text-white shadow-sm shadow-blue-200 hover:bg-blue-600"
                 >
                   <MapPin className="h-4 w-4" />
                   Distance
@@ -791,9 +791,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
               let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
               if (item.price_single && item.price_sharing) {
-                priceDisplay = `KES ${item.price_single.toLocaleString()} alone · KES ${item.price_sharing.toLocaleString()} sharing`;
+                priceDisplay = `KES ${item.price_single.toLocaleString()} for 1 person · KES ${item.price_sharing.toLocaleString()} sharing`;
               } else if (item.price_single) {
-                priceDisplay = `KES ${item.price_single.toLocaleString()}/mo alone`;
+                priceDisplay = `KES ${item.price_single.toLocaleString()}/mo for 1 person`;
               } else if (item.price_sharing) {
                 priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
               }
