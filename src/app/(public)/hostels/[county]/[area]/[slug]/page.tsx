@@ -453,7 +453,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     videoId={listing.youtube_id}
                     title={`${listing.title} — hostel walkthrough video`}
                     isShort={listing.is_youtube_shorts}
-                    autoPlay
                   />
                   <p className="text-xs font-semibold text-slate-500">
                     Walkthrough video provided by the host.

@@ -1,18 +1,14 @@
 'use client';
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const BLUR_DATA_URL =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iOSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJiIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxLjUiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTFlZWYwIiBmaWx0ZXI9InVybCgjYikiLz48L3N2Zz4=';
 
 type VideoProps = {
   url: string;
   title?: string;
   thumbnail?: string;
-  autoplay?: boolean;
   muted?: boolean;
   loop?: boolean;
   priority?: boolean;
@@ -23,7 +19,6 @@ export default function RumiVideo({
   url,
   title = 'Watch video',
   thumbnail,
-  autoplay = false,
   muted = false,
   loop = false,
   priority = false,
@@ -31,42 +26,12 @@ export default function RumiVideo({
 }: VideoProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // Intersection Observer for autoplay - starts immediately when in view
-  useEffect(() => {
-    if (!containerRef.current || !isMounted) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Small delay to ensure iframe is ready
-            setTimeout(() => {
-              setIsPlaying(true);
-            }, 100);
-          }
-        });
-      },
-      {
-        threshold: 0.1, // Video must be 10% visible to start
-      }
-    );
-
-    observer.observe(containerRef.current);
-
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
-  }, [isMounted]);
 
   // Extract YouTube ID
   const youtubeId = url.match(
@@ -80,9 +45,9 @@ export default function RumiVideo({
   const loopParam = loop && youtubeId ? `&loop=1&playlist=${youtubeId}` : '';
   
   const embedUrl = youtubeId
-    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1${mutedParam}${loopParam}`
+    ? `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&playsinline=1${mutedParam}${loopParam}`
     : url.includes('vimeo.com')
-      ? url.replace('vimeo.com', 'player.vimeo.com/video') + `?autoplay=1${muted ? '&muted=1' : ''}${loop ? '&loop=1' : ''}`
+      ? url.replace('vimeo.com', 'player.vimeo.com/video') + `?${muted ? 'muted=1&' : ''}${loop ? 'loop=1&' : ''}`
       : url;
 
   // Final thumbnail (priority: prop → YouTube → fallback)
@@ -92,9 +57,9 @@ export default function RumiVideo({
       ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
       : '/images/fallback-video.jpg');
 
-  const handlePlay = useCallback(() => {
+  const handlePlay = () => {
     setIsPlaying(true);
-  }, []);
+  };
 
   if (!url) return null;
   
@@ -128,9 +93,25 @@ export default function RumiVideo({
           loading="lazy"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-950">
-          <div className="text-gray-500 text-xs font-bold uppercase tracking-tight">Loading...</div>
-        </div>
+        <button
+          onClick={handlePlay}
+          className="w-full h-full relative group cursor-pointer"
+          aria-label={`Play ${title}`}
+        >
+          <Image
+            src={finalThumbnail}
+            alt={`${title} thumbnail`}
+            fill
+            className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, 66vw"
+            priority={priority}
+          />
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
+            <div className="bg-white/90 rounded-full p-4 shadow-lg">
+              <Play className="h-8 w-8 text-slate-900 fill-slate-900" />
+            </div>
+          </div>
+        </button>
       )}
     </div>
   );

@@ -8,11 +8,10 @@ interface LazyYouTubeProps {
   videoId: string;
   title?: string;
   isShort?: boolean;
-  autoPlay?: boolean;
 }
 
-export function LazyYouTube({ videoId, title = 'Video tour', isShort = false, autoPlay = false }: LazyYouTubeProps) {
-  const [active, setActive] = useState(autoPlay);
+export function LazyYouTube({ videoId, title = 'Video tour', isShort = false }: LazyYouTubeProps) {
+  const [active, setActive] = useState(false);
   const thumb = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   const aspectClass = isShort ? 'aspect-[9/16]' : 'aspect-video';
 
@@ -23,7 +22,7 @@ export function LazyYouTube({ videoId, title = 'Video tour', isShort = false, au
       <div className={`relative ${aspectClass} ${sizeClass} overflow-hidden rounded-2xl border border-slate-100 shadow-sm`}>
         <iframe
           className="absolute inset-0 w-full h-full"
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+          src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
           title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
