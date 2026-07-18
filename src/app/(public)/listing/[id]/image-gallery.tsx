@@ -85,6 +85,15 @@ export function ImageGallery({ images }: ImageGalleryProps) {
             </div>
           </>
         )}
+        {displayImages.length > 1 && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="absolute bottom-4 left-4 bg-white/95 hover:bg-white text-slate-800 font-bold text-[11px] py-2 px-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer z-20"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Show all photos
+          </button>
+        )}
       </div>
 
       {/* Desktop view Airbnb-style Grid */}
