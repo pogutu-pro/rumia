@@ -242,7 +242,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="pointer-events-auto flex items-center gap-2">
-          <SaveButton listingId={listing.id} />
+          <SaveButton listingId={listing.id} variant="icon" />
           <ShareListingButton
             variant="icon"
             listing={{
