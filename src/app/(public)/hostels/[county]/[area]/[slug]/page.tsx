@@ -61,7 +61,7 @@ const getListing = cache(async (slug: string) => {
 
   const { data: roomTypes } = await supabase
     .from('listing_room_types')
-    .select('id, room_type, price, is_available')
+    .select('id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size')
     .eq('listing_id', data.id);
 
   return { ...data, listing_room_types: roomTypes || [] } as any;
@@ -160,6 +160,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const agentSlug = listing.agents?.slug;
   const nearbyListings = await getNearbyListings(listing);
   const viewCounts = await getListingViewCounts(listing.id);
+
+  const roomTypes = listing.listing_room_types || [];
+  const hasAnyDeposit = roomTypes.some((rt: any) => rt.deposit != null && rt.deposit > 0);
+  const minDeposit = hasAnyDeposit
+    ? Math.min(...roomTypes.filter((rt: any) => rt.deposit != null && rt.deposit > 0).map((rt: any) => rt.deposit))
+    : null;
+  const minPrice = listing.price_single || listing.price || 0;
+  const minTotalToMoveIn = minDeposit != null ? minPrice + minDeposit : null;
   const hasCoordinates =
     listing.latitude !== null &&
     listing.longitude !== null &&
@@ -486,6 +494,19 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     </div>
                   )}
                 </div>
+                {minTotalToMoveIn != null && (
+                  <div className="mt-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 rounded-xl px-4 py-3 border border-emerald-200/60">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total to move in</span>
+                      <span className="text-lg font-black text-emerald-900 tabular-nums">
+                        KES {minTotalToMoveIn.toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">
+                      KES {minPrice.toLocaleString()} rent + KES {minDeposit!.toLocaleString()} deposit
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="h-px bg-slate-100" />
               <div className="space-y-3.5">
@@ -678,59 +699,73 @@ export default async function ListingSlugPage({ params }: PageProps) {
       )}
 
       {/* Mobile sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 flex items-center justify-between md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
-        <div>
-          {listing.price_single && listing.price_sharing && (
-            <div className="text-sm">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-center justify-between">
+          <div>
+            {minTotalToMoveIn != null ? (
+              <div className="space-y-0.5">
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-lg font-black text-slate-950">
+                    KES {minTotalToMoveIn.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase">move-in</span>
+                </div>
+                <div className="text-[10px] font-semibold text-slate-400">
+                  KES {minPrice.toLocaleString()} rent + KES {minDeposit!.toLocaleString()} deposit
+                </div>
+              </div>
+            ) : listing.price_single && listing.price_sharing && (
+              <div className="text-sm">
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-base font-black text-slate-950">
+                    KES {listing.price_single.toLocaleString()}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-500">
+                    single
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-base font-black text-slate-950">
+                    KES {listing.price_sharing.toLocaleString()}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-500">
+                    sharing
+                  </span>
+                </div>
+              </div>
+            )}
+            {!minTotalToMoveIn && listing.price_single && !listing.price_sharing && (
               <div className="flex items-baseline gap-0.5">
-                <span className="text-base font-black text-slate-950">
+                <span className="text-lg font-black text-slate-950">
                   KES {listing.price_single.toLocaleString()}
                 </span>
-                <span className="text-xs font-semibold text-slate-500">
-                  single
-                </span>
+                <span className="text-xs font-semibold text-slate-500">/mo</span>
               </div>
+            )}
+            {!minTotalToMoveIn && listing.price_sharing && !listing.price_single && (
               <div className="flex items-baseline gap-0.5">
-                <span className="text-base font-black text-slate-950">
+                <span className="text-lg font-black text-slate-950">
                   KES {listing.price_sharing.toLocaleString()}
                 </span>
-                <span className="text-xs font-semibold text-slate-500">
-                  sharing
-                </span>
+                <span className="text-xs font-semibold text-slate-500">/mo</span>
               </div>
-            </div>
-          )}
-          {listing.price_single && !listing.price_sharing && (
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-black text-slate-950">
-                KES {listing.price_single.toLocaleString()}
-              </span>
-              <span className="text-xs font-semibold text-slate-500">/mo</span>
-            </div>
-          )}
-          {listing.price_sharing && !listing.price_single && (
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-black text-slate-950">
-                KES {listing.price_sharing.toLocaleString()}
-              </span>
-              <span className="text-xs font-semibold text-slate-500">/mo</span>
-            </div>
-          )}
-          {!listing.price_single && !listing.price_sharing && (
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-black text-slate-950">
-                KES {listing.price.toLocaleString()}
-              </span>
-              <span className="text-xs font-semibold text-slate-500">/mo</span>
-            </div>
-          )}
-        </div>
-        <div className="w-[60%]">
-          <WhatsappButton
-            listingId={listing.id}
-            agentId={listing.agents?.id}
-            agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
-          />
+            )}
+            {!minTotalToMoveIn && !listing.price_single && !listing.price_sharing && (
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-lg font-black text-slate-950">
+                  KES {listing.price.toLocaleString()}
+                </span>
+                <span className="text-xs font-semibold text-slate-500">/mo</span>
+              </div>
+            )}
+          </div>
+          <div className="w-[60%]">
+            <WhatsappButton
+              listingId={listing.id}
+              agentId={listing.agents?.id}
+              agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+            />
+          </div>
         </div>
       </div>
     </div>

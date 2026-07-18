@@ -73,6 +73,12 @@ interface FormRoomType {
   room_type: string;
   price: string;
   is_available: boolean;
+  deposit: string;
+  furnishing_items: string[];
+  category: string;
+  occupancy: string;
+  floor: string;
+  size: string;
 }
 
 interface InitialListingData {
@@ -119,6 +125,12 @@ interface InitialListingData {
     room_type: string;
     price: number | string;
     is_available?: boolean | null;
+    deposit?: number | string | null;
+    furnishing_items?: string[] | null;
+    category?: string | null;
+    occupancy?: string | null;
+    floor?: string | null;
+    size?: string | null;
   }> | null;
 }
 
@@ -163,6 +175,88 @@ function initialImages(listing?: InitialListingData): UploadedImage[] {
     }));
 }
 
+const CATEGORY_OPTIONS = [
+  { value: 'bedsitter', label: 'Bedsitter' },
+  { value: 'single_room', label: 'Single Room' },
+  { value: 'double_room', label: 'Double Room' },
+  { value: 'studio', label: 'Studio' },
+] as const;
+
+const OCCUPANCY_OPTIONS = [
+  { value: 'alone', label: 'Alone (1 person)' },
+  { value: 'sharing_2', label: 'Sharing (2 people)' },
+  { value: 'sharing_3', label: 'Sharing (3 people)' },
+] as const;
+
+const FLOOR_OPTIONS = [
+  { value: 'ground', label: 'Ground floor' },
+  { value: 'upper', label: 'Upper floor' },
+  { value: 'na', label: 'N/A' },
+] as const;
+
+const SIZE_OPTIONS = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'smaller', label: 'Smaller' },
+  { value: 'larger', label: 'Larger' },
+] as const;
+
+const FURNISHING_ITEMS = [
+  'Bed frame',
+  'Mattress',
+  'Wardrobe/closet',
+  'Study desk & chair',
+  'Curtains',
+  'Cooking stove/burner',
+  'WiFi router',
+] as const;
+
+function generateRoomTypeLabel(
+  category: string,
+  occupancy: string,
+  floor: string,
+  size: string,
+): string {
+  if (!category) return '';
+
+  const categoryMap: Record<string, string> = {
+    bedsitter: 'Bedsitter',
+    single_room: 'Single Room',
+    double_room: 'Double Room',
+    studio: 'Studio',
+  };
+
+  const occupancyMap: Record<string, string> = {
+    alone: 'Alone',
+    sharing_2: 'Sharing',
+    sharing_3: 'Sharing',
+  };
+
+  let label = categoryMap[category] || category;
+
+  const parts: string[] = [];
+  if (floor && floor !== 'na') {
+    parts.push(floor === 'ground' ? 'Ground floor' : 'Upper floor');
+  }
+  if (size && size !== 'standard') {
+    parts.push(size === 'smaller' ? 'Smaller' : 'Larger');
+  }
+  if (occupancy) {
+    parts.push(occupancyMap[occupancy] || occupancy);
+  }
+
+  if (parts.length > 0) {
+    label += ' - ' + parts.join(', ');
+  }
+
+  return label;
+}
+
+function deriveFurnishingLevel(items: string[]): string {
+  if (items.length === 0) return '';
+  if (items.length <= 3) return 'Semi-furnished';
+  return 'Furnished';
+}
+
 function initialRoomTypes(listing?: InitialListingData): FormRoomType[] {
   const existing = listing?.listing_room_types || [];
 
@@ -171,10 +265,16 @@ function initialRoomTypes(listing?: InitialListingData): FormRoomType[] {
       room_type: room.room_type,
       price: String(room.price || ''),
       is_available: room.is_available ?? true,
+      deposit: room.deposit && Number(room.deposit) > 0 ? String(room.deposit) : '',
+      furnishing_items: room.furnishing_items || [],
+      category: room.category || '',
+      occupancy: room.occupancy || '',
+      floor: room.floor || '',
+      size: room.size || '',
     }));
   }
 
-  return [{ room_type: 'Single Room', price: '7500', is_available: true }];
+  return [{ room_type: 'Single Room', price: '7500', is_available: true, deposit: '', furnishing_items: [], category: '', occupancy: '', floor: '', size: '' }];
 }
 
 function SortableImageCard({
@@ -425,7 +525,7 @@ export function NewListingForm({
   const addRoomTypeField = () => {
     setRoomTypes((prev) => [
       ...prev,
-      { room_type: 'Double Room', price: '', is_available: true },
+      { room_type: 'Double Room', price: '', is_available: true, deposit: '', furnishing_items: [], category: '', occupancy: '', floor: '', size: '' },
     ]);
   };
 
@@ -728,8 +828,8 @@ export function NewListingForm({
               onChange={(e) => setRoomType(e.target.value)}
               className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
             >
-              <option value="Single">Single</option>
-              <option value="Double">Double</option>
+              <option value="Single">Alone (1 person)</option>
+              <option value="Double">Sharing (2 people)</option>
               <option value="Self-Contained">Self-Contained</option>
             </select>
           </div>
@@ -990,74 +1090,201 @@ export function NewListingForm({
             </div>
 
             <div className="space-y-3">
-              {roomTypes.map((rt, idx) => (
+              {roomTypes.map((rt, idx) => {
+                const hasStructuredFields = !!(rt.category || rt.occupancy || rt.floor || rt.size);
+                const label = hasStructuredFields
+                  ? generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, rt.size)
+                  : rt.room_type;
+                const furnishingLabel = deriveFurnishingLevel(rt.furnishing_items);
+
+                return (
                 <div
                   key={idx}
-                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100/80"
+                  className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/80 space-y-4"
                 >
-                  <div className="flex-1 w-full space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
-                      Room Type Name
-                    </Label>
-                    <Input
-                      type="text"
-                      required
-                      value={rt.room_type}
-                      onChange={(e) =>
-                        updateRoomTypeField(idx, 'room_type', e.target.value)
-                      }
-                      placeholder="e.g. Single Room, Self-Contained"
-                      className="h-10 bg-white border-slate-200"
-                    />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-700">
+                      Room Category {idx + 1}
+                    </span>
+                    {roomTypes.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRoomTypeField(idx)}
+                        className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg transition-colors"
+                        title="Remove category"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
-                  <div className="w-full sm:w-36 space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
-                      Rent (KES)
-                    </Label>
-                    <Input
-                      type="number"
-                      required
-                      value={rt.price}
-                      onChange={(e) =>
-                        updateRoomTypeField(idx, 'price', e.target.value)
-                      }
-                      placeholder="7500"
-                      className="h-10 bg-white border-slate-200"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 pt-5">
-                    <input
-                      type="checkbox"
-                      id={`avail-${idx}`}
-                      checked={rt.is_available}
-                      onChange={(e) =>
-                        updateRoomTypeField(
-                          idx,
-                          'is_available',
-                          e.target.checked,
-                        )
-                      }
-                      className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
-                    />
-                    <Label
-                      htmlFor={`avail-${idx}`}
-                      className="text-xs font-semibold text-slate-600 cursor-pointer"
-                    >
-                      Available
-                    </Label>
-                  </div>
-                  {roomTypes.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeRoomTypeField(idx)}
-                      className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg transition-colors mt-5"
-                      title="Remove category"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+
+                  {/* Auto-generated label preview */}
+                  {label && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Label: </span>
+                      <span className="text-sm font-semibold text-emerald-900">{label}</span>
+                    </div>
                   )}
+
+                  {/* Structured Dropdowns */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400 font-bold uppercase">Category *</Label>
+                      <select
+                        value={rt.category}
+                        onChange={(e) => {
+                          updateRoomTypeField(idx, 'category', e.target.value);
+                          const newCat = e.target.value;
+                          if (newCat) {
+                            const genLabel = generateRoomTypeLabel(newCat, rt.occupancy, rt.floor, rt.size);
+                            if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel);
+                          }
+                        }}
+                        className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        {CATEGORY_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400 font-bold uppercase">Occupancy *</Label>
+                      <select
+                        value={rt.occupancy}
+                        onChange={(e) => {
+                          updateRoomTypeField(idx, 'occupancy', e.target.value);
+                          const newOcc = e.target.value;
+                          if (rt.category) {
+                            const genLabel = generateRoomTypeLabel(rt.category, newOcc, rt.floor, rt.size);
+                            if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel);
+                          }
+                        }}
+                        className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        {OCCUPANCY_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400 font-bold uppercase">Floor (optional)</Label>
+                      <select
+                        value={rt.floor}
+                        onChange={(e) => {
+                          updateRoomTypeField(idx, 'floor', e.target.value);
+                          if (rt.category) {
+                            const genLabel = generateRoomTypeLabel(rt.category, rt.occupancy, e.target.value, rt.size);
+                            if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel);
+                          }
+                        }}
+                        className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        {FLOOR_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400 font-bold uppercase">Size (optional)</Label>
+                      <select
+                        value={rt.size}
+                        onChange={(e) => {
+                          updateRoomTypeField(idx, 'size', e.target.value);
+                          if (rt.category) {
+                            const genLabel = generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, e.target.value);
+                            if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel);
+                          }
+                        }}
+                        className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        {SIZE_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Pricing: Rent + Deposit */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400 font-bold uppercase">Rent (KES) *</Label>
+                      <Input
+                        type="number"
+                        required
+                        value={rt.price}
+                        onChange={(e) => updateRoomTypeField(idx, 'price', e.target.value)}
+                        placeholder="7500"
+                        className="h-10 bg-white border-slate-200"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400 font-bold uppercase">Deposit (KES) <span className="text-slate-300 font-normal">optional</span></Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={rt.deposit}
+                        onChange={(e) => updateRoomTypeField(idx, 'deposit', e.target.value)}
+                        placeholder="e.g. 3000"
+                        className="h-10 bg-white border-slate-200"
+                      />
+                    </div>
+                    <div className="flex items-end pb-1">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`avail-${idx}`}
+                          checked={rt.is_available}
+                          onChange={(e) => updateRoomTypeField(idx, 'is_available', e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                        />
+                        <Label htmlFor={`avail-${idx}`} className="text-xs font-semibold text-slate-600 cursor-pointer">
+                          Available
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Furnishing Checklist */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-slate-400 font-bold uppercase">Furnishing <span className="text-slate-300 font-normal">(optional)</span></Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {FURNISHING_ITEMS.map((item) => (
+                        <div key={item} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`furnishing-${idx}-${item}`}
+                            checked={rt.furnishing_items.includes(item)}
+                            onChange={(e) => {
+                              const newItems = e.target.checked
+                                ? [...rt.furnishing_items, item]
+                                : rt.furnishing_items.filter((f: string) => f !== item);
+                              updateRoomTypeField(idx, 'furnishing_items', newItems);
+                            }}
+                            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                          />
+                          <Label
+                            htmlFor={`furnishing-${idx}-${item}`}
+                            className="text-xs font-medium leading-none cursor-pointer text-slate-600"
+                          >
+                            {item}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                    {furnishingLabel && (
+                      <p className="text-xs font-bold text-emerald-600 mt-1">{furnishingLabel}</p>
+                    )}
+                  </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

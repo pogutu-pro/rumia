@@ -53,7 +53,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
 
   const { data: roomTypes } = await supabase
     .from('listing_room_types')
-    .select('id, room_type, price, is_available')
+    .select('id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size')
     .eq('listing_id', id);
 
   (listing as any).listing_room_types = roomTypes || [];

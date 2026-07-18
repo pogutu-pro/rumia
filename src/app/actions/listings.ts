@@ -111,6 +111,53 @@ async function replaceListingImages(
   return error;
 }
 
+function generateRoomTypeLabel(
+  category?: string,
+  occupancy?: string,
+  floor?: string,
+  size?: string,
+): string {
+  if (!category) return '';
+
+  const categoryMap: Record<string, string> = {
+    bedsitter: 'Bedsitter',
+    single_room: 'Single Room',
+    double_room: 'Double Room',
+    studio: 'Studio',
+  };
+
+  const occupancyMap: Record<string, string> = {
+    alone: 'Alone',
+    sharing_2: 'Sharing',
+    sharing_3: 'Sharing',
+  };
+
+  let label = categoryMap[category] || category;
+
+  const parts: string[] = [];
+  if (floor && floor !== 'na') {
+    parts.push(floor === 'ground' ? 'Ground floor' : 'Upper floor');
+  }
+  if (size && size !== 'standard') {
+    parts.push(size === 'smaller' ? 'Smaller' : 'Larger');
+  }
+  if (occupancy) {
+    parts.push(occupancyMap[occupancy] || occupancy);
+  }
+
+  if (parts.length > 0) {
+    label += ' - ' + parts.join(', ');
+  }
+
+  return label;
+}
+
+function deriveFurnishingLevel(items: string[] | undefined | null): string {
+  if (!items || items.length === 0) return 'empty';
+  if (items.length <= 3) return 'semi_furnished';
+  return 'furnished';
+}
+
 async function replaceRoomTypes(
   supabase: any,
   listingId: string,
@@ -126,13 +173,26 @@ async function replaceRoomTypes(
   }
 
   const validRoomTypes = roomTypes
-    .filter((rt: any) => rt.room_type && rt.price)
-    .map((rt: any) => ({
-      listing_id: listingId,
-      room_type: rt.room_type,
-      price: Math.round(parseFloat(rt.price)),
-      is_available: rt.is_available,
-    }));
+    .filter((rt: any) => (rt.room_type || rt.category) && rt.price)
+    .map((rt: any) => {
+      const hasStructuredFields = !!(rt.category || rt.occupancy || rt.floor || rt.size);
+      const label = hasStructuredFields
+        ? generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, rt.size) || rt.room_type
+        : rt.room_type;
+
+      return {
+        listing_id: listingId,
+        room_type: label,
+        price: Math.round(parseFloat(rt.price)),
+        is_available: rt.is_available,
+        deposit: rt.deposit && parseInt(rt.deposit) > 0 ? parseInt(rt.deposit) : null,
+        furnishing_items: rt.furnishing_items?.length ? rt.furnishing_items : null,
+        category: rt.category || null,
+        occupancy: rt.occupancy || null,
+        floor: rt.floor || null,
+        size: rt.size || null,
+      };
+    });
 
   if (validRoomTypes.length === 0) return null;
 
