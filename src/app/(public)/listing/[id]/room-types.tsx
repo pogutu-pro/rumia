@@ -12,6 +12,7 @@ interface RoomType {
 interface RoomTypesProps {
   roomTypes: RoomType[];
   fallbackPrice?: number;
+  startingPrice?: number;
 }
 
 function deriveFurnishingLevel(items: string[] | null | undefined): string {
@@ -20,7 +21,7 @@ function deriveFurnishingLevel(items: string[] | null | undefined): string {
   return 'Furnished';
 }
 
-export function RoomTypes({ roomTypes, fallbackPrice }: RoomTypesProps) {
+export function RoomTypes({ roomTypes, fallbackPrice, startingPrice }: RoomTypesProps) {
   const displayRooms = roomTypes && roomTypes.length > 0
     ? roomTypes
     : [
@@ -41,14 +42,17 @@ export function RoomTypes({ roomTypes, fallbackPrice }: RoomTypesProps) {
           const totalToMoveIn = hasDeposit ? room.price + room.deposit! : null;
           const hasFurnishing = room.furnishing_items && room.furnishing_items.length > 0;
           const furnishingLabel = deriveFurnishingLevel(room.furnishing_items);
+          const isStartingFrom = startingPrice != null && room.price === startingPrice && room.is_available;
 
           return (
             <div
               key={room.id}
               className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                room.is_available
-                  ? 'bg-white border-slate-200 hover:border-emerald-400 hover:shadow-lg'
-                  : 'bg-slate-50 border-slate-100 opacity-70'
+                isStartingFrom
+                  ? 'bg-white border-emerald-400 shadow-md ring-1 ring-emerald-100'
+                  : room.is_available
+                    ? 'bg-white border-slate-200 hover:border-emerald-400 hover:shadow-lg'
+                    : 'bg-slate-50 border-slate-100 opacity-70'
               }`}
             >
               {/* Card Header */}
@@ -67,6 +71,11 @@ export function RoomTypes({ roomTypes, fallbackPrice }: RoomTypesProps) {
                       <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Currently Full</p>
                     )}
                   </div>
+                  {isStartingFrom && (
+                    <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-600 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+                      Starting from
+                    </span>
+                  )}
                 </div>
               </div>
 

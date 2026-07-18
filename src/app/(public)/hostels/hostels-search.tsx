@@ -791,9 +791,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
               let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
               if (item.price_single && item.price_sharing) {
-                priceDisplay = `KES ${item.price_single.toLocaleString()} single · KES ${item.price_sharing.toLocaleString()} sharing`;
+                priceDisplay = `KES ${item.price_single.toLocaleString()} alone · KES ${item.price_sharing.toLocaleString()} sharing`;
               } else if (item.price_single) {
-                priceDisplay = `KES ${item.price_single.toLocaleString()}/mo single`;
+                priceDisplay = `KES ${item.price_single.toLocaleString()}/mo alone`;
               } else if (item.price_sharing) {
                 priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
               }

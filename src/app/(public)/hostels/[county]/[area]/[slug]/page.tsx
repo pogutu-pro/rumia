@@ -148,8 +148,37 @@ export default async function ListingSlugPage({ params }: PageProps) {
   );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
+  const agentSlug = listing.agents?.slug;
+  const nearbyListings = await getNearbyListings(listing);
+  const viewCounts = await getListingViewCounts(listing.id);
+
+  // ── Best price computation ──────────────────────────────────────────────
+  // Always prefer the cheapest shared-occupancy variant as the "Starting from" price.
+  // Fall back to the cheapest overall variant. Final fallback: listing-level price.
+  const roomTypes = (listing.listing_room_types || []) as any[];
+  const availableRooms = roomTypes.filter((rt) => rt.is_available !== false);
+
+  function pickBestVariant() {
+    if (availableRooms.length === 0) return null;
+
+    const shared = availableRooms.filter(
+      (rt) => rt.occupancy === 'sharing_2' || rt.occupancy === 'sharing_3',
+    );
+    const pool = shared.length > 0 ? shared : availableRooms;
+    return pool.reduce((best, rt) =>
+      best == null || rt.price < best.price ? rt : best,
+    null as any);
+  }
+
+  const bestVariant = pickBestVariant();
+  const startingPrice = bestVariant?.price ?? listing.price_single ?? listing.price ?? 0;
+  const startingDeposit = bestVariant?.deposit != null && bestVariant.deposit > 0
+    ? bestVariant.deposit
+    : null;
+  const moveInFrom = startingDeposit != null ? startingPrice + startingDeposit : null;
+
   const shareText = [
-    `${listing.room_type || listing.listing_room_types?.[0]?.room_type || 'Student hostel'} from KES ${listing.price.toLocaleString()}/month`,
+    `${bestVariant?.room_type || listing.room_type || 'Student hostel'} from KES ${startingPrice.toLocaleString()}/month`,
     listing.distance_to_campus
       ? `${listing.distance_to_campus} from DeKUT`
       : null,
@@ -157,17 +186,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
   ]
     .filter(Boolean)
     .join(' · ');
-  const agentSlug = listing.agents?.slug;
-  const nearbyListings = await getNearbyListings(listing);
-  const viewCounts = await getListingViewCounts(listing.id);
 
-  const roomTypes = listing.listing_room_types || [];
-  const hasAnyDeposit = roomTypes.some((rt: any) => rt.deposit != null && rt.deposit > 0);
-  const minDeposit = hasAnyDeposit
-    ? Math.min(...roomTypes.filter((rt: any) => rt.deposit != null && rt.deposit > 0).map((rt: any) => rt.deposit))
-    : null;
-  const minPrice = listing.price_single || listing.price || 0;
-  const minTotalToMoveIn = minDeposit != null ? minPrice + minDeposit : null;
   const hasCoordinates =
     listing.latitude !== null &&
     listing.longitude !== null &&
@@ -197,7 +216,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
           },
         }
       : {}),
-    priceRange: `KES ${listing.price.toLocaleString()} per month`,
+    priceRange: `KES ${startingPrice.toLocaleString()} per month`,
     provider: listing.agents
       ? {
           '@type': 'Person',
@@ -321,11 +340,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
               <p className="text-sm text-slate-600 font-medium">
                 Room type:{' '}
                 <span className="font-semibold text-slate-900">
-                  {listing.room_type || 'Self Contained'}
+                  {bestVariant?.room_type || listing.room_type || 'Self Contained'}
                 </span>
                 {' · '}Price from:{' '}
                 <span className="font-semibold text-slate-900">
-                  KES {listing.price.toLocaleString()}/month
+                  KES {startingPrice.toLocaleString()}/month
                 </span>
                 {listing.distance_to_campus && (
                   <>
@@ -419,6 +438,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
             <RoomTypes
               roomTypes={listing.listing_room_types || []}
               fallbackPrice={listing.price}
+              startingPrice={startingPrice}
             />
             <hr className="border-slate-100" />
 
@@ -460,50 +480,31 @@ export default async function ListingSlugPage({ params }: PageProps) {
             <div className="sticky top-28 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                  Pricing
+                  Starting from
                 </span>
-                <div className="mt-3 space-y-2.5">
-                  {listing.price_single && (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-slate-900">
-                        KES {listing.price_single.toLocaleString()}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-600">
-                        Single occupancy/month
-                      </span>
-                    </div>
-                  )}
-                  {listing.price_sharing && (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-slate-900">
-                        KES {listing.price_sharing.toLocaleString()}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-600">
-                        Shared per person/month
-                      </span>
-                    </div>
-                  )}
-                  {!listing.price_single && !listing.price_sharing && (
-                    <div className="flex items-baseline gap-1 mt-1.5 text-slate-900">
-                      <span className="text-3xl font-black">
-                        KES {listing.price.toLocaleString()}
-                      </span>
-                      <span className="text-sm font-semibold text-slate-500">
-                        / month
-                      </span>
-                    </div>
+                <div className="mt-3">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-slate-900 tracking-tight">
+                      KES {startingPrice.toLocaleString()}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-500">/mo</span>
+                  </div>
+                  {bestVariant && (
+                    <p className="text-xs font-semibold text-slate-400 mt-1">
+                      {bestVariant.room_type}
+                    </p>
                   )}
                 </div>
-                {minTotalToMoveIn != null && (
+                {moveInFrom != null && (
                   <div className="mt-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 rounded-xl px-4 py-3 border border-emerald-200/60">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total to move in</span>
+                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Move in from</span>
                       <span className="text-lg font-black text-emerald-900 tabular-nums">
-                        KES {minTotalToMoveIn.toLocaleString()}
+                        KES {moveInFrom.toLocaleString()}
                       </span>
                     </div>
                     <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">
-                      KES {minPrice.toLocaleString()} rent + KES {minDeposit!.toLocaleString()} deposit
+                      KES {startingPrice.toLocaleString()} rent + KES {startingDeposit!.toLocaleString()} deposit
                     </p>
                   </div>
                 )}
@@ -702,58 +703,22 @@ export default async function ListingSlugPage({ params }: PageProps) {
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center justify-between">
           <div>
-            {minTotalToMoveIn != null ? (
+            {moveInFrom != null ? (
               <div className="space-y-0.5">
                 <div className="flex items-baseline gap-0.5">
                   <span className="text-lg font-black text-slate-950">
-                    KES {minTotalToMoveIn.toLocaleString()}
+                    KES {moveInFrom.toLocaleString()}
                   </span>
                   <span className="text-[10px] font-bold text-emerald-600 uppercase">move-in</span>
                 </div>
                 <div className="text-[10px] font-semibold text-slate-400">
-                  KES {minPrice.toLocaleString()} rent + KES {minDeposit!.toLocaleString()} deposit
+                  KES {startingPrice.toLocaleString()} rent + KES {startingDeposit!.toLocaleString()} deposit
                 </div>
               </div>
-            ) : listing.price_single && listing.price_sharing && (
-              <div className="text-sm">
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-base font-black text-slate-950">
-                    KES {listing.price_single.toLocaleString()}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-500">
-                    single
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-base font-black text-slate-950">
-                    KES {listing.price_sharing.toLocaleString()}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-500">
-                    sharing
-                  </span>
-                </div>
-              </div>
-            )}
-            {!minTotalToMoveIn && listing.price_single && !listing.price_sharing && (
+            ) : (
               <div className="flex items-baseline gap-0.5">
                 <span className="text-lg font-black text-slate-950">
-                  KES {listing.price_single.toLocaleString()}
-                </span>
-                <span className="text-xs font-semibold text-slate-500">/mo</span>
-              </div>
-            )}
-            {!minTotalToMoveIn && listing.price_sharing && !listing.price_single && (
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-black text-slate-950">
-                  KES {listing.price_sharing.toLocaleString()}
-                </span>
-                <span className="text-xs font-semibold text-slate-500">/mo</span>
-              </div>
-            )}
-            {!minTotalToMoveIn && !listing.price_single && !listing.price_sharing && (
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-black text-slate-950">
-                  KES {listing.price.toLocaleString()}
+                  KES {startingPrice.toLocaleString()}
                 </span>
                 <span className="text-xs font-semibold text-slate-500">/mo</span>
               </div>
