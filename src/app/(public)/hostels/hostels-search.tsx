@@ -949,11 +949,11 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               type="button"
               onClick={loadMore}
               disabled={loadingMore}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/10 hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingMore ? (
                 <>
-                  <span className="h-4 w-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Loading...
                 </>
               ) : (
