@@ -9,7 +9,7 @@ interface Props {
   params: Promise<{ county: string; area: string; slug: string }>;
 }
 
-async function fetchImageAsPngDataUrl(url: string): Promise<string | null> {
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
     const resp = await fetch(url, {
       headers: { Accept: 'image/webp,image/jpeg,image/png,*/*' },
@@ -17,8 +17,8 @@ async function fetchImageAsPngDataUrl(url: string): Promise<string | null> {
     if (!resp.ok) return null;
     const buffer = Buffer.from(await resp.arrayBuffer());
     const sharp = (await import('sharp')).default;
-    const png = await sharp(buffer).png().toBuffer();
-    return `data:image/png;base64,${png.toString('base64')}`;
+    const jpeg = await sharp(buffer).jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+    return `data:image/jpeg;base64,${jpeg.toString('base64')}`;
   } catch {
     return null;
   }
@@ -43,7 +43,7 @@ export default async function ListingOgImage({ params }: Props) {
     const location = listing?.location ?? 'Nyeri, Kenya';
     const images = (listing?.listing_images ?? []).sort((a: any, b: any) => a.display_order - b.display_order);
     const coverUrl = images[0]?.r2_url ?? null;
-    const coverDataUrl = coverUrl ? await fetchImageAsPngDataUrl(coverUrl) : null;
+    const coverDataUrl = coverUrl ? await fetchImageAsDataUrl(coverUrl) : null;
 
     return new ImageResponse(
       (
