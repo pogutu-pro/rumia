@@ -111,9 +111,6 @@ export async function generateMetadata({
     );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
-  const ogImageUrl = `${metadataBase}/hostels/${county}/${area}/${slug}/opengraph-image`;
-  const coverImage = (listing.listing_images ?? [])
-    .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))[0]?.r2_url;
   return {
     title,
     description,
@@ -124,17 +121,11 @@ export async function generateMetadata({
       url: canonicalUrl,
       siteName: 'Rumia',
       type: 'website',
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImageUrl],
-    },
-    other: {
-      'og:image:width': '1200',
-      'og:image:height': '630',
     },
   };
 }

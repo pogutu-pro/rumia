@@ -2,6 +2,21 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'nodejs';
 
+async function fetchImageAsPngDataUrl(url: string): Promise<string | null> {
+  try {
+    const resp = await fetch(url, {
+      headers: { Accept: 'image/webp,image/jpeg,image/png,*/*' },
+    });
+    if (!resp.ok) return null;
+    const buffer = Buffer.from(await resp.arrayBuffer());
+    const sharp = (await import('sharp')).default;
+    const png = await sharp(buffer).png().toBuffer();
+    return `data:image/png;base64,${png.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -27,6 +42,7 @@ export async function GET(request: Request) {
     const location = listing?.location ?? 'Nyeri, Kenya';
     const images = (listing?.listing_images ?? []).sort((a: any, b: any) => a.display_order - b.display_order);
     const coverUrl = images[0]?.r2_url ?? null;
+    const coverDataUrl = coverUrl ? await fetchImageAsPngDataUrl(coverUrl) : null;
 
     return new ImageResponse(
       (
@@ -42,9 +58,9 @@ export async function GET(request: Request) {
             backgroundColor: '#0f172a',
           }}
         >
-          {coverUrl && (
+          {coverDataUrl && (
             <img
-              src={coverUrl}
+              src={coverDataUrl}
               alt=""
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
             />
@@ -88,7 +104,13 @@ export async function GET(request: Request) {
           </div>
         </div>
       ),
-      { width: 800, height: 420 }
+      {
+        width: 800,
+        height: 420,
+        headers: {
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        },
+      }
     );
   } catch {
     return fallbackImage();
@@ -122,6 +144,12 @@ function fallbackImage() {
         </div>
       </div>
     ),
-    { width: 1200, height: 630 }
+    {
+      width: 1200,
+      height: 630,
+      headers: {
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      },
+    }
   );
 }
