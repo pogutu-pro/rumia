@@ -28,6 +28,7 @@ import {
   cascadeSearch,
   fetchListings,
   type CombinedFilters,
+  type CascadeTier,
   type SearchListing,
 } from '@/lib/search/cascade-search';
 
@@ -81,7 +82,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
   const [offset, setOffset] = useState(initialListings.length);
   const [totalCountState, setTotalCount] = useState(totalCount);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
-  const [tier, setTier] = useState<1 | 2 | 3>(1);
+  const [tier, setTier] = useState<CascadeTier>(1);
   const [originalFreeText, setOriginalFreeText] = useState('');
   const searchIdRef = useRef(0);
   const effectiveFiltersRef = useRef<CombinedFilters | null>(null);
@@ -313,8 +314,11 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
   const hasSmartFilters =
     !!parsedSmart.freeText ||
     !!parsedSmart.maxPrice ||
+    !!parsedSmart.minPrice ||
+    !!parsedSmart.exactPrice ||
     !!parsedSmart.gender ||
     !!parsedSmart.roomType ||
+    !!parsedSmart.area ||
     parsedSmart.amenities.length > 0;
   const hasAnyFilters = activeFilterCount > 0 || hasSmartFilters;
 
@@ -327,7 +331,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
             Student Hostels Near DeKUT
           </h1>
           <p className="text-slate-500 font-medium mt-1 text-sm lg:text-base">
-            Type anything — room type, price, amenities, or location.
+            Search by name, location, price, or amenities — handles typos too.
           </p>
         </div>
 
@@ -338,7 +342,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder='e.g. "cheap ladies wifi gate A" or "self contained near campus"'
+            placeholder='e.g. "cheap ladies wifi gate A" or "Sunshine Hostels" or "5k self contained"'
             className="pl-12 h-13 text-base bg-white border-slate-200 focus-visible:ring-emerald-500 rounded-2xl shadow-sm"
           />
           {query && (
@@ -495,18 +499,32 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
           />
         </div>
 
-        {/* Cascade tier indicator — never show empty */}
-        {!loading && tier > 1 && query && (
+        {/* Cascade tier indicator — shows when results are relaxed */}
+        {!loading && tier !== 1 && query && (
           <div
             className={`mb-4 flex items-start gap-3 p-3.5 rounded-xl text-sm font-medium border ${
-              tier === 2
-                ? 'bg-blue-50 border-blue-100 text-blue-700'
-                : 'bg-amber-50 border-amber-100 text-amber-700'
+              tier === 1.1
+                ? 'bg-indigo-50 border-indigo-100 text-indigo-700'
+                : tier === 1.2
+                  ? 'bg-violet-50 border-violet-100 text-violet-700'
+                  : tier === 2
+                    ? 'bg-blue-50 border-blue-100 text-blue-700'
+                    : 'bg-amber-50 border-amber-100 text-amber-700'
             }`}
           >
             <Info className="h-4 w-4 mt-0.5 shrink-0" />
             <p className="flex-1">
-              {tier === 2 ? (
+              {tier === 1.1 ? (
+                <>
+                  Showing results matching individual words from <span className="font-bold">&quot;{originalFreeText}&quot;</span> —
+                  no exact phrase match found.
+                </>
+              ) : tier === 1.2 ? (
+                <>
+                  Showing similar results for <span className="font-bold">&quot;{originalFreeText}&quot;</span> —
+                  we found close matches even with possible typos.
+                </>
+              ) : tier === 2 ? (
                 <>
                   Showing results without <span className="font-bold">&quot;{originalFreeText}&quot;</span> — we
                   broadened the search to show more options.
@@ -524,7 +542,13 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               type="button"
               onClick={handleClearAll}
               className={`shrink-0 text-xs font-bold underline underline-offset-2 hover:no-underline cursor-pointer ${
-                tier === 2 ? 'text-blue-600' : 'text-amber-600'
+                tier === 1.1
+                  ? 'text-indigo-600'
+                  : tier === 1.2
+                    ? 'text-violet-600'
+                    : tier === 2
+                      ? 'text-blue-600'
+                      : 'text-amber-600'
               }`}
             >
               Refine
