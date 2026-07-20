@@ -4,10 +4,9 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag } from 'lucide-react';
+import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { createClient } from '@/lib/supabase/client';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
@@ -24,274 +23,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { parseQuery } from '@/lib/search/parse-query';
+import {
+  cascadeSearch,
+  fetchListings,
+  type CombinedFilters,
+  type SearchListing,
+} from '@/lib/search/cascade-search';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface ParsedFilters {
-  maxPrice?: number;
-  exactPrice?: number;
-  gender?: 'male' | 'female';
-  roomType?: string;
-  amenities: string[];
-  area?: string;
-  proximityGate?: 'A' | 'B';
-  sortByProximity: boolean;
-  freeText: string;
-}
-
-export interface Listing {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  location: string;
-  slug: string | null;
-  county: string | null;
-  area: string | null;
-  gender?: 'mixed' | 'male' | 'female' | null;
-  specific_location?: string | null;
-  price_single?: number | null;
-  price_sharing?: number | null;
-  distance_category?: string | null;
-  distance_to_campus?: string | null;
-  mpesa_details?: string | null;
-  amenities?: string[] | null;
-  room_type?: string | null;
-  room_type_enum?: string | null;
-  bathroom_type?: string | null;
-  wifi_included?: boolean | null;
-  water_included?: boolean | null;
-  electricity_included?: boolean | null;
-  security_type?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  proximity_description?: string | null;
-  created_at?: string;
-  sort_position?: number | null;
-  listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
-  agents: { name: string; phone?: string; whatsapp?: string } | null;
-  listing_room_types?: { deposit?: number | null; furnishing_items?: string[] | null; room_type?: string | null }[] | null;
-}
-
-interface CombinedFilters {
-  searchText: string;
-  genders: string[];
-  amenities: string[];
-  roomTypes: string[];
-  minPrice: number | null;
-  maxPrice: number | null;
-  zones: string[];
-}
-
-// ── Smart Search Parser ───────────────────────────────────────────────────────
-
-const PRICE_WORDS = ['cheap', 'affordable', 'budget'];
-const GENDER_FEMALE = ['ladies', 'girls', 'female'];
-const GENDER_MALE = ['gents', 'boys', 'male'];
-const AREA_KEYWORDS: [string[], string][] = [
-  [['near gate a', 'gate a'], 'Near Gate A'],
-  [['near gate b', 'gate b'], 'Near Gate B'],
-  [['boma'], 'Boma'],
-  [['nyeri view'], 'Nyeri View'],
-  [['kahawa ridge'], 'Kahawa Ridge'],
-  [['embassy'], 'Embassy Area'],
-  [['nyaribo'], 'Nyaribo'],
-];
-const ROOM_TYPES: [string[], string][] = [
-  [['self contained', 'ensuite'], 'self_contained'],
-  [['bedsitter', 'bed sitter'], 'bedsitter'],
-  [['single room', 'single'], 'single'],
-  [['double room', 'double'], 'double'],
-  [['shared'], 'shared'],
-];
-const AMENITY_MAP: [string[], string][] = [
-  [['wifi', 'internet'], 'WiFi'],
-  [['water'], 'Water'],
-  [['electricity', 'power'], 'Electricity'],
-  [['parking'], 'Parking'],
-  [['security', 'guard'], 'Security'],
-  [['furnished'], 'Furnished'],
-  [['washing', 'laundry'], 'Laundry Area'],
-];
-
-function parseQuery(input: string): ParsedFilters {
-  const lower = input.toLowerCase();
-  const filters: ParsedFilters = {
-    amenities: [],
-    sortByProximity: false,
-    freeText: '',
-  };
-  let remaining = lower;
-
-  if (PRICE_WORDS.some((w) => lower.includes(w))) {
-    filters.maxPrice = 5000;
-    PRICE_WORDS.forEach((w) => {
-      remaining = remaining.replace(w, '');
-    });
-  }
-
-  const underMatch = remaining.match(/(?:under|below)\s+(\d+\.?\d*)\s*k?/);
-  if (underMatch) {
-    const num = parseFloat(underMatch[1]);
-    filters.maxPrice =
-      underMatch[0].includes('k') && num < 1000 ? num * 1000 : num;
-    remaining = remaining.replace(underMatch[0], '');
-  }
-
-  if (!filters.maxPrice) {
-    const numMatch = remaining.match(/\b(\d{3,6})\b/);
-    if (numMatch) {
-      const num = parseInt(numMatch[1], 10);
-      if (num >= 500 && num <= 100000) {
-        filters.exactPrice = num;
-        remaining = remaining.replace(numMatch[0], '');
-      }
-    }
-  }
-
-  if (GENDER_FEMALE.some((w) => lower.includes(w))) {
-    filters.gender = 'female';
-    GENDER_FEMALE.forEach((w) => {
-      remaining = remaining.replace(w, '');
-    });
-  } else if (GENDER_MALE.some((w) => lower.includes(w))) {
-    filters.gender = 'male';
-    GENDER_MALE.forEach((w) => {
-      remaining = remaining.replace(w, '');
-    });
-  }
-
-  for (const [patterns, value] of ROOM_TYPES) {
-    for (const p of patterns) {
-      if (lower.includes(p)) {
-        filters.roomType = value;
-        remaining = remaining.replace(p, '');
-        break;
-      }
-    }
-    if (filters.roomType) break;
-  }
-
-  for (const [patterns, label] of AMENITY_MAP) {
-    for (const p of patterns) {
-      if (lower.includes(p)) {
-        if (!filters.amenities.includes(label)) filters.amenities.push(label);
-        remaining = remaining.replace(p, '');
-      }
-    }
-  }
-
-  for (const [patterns, areaName] of AREA_KEYWORDS) {
-    for (const p of patterns) {
-      if (lower.includes(p)) {
-        filters.area = areaName;
-        remaining = remaining.replace(p, '');
-        break;
-      }
-    }
-    if (filters.area) break;
-  }
-
-  if (lower.includes('gate a')) {
-    filters.proximityGate = 'A';
-    remaining = remaining.replace('gate a', '');
-  } else if (lower.includes('gate b')) {
-    filters.proximityGate = 'B';
-    remaining = remaining.replace('gate b', '');
-  }
-  if (lower.includes('near campus') || lower.includes('close to campus')) {
-    filters.sortByProximity = true;
-    remaining = remaining.replace(/near campus|close to campus/g, '');
-  }
-
-  filters.freeText = remaining.replace(/\s+/g, ' ').trim();
-  return filters;
-}
-
-// ── Supabase Query ────────────────────────────────────────────────────────────
-
-async function fetchListings(
-  filters: CombinedFilters,
-  from: number = 0,
-  to: number = 23,
-): Promise<{ listings: Listing[]; count: number }> {
-  const supabase = createClient();
-  let q = supabase
-    .from('listings')
-    .select(
-      `id, title, description, price, location, slug, county, area, gender, specific_location,
-       price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
-       amenities, room_type, room_type_enum, bathroom_type,
-       wifi_included, water_included, electricity_included, security_type,
-       latitude, longitude, proximity_description, created_at, sort_position,
-       listing_images(r2_url, display_order, blur_data_url),
-        listing_room_types(deposit, furnishing_items, room_type),
-       agents(name, phone, whatsapp)`,
-      { count: 'exact' },
-    )
-    .eq('is_active', true);
-
-  const parsed = parseQuery(filters.searchText);
-
-  if (parsed.maxPrice) q = q.lte('price', parsed.maxPrice);
-  if (parsed.exactPrice) {
-    q = q
-      .gte('price', parsed.exactPrice - 500)
-      .lte('price', parsed.exactPrice + 500);
-  }
-  if (parsed.gender) q = q.eq('gender', parsed.gender);
-  if (parsed.roomType) q = q.eq('room_type_enum', parsed.roomType);
-  parsed.amenities.forEach((a) => {
-    q = q.contains('amenities', [a]);
-  });
-  if (parsed.area) q = q.eq('area', parsed.area);
-  if (parsed.proximityGate)
-    q = q.ilike('proximity_description', `%Gate ${parsed.proximityGate}%`);
-  if (parsed.freeText) {
-    q = q.or(
-      `title.ilike.%${parsed.freeText}%,description.ilike.%${parsed.freeText}%,location.ilike.%${parsed.freeText}%`,
-    );
-  }
-
-  if (filters.genders.length > 0) {
-    q = q.in('gender', filters.genders);
-  }
-  if (filters.amenities.length > 0) {
-    filters.amenities.forEach((a) => {
-      q = q.contains('amenities', [a]);
-    });
-  }
-  if (filters.roomTypes.length > 0) {
-    q = q.in('room_type_enum', filters.roomTypes);
-  }
-  if (filters.minPrice !== null) q = q.gte('price', filters.minPrice);
-  if (filters.maxPrice !== null) q = q.lte('price', filters.maxPrice);
-  if (filters.zones.length > 0) {
-    q = q.in('area', filters.zones);
-  }
-
-  q = parsed.sortByProximity
-    ? q.order('proximity_description', { ascending: true })
-    : q.order('created_at', { ascending: false });
-
-  q = q.range(from, to);
-
-  const { data, count } = await q;
-  const results = (data as Listing[]) || [];
-  // Admin-positioned listings always appear first
-  results.sort((a, b) => {
-    const aPos = (a as any).sort_position ?? null;
-    const bPos = (b as any).sort_position ?? null;
-    if (aPos !== null && bPos !== null) return aPos - bPos;
-    if (aPos !== null) return -1;
-    if (bPos !== null) return 1;
-    return 0;
-  });
-  return {
-    listings: results,
-    count: count || 0,
-  };
-}
+export type Listing = SearchListing;
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
@@ -341,6 +81,10 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
   const [offset, setOffset] = useState(initialListings.length);
   const [totalCountState, setTotalCount] = useState(totalCount);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
+  const [tier, setTier] = useState<1 | 2 | 3>(1);
+  const [originalFreeText, setOriginalFreeText] = useState('');
+  const searchIdRef = useRef(0);
+  const effectiveFiltersRef = useRef<CombinedFilters | null>(null);
 
   const {
     genders,
@@ -475,15 +219,20 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
   const runSearch = useCallback(
     async (searchText: string) => {
+      const thisSearch = ++searchIdRef.current;
       setLoading(true);
       setOffset(0);
       setHasMore(true);
       const combined = buildCombinedFilters(searchText);
-      const result = await fetchListings(combined, 0, pageSize - 1);
+      const result = await cascadeSearch(combined, pageSize);
+      if (thisSearch !== searchIdRef.current) return;
       setListings(result.listings);
       setTotalCount(result.count);
       setOffset(result.listings.length);
       setHasMore(result.listings.length < result.count);
+      setTier(result.tier);
+      setOriginalFreeText(result.originalFreeText);
+      effectiveFiltersRef.current = result.effectiveFilters;
       setLoading(false);
     },
     [buildCombinedFilters, pageSize],
@@ -491,14 +240,15 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
+    const filters = effectiveFiltersRef.current;
+    if (!filters) return;
     setLoadingMore(true);
-    const combined = buildCombinedFilters(debouncedQuery);
-    const result = await fetchListings(combined, offset, offset + pageSize - 1);
+    const result = await fetchListings(filters, offset, offset + pageSize - 1);
     setListings((prev) => [...prev, ...result.listings]);
     setOffset((prev) => prev + result.listings.length);
     setHasMore(offset + result.listings.length < result.count);
     setLoadingMore(false);
-  }, [loadingMore, hasMore, buildCombinedFilters, debouncedQuery, offset, pageSize]);
+  }, [loadingMore, hasMore, offset, pageSize]);
 
   // URL sync
   useEffect(() => {
@@ -523,6 +273,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
   const handleClearAll = useCallback(() => {
     reset();
     setQuery('');
+    setTier(1);
+    setOriginalFreeText('');
+    effectiveFiltersRef.current = null;
   }, [reset]);
 
   const handleMobileApply = useCallback(
@@ -564,29 +317,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     !!parsedSmart.roomType ||
     parsedSmart.amenities.length > 0;
   const hasAnyFilters = activeFilterCount > 0 || hasSmartFilters;
-
-  const emptyMessage = () => {
-    const parts: string[] = [];
-    const parsed = parseQuery(debouncedQuery);
-    if (parsed.gender)
-      parts.push(parsed.gender === 'female' ? 'ladies only' : 'gents only');
-    if (parsed.maxPrice)
-      parts.push(`under KES ${parsed.maxPrice.toLocaleString()}`);
-    if (parsed.exactPrice)
-      parts.push(`~KES ${parsed.exactPrice.toLocaleString()}`);
-    if (parsed.roomType) parts.push(parsed.roomType.replace('_', ' '));
-    parsed.amenities.forEach((a) => parts.push(a.toLowerCase()));
-    if (parsed.freeText) parts.push(`"${parsed.freeText}"`);
-    if (genders.length) parts.push(`gender: ${genders.join(' or ')}`);
-    if (amenities.length) parts.push(`amenities: ${amenities.join(', ')}`);
-    if (roomTypes.length) parts.push(`type: ${roomTypes.join(', ')}`);
-    if (minPrice || maxPrice)
-      parts.push(`price: ${minPrice ?? 0}–${maxPrice ?? '∞'}`);
-    if (zones.length) parts.push(`zones: ${zones.join(', ')}`);
-    return parts.length
-      ? `No hostels found for ${parts.join(', ')}. Try removing some filters above.`
-      : 'No hostels found. Check back soon.';
-  };
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-6 lg:py-10">
@@ -765,6 +495,43 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
           />
         </div>
 
+        {/* Cascade tier indicator — never show empty */}
+        {!loading && tier > 1 && query && (
+          <div
+            className={`mb-4 flex items-start gap-3 p-3.5 rounded-xl text-sm font-medium border ${
+              tier === 2
+                ? 'bg-blue-50 border-blue-100 text-blue-700'
+                : 'bg-amber-50 border-amber-100 text-amber-700'
+            }`}
+          >
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <p className="flex-1">
+              {tier === 2 ? (
+                <>
+                  Showing results without <span className="font-bold">&quot;{originalFreeText}&quot;</span> — we
+                  broadened the search to show more options.
+                </>
+              ) : (
+                <>
+                  Showing all hostels — your search didn&apos;t match specific listings. Try
+                  simpler terms like <span className="font-bold">&quot;wifi&quot;</span>,{' '}
+                  <span className="font-bold">&quot;ladies&quot;</span>, or a price like{' '}
+                  <span className="font-bold">&quot;5000&quot;</span>.
+                </>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className={`shrink-0 text-xs font-bold underline underline-offset-2 hover:no-underline cursor-pointer ${
+                tier === 2 ? 'text-blue-600' : 'text-amber-600'
+              }`}
+            >
+              Refine
+            </button>
+          </div>
+        )}
+
         {/* Mobile results count */}
         {!isDesktop && !loading && (
           <p className="text-sm text-slate-400 font-semibold mb-5 px-1">
@@ -928,17 +695,15 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         ) : (
           <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
             <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">
-              {emptyMessage()}
+              Something went wrong. Try refreshing or clearing your search.
             </p>
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className="mt-5 inline-flex items-center px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                Clear all filters
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="mt-5 inline-flex items-center px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              Clear all filters
+            </button>
           </div>
         )}
 
