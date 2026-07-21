@@ -319,20 +319,15 @@ async function fetchFuzzy(
   return { listings: result.listings, count: result.totalCount };
 }
 
-function fuzzyToSearchListing(fl: FuzzyListing): SearchListing {
-  return {
-    id: fl.id,
-    title: fl.title,
-    description: fl.description,
-    price: fl.price,
-    location: fl.location,
-    area: fl.area,
-    slug: fl.slug,
-    county: fl.county,
-    sort_position: fl.sort_position,
-    listing_images: [],
-    agents: null,
-  };
+async function fetchFullListingsByIds(ids: string[]): Promise<SearchListing[]> {
+  if (ids.length === 0) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('listings')
+    .select(LISTING_SELECT)
+    .eq('is_active', true)
+    .in('id', ids);
+  return (data as SearchListing[]) || [];
 }
 
 // ── Pagination helper ─────────────────────────────────────────────────────────
@@ -382,12 +377,23 @@ export async function cascadeSearch(
   // ── Tier 1.2: Fuzzy match (client-side, no DB filters) ────────────────────
   if (freeText && freeText.length >= 2) {
     try {
-      const fuzzyResult = await fetchFuzzy(freeText, pageSize);
+      const fuzzyResult = await fetchFuzzy(freeText, pageSize * 2);
       if (fuzzyResult.count > 0) {
-        const scored = fuzzyResult.listings.map((fl) => {
-          const sl = fuzzyToSearchListing(fl);
-          return { listing: sl, score: scoreResult(sl, freeText, 'fuzzy') };
-        });
+        const fuzzyIds = fuzzyResult.listings.map((fl) => fl.id);
+        const fullListings = await fetchFullListingsByIds(fuzzyIds);
+
+        const fuzzyScoreMap = new Map<string, number>();
+        for (const fl of fuzzyResult.listings) {
+          const match = fullListings.find((sl) => String(sl.id) === fl.id);
+          if (match) {
+            fuzzyScoreMap.set(fl.id, scoreResult(match, freeText, 'fuzzy'));
+          }
+        }
+
+        const scored: ScoredResult[] = fullListings.map((sl) => ({
+          listing: sl,
+          score: fuzzyScoreMap.get(String(sl.id)) ?? 0,
+        }));
         scored.sort((a, b) => b.score - a.score);
         const paginated = scored.slice(0, pageSize);
 
