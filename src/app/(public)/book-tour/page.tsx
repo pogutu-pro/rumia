@@ -5,16 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BookTourForm } from '@/app/(public)/listing/[id]/book-tour-form';
-
-const ZONES = [
-  { value: 'Dekut Main Gate', label: 'Dekut Main Gate' },
-  { value: 'Near Gate A', label: 'Near Gate A' },
-  { value: 'Near Gate B', label: 'Near Gate B' },
-  { value: 'Kabaru', label: 'Kabaru' },
-  { value: 'Kieni', label: 'Kieni' },
-  { value: 'Karumandi', label: 'Karumandi' },
-  { value: 'Town', label: 'Town' },
-];
+import { AREA_OPTIONS } from '@/lib/constants/dekut-areas';
 
 export default function BookTourPage() {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
@@ -61,7 +52,7 @@ export default function BookTourPage() {
               Select your area
             </p>
             <div className="grid grid-cols-2 gap-3">
-              {ZONES.map((zone) => (
+              {AREA_OPTIONS.map((zone) => (
                 <button
                   key={zone.value}
                   type="button"
