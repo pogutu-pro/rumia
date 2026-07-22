@@ -1,10 +1,22 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { User, Mail, Phone, Calendar, Heart, ArrowRight } from 'lucide-react';
-import { FeedbackForm } from '@/components/feedback/feedback-form';
-import { LogoutButton } from '@/components/logout-button';
-import { AccountDashboardBar } from './account-dashboard-bar';
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { signInWithGoogle } from '@/lib/supabase/auth';
+import { Heart, Loader2 } from 'lucide-react';
+import { AccountHeader } from './account-header';
+import { AccountTabs, type AccountTab } from './account-tabs';
+import { AccountToursTab } from './account-tours-tab';
+import { AccountSavedTab } from './account-saved-tab';
+import { AccountFeedbackTab } from './account-feedback-tab';
+
+const VALID_TABS = new Set<AccountTab>(['tours', 'saved', 'feedback']);
+
+function getValidTab(value: string | null): AccountTab {
+  if (value && VALID_TABS.has(value as AccountTab)) return value as AccountTab;
+  return 'tours';
+}
 
 interface Profile {
   id: string;
@@ -12,145 +24,120 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   phone: string | null;
-  created_at: string | null;
+  role: string | null;
 }
 
-export default async function AccountPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function AccountPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const activeTab = getValidTab(searchParams.get('tab'));
 
-  if (!user) {
-    redirect('/auth/login');
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [hasAgent, setHasAgent] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || cancelled) {
+        setLoading(false);
+        return;
+      }
+
+      const [profileRes, agentRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('agents').select('id').eq('user_id', user.id).maybeSingle(),
+      ]);
+
+      if (!cancelled) {
+        setProfile({
+          ...profileRes.data,
+          email: profileRes.data?.email || user.email || '',
+        } as Profile);
+        setHasAgent(!!agentRes.data);
+        setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleTabChange = useCallback(
+    (tab: AccountTab) => {
+      router.replace(`/account?tab=${tab}`, { scroll: false });
+    },
+    [router],
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+      </div>
+    );
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="max-w-sm w-full text-center space-y-8">
+          <div className="space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+              <Heart className="h-8 w-8 text-slate-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              Sign in to your account
+            </h1>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              View your tours, saved hostels, and manage your profile.
+            </p>
+          </div>
 
-  const isAdmin = profile?.role === 'admin';
-
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  const hasAgent = !!agent;
+          <button
+            onClick={() => signInWithGoogle('/account')}
+            className="w-full flex items-center justify-center gap-3 h-12 border-2 border-slate-200 rounded-xl font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm"
+          >
+            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+            </svg>
+            Continue with Google
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {(isAdmin || hasAgent) && (
-          <AccountDashboardBar isAdmin={isAdmin} hasAgent={hasAgent} />
-        )}
+    <div className="min-h-screen bg-slate-50/50">
+      <AccountHeader
+        fullName={profile.full_name}
+        email={profile.email}
+        avatarUrl={profile.avatar_url}
+        isAdmin={profile.role === 'admin'}
+        hasAgent={hasAgent}
+      />
 
-        {/* Compact welcome */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Hey{profile?.full_name ? ` ${profile.full_name.split(' ')[0]}` : ''}{' '}
-            👋
-          </h1>
-          <p className="text-sm text-slate-500 mt-1 max-w-xl">
-            You&apos;re an early user of Rumia, your feedback directly shapes
-            what we build. What&apos;s on your mind?
-          </p>
-        </div>
+      <AccountTabs
+        active={activeTab}
+        onChange={handleTabChange}
+      />
 
-        {/* Saved Hostels Link */}
-        <Link
-          href="/saved"
-          className="flex items-center justify-between bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6 hover:shadow-md transition-shadow"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
-              <Heart className="h-5 w-5 text-rose-500" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-900">Saved Hostels</p>
-              <p className="text-xs text-slate-500">View your saved listings</p>
-            </div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-slate-400" />
-        </Link>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Feedback form — hero */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8">
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-slate-900">
-                  Share your feedback
-                </h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  All fields are optional, just tell us what you think.
-                </p>
-              </div>
-              <FeedbackForm />
-            </div>
-          </div>
-
-          {/* Profile card — sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="bg-emerald-600 px-6 py-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-white/20 mx-auto flex items-center justify-center mb-3">
-                  {profile?.avatar_url ? (
-                    <img
-                      src={profile.avatar_url}
-                      alt={profile?.full_name || 'Profile'}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-8 w-8 text-white" />
-                  )}
-                </div>
-                <h2 className="text-lg font-bold text-white">
-                  {profile?.full_name || 'Student'}
-                </h2>
-                <p className="text-emerald-100 text-xs mt-0.5">User Account</p>
-              </div>
-
-              <div className="px-6 py-5 space-y-4">
-                <div className="flex items-center gap-3 text-sm">
-                  <Mail className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span className="text-slate-600 truncate">
-                    {profile?.email || user.email}
-                  </span>
-                </div>
-
-                {profile?.phone && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <Phone className="h-4 w-4 text-slate-400 shrink-0" />
-                    <span className="text-slate-600">{profile.phone}</span>
-                  </div>
-                )}
-
-                {profile?.created_at && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
-                    <span className="text-slate-500">
-                      Joined{' '}
-                      {new Date(profile.created_at).toLocaleDateString(
-                        'en-KE',
-                        {
-                          year: 'numeric',
-                          month: 'long',
-                        },
-                      )}
-                    </span>
-                  </div>
-                )}
-
-                <hr className="border-gray-100" />
-                <LogoutButton />
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="max-w-2xl mx-auto px-4 py-5 pb-24">
+        {activeTab === 'tours' && <AccountToursTab />}
+        {activeTab === 'saved' && <AccountSavedTab />}
+        {activeTab === 'feedback' && <AccountFeedbackTab />}
       </div>
     </div>
   );
