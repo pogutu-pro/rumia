@@ -38,6 +38,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
   const [zoneFilter, setZoneFilter] = useState('');
   const [agentFilter, setAgentFilter] = useState('');
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const hasActiveFilters = statusFilter !== '' || zoneFilter !== '' || agentFilter !== '';
 
@@ -55,9 +56,13 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
   });
 
   async function handleStatusUpdate(bookingId: string, newStatus: TourStatus) {
+    setUpdateError(null);
     setIsUpdating(bookingId);
     try {
-      await updateTourBookingStatusAction(bookingId, newStatus);
+      const result = await updateTourBookingStatusAction(bookingId, newStatus);
+      if (!result.success) {
+        setUpdateError(result.error);
+      }
     } finally {
       setIsUpdating(null);
     }
@@ -91,6 +96,23 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
               Review these bookings below — they may need follow-up.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Update error */}
+      {updateError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-800">Status update failed</p>
+            <p className="text-xs text-red-600 mt-0.5">{updateError}</p>
+          </div>
+          <button
+            onClick={() => setUpdateError(null)}
+            className="ml-auto text-red-400 hover:text-red-600 text-xs font-semibold cursor-pointer"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -222,9 +244,10 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                     <select
                       value={t.status}
                       disabled={isUpdating === t.id}
-                      onChange={(e) =>
-                        handleStatusUpdate(t.id, e.target.value as TourStatus)
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value as TourStatus;
+                        if (val !== t.status) handleStatusUpdate(t.id, val);
+                      }}
                       className="h-8 rounded-lg border border-gray-200 bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
                       {STATUS_OPTIONS.map((s) => (
@@ -299,9 +322,10 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
               <select
                 value={t.status}
                 disabled={isUpdating === t.id}
-                onChange={(e) =>
-                  handleStatusUpdate(t.id, e.target.value as TourStatus)
-                }
+                onChange={(e) => {
+                  const val = e.target.value as TourStatus;
+                  if (val !== t.status) handleStatusUpdate(t.id, val);
+                }}
                 className="w-full h-9 rounded-lg border border-gray-200 bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 {STATUS_OPTIONS.map((s) => (

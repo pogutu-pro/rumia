@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 const PAGE_SIZE = 24;
 
-async function getInitialListings(): Promise<Listing[]> {
+async function getAllActiveListings(): Promise<Listing[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('listings')
@@ -36,33 +36,18 @@ async function getInitialListings(): Promise<Listing[]> {
        listing_images(r2_url, display_order, blur_data_url),
        agents(name, phone, whatsapp)`,
     )
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(PAGE_SIZE);
+    .eq('is_active', true);
 
   return sortListingsByPosition(data as unknown as Listing[]) || [];
 }
 
-async function getListingCount(): Promise<number> {
-  const supabase = await createClient();
-  const { count } = await supabase
-    .from('listings')
-    .select('id', { count: 'exact', head: true })
-    .eq('is_active', true);
-  return count || 0;
-}
-
 export default async function HostelsPage() {
-  const [initialListings, totalCount] = await Promise.all([
-    getInitialListings(),
-    getListingCount(),
-  ]);
+  const allListings = await getAllActiveListings();
 
   return (
     <Suspense>
       <HostelsSearch
-        initialListings={initialListings}
-        totalCount={totalCount}
+        allListings={allListings}
         pageSize={PAGE_SIZE}
       />
     </Suspense>

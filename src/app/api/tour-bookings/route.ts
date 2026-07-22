@@ -78,6 +78,18 @@ export async function POST(request: NextRequest) {
       resolvedAgentId = listing?.agent_id || null;
     }
 
+    // Fallback: assign first available agent for standalone full-search bookings
+    if (!resolvedAgentId) {
+      const supabaseForLookup = await createClient();
+      const { data: fallbackAgent } = await supabaseForLookup
+        .from('agents')
+        .select('id')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single();
+      resolvedAgentId = fallbackAgent?.id || null;
+    }
+
     // Use service-role client for insert (bypasses RLS for anon inserts)
     const { createClient: createServiceClient } = await import('@supabase/supabase-js');
     const supabase = createServiceClient(

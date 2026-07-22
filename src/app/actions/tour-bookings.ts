@@ -6,6 +6,15 @@ import type { TourStatus } from '@/types';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
+const VALID_STATUS_TRANSITIONS: Record<TourStatus, TourStatus[]> = {
+  pending_payment: ['confirmed', 'paid', 'cancelled', 'no_show'],
+  confirmed: ['paid', 'cancelled', 'no_show'],
+  paid: ['completed', 'cancelled'],
+  completed: [],
+  no_show: [],
+  cancelled: [],
+};
+
 export async function updateTourBookingStatusAction(
   bookingId: string,
   status: TourStatus,
@@ -40,6 +49,15 @@ export async function updateTourBookingStatusAction(
 
   if (!isAgent && !isAdmin) {
     return { success: false, error: 'Forbidden' };
+  }
+
+  // Validate status transition
+  const allowed = VALID_STATUS_TRANSITIONS[booking.status as TourStatus];
+  if (allowed && !allowed.includes(status)) {
+    return {
+      success: false,
+      error: `Cannot transition from "${booking.status.replace(/_/g, ' ')}" to "${status.replace(/_/g, ' ')}"`,
+    };
   }
 
   const { error } = await (supabase as any)

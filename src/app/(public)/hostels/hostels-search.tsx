@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, Info, CalendarCheck } from 'lucide-react';
+import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -23,14 +23,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { parseQuery } from '@/lib/search/parse-query';
-import {
-  cascadeSearch,
-  fetchListings,
-  type CombinedFilters,
-  type CascadeTier,
-  type SearchListing,
-} from '@/lib/search/cascade-search';
+import { clientSearch } from '@/lib/search/client-search';
+import type { SearchListing, CombinedFilters } from '@/lib/search/cascade-search';
 
 export type Listing = SearchListing;
 
@@ -60,12 +54,11 @@ function ListingSkeleton() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 interface HostelsSearchProps {
-  initialListings: Listing[];
-  totalCount: number;
+  allListings: Listing[];
   pageSize: number;
 }
 
-export default function HostelsSearch({ initialListings, totalCount, pageSize }: HostelsSearchProps) {
+export default function HostelsSearch({ allListings, pageSize }: HostelsSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
@@ -73,19 +66,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
   const initialQuery = searchParams.get('q') ?? '';
   const [query, setQuery] = useState(initialQuery);
-  const [listings, setListings] = useState<Listing[]>(
-    initialQuery ? [] : initialListings,
-  );
-  const [loading, setLoading] = useState(!!initialQuery);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(initialListings.length >= pageSize);
-  const [offset, setOffset] = useState(initialListings.length);
-  const [totalCountState, setTotalCount] = useState(totalCount);
+  const debouncedQuery = useDebounce(query, 200);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
-  const [tier, setTier] = useState<CascadeTier>(1);
-  const [originalFreeText, setOriginalFreeText] = useState('');
-  const searchIdRef = useRef(0);
-  const effectiveFiltersRef = useRef<CombinedFilters | null>(null);
 
   const {
     genders,
@@ -107,8 +89,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     hydrateFromParams,
     toParams,
   } = useFilterStore();
-
-  const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
     if (!hydrationDone.current && searchParams.toString()) {
@@ -194,20 +174,11 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     [addCompareSelection, removeCompareSelection, isCompareSelected, compareSelectedIds.length],
   );
 
-  const filters: FilterState = {
-    genders,
-    amenities,
-    roomTypes,
-    minPrice,
-    maxPrice,
-    zones,
-    maxDistance,
-    sortByNearest,
-  };
+  // ── Client-side search ─────────────────────────────────────────────────────
 
-  const buildCombinedFilters = useCallback(
-    (searchText: string): CombinedFilters => ({
-      searchText,
+  const combinedFilters = useMemo<CombinedFilters>(
+    () => ({
+      searchText: debouncedQuery,
       genders,
       amenities,
       roomTypes,
@@ -215,43 +186,41 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
       maxPrice,
       zones,
     }),
-    [genders, amenities, roomTypes, minPrice, maxPrice, zones],
+    [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones],
   );
 
-  const runSearch = useCallback(
-    async (searchText: string) => {
-      const thisSearch = ++searchIdRef.current;
-      setLoading(true);
-      setOffset(0);
-      setHasMore(true);
-      const combined = buildCombinedFilters(searchText);
-      const result = await cascadeSearch(combined, pageSize);
-      if (thisSearch !== searchIdRef.current) return;
-      setListings(result.listings);
-      setTotalCount(result.count);
-      setOffset(result.listings.length);
-      setHasMore(result.listings.length < result.count);
-      setTier(result.tier);
-      setOriginalFreeText(result.originalFreeText);
-      effectiveFiltersRef.current = result.effectiveFilters;
-      setLoading(false);
-    },
-    [buildCombinedFilters, pageSize],
+  // Client-side search — fully synchronous, derived via useMemo
+  const allFiltered = useMemo(
+    () => clientSearch(allListings, combinedFilters, allListings.length, 0).listings,
+    [allListings, combinedFilters],
   );
 
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-    const filters = effectiveFiltersRef.current;
-    if (!filters) return;
-    setLoadingMore(true);
-    const result = await fetchListings(filters, offset, offset + pageSize - 1);
-    setListings((prev) => [...prev, ...result.listings]);
-    setOffset((prev) => prev + result.listings.length);
-    setHasMore(offset + result.listings.length < result.count);
-    setLoadingMore(false);
-  }, [loadingMore, hasMore, offset, pageSize]);
+  const totalCountState = allFiltered.length;
 
-  // URL sync
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+  const filterKey = `${combinedFilters.searchText}|${combinedFilters.genders.join(',')}|${combinedFilters.amenities.join(',')}|${combinedFilters.roomTypes.join(',')}|${combinedFilters.minPrice}|${combinedFilters.maxPrice}|${combinedFilters.zones.join(',')}`;
+  const prevFilterKeyRef = useRef(filterKey);
+
+  useEffect(() => {
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      setVisibleCount(pageSize);
+    }
+  }, [filterKey, pageSize]);
+
+  const listings = useMemo(
+    () => allFiltered.slice(0, visibleCount),
+    [allFiltered, visibleCount],
+  );
+
+  const hasMore = visibleCount < allFiltered.length;
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((prev) => Math.min(prev + pageSize, allFiltered.length));
+  }, [pageSize, allFiltered.length]);
+
+  // ── URL sync ───────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const filterParams = toParams();
     const qParam = debouncedQuery
@@ -265,18 +234,9 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
     router.replace(url, { scroll: false });
   }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, router, toParams]);
 
-  // Search execution
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    runSearch(debouncedQuery);
-  }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, runSearch]);
-
   const handleClearAll = useCallback(() => {
     reset();
     setQuery('');
-    setTier(1);
-    setOriginalFreeText('');
-    effectiveFiltersRef.current = null;
   }, [reset]);
 
   const handleMobileApply = useCallback(
@@ -310,17 +270,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
   const priceFilterActive = minPrice || maxPrice ? 1 : 0;
   const distanceFilterActive = maxDistance || sortByNearest ? 1 : 0;
 
-  const parsedSmart = parseQuery(debouncedQuery);
-  const hasSmartFilters =
-    !!parsedSmart.freeText ||
-    !!parsedSmart.maxPrice ||
-    !!parsedSmart.minPrice ||
-    !!parsedSmart.exactPrice ||
-    !!parsedSmart.gender ||
-    !!parsedSmart.roomType ||
-    !!parsedSmart.area ||
-    parsedSmart.amenities.length > 0;
-  const hasAnyFilters = activeFilterCount > 0 || hasSmartFilters;
+  const hasAnyFilters = activeFilterCount > 0 || debouncedQuery.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-6 lg:py-10">
@@ -359,7 +309,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         {/* Filter toolbar */}
         <div className="mb-5 space-y-3">
           <div className="flex flex-nowrap items-center gap-3 overflow-x-auto scrollbar-none">
-            {/* Filters — advanced filtering (leave as is) */}
             {isDesktop ? (
               <Sheet
                 open={desktopFilterOpen}
@@ -390,7 +339,16 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                   </SheetHeader>
                   <div className="p-5">
                     <FilterSidebar
-                      filters={filters}
+                      filters={{
+                        genders,
+                        amenities,
+                        roomTypes,
+                        minPrice,
+                        maxPrice,
+                        zones,
+                        maxDistance,
+                        sortByNearest,
+                      }}
                       onSetGenders={setGenders}
                       onSetAmenities={setAmenities}
                       onSetRoomTypes={setRoomTypes}
@@ -404,14 +362,31 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               </Sheet>
             ) : (
               <FilterBottomSheet
-                currentFilters={filters}
+                currentFilters={{
+                  genders,
+                  amenities,
+                  roomTypes,
+                  minPrice,
+                  maxPrice,
+                  zones,
+                  maxDistance,
+                  sortByNearest,
+                }}
                 onApply={handleMobileApply}
               />
             )}
 
-            {/* Price — coral/red-pink, the most-used quick filter */}
             <FilterBottomSheet
-              currentFilters={filters}
+              currentFilters={{
+                genders,
+                amenities,
+                roomTypes,
+                minPrice,
+                maxPrice,
+                zones,
+                maxDistance,
+                sortByNearest,
+              }}
               mode="price"
               onApply={(d) => setPriceRange(d.minPrice, d.maxPrice)}
               trigger={
@@ -430,9 +405,17 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               }
             />
 
-            {/* Distance — blue, associated with location */}
             <FilterBottomSheet
-              currentFilters={filters}
+              currentFilters={{
+                genders,
+                amenities,
+                roomTypes,
+                minPrice,
+                maxPrice,
+                zones,
+                maxDistance,
+                sortByNearest,
+              }}
               mode="distance"
               onApply={(d) => {
                 setMaxDistance(d.maxDistance);
@@ -456,14 +439,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
 
             {isDesktop && (
               <p className="text-sm text-slate-400 font-semibold">
-                {loading ? (
-                  <span className="text-slate-300">Searching...</span>
-                ) : (
-                  <>
-                    {totalCountState}{' '}
-                    {totalCountState === 1 ? 'hostel' : 'hostels'} found
-                  </>
-                )}
+                {totalCountState}{' '}
+                {totalCountState === 1 ? 'hostel' : 'hostels'} found
                 {hasAnyFilters && (
                   <span className="text-slate-300">
                     {' '}·{' '}
@@ -481,7 +458,16 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
           </div>
 
           <ActiveFilterChips
-            filters={filters}
+            filters={{
+              genders,
+              amenities,
+              roomTypes,
+              minPrice,
+              maxPrice,
+              zones,
+              maxDistance,
+              sortByNearest,
+            }}
             onRemoveGender={(v) =>
               setGenders(genders.filter((g) => g !== v))
             }
@@ -499,65 +485,8 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
           />
         </div>
 
-        {/* Cascade tier indicator — shows when results are relaxed */}
-        {!loading && tier !== 1 && query && (
-          <div
-            className={`mb-4 flex items-start gap-3 p-3.5 rounded-xl text-sm font-medium border ${
-              tier === 1.1
-                ? 'bg-indigo-50 border-indigo-100 text-indigo-700'
-                : tier === 1.2
-                  ? 'bg-violet-50 border-violet-100 text-violet-700'
-                  : tier === 2
-                    ? 'bg-blue-50 border-blue-100 text-blue-700'
-                    : 'bg-amber-50 border-amber-100 text-amber-700'
-            }`}
-          >
-            <Info className="h-4 w-4 mt-0.5 shrink-0" />
-            <p className="flex-1">
-              {tier === 1.1 ? (
-                <>
-                  Showing results matching individual words from <span className="font-bold">&quot;{originalFreeText}&quot;</span> —
-                  no exact phrase match found.
-                </>
-              ) : tier === 1.2 ? (
-                <>
-                  Showing similar results for <span className="font-bold">&quot;{originalFreeText}&quot;</span> —
-                  we found close matches even with possible typos.
-                </>
-              ) : tier === 2 ? (
-                <>
-                  Showing results without <span className="font-bold">&quot;{originalFreeText}&quot;</span> — we
-                  broadened the search to show more options.
-                </>
-              ) : (
-                <>
-                  Showing all hostels — your search didn&apos;t match specific listings. Try
-                  simpler terms like <span className="font-bold">&quot;wifi&quot;</span>,{' '}
-                  <span className="font-bold">&quot;ladies&quot;</span>, or a price like{' '}
-                  <span className="font-bold">&quot;5000&quot;</span>.
-                </>
-              )}
-            </p>
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className={`shrink-0 text-xs font-bold underline underline-offset-2 hover:no-underline cursor-pointer ${
-                tier === 1.1
-                  ? 'text-indigo-600'
-                  : tier === 1.2
-                    ? 'text-violet-600'
-                    : tier === 2
-                      ? 'text-blue-600'
-                      : 'text-amber-600'
-              }`}
-            >
-              Refine
-            </button>
-          </div>
-        )}
-
         {/* Mobile results count */}
-        {!isDesktop && !loading && (
+        {!isDesktop && (
           <p className="text-sm text-slate-400 font-semibold mb-5 px-1">
             {totalCountState}{' '}
             {totalCountState === 1 ? 'hostel' : 'hostels'} found
@@ -577,35 +506,31 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         )}
 
         {/* Book a Tour CTA */}
-        {!loading && (
-          <div className="mb-6 bg-white border border-slate-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
-                <CalendarCheck className="h-5 w-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-slate-900">
-                  Not sure which one to pick?
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Book a guided tour and let a verified agent show you the best options in person.
-                </p>
-              </div>
+        <div className="mb-6 bg-white border border-slate-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
+              <CalendarCheck className="h-5 w-5 text-white" />
             </div>
-            <Link
-              href="/book-tour"
-              className="shrink-0 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-colors"
-            >
-              <CalendarCheck className="h-4 w-4" />
-              Book a Tour
-            </Link>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-900">
+                Not sure which one to pick?
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Book a guided tour and let a verified agent show you the best options in person.
+              </p>
+            </div>
           </div>
-        )}
+          <Link
+            href="/book-tour"
+            className="shrink-0 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-colors"
+          >
+            <CalendarCheck className="h-4 w-4" />
+            Book a Tour
+          </Link>
+        </div>
 
         {/* Listing Grid */}
-        {loading ? (
-          <ListingSkeleton />
-        ) : listings.length > 0 ? (
+        {listings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((item) => {
               const sorted = [...(item.listing_images || [])].sort(
@@ -709,7 +634,6 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
                       <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
                         <span>Agent: {item.agents?.name ?? 'Rumia Agent'}</span>
                         <div className="flex items-center gap-2">
-                          {/* Compare button — inline next to View */}
                           <button
                             type="button"
                             onClick={(e) => {
@@ -745,7 +669,7 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         ) : (
           <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
             <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">
-              Something went wrong. Try refreshing or clearing your search.
+              No hostels match your search. Try different terms or clear your filters.
             </p>
             <button
               type="button"
@@ -758,22 +682,14 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
         )}
 
         {/* Load More */}
-        {!loading && hasMore && listings.length > 0 && (
+        {hasMore && listings.length > 0 && (
           <div className="mt-8 text-center">
             <button
               type="button"
               onClick={loadMore}
-              disabled={loadingMore}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/10 hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/10 hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer"
             >
-              {loadingMore ? (
-                <>
-                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Load more hostels'
-              )}
+              Load more hostels
             </button>
           </div>
         )}

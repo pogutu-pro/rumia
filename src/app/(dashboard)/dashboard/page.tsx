@@ -360,7 +360,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Tour Bookings */}
-      <div className="space-y-4">
+      <div id="tours" className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight flex items-center gap-2">

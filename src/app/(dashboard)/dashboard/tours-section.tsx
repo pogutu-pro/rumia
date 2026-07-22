@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import Link from 'next/link';
-import { CalendarCheck, Clock, MapPin, Phone, User } from 'lucide-react';
+import { CalendarCheck, Clock, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { updateTourBookingStatusAction } from '@/app/actions/tour-bookings';

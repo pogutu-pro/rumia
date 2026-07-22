@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils/cn';
-import { Badge } from '@/components/ui/badge';
 
 export type StatusVariant =
   | 'active'
@@ -10,8 +9,7 @@ export type StatusVariant =
   | 'draft'
   | 'info';
 
-interface StatusBadgeProps
-  extends React.ComponentPropsWithoutRef<typeof Badge> {
+interface StatusBadgeProps extends React.ComponentPropsWithoutRef<'span'> {
   status: string;
   variantMap?: Record<string, StatusVariant>;
 }
