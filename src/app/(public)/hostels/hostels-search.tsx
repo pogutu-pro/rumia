@@ -8,6 +8,7 @@ import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/use-debounce';
+import { createClient } from '@/lib/supabase/client';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
@@ -107,6 +108,18 @@ export default function HostelsSearch({ allListings, pageSize }: HostelsSearchPr
   const addCompareSelection = useCompareStore((s) => s.addSelection);
   const removeCompareSelection = useCompareStore((s) => s.removeSelection);
   const isCompareSelected = useCompareStore((s) => s.isSelected);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function checkAuth() {
+      const { data: { user } } = await createClient().auth.getUser();
+      if (active && user) setIsLoggedIn(true);
+    }
+    void checkAuth();
+    return () => { active = false; };
+  }, []);
 
   const handleCompareToggle = useCallback(
     (item: Listing) => {
@@ -515,13 +528,13 @@ export default function HostelsSearch({ allListings, pageSize }: HostelsSearchPr
               <p className="text-sm font-bold text-slate-900">
                 Not sure which one to pick?
               </p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Book a guided tour and let a verified agent show you the best options in person.
+              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                See the hostels in person before you commit. A verified agent walks you there and handles everything.
               </p>
             </div>
           </div>
           <Link
-            href="/book-tour"
+            href={isLoggedIn ? '/account/book-tour' : '/book-tour'}
             className="shrink-0 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-colors"
           >
             <CalendarCheck className="h-4 w-4" />

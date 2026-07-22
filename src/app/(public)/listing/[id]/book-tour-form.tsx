@@ -430,13 +430,13 @@ function FormContent({
       {/* Why Tour Early */}
       <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-4">
         <p className="text-sm font-semibold text-amber-900 mb-1">
-          Most students lose their first choice because they tour too late
+          Don&apos;t waste your first choice
         </p>
         <p className="text-xs text-amber-700 leading-relaxed">
-          Agents hold rooms for a limited window. If you wait until the week
-          before intake, the room you wanted is likely gone and you are left
-          choosing from what remains. A quick tour now locks in your options
-          before someone else does.
+          Don&apos;t waste time getting lost, asking random people, or
+          returning another day because the caretaker isn&apos;t available.
+          Rumia knows the hostels, guides you there, and ensures you&apos;re
+          expected.
         </p>
       </div>
 

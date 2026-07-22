@@ -4,7 +4,6 @@ import { ListingsList } from './listings-list';
 import { GettingStarted } from './getting-started';
 import { LeadsTable } from './leads-table';
 import { CommissionTable } from './commission-table';
-import { ToursSection } from './tours-section';
 import { Building2, MessageCircle, Landmark, Plus, Wallet, Eye, CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 
@@ -359,25 +358,27 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Tour Bookings */}
-      <div id="tours" className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Tour Bookings Summary */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-xs p-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-amber-50 text-amber-700">
+            <CalendarCheck className="h-5 w-5" />
+          </div>
           <div>
-            <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-slate-600" />
-              Tour Bookings
-              {pendingToursCount > 0 && (
-                <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
-                  {pendingToursCount}
-                </span>
-              )}
-            </h2>
-            <p className="text-sm font-medium text-slate-500 mt-0.5">
-              Scheduled hostel tours and their status.
+            <h3 className="text-sm font-bold text-slate-900">Tour Bookings</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {pendingToursCount > 0
+                ? `${pendingToursCount} pending tour${pendingToursCount !== 1 ? 's' : ''} awaiting action`
+                : `${tourBookings.length} total booking${tourBookings.length !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
-        <ToursSection bookings={tourBookings} />
+        <Link
+          href="/dashboard/tours"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors"
+        >
+          View all
+        </Link>
       </div>
     </div>
   );
