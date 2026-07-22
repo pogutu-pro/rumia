@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
       preferred_date,
       preferred_time,
       agent_id,
-    } = body as CreateTourBookingInput & { agent_id?: string };
+      linked_user_id,
+    } = body as CreateTourBookingInput & { agent_id?: string; linked_user_id?: string };
 
     // Validate required fields
     if (!student_name || !phone || !zone || !tour_type || !preferred_date || !preferred_time) {
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
         preferred_time,
         status: 'pending_payment',
         agent_id: resolvedAgentId,
+        linked_user_id: linked_user_id || null,
       })
       .select()
       .single();
