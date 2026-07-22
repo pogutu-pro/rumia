@@ -708,45 +708,21 @@ export default async function ListingSlugPage({ params }: PageProps) {
 
       {/* Mobile sticky footer */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex items-center justify-between">
-          <div>
-            {moveInFrom != null ? (
-              <div className="space-y-0.5">
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-lg font-black text-slate-950">
-                    KES {moveInFrom.toLocaleString()}
-                  </span>
-                  <span className="text-[10px] font-bold text-emerald-600 uppercase">move-in</span>
-                </div>
-                <div className="text-[10px] font-semibold text-slate-400">
-                  KES {startingPrice.toLocaleString()} rent + KES {startingDeposit!.toLocaleString()} deposit
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-black text-slate-950">
-                  KES {startingPrice.toLocaleString()}
-                </span>
-                <span className="text-xs font-semibold text-slate-500">/mo</span>
-              </div>
-            )}
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <BookTourButton
+              listingId={listing.id}
+              listingTitle={listing.title}
+              listingZone={listing.area}
+              agentId={listing.agents?.id}
+            />
           </div>
-          <div className="w-full flex gap-2">
-            <div className="flex-1">
-              <BookTourButton
-                listingId={listing.id}
-                listingTitle={listing.title}
-                listingZone={listing.area}
-                agentId={listing.agents?.id}
-              />
-            </div>
-            <div className="flex-1">
-              <WhatsappButton
-                listingId={listing.id}
-                agentId={listing.agents?.id}
-                agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
-              />
-            </div>
+          <div className="flex-1">
+            <WhatsappButton
+              listingId={listing.id}
+              agentId={listing.agents?.id}
+              agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+            />
           </div>
         </div>
       </div>
