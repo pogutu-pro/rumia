@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, Info } from 'lucide-react';
+import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, Info, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -574,6 +574,32 @@ export default function HostelsSearch({ initialListings, totalCount, pageSize }:
               </span>
             )}
           </p>
+        )}
+
+        {/* Book a Tour CTA */}
+        {!loading && (
+          <div className="mb-6 bg-white border border-slate-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
+                <CalendarCheck className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900">
+                  Not sure which one to pick?
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Book a guided tour and let a verified agent show you the best options in person.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/book-tour"
+              className="shrink-0 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-colors"
+            >
+              <CalendarCheck className="h-4 w-4" />
+              Book a Tour
+            </Link>
+          </div>
         )}
 
         {/* Listing Grid */}

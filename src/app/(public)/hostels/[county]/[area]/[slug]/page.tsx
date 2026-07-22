@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
 import { WhatsappButton } from '@/app/(public)/listing/[id]/whatsapp-button';
+import { BookTourButton } from '@/app/(public)/listing/[id]/book-tour-button';
 import { QuickFacts } from '@/app/(public)/listing/[id]/quick-facts';
 import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
 import { LocationSection } from '@/app/(public)/listing/[id]/location-section';
@@ -376,14 +377,16 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 Included in Rent
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                    <Check className="h-4 w-4" />
+                {listing.water_included && (
+                  <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                      <Check className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">
+                      Water Included
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">
-                    Water {listing.water_included ? 'Included' : 'Available'}
-                  </span>
-                </div>
+                )}
                 <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                     <Check className="h-4 w-4" />
@@ -453,7 +456,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
               </>
             )}
 
-            {hasCoordinates && (
+            {/* LocationSection hidden per product decision; code preserved for future use */}
+            {/* {hasCoordinates && (
               <>
                 <LocationSection
                   listingTitle={listing.title}
@@ -462,7 +466,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 />
                 <hr className="border-slate-100" />
               </>
-            )}
+            )} */}
 
           </div>
 
@@ -502,12 +506,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
               </div>
               <div className="h-px bg-slate-100" />
               <div className="space-y-3.5">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>
-                    Water {listing.water_included ? 'Included' : 'Available'}
-                  </span>
-                </div>
+                {listing.water_included && (
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>Water Included</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   <span>Security {listing.security_type || 'Available'}</span>
@@ -519,13 +523,25 @@ export default async function ListingSlugPage({ params }: PageProps) {
                   </div>
                 )}
               </div>
-              <WhatsappButton
-                listingId={listing.id}
-                agentId={listing.agents?.id}
-                agentPhone={
-                  listing.agents?.whatsapp || listing.agents?.phone || ''
-                }
-              />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <BookTourButton
+                    listingId={listing.id}
+                    listingTitle={listing.title}
+                    listingZone={listing.area}
+                    agentId={listing.agents?.id}
+                  />
+                </div>
+                <div className="flex-1">
+                  <WhatsappButton
+                    listingId={listing.id}
+                    agentId={listing.agents?.id}
+                    agentPhone={
+                      listing.agents?.whatsapp || listing.agents?.phone || ''
+                    }
+                  />
+                </div>
+              </div>
               {listing.agents && (
                 <div className="pt-4 border-t border-slate-100 space-y-4">
                   <div className="flex items-center gap-3">
@@ -715,12 +731,22 @@ export default async function ListingSlugPage({ params }: PageProps) {
               </div>
             )}
           </div>
-          <div className="w-[60%]">
-            <WhatsappButton
-              listingId={listing.id}
-              agentId={listing.agents?.id}
-              agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
-            />
+          <div className="w-full flex gap-2">
+            <div className="flex-1">
+              <BookTourButton
+                listingId={listing.id}
+                listingTitle={listing.title}
+                listingZone={listing.area}
+                agentId={listing.agents?.id}
+              />
+            </div>
+            <div className="flex-1">
+              <WhatsappButton
+                listingId={listing.id}
+                agentId={listing.agents?.id}
+                agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+              />
+            </div>
           </div>
         </div>
       </div>

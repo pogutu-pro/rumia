@@ -17,6 +17,7 @@ import {
   LogOut,
   Menu,
   X,
+  CalendarCheck,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
@@ -34,6 +35,7 @@ const navLinks = [
   { label: 'Agents', href: '/admin/agents', icon: Users, exact: false },
   { label: 'Users', href: '/admin/users', icon: UserCog, exact: false },
   { label: 'Listings', href: '/admin/listings', icon: Building2, exact: false },
+  { label: 'Tours', href: '/admin/tours', icon: CalendarCheck, exact: false },
   { label: 'Leads', href: '/admin/leads', icon: MousePointerClick, exact: false },
   { label: 'Commissions', href: '/admin/commissions', icon: DollarSign, exact: false },
   { label: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight, exact: false },

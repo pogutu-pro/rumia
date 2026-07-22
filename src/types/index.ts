@@ -179,3 +179,49 @@ export interface CreateCommissionInput {
   listing_id: string;
   amount: number;
 }
+
+// ── Tour Bookings ───────────────────────────────────────────
+
+export type TourType = 'specific_hostel' | 'full_search';
+export type TourTimeWindow = 'morning' | 'afternoon' | 'evening';
+export type TourStatus =
+  | 'pending_payment'
+  | 'confirmed'
+  | 'paid'
+  | 'completed'
+  | 'no_show'
+  | 'cancelled';
+
+export interface TourBooking {
+  id: string;
+  student_name: string;
+  phone: string;
+  listing_id: string | null;
+  zone: string;
+  tour_type: TourType;
+  amount: number;
+  preferred_date: string;
+  preferred_time: TourTimeWindow;
+  status: TourStatus;
+  linked_user_id: string | null;
+  agent_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TourBookingWithJoins extends TourBooking {
+  listings?: { id: string; title: string; area: string | null } | null;
+  agents?: { id: string; name: string } | null;
+}
+
+export interface CreateTourBookingInput {
+  student_name: string;
+  phone: string;
+  listing_id?: string | null;
+  zone: string;
+  tour_type: TourType;
+  amount: number;
+  preferred_date: string;
+  preferred_time: TourTimeWindow;
+  agent_id?: string | null;
+}

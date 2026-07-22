@@ -61,5 +61,39 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Link any unlinked tour bookings to this user by matching phone number
+  if (user?.id) {
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('phone')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.phone) {
+        const normalizedPhone = profile.phone.replace(/\D/g, '');
+
+        // Find tour bookings with matching phone that aren't linked yet
+        const { data: unlinkedBookings } = await supabaseAdmin
+          .from('tour_bookings')
+          .select('id')
+          .is('linked_user_id', null)
+          .eq('phone', normalizedPhone)
+          .limit(10);
+
+        if (unlinkedBookings && unlinkedBookings.length > 0) {
+          const bookingIds = unlinkedBookings.map((b: { id: string }) => b.id);
+          await supabaseAdmin
+            .from('tour_bookings')
+            .update({ linked_user_id: user.id })
+            .in('id', bookingIds);
+        }
+      }
+    } catch (linkError) {
+      // Non-critical: don't fail the auth flow if linking fails
+      console.error('Tour booking link error:', linkError);
+    }
+  }
+
   return response;
 }

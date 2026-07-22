@@ -4,7 +4,8 @@ import { ListingsList } from './listings-list';
 import { GettingStarted } from './getting-started';
 import { LeadsTable } from './leads-table';
 import { CommissionTable } from './commission-table';
-import { Building2, MessageCircle, Landmark, Plus, Wallet, Eye } from 'lucide-react';
+import { ToursSection } from './tours-section';
+import { Building2, MessageCircle, Landmark, Plus, Wallet, Eye, CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export const revalidate = 0; // Fresh statistics always
@@ -145,6 +146,28 @@ export default async function DashboardPage() {
   const totalEarned = commissions
     .filter((c: any) => c.status === 'paid')
     .reduce((acc: number, c: any) => acc + c.amount, 0);
+
+  // Fetch tour bookings for this agent
+  const { data: tourBookingsRaw } = await (supabase as any)
+    .from('tour_bookings')
+    .select(`
+      *,
+      listings(id, title, area),
+      agents(id, name)
+    `)
+    .eq('agent_id', agent.id)
+    .order('preferred_date', { ascending: true })
+    .order('preferred_time', { ascending: true });
+
+  const tourBookings = (tourBookingsRaw ?? []).map((b: any) => ({
+    ...b,
+    listings: b.listings ?? null,
+    agents: b.agents ?? null,
+  }));
+
+  const pendingToursCount = tourBookings.filter(
+    (b: any) => b.status === 'pending_payment' || b.status === 'confirmed',
+  ).length;
 
   return (
     <div className="space-y-8">
@@ -334,6 +357,27 @@ export default async function DashboardPage() {
             leadsCountByListing={leadsCountByListing}
           />
         </div>
+      </div>
+
+      {/* Tour Bookings */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight flex items-center gap-2">
+              <CalendarCheck className="h-5 w-5 text-slate-600" />
+              Tour Bookings
+              {pendingToursCount > 0 && (
+                <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
+                  {pendingToursCount}
+                </span>
+              )}
+            </h2>
+            <p className="text-sm font-medium text-slate-500 mt-0.5">
+              Scheduled hostel tours and their status.
+            </p>
+          </div>
+        </div>
+        <ToursSection bookings={tourBookings} />
       </div>
     </div>
   );
