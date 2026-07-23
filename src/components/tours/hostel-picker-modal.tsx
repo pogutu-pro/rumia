@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { Check, MapPin, ArrowLeft, Building2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ interface HostelOption {
   price: number;
   location: string;
   agent_name: string | null;
+  image_url: string | null;
 }
 
 interface HostelPickerModalProps {
@@ -90,7 +92,8 @@ export function HostelPickerModal({
             title,
             price,
             location,
-            agents ( name )
+            agents ( name ),
+            listing_images ( r2_url, display_order )
           `)
           .eq('is_active', true)
           .eq('area', zone)
@@ -98,13 +101,19 @@ export function HostelPickerModal({
 
         if (!cancelled && data) {
           setHostels(
-            data.map((l: any) => ({
-              id: l.id,
-              title: l.title,
-              price: l.price,
-              location: l.location,
-              agent_name: l.agents?.name || null,
-            })),
+            data.map((l: any) => {
+              const sorted = [...(l.listing_images || [])].sort(
+                (a: any, b: any) => a.display_order - b.display_order,
+              );
+              return {
+                id: l.id,
+                title: l.title,
+                price: l.price,
+                location: l.location,
+                agent_name: l.agents?.name || null,
+                image_url: sorted[0]?.r2_url || null,
+              };
+            }),
           );
         }
       } catch {
@@ -218,7 +227,7 @@ export function HostelPickerModal({
                 onClick={() => toggle(hostel.id)}
                 disabled={disabled}
                 className={cn(
-                  'w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all duration-200',
+                  'w-full flex items-center gap-3 p-2.5 rounded-xl border-2 text-left transition-all duration-200',
                   isSelected
                     ? 'border-emerald-600 bg-emerald-50'
                     : disabled
@@ -226,6 +235,38 @@ export function HostelPickerModal({
                     : 'border-gray-200 hover:border-gray-300 bg-white',
                 )}
               >
+                {/* Hostel image */}
+                <div className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+                  {hostel.image_url ? (
+                    <Image
+                      src={hostel.image_url}
+                      alt={hostel.title}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Building2 className="h-6 w-6 text-gray-300" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {hostel.title}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {hostel.location}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-emerald-600 mt-0.5">
+                    KSh {hostel.price.toLocaleString()}/mo
+                  </p>
+                </div>
+
                 <div
                   className={cn(
                     'shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
@@ -236,33 +277,6 @@ export function HostelPickerModal({
                 >
                   {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {hostel.title}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {hostel.location}
-                    </span>
-                    <span>·</span>
-                    <span className="font-bold text-emerald-600">
-                      KSh {hostel.price.toLocaleString()}/mo
-                    </span>
-                  </div>
-                </div>
-                {isSelected && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggle(hostel.id);
-                    }}
-                    className="shrink-0 p-1 rounded-full hover:bg-emerald-100 text-emerald-600"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </button>
             );
           })
