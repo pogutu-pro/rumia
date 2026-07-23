@@ -1,48 +1,59 @@
 /**
  * Tour Booking Pricing Matrix
  *
- * Price is determined by zone (from listing.area) and tour type.
- * All amounts are in KSh.
+ * Pricing rules:
+ *   - From listing details page → specific_hostel = KSh 100 flat
+ *   - From /book-tour page → specific_hostel = KSh 300 flat (pick up to 4 hostels)
+ *   - Full search → varies by zone (see matrix below)
  *
- * To update prices: edit the PRICING_MATRIX below.
- * No other file should contain hardcoded tour prices.
+ * All amounts are in KSh.
  */
 
 import type { TourType } from '@/types';
 
 interface ZonePricing {
-  specific_hostel: number;
   full_search: number;
 }
 
 /**
- * Maps listing.area values to their tour pricing tiers.
- * Keep this in sync with AREA_OPTIONS in dekut-areas.ts.
+ * Maps listing.area values to their full-search tour pricing tiers.
+ * specific_hostel pricing is flat (100 from details, 300 from /book-tour).
  */
 export const PRICING_MATRIX: Record<string, ZonePricing> = {
-  Boma: { specific_hostel: 300, full_search: 600 },
-  'Nyeri View': { specific_hostel: 500, full_search: 1000 },
-  'Kahawa Ridge': { specific_hostel: 500, full_search: 1000 },
-  Nyaribo: { specific_hostel: 800, full_search: 1500 },
-  'Embassy Area': { specific_hostel: 800, full_search: 1500 },
-  // Near Gate A & Near Gate B: mapped to Boma tier (cheapest) as default.
-  // Update these if a different tier is intended.
-  'Near Gate A': { specific_hostel: 300, full_search: 600 },
-  'Near Gate B': { specific_hostel: 300, full_search: 600 },
+  Boma: { full_search: 600 },
+  'Nyeri View': { full_search: 1000 },
+  'Kahawa Ridge': { full_search: 1000 },
+  Nyaribo: { full_search: 1500 },
+  'Embassy Area': { full_search: 1500 },
+  'Near Gate A': { full_search: 600 },
+  'Near Gate B': { full_search: 600 },
 };
+
+/** Flat price for booking a tour from a specific listing details page */
+export const LISTING_SPECIFIC_PRICE = 100;
+
+/** Flat price for booking a specific-hostel tour from /book-tour (zone picker) */
+export const ZONE_SPECIFIC_PRICE = 300;
 
 /**
  * Returns the tour price for a given zone and tour type.
- * Returns null if the zone is not in the pricing matrix.
+ * If fromListing is true, uses the flat listing-specific price.
+ * Returns null if zone is unknown and it's a full_search.
  */
 export function getTourPrice(
   zone: string | null | undefined,
   tourType: TourType,
+  fromListing: boolean = false,
 ): number | null {
+  if (tourType === 'specific_hostel') {
+    return fromListing ? LISTING_SPECIFIC_PRICE : ZONE_SPECIFIC_PRICE;
+  }
+
+  // full_search — varies by zone
   if (!zone) return null;
   const tier = PRICING_MATRIX[zone];
   if (!tier) return null;
-  return tier[tourType];
+  return tier.full_search;
 }
 
 /**

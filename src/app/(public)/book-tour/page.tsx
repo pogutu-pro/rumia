@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BookTourForm } from '@/app/(public)/listing/[id]/book-tour-form';
 import { AREA_OPTIONS } from '@/lib/constants/dekut-areas';
@@ -57,13 +57,19 @@ export default function BookTourPage() {
                   key={zone.value}
                   type="button"
                   onClick={() => setSelectedZone(zone.value)}
-                  className={`h-12 rounded-xl border-2 text-sm font-semibold transition-all ${
+                  className={`h-auto min-h-[3.5rem] rounded-xl border-2 text-left px-3 py-2.5 transition-all ${
                     selectedZone === zone.value
                       ? 'border-slate-900 bg-slate-50 text-slate-900'
                       : 'border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}
                 >
-                  {zone.label}
+                  <span className="text-sm font-semibold block">{zone.label}</span>
+                  {zone.distance && (
+                    <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                      <MapPin className="h-2.5 w-2.5" />
+                      {zone.distance}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>

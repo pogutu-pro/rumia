@@ -20,9 +20,10 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { getTourPrice, formatTourPrice } from '@/lib/constants/tour-pricing';
+import { getTourPrice, formatTourPrice, LISTING_SPECIFIC_PRICE, ZONE_SPECIFIC_PRICE } from '@/lib/constants/tour-pricing';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/client';
+import { HostelPickerModal } from '@/components/tours/hostel-picker-modal';
 import type { TourType, TourTimeWindow, TourBooking } from '@/types';
 
 interface BookTourFormProps {
@@ -35,6 +36,14 @@ interface BookTourFormProps {
 }
 
 type FormStep = 'form' | 'confirmation';
+
+interface SelectedHostel {
+  id: string;
+  title: string;
+  price: number;
+  location: string;
+  agent_name: string | null;
+}
 
 const TIME_OPTIONS: Array<{ value: TourTimeWindow; label: string; icon: string }> = [
   { value: 'morning', label: 'Morning', icon: '' },
@@ -108,8 +117,19 @@ export function BookTourForm({
   const [linkedUserId, setLinkedUserId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Hostel picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedHostels, setSelectedHostels] = useState<SelectedHostel[]>([]);
+
   const zone = listingZone;
-  const price = useMemo(() => getTourPrice(zone, tourType), [zone, tourType]);
+  const fromListing = !!listingId;
+
+  const price = useMemo(() => {
+    if (tourType === 'specific_hostel') {
+      return fromListing ? LISTING_SPECIFIC_PRICE : ZONE_SPECIFIC_PRICE;
+    }
+    return getTourPrice(zone, 'full_search', false);
+  }, [tourType, fromListing, zone]);
 
   useEffect(() => {
     setMounted(true);
@@ -158,12 +178,33 @@ export function BookTourForm({
     setPhone('');
     setLinkedUserId(null);
     setIsLoggedIn(false);
+    setSelectedHostels([]);
+    setPickerOpen(false);
   }, []);
 
   const handleClose = useCallback(() => {
     resetForm();
     onClose();
   }, [onClose, resetForm]);
+
+  // When user selects specific_hostel from /book-tour (not from listing), open picker
+  const handleTourTypeChange = useCallback(
+    (type: TourType) => {
+      setTourType(type);
+      if (type === 'specific_hostel' && !fromListing) {
+        setPickerOpen(true);
+      }
+    },
+    [fromListing],
+  );
+
+  const handleHostelsPicked = useCallback((hostels: SelectedHostel[]) => {
+    setSelectedHostels(hostels);
+    setPickerOpen(false);
+    if (hostels.length > 0) {
+      toast.success(`${hostels.length} hostel${hostels.length > 1 ? 's' : ''} selected for tour`);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,22 +222,38 @@ export function BookTourForm({
       return;
     }
 
+    // Validate hostel selection for zone-specific tours
+    if (tourType === 'specific_hostel' && !fromListing && selectedHostels.length === 0) {
+      toast.error('Please select at least one hostel to tour');
+      setPickerOpen(true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      // For zone-specific tours, send the first selected listing as the primary
+      const primaryListingId = tourType === 'specific_hostel' && !fromListing
+        ? selectedHostels[0]?.id || ''
+        : listingId;
+
       const response = await fetch('/api/tour-bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           student_name: studentName.trim(),
           phone: phone.trim(),
-          listing_id: listingId,
+          listing_id: primaryListingId,
           zone,
           tour_type: tourType,
           preferred_date: preferredDate,
           preferred_time: preferredTime,
           agent_id: agentId,
           linked_user_id: linkedUserId,
+          from_listing: fromListing,
+          selected_listing_ids: tourType === 'specific_hostel' && !fromListing
+            ? selectedHostels.map((h) => h.id)
+            : undefined,
         }),
       });
 
@@ -289,7 +346,7 @@ export function BookTourForm({
                 {step === 'form' ? (
                   <FormContent
                     tourType={tourType}
-                    setTourType={setTourType}
+                    setTourType={handleTourTypeChange}
                     preferredDate={preferredDate}
                     setPreferredDate={setPreferredDate}
                     preferredTime={preferredTime}
@@ -301,9 +358,11 @@ export function BookTourForm({
                     price={price}
                     zone={zone}
                     listingTitle={listingTitle}
-                    isListingSpecific={!!listingId}
+                    isListingSpecific={fromListing}
                     isSubmitting={isSubmitting}
                     isLoggedIn={isLoggedIn}
+                    selectedHostels={selectedHostels}
+                    onOpenPicker={() => setPickerOpen(true)}
                     onSubmit={handleSubmit}
                     onClose={handleClose}
                   />
@@ -338,7 +397,7 @@ export function BookTourForm({
                   {step === 'form' ? (
                     <FormContent
                       tourType={tourType}
-                      setTourType={setTourType}
+                      setTourType={handleTourTypeChange}
                       preferredDate={preferredDate}
                       setPreferredDate={setPreferredDate}
                       preferredTime={preferredTime}
@@ -350,9 +409,11 @@ export function BookTourForm({
                       price={price}
                       zone={zone}
                       listingTitle={listingTitle}
-                      isListingSpecific={!!listingId}
+                      isListingSpecific={fromListing}
                       isSubmitting={isSubmitting}
                       isLoggedIn={isLoggedIn}
+                      selectedHostels={selectedHostels}
+                      onOpenPicker={() => setPickerOpen(true)}
                       onSubmit={handleSubmit}
                       onClose={handleClose}
                     />
@@ -368,6 +429,16 @@ export function BookTourForm({
                 </div>
               </motion.div>
             </div>
+          )}
+
+          {/* Hostel Picker Modal */}
+          {zone && (
+            <HostelPickerModal
+              isOpen={pickerOpen}
+              onClose={() => setPickerOpen(false)}
+              onConfirm={handleHostelsPicked}
+              zone={zone}
+            />
           )}
         </div>
       )}
@@ -395,6 +466,8 @@ interface FormContentProps {
   isListingSpecific: boolean;
   isSubmitting: boolean;
   isLoggedIn: boolean;
+  selectedHostels: SelectedHostel[];
+  onOpenPicker: () => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
@@ -416,6 +489,8 @@ function FormContent({
   isListingSpecific,
   isSubmitting,
   isLoggedIn,
+  selectedHostels,
+  onOpenPicker,
   onSubmit,
   onClose,
 }: FormContentProps) {
@@ -493,11 +568,15 @@ function FormContent({
               >
                 Specific Hostel
               </span>
-              {isListingSpecific && (
+              {isListingSpecific ? (
                 <span className="text-[10px] font-medium text-gray-400 leading-tight text-center">
                   {listingTitle.length > 30
                     ? listingTitle.slice(0, 30) + '…'
                     : listingTitle}
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium text-emerald-600 leading-tight text-center font-bold">
+                  KSh 300 · Pick up to 4
                 </span>
               )}
             </button>
@@ -531,6 +610,47 @@ function FormContent({
             </button>
           </div>
         </div>
+
+        {/* Selected hostels summary (zone-specific tours) */}
+        {tourType === 'specific_hostel' && !isListingSpecific && (
+          <div>
+            {selectedHostels.length > 0 ? (
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-emerald-800">
+                    {selectedHostels.length} hostel{selectedHostels.length > 1 ? 's' : ''} selected
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onOpenPicker}
+                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
+                  >
+                    Change
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedHostels.map((h) => (
+                    <span
+                      key={h.id}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-emerald-200 text-[11px] font-medium text-emerald-700"
+                    >
+                      {h.title}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenPicker}
+                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition-colors"
+              >
+                <Building2 className="h-4 w-4" />
+                Pick hostels to tour in {zone}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Preferred Date */}
         <div className="space-y-2">
@@ -638,8 +758,11 @@ function FormContent({
                 Tour fee
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                {tourType === 'specific_hostel' ? 'Specific Hostel' : 'Full Search'} ·{' '}
-                {zone}
+                {tourType === 'specific_hostel'
+                  ? isListingSpecific
+                    ? 'Direct booking'
+                    : `${selectedHostels.length || '—'} hostel${(selectedHostels.length || 0) !== 1 ? 's' : ''} · ${zone}`
+                  : `Full Search · ${zone}`}
               </p>
             </div>
             <p className="text-xl font-black text-slate-900">

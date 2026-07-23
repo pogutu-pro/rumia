@@ -17,7 +17,14 @@ export async function POST(request: NextRequest) {
       preferred_time,
       agent_id,
       linked_user_id,
-    } = body as CreateTourBookingInput & { agent_id?: string; linked_user_id?: string };
+      from_listing,
+      selected_listing_ids,
+    } = body as CreateTourBookingInput & {
+      agent_id?: string;
+      linked_user_id?: string;
+      from_listing?: boolean;
+      selected_listing_ids?: string[];
+    };
 
     // Validate required fields
     if (!student_name || !phone || !zone || !tour_type || !preferred_date || !preferred_time) {
@@ -47,8 +54,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate hostel selection for zone-specific tours
+    if (tour_type === 'specific_hostel' && !from_listing) {
+      if (!selected_listing_ids || selected_listing_ids.length === 0) {
+        return NextResponse.json(
+          { error: 'Please select at least one hostel to tour' },
+          { status: 400 },
+        );
+      }
+      if (selected_listing_ids.length > 4) {
+        return NextResponse.json(
+          { error: 'You can select up to 4 hostels per tour' },
+          { status: 400 },
+        );
+      }
+    }
+
     // Compute price server-side (never trust client-sent price)
-    const amount = getTourPrice(zone, tour_type);
+    const amount = getTourPrice(zone, tour_type, !!from_listing);
     if (amount === null) {
       return NextResponse.json(
         { error: `No pricing configured for zone: ${zone}` },
@@ -101,7 +124,7 @@ export async function POST(request: NextRequest) {
     const { data: booking, error } = await supabase
       .from('tour_bookings')
       .insert({
-        student_name: student_name.trim(),
+        student_name: studentNameTrimmed(student_name),
         phone: phone.trim(),
         listing_id: listing_id || null,
         zone,
@@ -134,9 +157,16 @@ export async function POST(request: NextRequest) {
 
       if (agentProfile?.user_id) {
         const timeLabel = preferred_time === 'morning' ? 'morning' : preferred_time === 'afternoon' ? 'afternoon' : 'evening';
+        const hostelCount = selected_listing_ids?.length || 0;
+        const tourDescription = tour_type === 'specific_hostel'
+          ? from_listing
+            ? 'hostel'
+            : `${hostelCount} hostel${hostelCount !== 1 ? 's' : ''}`
+          : 'area';
+
         sendPushToUser(agentProfile.user_id, {
           title: 'New tour booking',
-          body: `${student_name.trim()} booked a ${tour_type === 'specific_hostel' ? 'hostel' : 'area'} tour for ${timeLabel} on ${preferred_date}`,
+          body: `${studentNameTrimmed(student_name)} booked a ${tourDescription} tour for ${timeLabel} on ${preferred_date}`,
           url: '/dashboard/tours',
           tag: 'new-tour-booking',
         }).catch(() => {});
@@ -151,4 +181,8 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function studentNameTrimmed(name: string): string {
+  return name.trim();
 }
