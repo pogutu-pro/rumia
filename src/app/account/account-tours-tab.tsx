@@ -112,45 +112,34 @@ export function AccountToursTab() {
   if (bookings.length === 0) {
     return (
       <div className="py-8">
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden">
-          {/* Decorative dots */}
-          <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]">
-            <div className="absolute top-6 left-6 w-2 h-2 bg-white rounded-full" />
-            <div className="absolute top-10 right-10 w-1.5 h-1.5 bg-white rounded-full" />
-            <div className="absolute bottom-8 left-12 w-1 h-1 bg-white rounded-full" />
-            <div className="absolute bottom-12 right-6 w-2 h-2 bg-white rounded-full" />
-            <div className="absolute top-1/2 left-1/3 w-1 h-1 bg-white rounded-full" />
+        <div className="bg-white border border-slate-100 rounded-2xl p-8 sm:p-10 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-slate-50 mx-auto flex items-center justify-center mb-5">
+            <CalendarCheck className="h-7 w-7 text-slate-300" />
           </div>
 
-          <div className="relative z-10">
-            <div className="w-16 h-16 rounded-2xl bg-white/10 mx-auto flex items-center justify-center mb-5">
-              <CalendarCheck className="h-8 w-8 text-emerald-400" />
-            </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+            No tours yet
+          </h3>
+          <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed mb-6">
+            Book a guided tour and let a verified agent show you the best
+            hostels near DeKUT in person.
+          </p>
 
-            <h3 className="text-xl font-black text-white mb-2">
-              Find Your Perfect Hostel
-            </h3>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed mb-7">
-              Book a guided tour and let a verified agent show you the best
-              hostels near DeKUT in person. No commitment, no stress.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/account/book-tour"
-                className="inline-flex items-center gap-2.5 h-12 px-7 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold transition-all shadow-lg shadow-emerald-500/20"
-              >
-                <CalendarPlus className="h-4 w-4" />
-                Book a Tour
-              </Link>
-              <Link
-                href="/hostels"
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-2xl bg-white/10 hover:bg-white/15 text-white text-sm font-bold transition-all"
-              >
-                Browse first
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/account/book-tour"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-all"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Book a Tour
+            </Link>
+            <Link
+              href="/hostels"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-bold transition-all"
+            >
+              Browse first
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </div>
