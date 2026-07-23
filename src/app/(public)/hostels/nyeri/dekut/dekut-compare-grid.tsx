@@ -177,16 +177,20 @@ export default function DeKutCompareGrid({ listings }: { listings: DeKutListing[
                           e.stopPropagation();
                           handleCompareToggle(item);
                         }}
-                        className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-white transition-all duration-200 cursor-pointer hover:bg-slate-700"
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                          isSelected
+                            ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
+                            : 'bg-slate-900 text-white hover:bg-slate-700'
+                        }`}
                       >
                         {isSelected ? (
                           <>
-                            <Check className="h-3 w-3" />
+                            <Check className="h-3.5 w-3.5" />
                             Added
                           </>
                         ) : (
                           <>
-                            <GitCompareArrows className="h-3 w-3" />
+                            <GitCompareArrows className="h-3.5 w-3.5" />
                             Compare
                           </>
                         )}

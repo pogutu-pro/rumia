@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, ArrowRight } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import { Metadata } from 'next';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/server';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { JsonLd } from '@/components/seo/json-ld';
-import { FeaturedHostelCard } from '@/components/compare/featured-hostel-card';
-import { sortListingsByPosition } from '@/lib/utils/listing-sort';
+import { PopularHostels } from '@/components/home/popular-hostels';
 
 export const revalidate = 0;
 
@@ -47,37 +46,10 @@ const organizationSchema = {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Fetch active listings with their first image and agent name
-  const { data: listingsData } = await supabase
-    .from('listings')
-    .select(
-      `
-      id,
-      title,
-      description,
-      price,
-      location,
-      agent_id,
-      is_active,
-      slug,
-      county,
-      area,
-      created_at,
-      sort_position,
-      listing_images (
-        r2_url,
-        display_order,
-        blur_data_url
-      ),
-      agents (
-        name
-      )
-    `,
-    )
-    .eq('is_active', true)
-    .limit(8);
-
-  let listings = sortListingsByPosition((listingsData || []) as any[]);
+  // Fetch top 12 most-viewed active listings for the popular section
+  const { data: popularData } = await supabase.rpc('get_popular_listings', {
+    p_limit: 12,
+  });
 
   // Get unique locations for quick search suggestions
   const { data: locsData } = await supabase
@@ -93,11 +65,7 @@ export default async function HomePage() {
       ) as string[]
     ).slice(0, 4);
   } else {
-    uniqueLocations = (
-      Array.from(
-        new Set(listings.map((l: any) => l.location.split(',')[0].trim())),
-      ) as string[]
-    ).slice(0, 4);
+    uniqueLocations = [];
   }
 
   return (
@@ -156,9 +124,6 @@ export default async function HomePage() {
           {/* Quick Locations */}
           {uniqueLocations.length > 0 && (
             <div className="mt-8 flex items-center justify-center flex-wrap gap-2 text-sm text-slate-400">
-              <span className="font-semibold text-slate-300 mr-1">
-                Popular:
-              </span>
               {uniqueLocations.map((loc) => (
                 <Link
                   key={loc}
@@ -173,54 +138,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Grid */}
-      <section className="container mx-auto px-4 py-16 sm:py-24">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-950">
-              Featured Hostels
-            </h2>
-            <p className="text-slate-500 mt-2 font-medium">
-              Explore the latest premium student rooms available right now.
-            </p>
-          </div>
-          <Link
-            href="/hostels"
-            className="group hidden sm:flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors"
-          >
-            View all listings
-            <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {listings && listings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {listings.map((item, index) => (
-              <FeaturedHostelCard key={item.id} item={item} index={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 bg-white border border-slate-100 rounded-3xl">
-            <p className="text-slate-400 font-medium">No listings found.</p>
-            <Link
-              href="/dashboard/new"
-              className="mt-4 inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors"
-            >
-              Create First Listing
-            </Link>
-          </div>
-        )}
-
-        <div className="mt-10 text-center sm:hidden">
-          <Link
-            href="/hostels"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors"
-          >
-            View All Listings
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
+      <PopularHostels listings={(popularData || []) as any[]} />
 
       <section className="container mx-auto px-4 pb-16 sm:pb-24">
         <EarlyAccessBanner />

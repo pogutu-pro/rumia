@@ -63,10 +63,10 @@ function SidebarContent({
               href={href}
               onClick={onNavigate}
               className={[
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                 isActive
-                  ? 'bg-gray-100 text-gray-900 font-semibold'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
               ].join(' ')}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -78,7 +78,7 @@ function SidebarContent({
         <Link
           href="/dashboard/new"
           onClick={onNavigate}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 font-medium mt-2"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 mt-2"
         >
           <Plus className="h-4 w-4 shrink-0" />
           New Listing

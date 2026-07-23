@@ -73,13 +73,13 @@ export const PublicHeader = React.memo(function PublicHeader() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'px-4 py-2 text-sm font-bold rounded-lg transition-colors',
+                    'px-4 py-2 text-sm font-bold rounded-xl transition-all',
                     pathname.startsWith(item.href)
                       ? isScrolled || !isHome
-                        ? 'text-emerald-600 bg-emerald-50'
-                        : 'text-white bg-white/10'
+                        ? 'text-white bg-emerald-600 shadow-sm shadow-emerald-600/20'
+                        : 'text-white bg-white/15 backdrop-blur-sm'
                       : isScrolled || !isHome
-                        ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                         : 'text-white/80 hover:text-white hover:bg-white/10'
                   )}
                 >

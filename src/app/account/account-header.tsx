@@ -72,10 +72,10 @@ export function AccountHeader({
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                     active
-                      ? 'text-slate-900 bg-slate-100'
-                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
+                      ? 'text-white bg-emerald-600 shadow-sm shadow-emerald-600/20'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
