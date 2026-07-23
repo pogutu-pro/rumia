@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { ArrowLeft, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BookTourForm } from '@/app/(public)/listing/[id]/book-tour-form';
 import { AREA_OPTIONS } from '@/lib/constants/dekut-areas';
+import { cn } from '@/lib/utils/cn';
 
 export default function BookTourPage() {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
@@ -52,26 +53,36 @@ export default function BookTourPage() {
               Select your area
             </p>
             <div className="grid grid-cols-2 gap-3">
-              {AREA_OPTIONS.map((zone) => (
-                <button
-                  key={zone.value}
-                  type="button"
-                  onClick={() => setSelectedZone(zone.value)}
-                  className={`h-auto min-h-[3.5rem] rounded-xl border-2 text-left px-3 py-2.5 transition-all ${
-                    selectedZone === zone.value
-                      ? 'border-slate-900 bg-slate-50 text-slate-900'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                  }`}
-                >
-                  <span className="text-sm font-semibold block">{zone.label}</span>
-                  {zone.proximity && (
-                    <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
-                      <MapPin className="h-2.5 w-2.5" />
-                      {zone.proximity}
+              {AREA_OPTIONS.map((zone) => {
+                const isSelected = selectedZone === zone.value;
+                return (
+                  <button
+                    key={zone.value}
+                    type="button"
+                    onClick={() => setSelectedZone(zone.value)}
+                    className={cn(
+                      'relative flex flex-col items-start rounded-xl border-2 p-3.5 text-left transition-all duration-200',
+                      isSelected
+                        ? 'border-emerald-600 bg-emerald-50 shadow-sm shadow-emerald-600/10'
+                        : 'border-slate-200 hover:border-slate-300 bg-white',
+                    )}
+                  >
+                    <span className={cn(
+                      'text-sm font-bold',
+                      isSelected ? 'text-emerald-800' : 'text-slate-900',
+                    )}>
+                      {zone.label}
                     </span>
-                  )}
-                </button>
-              ))}
+                    <span className={cn(
+                      'mt-1.5 inline-flex items-center gap-1 text-xs font-bold',
+                      isSelected ? 'text-emerald-700' : 'text-slate-500',
+                    )}>
+                      <Banknote className="h-3 w-3" />
+                      KSh {zone.price.toLocaleString()}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -83,7 +94,7 @@ export default function BookTourPage() {
             Continue
           </Button>
 
-          <p className="text-[10px] text-center text-slate-400 font-medium">
+          <p className="text-xs text-center text-slate-600 font-bold">
             Pay the agent directly when you arrive. No online payment required.
           </p>
         </div>

@@ -10,6 +10,11 @@ export interface AreaCoordinates {
 }
 
 export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
+  Boma: {
+    name: 'Boma',
+    latitude: -0.4005,
+    longitude: 36.9645,
+  },
   'Near Gate A': {
     name: 'Near Gate A',
     latitude: -0.397509,
@@ -30,20 +35,15 @@ export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
     latitude: -0.401,
     longitude: 36.954,
   },
-  'Embassy Area': {
-    name: 'Embassy Area',
-    latitude: -0.3721,
-    longitude: 36.9325,
-  },
   Nyaribo: {
     name: 'Nyaribo',
     latitude: -0.3785,
     longitude: 36.981,
   },
-  Boma: {
-    name: 'Boma',
-    latitude: -0.4005,
-    longitude: 36.9645,
+  'Embassy Area': {
+    name: 'Embassy Area',
+    latitude: -0.3721,
+    longitude: 36.9325,
   },
 };
 
@@ -52,19 +52,33 @@ export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
  * Avoids specific walking times so users don't think they can just walk instead of paying.
  */
 const AREA_PROXIMITY: Record<string, string> = {
+  Boma: 'Near campus',
   'Near Gate A': 'Closest to campus',
   'Near Gate B': 'Close to campus',
-  Boma: 'Near campus',
-  'Kahawa Ridge': 'Walking distance',
   'Nyeri View': 'Near campus',
+  'Kahawa Ridge': 'A bit further',
   Nyaribo: 'A bit further',
-  'Embassy Area': 'A bit further',
+  'Embassy Area': 'Farther out',
+};
+
+/**
+ * Full-search tour price per zone — shown on the zone picker cards.
+ */
+const AREA_PRICES: Record<string, number> = {
+  Boma: 600,
+  'Near Gate A': 600,
+  'Near Gate B': 600,
+  'Nyeri View': 1000,
+  'Kahawa Ridge': 1000,
+  Nyaribo: 1500,
+  'Embassy Area': 1500,
 };
 
 export const AREA_OPTIONS = Object.values(DEKUT_AREAS).map((area) => ({
   value: area.name,
   label: area.name,
   proximity: AREA_PROXIMITY[area.name] || '',
+  price: AREA_PRICES[area.name] || 0,
 }));
 
 export const DISTANCE_CATEGORY_OPTIONS = [
