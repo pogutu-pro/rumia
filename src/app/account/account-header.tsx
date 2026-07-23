@@ -1,8 +1,8 @@
 'use client';
 
-import { LogOut, ShieldAlert, LayoutDashboard } from 'lucide-react';
+import { LogOut, ShieldAlert, LayoutDashboard, Home, Search, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 interface AccountHeaderProps {
@@ -21,8 +21,15 @@ export function AccountHeader({
   hasAgent,
 }: AccountHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
   const firstName = fullName?.split(' ')[0] || 'Student';
+
+  const navLinks = [
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/hostels', label: 'Browse', icon: Search },
+    { href: '/agents', label: 'Agents', icon: Users },
+  ];
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -57,6 +64,26 @@ export function AccountHeader({
               </p>
             </div>
           </div>
+
+          <nav className="hidden md:flex items-center gap-1 mr-4">
+            {navLinks.map(({ href, label, icon: Icon }) => {
+              const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    active
+                      ? 'text-slate-900 bg-slate-100'
+                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
 
           <div className="flex items-center gap-1">
             {(isAdmin || hasAgent) && (
