@@ -10,6 +10,7 @@ import { AccountTabs, type AccountTab } from './account-tabs';
 import { AccountToursTab } from './account-tours-tab';
 import { AccountSavedTab } from './account-saved-tab';
 import { AccountFeedbackTab } from './account-feedback-tab';
+import { ProfileCompletionModal } from './profile-completion-modal';
 
 const VALID_TABS = new Set<AccountTab>(['tours', 'saved', 'feedback']);
 
@@ -119,8 +120,24 @@ export default function AccountPage() {
     );
   }
 
+  const needsProfileCompletion = !profile.full_name?.trim() || !profile.phone?.trim();
+
   return (
     <div className="min-h-screen bg-slate-50/50">
+      {needsProfileCompletion && (
+        <ProfileCompletionModal
+          isOpen={true}
+          userId={profile.id}
+          currentName={profile.full_name}
+          currentPhone={profile.phone}
+          onSuccess={(data) => {
+            setProfile((prev) =>
+              prev ? { ...prev, full_name: data.full_name, phone: data.phone } : prev,
+            );
+          }}
+        />
+      )}
+
       <AccountHeader
         fullName={profile.full_name}
         email={profile.email}
