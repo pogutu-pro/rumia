@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { sendPushToUser } from '@/lib/push';
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,6 +79,22 @@ export async function POST(request: NextRequest) {
 
       if (leadError) {
         console.error('Error recording lead:', leadError);
+      }
+
+      // Notify the agent of the new inquiry
+      const { data: agentProfile } = await supabase
+        .from('agents')
+        .select('user_id')
+        .eq('id', agent_id)
+        .single();
+
+      if (agentProfile?.user_id) {
+        sendPushToUser(agentProfile.user_id, {
+          title: 'New student inquiry',
+          body: `Someone is interested in "${listing.title}". Check your dashboard.`,
+          url: '/dashboard',
+          tag: 'new-inquiry',
+        }).catch(() => {});
       }
 
       // Calculate commission (10% of monthly listing price or flat rate of KSh 1,000)

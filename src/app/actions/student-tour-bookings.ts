@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { sendPushToUser } from '@/lib/push';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -96,7 +97,7 @@ export async function cancelStudentTourBookingAction(
 
   const { data: booking, error: fetchError } = await supabase
     .from('tour_bookings')
-    .select('id, status, linked_user_id')
+    .select('id, status, linked_user_id, agent_id')
     .eq('id', bookingId)
     .single();
 
@@ -119,6 +120,24 @@ export async function cancelStudentTourBookingAction(
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Notify the agent of the cancellation
+  if (booking.agent_id) {
+    const { data: agentProfile } = await supabase
+      .from('agents')
+      .select('user_id')
+      .eq('id', booking.agent_id)
+      .single();
+
+    if (agentProfile?.user_id) {
+      sendPushToUser(agentProfile.user_id, {
+        title: 'Tour cancelled',
+        body: `A student cancelled their tour booking. Check your dashboard.`,
+        url: '/dashboard/tours',
+        tag: `tour-cancel-${bookingId}`,
+      }).catch(() => {});
+    }
   }
 
   revalidatePath('/account');

@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   CalendarCheck,
+  Settings,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
@@ -40,6 +41,7 @@ const navLinks = [
   { label: 'Commissions', href: '/admin/commissions', icon: DollarSign, exact: false },
   { label: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight, exact: false },
   { label: 'Feedback', href: '/admin/feedback', icon: MessageSquare, exact: false },
+  { label: 'Settings', href: '/admin/settings', icon: Settings, exact: false },
 ];
 
 function SidebarContent({

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { generateListingSlug, uniqueSlug } from '@/lib/utils/string';
+import { sendPushToUsers } from '@/lib/push';
 
 function nullableCoordinate(value: unknown) {
   if (value === null || value === undefined || value === '') return null;
@@ -313,6 +314,9 @@ export async function createListingAction(formData: any) {
 
     revalidateListingSurfaces(county, area, slug);
 
+    // Send push notifications to users who saved hostels in the same area
+    sendPushNewListing(supabase, listing, county, area).catch(() => {});
+
     return {
       success: true,
       listingId: listing.id,
@@ -356,7 +360,7 @@ export async function updateListingAction(formData: any) {
   try {
     const { data: existing, error: existingError } = await supabase
       .from('listings')
-      .select('id, slug, county, area')
+      .select('id, slug, county, area, price')
       .eq('id', formData.listing_id)
       .eq('agent_id', agent.id)
       .single();
@@ -422,6 +426,12 @@ export async function updateListingAction(formData: any) {
       listing.slug || existing.slug,
     );
 
+    // Send price drop notifications to users who saved this listing
+    const newPrice = parseFloat(formData.price_single || formData.price) || null;
+    if (existing.price && newPrice && newPrice < existing.price) {
+      sendPushPriceDrop(supabase, existing.id, formData.title || listing.slug, existing.price, newPrice).catch(() => {});
+    }
+
     return {
       success: true,
       listingId: listing.id,
@@ -434,4 +444,57 @@ export async function updateListingAction(formData: any) {
       error: error.message || 'An unexpected error occurred',
     };
   }
+}
+
+// --- Push notification helpers (fire-and-forget, never block the action) ---
+
+async function sendPushNewListing(
+  supabase: any,
+  listing: { id: string; title: string },
+  county: string,
+  area: string,
+) {
+  // Find users who saved hostels in the same area
+  const { data: areaUsers } = await supabase
+    .from('saved_hostels')
+    .select('user_id, listings!inner(area)')
+    .eq('listings.area', area)
+    .not('user_id', 'is', null);
+
+  if (!areaUsers || areaUsers.length === 0) return;
+
+  const userIds = Array.from(new Set<string>(areaUsers.map((r: any) => r.user_id as string)));
+
+  await sendPushToUsers(userIds, {
+    title: 'New hostel available',
+    body: `A new listing just dropped in ${area}: "${listing.title}"`,
+    url: `/hostels/${county}/${area}`,
+    tag: 'new-listing',
+  });
+}
+
+async function sendPushPriceDrop(
+  supabase: any,
+  listingId: string,
+  title: string,
+  oldPrice: number,
+  newPrice: number,
+) {
+  // Find users who saved this specific listing
+  const { data: saved } = await supabase
+    .from('saved_hostels')
+    .select('user_id')
+    .eq('listing_id', listingId);
+
+  if (!saved || saved.length === 0) return;
+
+  const userIds = Array.from(new Set<string>(saved.map((r: any) => r.user_id as string)));
+  const savings = oldPrice - newPrice;
+
+  await sendPushToUsers(userIds, {
+    title: 'Price drop!',
+    body: `"${title}" dropped by KSh ${savings.toLocaleString()} — now KSh ${newPrice.toLocaleString()}/mo`,
+    url: `/listing/${listingId}`,
+    tag: `price-drop-${listingId}`,
+  });
 }

@@ -10,6 +10,7 @@ import { GestureTutorial } from '@/components/pwa/GestureTutorial';
 import { AnimatedMain } from '@/components/pwa/AnimatedMain';
 import { CompareTray } from '@/components/compare/compare-tray';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
+import { InstallBanner } from '@/components/pwa/InstallBanner';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -105,6 +106,7 @@ export default function RootLayout({
           </NavigationProvider>
         </Providers>
         <ServiceWorkerRegister />
+        <InstallBanner />
         <Analytics />
       </body>
     </html>

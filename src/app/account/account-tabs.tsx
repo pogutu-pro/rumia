@@ -1,14 +1,15 @@
 'use client';
 
-import { CalendarCheck, Heart, MessageSquare } from 'lucide-react';
+import { CalendarCheck, Heart, MessageSquare, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-export type AccountTab = 'tours' | 'saved' | 'feedback';
+export type AccountTab = 'tours' | 'saved' | 'feedback' | 'settings';
 
 const TABS: Array<{ id: AccountTab; label: string; icon: typeof CalendarCheck }> = [
   { id: 'tours', label: 'Tours', icon: CalendarCheck },
   { id: 'saved', label: 'Saved', icon: Heart },
   { id: 'feedback', label: 'Feedback', icon: MessageSquare },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 interface AccountTabsProps {

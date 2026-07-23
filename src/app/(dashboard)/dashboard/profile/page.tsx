@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { AgentProfileForm } from './agent-profile-form';
+import { AgentProfileClient } from './agent-profile-client';
 
 export default async function AgentProfilePage() {
   const supabase = await createClient();
@@ -25,7 +25,7 @@ export default async function AgentProfilePage() {
         </p>
       </div>
 
-      <AgentProfileForm agent={agent} />
+      <AgentProfileClient agent={agent} />
     </div>
   );
 }

@@ -11,8 +11,10 @@ import { AccountToursTab } from './account-tours-tab';
 import { AccountSavedTab } from './account-saved-tab';
 import { AccountFeedbackTab } from './account-feedback-tab';
 import { ProfileCompletionModal } from './profile-completion-modal';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
+import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
 
-const VALID_TABS = new Set<AccountTab>(['tours', 'saved', 'feedback']);
+const VALID_TABS = new Set<AccountTab>(['tours', 'saved', 'feedback', 'settings']);
 
 function getValidTab(value: string | null): AccountTab {
   if (value && VALID_TABS.has(value as AccountTab)) return value as AccountTab;
@@ -155,7 +157,17 @@ export default function AccountPage() {
         {activeTab === 'tours' && <AccountToursTab />}
         {activeTab === 'saved' && <AccountSavedTab />}
         {activeTab === 'feedback' && <AccountFeedbackTab />}
+        {activeTab === 'settings' && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 mb-1">Notifications</h2>
+              <p className="text-sm text-slate-500">Manage how Rumia alerts you.</p>
+            </div>
+            <NotificationSettings />
+          </div>
+        )}
       </div>
+      <PushNotificationPrompt />
     </div>
   );
 }

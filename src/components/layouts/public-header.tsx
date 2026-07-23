@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { InstallButton } from '@/components/pwa/InstallButton';
 
 const NAV_LINKS = [
   { href: '/hostels', label: 'Browse All' },
@@ -88,11 +87,6 @@ export const PublicHeader = React.memo(function PublicHeader() {
                 </Link>
               ))}
             </nav>
-
-            {/* Install button — top right, all pages, all screen sizes */}
-            <div className="shrink-0">
-              <InstallButton />
-            </div>
           </div>
         </div>
       </header>

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { sendPushToUser } from '@/lib/push';
 import type { TourStatus } from '@/types';
 
 type ActionResult = { success: true } | { success: false; error: string };
@@ -31,7 +32,7 @@ export async function updateTourBookingStatusAction(
   // Verify the user owns the agent for this booking, or is admin
   const { data: booking, error: fetchError } = await (supabase as any)
     .from('tour_bookings')
-    .select('id, agent_id, status, agents!tour_bookings_agent_id_fkey(user_id)')
+    .select('id, agent_id, status, linked_user_id, student_name, agents!tour_bookings_agent_id_fkey(user_id)')
     .eq('id', bookingId)
     .single();
 
@@ -67,6 +68,24 @@ export async function updateTourBookingStatusAction(
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Notify the student of the status change
+  if (booking.linked_user_id) {
+    const statusLabels: Record<string, string> = {
+      confirmed: 'confirmed',
+      paid: 'payment received',
+      completed: 'completed',
+      cancelled: 'cancelled',
+      no_show: 'marked as no-show',
+    };
+    const label = statusLabels[status] || status.replace(/_/g, ' ');
+    sendPushToUser(booking.linked_user_id, {
+      title: 'Tour update',
+      body: `Your tour booking has been ${label}${booking.student_name ? ` (${booking.student_name})` : ''}`,
+      url: '/account?tab=tours',
+      tag: `tour-update-${bookingId}`,
+    }).catch(() => {});
   }
 
   revalidatePath('/dashboard');

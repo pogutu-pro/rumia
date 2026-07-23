@@ -4,9 +4,9 @@ import { Download } from "lucide-react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 export function InstallButton() {
-  const { isInstallable, handleInstall } = usePWAInstall();
+  const { shouldShow, handleInstall } = usePWAInstall();
 
-  if (!isInstallable) return null;
+  if (!shouldShow) return null;
 
   return (
     <button

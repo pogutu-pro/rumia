@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getTourPrice } from '@/lib/constants/tour-pricing';
+import { sendPushToUser } from '@/lib/push';
 import type { CreateTourBookingInput, TourType, TourTimeWindow } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -121,6 +122,25 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create booking' },
         { status: 500 },
       );
+    }
+
+    // Notify the assigned agent
+    if (resolvedAgentId) {
+      const { data: agentProfile } = await supabase
+        .from('agents')
+        .select('user_id')
+        .eq('id', resolvedAgentId)
+        .single();
+
+      if (agentProfile?.user_id) {
+        const timeLabel = preferred_time === 'morning' ? 'morning' : preferred_time === 'afternoon' ? 'afternoon' : 'evening';
+        sendPushToUser(agentProfile.user_id, {
+          title: 'New tour booking',
+          body: `${student_name.trim()} booked a ${tour_type === 'specific_hostel' ? 'hostel' : 'area'} tour for ${timeLabel} on ${preferred_date}`,
+          url: '/dashboard/tours',
+          tag: 'new-tour-booking',
+        }).catch(() => {});
+      }
     }
 
     return NextResponse.json({ success: true, booking });
