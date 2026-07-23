@@ -64,10 +64,10 @@ export default function BookTourPage() {
                   }`}
                 >
                   <span className="text-sm font-semibold block">{zone.label}</span>
-                  {zone.distance && (
+                  {zone.proximity && (
                     <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
                       <MapPin className="h-2.5 w-2.5" />
-                      {zone.distance}
+                      {zone.proximity}
                     </span>
                   )}
                 </button>

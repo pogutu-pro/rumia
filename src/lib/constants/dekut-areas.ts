@@ -48,23 +48,23 @@ export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
 };
 
 /**
- * Approximate walking distance from DeKUT main gate to each area.
- * Used in the book-tour location picker.
+ * Proximity description for each area — used in the book-tour location picker.
+ * Avoids specific walking times so users don't think they can just walk instead of paying.
  */
-const AREA_DISTANCES: Record<string, string> = {
-  'Near Gate A': '~2 min walk',
-  'Near Gate B': '~3 min walk',
-  Boma: '~5 min walk',
-  'Kahawa Ridge': '~8 min walk',
-  'Nyeri View': '~10 min walk',
-  Nyaribo: '~15 min walk',
-  'Embassy Area': '~20 min walk',
+const AREA_PROXIMITY: Record<string, string> = {
+  'Near Gate A': 'Closest to campus',
+  'Near Gate B': 'Close to campus',
+  Boma: 'Near campus',
+  'Kahawa Ridge': 'Walking distance',
+  'Nyeri View': 'Near campus',
+  Nyaribo: 'A bit further',
+  'Embassy Area': 'A bit further',
 };
 
 export const AREA_OPTIONS = Object.values(DEKUT_AREAS).map((area) => ({
   value: area.name,
   label: area.name,
-  distance: AREA_DISTANCES[area.name] || '',
+  proximity: AREA_PROXIMITY[area.name] || '',
 }));
 
 export const DISTANCE_CATEGORY_OPTIONS = [
