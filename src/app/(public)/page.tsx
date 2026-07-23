@@ -127,8 +127,7 @@ export default async function HomePage() {
             <strong className="text-white">
               Dedan Kimathi University of Technology
             </strong>{' '}
-            in Nyeri, Kenya.Contact agents directly on WhatsApp and book a tour
-            for free.
+            in Nyeri, Kenya.Contact agents directly on WhatsApp and book a tour.
           </p>
 
           {/* Search Bar Widget */}
