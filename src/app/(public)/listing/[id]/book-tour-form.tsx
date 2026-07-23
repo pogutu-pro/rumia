@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CalendarCheck,
@@ -93,6 +94,7 @@ export function BookTourForm({
   agentId,
 }: BookTourFormProps) {
   const isMobile = useIsMobile();
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<FormStep>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booking, setBooking] = useState<TourBooking | null>(null);
@@ -108,6 +110,10 @@ export function BookTourForm({
 
   const zone = listingZone;
   const price = useMemo(() => getTourPrice(zone, tourType), [zone, tourType]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto-fill from profile if user is logged in
   useEffect(() => {
@@ -239,7 +245,9 @@ export function BookTourForm({
     };
   }, [isOpen]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div
@@ -363,7 +371,8 @@ export function BookTourForm({
           )}
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
