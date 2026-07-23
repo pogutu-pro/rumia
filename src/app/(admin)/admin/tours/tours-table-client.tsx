@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CalendarCheck, Clock, MapPin, Phone, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { TourCountdown } from '@/components/tour-countdown';
 import { updateTourBookingStatusAction } from '@/app/actions/tour-bookings';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import type { TourBookingWithJoins, TourStatus } from '@/types';
@@ -32,6 +33,8 @@ const STATUS_OPTIONS: TourStatus[] = [
   'no_show',
   'cancelled',
 ];
+
+const ACTIVE_STATUSES = new Set<TourStatus>(['pending_payment', 'confirmed', 'paid']);
 
 export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps) {
   const [statusFilter, setStatusFilter] = useState('');
@@ -214,6 +217,15 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                       <Clock className="h-3 w-3" />
                       {t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1)}
                     </p>
+                    {ACTIVE_STATUSES.has(t.status) && (
+                      <div className="mt-1.5">
+                        <TourCountdown
+                          preferredDate={t.preferred_date}
+                          preferredTime={t.preferred_time as 'morning' | 'afternoon' | 'evening'}
+                          compact
+                        />
+                      </div>
+                    )}
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-600">{t.zone}</td>
                   <td className="px-5 py-4 text-sm text-gray-600">
@@ -307,6 +319,15 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   {t.zone}
                 </div>
                 <div className="font-bold text-gray-900">{formatTourPrice(t.amount)}</div>
+                {ACTIVE_STATUSES.has(t.status) && (
+                  <div className="col-span-2">
+                    <TourCountdown
+                      preferredDate={t.preferred_date}
+                      preferredTime={t.preferred_time as 'morning' | 'afternoon' | 'evening'}
+                      compact
+                    />
+                  </div>
+                )}
               </div>
               {t.agents && (
                 <p className="text-xs text-gray-500">

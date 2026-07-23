@@ -17,6 +17,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { TourCountdown } from '@/components/tour-countdown';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import { cancelStudentTourBookingAction } from '@/app/actions/student-tour-bookings';
 import { EditTourModal } from './edit-tour-modal';
@@ -279,6 +280,7 @@ function TourCard({
   const canEdit = booking.status === 'pending_payment' && !isPast;
   const canCancel =
     (booking.status === 'pending_payment' || booking.status === 'confirmed') && !isPast;
+  const isActive = !isPast && booking.status !== 'cancelled' && booking.status !== 'completed' && booking.status !== 'no_show';
 
   return (
     <div
@@ -348,6 +350,17 @@ function TourCard({
               {timeLabel}
             </span>
           </div>
+
+          {/* Countdown */}
+          {isActive && (
+            <div className="mb-3">
+              <TourCountdown
+                preferredDate={booking.preferred_date}
+                preferredTime={booking.preferred_time as 'morning' | 'afternoon' | 'evening'}
+                compact
+              />
+            </div>
+          )}
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-2.5 border-t border-slate-50">

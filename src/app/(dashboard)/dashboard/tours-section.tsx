@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { CalendarCheck, Clock, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { TourCountdown } from '@/components/tour-countdown';
 import { updateTourBookingStatusAction } from '@/app/actions/tour-bookings';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import type { TourBookingWithJoins, TourStatus } from '@/types';
@@ -32,6 +33,8 @@ const TOUR_STATUS_VARIANT_MAP: Record<string, 'active' | 'pending' | 'rejected' 
   no_show: 'rejected',
   cancelled: 'rejected',
 };
+
+const ACTIVE_STATUSES = new Set<TourStatus>(['pending_payment', 'confirmed', 'paid']);
 
 export function ToursSection({ bookings }: ToursSectionProps) {
   const [isPending, startTransition] = useTransition();
@@ -104,6 +107,15 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                     <Clock className="h-3 w-3" />
                     {b.preferred_time.charAt(0).toUpperCase() + b.preferred_time.slice(1)}
                   </p>
+                  {ACTIVE_STATUSES.has(b.status) && (
+                    <div className="mt-1.5">
+                      <TourCountdown
+                        preferredDate={b.preferred_date}
+                        preferredTime={b.preferred_time as 'morning' | 'afternoon' | 'evening'}
+                        compact
+                      />
+                    </div>
+                  )}
                 </td>
                 <td className="px-5 py-4 text-sm font-semibold text-slate-700">{b.zone}</td>
                 <td className="px-5 py-4 text-sm text-slate-600">
@@ -201,6 +213,15 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                 {b.zone}
               </div>
               <div className="font-bold text-slate-900">{formatTourPrice(b.amount)}</div>
+              {ACTIVE_STATUSES.has(b.status) && (
+                <div className="col-span-2">
+                  <TourCountdown
+                    preferredDate={b.preferred_date}
+                    preferredTime={b.preferred_time as 'morning' | 'afternoon' | 'evening'}
+                    compact
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2 pt-1">

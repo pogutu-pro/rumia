@@ -24,6 +24,9 @@
 
     /* Smooth theme transitions */
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+    /* Force native form controls (date pickers, etc.) to light mode */
+    color-scheme: light;
   }
 
   body {
