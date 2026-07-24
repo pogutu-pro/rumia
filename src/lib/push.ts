@@ -76,6 +76,18 @@ export async function sendPushToUser(
 }
 
 /**
+ * Get all active admin user IDs (for admin notifications).
+ */
+export async function getAdminUserIds(): Promise<string[]> {
+  const { data: admins } = await supabaseAdmin
+    .from('admin_users')
+    .select('user_id')
+    .eq('is_active', true);
+
+  return admins?.map((a: any) => a.user_id as string) ?? [];
+}
+
+/**
  * Send a push notification to multiple users at once.
  */
 export async function sendPushToUsers(

@@ -22,7 +22,7 @@ export async function updateStudentTourBookingAction(
   // Verify this booking belongs to the user
   const { data: booking, error: fetchError } = await supabase
     .from('tour_bookings')
-    .select('id, status, linked_user_id')
+    .select('id, status, linked_user_id, agent_id')
     .eq('id', bookingId)
     .single();
 
@@ -77,6 +77,24 @@ export async function updateStudentTourBookingAction(
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Notify the agent of the edit
+  if (booking.agent_id) {
+    const { data: agentProfile } = await supabase
+      .from('agents')
+      .select('user_id')
+      .eq('id', booking.agent_id)
+      .single();
+
+    if (agentProfile?.user_id) {
+      sendPushToUser(agentProfile.user_id, {
+        title: 'Tour booking edited',
+        body: 'A student updated their tour booking details. Check your dashboard.',
+        url: '/dashboard/tours',
+        tag: `tour-edit-${bookingId}`,
+      }).catch(() => {});
+    }
   }
 
   revalidatePath('/account');

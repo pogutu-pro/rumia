@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { isAdminUser } from '@/lib/utils/admin';
 import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
+import { sendPushToUser } from '@/lib/push';
 import type { CreateAgentInput, CreateCommissionInput } from '@/types';
 
 type ActionResult = { success: true } | { success: false; error: string };
@@ -137,6 +138,21 @@ export async function createAgentAction(
 
     revalidatePath('/admin/agents');
     revalidatePath('/admin/users');
+
+    // Notify all admins of the new agent
+    import('@/lib/push').then(({ sendPushToUsers, getAdminUserIds }) =>
+      getAdminUserIds().then((adminIds) => {
+        if (adminIds.length > 0) {
+          sendPushToUsers(adminIds, {
+            title: 'New agent registered',
+            body: `${data.name} was just added as an agent.`,
+            url: '/admin/agents',
+            tag: 'new-agent',
+          }).catch(() => {});
+        }
+      }),
+    );
+
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error';
@@ -355,6 +371,25 @@ export async function updateAgentStatusAction(
 
     if (error) {
       return { success: false, error: error.message };
+    }
+
+    // Notify the agent of the status change
+    const { data: agent } = await supabaseAdmin
+      .from('agents')
+      .select('user_id, name')
+      .eq('id', agentId)
+      .single();
+
+    if (agent?.user_id) {
+      const label = status === 'active' ? 'activated' : 'suspended';
+      sendPushToUser(agent.user_id, {
+        title: `Account ${label}`,
+        body: status === 'active'
+          ? 'Your agent account has been activated. You can now receive leads.'
+          : 'Your agent account has been suspended. Contact support for details.',
+        url: '/dashboard',
+        tag: `agent-status-${agentId}`,
+      }).catch(() => {});
     }
 
     revalidatePath('/admin/agents');

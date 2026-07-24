@@ -173,6 +173,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Confirm to the student
+    if (linked_user_id) {
+      sendPushToUser(linked_user_id, {
+        title: 'Tour booking received',
+        body: `Your ${tour_type === 'full_search' ? zone : 'hostel'} tour is booked for ${preferred_date}. An agent will confirm shortly.`,
+        url: '/account?tab=tours',
+        tag: `tour-confirm-${booking.id}`,
+      }).catch(() => {});
+    }
+
+    // Notify all admins of the new booking
+    import('@/lib/push').then(({ sendPushToUsers, getAdminUserIds }) =>
+      getAdminUserIds().then((adminIds) => {
+        if (adminIds.length > 0) {
+          sendPushToUsers(adminIds, {
+            title: 'New tour booking',
+            body: `${studentNameTrimmed(student_name)} booked a ${tour_type} tour in ${zone}.`,
+            url: '/admin/tours',
+            tag: 'new-tour-admin',
+          }).catch(() => {});
+        }
+      }),
+    );
+
     return NextResponse.json({ success: true, booking });
   } catch (error) {
     console.error('Tour booking error:', error);

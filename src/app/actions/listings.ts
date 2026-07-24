@@ -317,6 +317,20 @@ export async function createListingAction(formData: any) {
     // Send push notifications to users who saved hostels in the same area
     sendPushNewListing(supabase, listing, county, area).catch(() => {});
 
+    // Notify all admins of the new listing
+    import('@/lib/push').then(({ sendPushToUsers, getAdminUserIds }) =>
+      getAdminUserIds().then((adminIds) => {
+        if (adminIds.length > 0) {
+          sendPushToUsers(adminIds, {
+            title: 'New listing created',
+            body: `"${listing.title}" was just added in ${area}.`,
+            url: `/admin/listings`,
+            tag: 'new-listing-admin',
+          }).catch(() => {});
+        }
+      }),
+    );
+
     return {
       success: true,
       listingId: listing.id,
