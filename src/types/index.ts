@@ -38,6 +38,8 @@ export interface Listing {
   is_youtube_shorts?: boolean;
   agent_id: string | number;
   is_active: boolean;
+  pays_commission?: boolean;
+  commission_locked_by_admin?: boolean;
   created_at?: string;
   // Location & area
   area?: string | null;
@@ -91,6 +93,9 @@ export interface Lead {
   agent_id: string | number;
   clicked_at: string;
   ip_hash: string;
+  contact_type?: 'hostel_owner' | 'rumia_agent' | null;
+  name?: string | null;
+  phone?: string | null;
 }
 
 export interface Commission {
@@ -142,6 +147,9 @@ export interface AdminLead {
   agent_id: string;
   clicked_at: string;
   ip_hash: string;
+  contact_type?: 'hostel_owner' | 'rumia_agent' | null;
+  name?: string | null;
+  phone?: string | null;
   listings?: { title: string; id: string } | null;
   agents?: { name: string; id: string } | null;
 }

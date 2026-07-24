@@ -1,4 +1,5 @@
 import { MessageCircle, Camera, Linkedin } from 'lucide-react';
+import { buildWhatsAppUrl } from '@/lib/utils/phone';
 
 interface AgentContactSectionProps {
   whatsapp: string;
@@ -10,16 +11,10 @@ interface AgentContactSectionProps {
   horizontal?: boolean;
 }
 
-function cleanPhone(phone: string) {
-  const clean = phone.replace(/[^\d+]/g, '');
-  return clean.startsWith('+') ? clean : clean.replace(/^0?/, '+254');
-}
-
 function getWhatsAppUrl(phone: string, agentName?: string | null) {
-  const cleaned = cleanPhone(phone);
-  if (!agentName) return `https://wa.me/${cleaned}`;
+  if (!agentName) return buildWhatsAppUrl(phone);
   const message = `Hi ${agentName}, I found your profile on Rumia while looking for student accommodation. I'm interested in finding a hostel and would appreciate your assistance. Could you please help me with available options, pricing, location, and arrange a viewing if possible? Thank you!`;
-  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+  return buildWhatsAppUrl(phone, message);
 }
 
 export function AgentContactSection({

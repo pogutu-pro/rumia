@@ -16,7 +16,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
-import { WhatsappButton } from '@/app/(public)/listing/[id]/whatsapp-button';
+import { ContactButton } from '@/app/(public)/listing/[id]/contact-button';
 import { BookTourButton } from '@/app/(public)/listing/[id]/book-tour-button';
 import { QuickFacts } from '@/app/(public)/listing/[id]/quick-facts';
 import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
@@ -50,7 +50,7 @@ const getListing = cache(async (slug: string) => {
       is_active, amenities, rating, views, bathroom_type, distance_to_campus,
       security_type, electricity_included, water_included, wifi_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
-      gender, specific_location, price_single, price_sharing, mpesa_details, distance_category,
+      gender, specific_location, price_single, price_sharing, mpesa_details, distance_category, pays_commission,
       listing_images ( id, r2_url, category, display_order, blur_data_url, width, height, format ),
       agents ( id, name, phone, whatsapp, slug )
     `,
@@ -533,12 +533,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <WhatsappButton
+                  <ContactButton
                     listingId={listing.id}
+                    listingTitle={listing.title}
                     agentId={listing.agents?.id}
-                    agentPhone={
-                      listing.agents?.whatsapp || listing.agents?.phone || ''
-                    }
+                    agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+                    paysCommission={listing.pays_commission ?? true}
                   />
                 </div>
               </div>
@@ -718,10 +718,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
             />
           </div>
           <div className="flex-1">
-            <WhatsappButton
+            <ContactButton
               listingId={listing.id}
+              listingTitle={listing.title}
               agentId={listing.agents?.id}
               agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+              paysCommission={listing.pays_commission ?? true}
             />
           </div>
         </div>

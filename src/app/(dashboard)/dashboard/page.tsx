@@ -69,6 +69,8 @@ export default async function DashboardPage() {
       price,
       location,
       is_active,
+      pays_commission,
+      commission_locked_by_admin,
       listing_images (
         r2_url
       )

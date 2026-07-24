@@ -12,6 +12,8 @@ interface Listing {
   price: number;
   location: string;
   is_active: boolean;
+  pays_commission?: boolean;
+  commission_locked_by_admin?: boolean;
   listing_images: { r2_url: string }[];
 }
 
@@ -23,6 +25,7 @@ interface ListingsListProps {
 export function ListingsList({ initialListings, leadsCountByListing }: ListingsListProps) {
   const [listings, setListings] = useState<Listing[]>(initialListings);
   const [togglingId, setTogglingId] = useState<string | number | null>(null);
+  const [togglingCommissionId, setTogglingCommissionId] = useState<string | number | null>(null);
   const supabase = createClient();
 
   const handleToggleActive = async (id: string | number, currentStatus: boolean) => {
@@ -48,6 +51,32 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
       toast.error('Failed to update listing status');
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleToggleCommission = async (id: string | number, currentStatus: boolean, isLocked: boolean) => {
+    if (togglingCommissionId || isLocked) return;
+    setTogglingCommissionId(id);
+
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .update({ pays_commission: !currentStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setListings((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, pays_commission: !currentStatus } : item))
+      );
+      toast.success(
+        `Commission set to ${!currentStatus ? 'Pays Commission' : 'Consultation Fee'}`
+      );
+    } catch (error) {
+      console.error('Error toggling commission status:', error);
+      toast.error('Failed to update commission status');
+    } finally {
+      setTogglingCommissionId(null);
     }
   };
 
@@ -112,11 +141,33 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                     {item.title}
                   </h3>
 
-                  <div className="flex items-center gap-1.5 text-emerald-600 mb-4 flex-1">
-                    <MessageCircle className="h-4 w-4" />
-                    <span className="text-sm font-bold">
-                      {leadsCountByListing[String(item.id)] || 0} <span className="font-medium text-slate-500">Leads</span>
-                    </span>
+                  <div className="flex items-center justify-between mb-4 flex-1">
+                    <div className="flex items-center gap-1.5 text-emerald-600">
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="text-sm font-bold">
+                        {leadsCountByListing[String(item.id)] || 0} <span className="font-medium text-slate-500">Leads</span>
+                      </span>
+                    </div>
+                    {item.pays_commission !== undefined && (
+                      <button
+                        onClick={() => handleToggleCommission(item.id, !!item.pays_commission, !!item.commission_locked_by_admin)}
+                        disabled={togglingCommissionId === item.id || !!item.commission_locked_by_admin}
+                        title={item.commission_locked_by_admin ? "Locked by admin" : "Toggle commission status"}
+                        className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                          item.pays_commission
+                            ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100'
+                            : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-100'
+                        } disabled:opacity-50`}
+                      >
+                        {togglingCommissionId === item.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : item.pays_commission ? (
+                          'Pays Comm.'
+                        ) : (
+                          'No Comm.'
+                        )}
+                      </button>
+                    )}
                   </div>
 
                   {/* Actions & Toggle */}

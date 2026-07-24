@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sendPushToUser } from '@/lib/push';
+import { cleanPhone, buildWhatsAppUrl, hostelOwnerMessage, agentInquiryMessage, agentFeeAcceptedMessage } from '@/lib/utils/phone';
 
 export async function POST(request: NextRequest) {
   try {
-    const { listing_id, agent_id } = await request.json();
+    const body = await request.json();
+    const { listing_id, agent_id, contact_type, name, phone: userPhone } = body;
 
     if (!listing_id || !agent_id) {
       return NextResponse.json(
@@ -75,6 +77,9 @@ export async function POST(request: NextRequest) {
         agent_id,
         clicked_at: new Date().toISOString(),
         ip_hash: ipHash,
+        contact_type: contact_type || null,
+        name: name || null,
+        phone: userPhone || null,
       });
 
       if (leadError) {
@@ -124,17 +129,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Determine WhatsApp number to message
+    // Determine WhatsApp number and build contextual message
     const formattedPhone = agent.whatsapp || agent.phone || '';
-    // Strip non-numeric characters except maybe starting '+'
-    const cleanPhone = formattedPhone.replace(/[^\d+]/g, '');
-    // Normalize to Kenyan international format if no country code
-    const waPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.replace(/^0?/, '+254');
+    const waPhone = cleanPhone(formattedPhone);
 
-    // Format greeting message
-    const message = `Hello, I'm interested in your listing: "${listing.title}" on Rumia. Is it still available?`;
-    const whatsappUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+    let message: string;
+    if (contact_type === 'hostel_owner') {
+      // hostel_owner: use landlord_phone if available, else agent phone
+      const { data: listingFull } = await supabase
+        .from('listings')
+        .select('landlord_phone')
+        .eq('id', listing_id)
+        .single();
+      const ownerPhone = listingFull?.landlord_phone
+        ? cleanPhone(listingFull.landlord_phone)
+        : waPhone;
+      message = hostelOwnerMessage(listing.title);
+      const whatsappUrl = buildWhatsAppUrl(ownerPhone, message);
+      return NextResponse.json({ success: true, whatsappUrl });
+    } else if (contact_type === 'rumia_agent') {
+      // Determine if fee was accepted (non-commission hostel)
+      const feeAccepted = body.fee_accepted === true;
+      const { data: agentRow } = await supabase
+        .from('agents')
+        .select('name')
+        .eq('id', agent_id)
+        .single();
+      const agentName = agentRow?.name || 'your agent';
+      message = feeAccepted
+        ? agentFeeAcceptedMessage(listing.title, agentName)
+        : agentInquiryMessage(listing.title, agentName);
+    } else {
+      // Legacy fallback: original message
+      message = `Hello, I'm interested in your listing: "${listing.title}" on Rumia. Is it still available?`;
+    }
 
+    const whatsappUrl = buildWhatsAppUrl(waPhone, message);
     return NextResponse.json({ success: true, whatsappUrl });
   } catch (error) {
     console.error('Lead tracking error:', error);
