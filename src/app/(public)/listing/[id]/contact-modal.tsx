@@ -157,7 +157,11 @@ export function ContactModal({
           returnPath: window.location.pathname,
         };
         savePendingContact(pending);
-        await signInWithGoogle(window.location.pathname);
+        const { error } = await signInWithGoogle(window.location.pathname);
+        if (error) {
+          setIsLoading(false);
+          return;
+        }
         return; // page will redirect
       }
 

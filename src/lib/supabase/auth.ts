@@ -1,18 +1,9 @@
 import { createClient } from './client';
+import { toast } from 'sonner';
 
 export async function signInWithGoogle(next?: string) {
-  const supabase = createClient();
-  const baseUrl = `${window.location.origin}/auth/callback`;
-  const redirectTo = next
-    ? `${baseUrl}?next=${encodeURIComponent(next)}`
-    : baseUrl;
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo,
-    },
-  });
-  return { data, error };
+  toast.error('Site is under maintenance. Please try again later.');
+  return { data: null, error: new Error('Site is under maintenance') };
 }
 
 export async function signOut() {
