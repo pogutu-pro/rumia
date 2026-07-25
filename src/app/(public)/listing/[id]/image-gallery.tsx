@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { LayoutGrid, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
-
-interface GalleryImage {
-  r2_url: string;
-  category?: string;
-  blur_data_url?: string;
-}
+import { GalleryImage, GalleryViewMode } from '@/components/gallery/gallery-types';
+import { GalleryMasonryGrid } from '@/components/gallery/gallery-masonry-grid';
+import { GalleryCarouselViewer } from '@/components/gallery/gallery-carousel-viewer';
 
 interface ImageGalleryProps {
   images: (string | GalleryImage)[];
@@ -18,171 +15,138 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   const fallbackImage =
     'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200';
 
-  const displayImages: GalleryImage[] = images && images.length > 0
-    ? images.map((img) => {
-        if (typeof img === 'string') {
-          return { r2_url: img, category: 'Room' };
-        }
-        return {
-          r2_url: img.r2_url || (img as any).url || fallbackImage,
-          category: img.category || 'Room',
-          blur_data_url: img.blur_data_url || undefined,
-        };
-      })
-    : [{ r2_url: fallbackImage, category: 'Room' }];
+  // Normalize image objects
+  const displayImages: GalleryImage[] =
+    images && images.length > 0
+      ? images.map((img, idx) => {
+          if (typeof img === 'string') {
+            return {
+              id: `img-${idx}`,
+              r2_url: img,
+              category: 'Room',
+              alt: `Hostel photo ${idx + 1}`,
+            };
+          }
+          return {
+            id: img.id || `img-${idx}`,
+            r2_url: img.r2_url || (img as any).url || fallbackImage,
+            category: img.category || 'Room',
+            blur_data_url: img.blur_data_url || undefined,
+            width: img.width,
+            height: img.height,
+            alt: img.alt || `Hostel photo ${idx + 1}`,
+          };
+        })
+      : [
+          {
+            id: 'fallback-0',
+            r2_url: fallbackImage,
+            category: 'Room',
+            alt: 'Hostel main view',
+          },
+        ];
 
+  // Gallery state
   const [mobileIndex, setMobileIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [viewMode, setViewMode] = useState<GalleryViewMode | null>(null); // null means closed
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
 
-  const handlePrev = () => {
+  // Manage body scroll lock
+  useEffect(() => {
+    if (viewMode !== null) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [viewMode]);
+
+  // Intercept mobile Back button / Android back gesture to close gallery instead of leaving page
+  useEffect(() => {
+    const handlePopState = () => {
+      setViewMode(null);
+    };
+
+    if (viewMode !== null) {
+      window.addEventListener('popstate', handlePopState);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [viewMode]);
+
+  // Mobile slider controls
+  const handleMobilePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setMobileIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
   };
 
-  const handleNext = () => {
+  const handleMobileNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setMobileIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
   };
 
-  const categories: string[] = ['All', ...Array.from(new Set(displayImages.map(img => img.category).filter((cat): cat is string => !!cat)))];
+  // Open gallery at a specific index
+  const openGalleryAt = (index: number, mode: GalleryViewMode = 'carousel') => {
+    if (viewMode === null) {
+      // Push history state so mobile Back gesture/button closes gallery overlay instead of navigating away
+      window.history.pushState({ galleryOpen: true }, '', '#gallery');
+    }
+    setActivePhotoIndex(index);
+    setViewMode(mode);
+  };
 
-  const filteredImages = activeCategory === 'All'
-    ? displayImages
-    : displayImages.filter(img => img.category === activeCategory);
+  const closeGallery = () => {
+    if (viewMode !== null) {
+      setViewMode(null);
+      if (typeof window !== 'undefined' && (window.location.hash === '#gallery' || window.history.state?.galleryOpen)) {
+        window.history.back();
+      }
+    }
+  };
 
   return (
     <div className="relative w-full">
-      {/* Mobile view slider */}
-      <div className="md:hidden relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-          <Image
-            src={displayImages[mobileIndex]?.r2_url}
-            alt={`Property image ${mobileIndex + 1}`}
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority={mobileIndex === 0}
-            placeholder={displayImages[mobileIndex]?.blur_data_url ? 'blur' : undefined}
-            blurDataURL={displayImages[mobileIndex]?.blur_data_url || undefined}
-            onClick={() => setIsModalOpen(true)}
-          />
+      {/* ── Mobile View Aspect Slider ─────────────────────────────────────── */}
+      <div className="md:hidden relative aspect-[4/3] w-full overflow-hidden bg-slate-100 rounded-2xl border border-slate-100 shadow-xs">
+        <Image
+          src={displayImages[mobileIndex]?.r2_url}
+          alt={displayImages[mobileIndex]?.alt || `Property image ${mobileIndex + 1}`}
+          fill
+          className="object-cover cursor-pointer"
+          sizes="100vw"
+          priority={mobileIndex === 0}
+          placeholder={
+            displayImages[mobileIndex]?.blur_data_url ? 'blur' : undefined
+          }
+          blurDataURL={displayImages[mobileIndex]?.blur_data_url || undefined}
+          onClick={() => openGalleryAt(mobileIndex, 'carousel')}
+        />
 
         {displayImages.length > 1 && (
           <>
             <button
-              onClick={handlePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white transition-colors"
+              type="button"
+              onClick={handleMobilePrev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-xs p-2 rounded-full shadow-md text-slate-700 hover:bg-white transition-all cursor-pointer z-10"
+              aria-label="Previous photo"
             >
-              <ChevronLeft className="h-5 w-5 text-slate-700" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button
-              onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white transition-colors"
+              type="button"
+              onClick={handleMobileNext}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-xs p-2 rounded-full shadow-md text-slate-700 hover:bg-white transition-all cursor-pointer z-10"
+              aria-label="Next photo"
             >
-              <ChevronRight className="h-5 w-5 text-slate-700" />
+              <ChevronRight className="h-5 w-5" />
             </button>
-            <div className="absolute bottom-4 left-4 bg-slate-900/80 px-2 py-1 rounded-md text-[11px] font-bold text-white uppercase tracking-wider">
+
+            {/* Counter pill */}
+            <div className="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur-xs px-3 py-1 rounded-full text-[11px] font-extrabold text-white uppercase tracking-wider shadow-sm">
               {mobileIndex + 1} / {displayImages.length}
-            </div>
-          </>
-        )}
-        {displayImages.length > 1 && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-800 font-bold text-[11px] py-2 px-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer z-20"
-          >
-            <LayoutGrid className="h-3.5 w-3.5" />
-            Show all photos
-          </button>
-        )}
-      </div>
-
-      {/* Desktop view Airbnb-style Grid */}
-      <div className="hidden md:grid grid-cols-4 gap-2 aspect-[21/9] w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 relative group">
-        {displayImages.length === 1 ? (
-          <div className="col-span-4 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-            <Image src={displayImages[0].r2_url} alt="Property display" fill className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer" sizes="100vw" priority placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[0]?.blur_data_url || undefined} />
-          </div>
-        ) : displayImages.length === 2 ? (
-          <>
-            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[0].r2_url} alt="Property display 1" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[0]?.blur_data_url || undefined} />
-            </div>
-            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[1].r2_url} alt="Property display 2" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[1]?.blur_data_url || undefined} />
-            </div>
-          </>
-        ) : displayImages.length === 3 ? (
-          <>
-            <div className="col-span-2 row-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[0].r2_url} alt="Property display 1" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" priority placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[0]?.blur_data_url || undefined} />
-            </div>
-            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[1].r2_url} alt="Property display 2" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[1]?.blur_data_url || undefined} />
-            </div>
-            <div className="col-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image src={displayImages[2].r2_url} alt="Property display 3" fill className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer" sizes="50vw" placeholder={displayImages[2]?.blur_data_url ? 'blur' : undefined} blurDataURL={displayImages[2]?.blur_data_url || undefined} />
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Left large photo */}
-            <div className="col-span-2 row-span-2 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image
-                src={displayImages[0].r2_url}
-                alt="Property main display"
-                fill
-                className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-                placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined}
-                blurDataURL={displayImages[0]?.blur_data_url || undefined}
-              />
-            </div>
-            {/* Top Right photos */}
-            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image
-                src={displayImages[1]?.r2_url || fallbackImage}
-                alt="Property detail 1"
-                fill
-                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
-                sizes="(max-width: 768px) 100vw, 25vw"
-                placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined}
-                blurDataURL={displayImages[1]?.blur_data_url || undefined}
-              />
-            </div>
-            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image
-                src={displayImages[2]?.r2_url || fallbackImage}
-                alt="Property detail 2"
-                fill
-                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
-                sizes="(max-width: 768px) 100vw, 25vw"
-                placeholder={displayImages[2]?.blur_data_url ? 'blur' : undefined}
-                blurDataURL={displayImages[2]?.blur_data_url || undefined}
-              />
-            </div>
-            {/* Bottom Right photos */}
-            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image
-                src={displayImages[3]?.r2_url || fallbackImage}
-                alt="Property detail 3"
-                fill
-                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
-                sizes="(max-width: 768px) 100vw, 25vw"
-                placeholder={displayImages[3]?.blur_data_url ? 'blur' : undefined}
-                blurDataURL={displayImages[3]?.blur_data_url || undefined}
-              />
-            </div>
-            <div className="col-span-1 h-full relative overflow-hidden" onClick={() => setIsModalOpen(true)}>
-              <Image
-                src={displayImages[4]?.r2_url || displayImages[0].r2_url}
-                alt="Property detail 4"
-                fill
-                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
-                sizes="(max-width: 768px) 100vw, 25vw"
-                placeholder={(displayImages[4] || displayImages[0])?.blur_data_url ? 'blur' : undefined}
-                blurDataURL={(displayImages[4] || displayImages[0])?.blur_data_url || undefined}
-              />
             </div>
           </>
         )}
@@ -190,121 +154,271 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         {/* Show all photos button */}
         {displayImages.length > 1 && (
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-800 font-bold text-xs py-2 px-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all hover:scale-[1.02] cursor-pointer z-20"
+            type="button"
+            onClick={() => openGalleryAt(0, 'grid')}
+            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-900 font-bold text-xs py-2 px-3.5 rounded-xl border border-slate-200 shadow-md flex items-center gap-1.5 transition-all cursor-pointer z-20"
           >
-            <LayoutGrid className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4 text-emerald-600" />
             Show all photos
           </button>
         )}
       </div>
 
-      {/* Full-Screen Premium Photo Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto flex flex-col text-slate-900 animate-in fade-in duration-200">
-          {/* Header */}
-          <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-100 px-6 py-4 flex items-center justify-between z-30">
-            <div>
-              <h3 className="text-slate-900 font-extrabold text-lg tracking-tight">Property Gallery</h3>
-              <p className="text-xs text-slate-500 font-medium">{displayImages.length} total photos available</p>
-            </div>
-            <button
-              onClick={() => {
-                setIsModalOpen(false);
-                setActiveCategory('All');
-              }}
-              className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 rounded-full transition-colors cursor-pointer"
+      {/* ── Desktop Airbnb-Style 5-Grid Layout ───────────────────────────── */}
+      <div className="hidden md:grid grid-cols-4 gap-2 aspect-[21/9] w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 relative group">
+        {displayImages.length === 1 ? (
+          <div
+            className="col-span-4 h-full relative overflow-hidden"
+            onClick={() => openGalleryAt(0, 'carousel')}
+          >
+            <Image
+              src={displayImages[0].r2_url}
+              alt="Property display"
+              fill
+              className="object-cover hover:scale-[1.01] transition-transform duration-500 cursor-pointer"
+              sizes="100vw"
+              priority
+              placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined}
+              blurDataURL={displayImages[0]?.blur_data_url || undefined}
+            />
+          </div>
+        ) : displayImages.length === 2 ? (
+          <>
+            <div
+              className="col-span-2 h-full relative overflow-hidden"
+              onClick={() => openGalleryAt(0, 'carousel')}
             >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Modal Content layout */}
-          <div className="flex-1 flex flex-col md:flex-row h-full min-h-[calc(100vh-73px)]">
-            {/* Sidebar filter tabs */}
-            <div className="w-full md:w-64 bg-white border-r border-slate-100 p-6 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible shrink-0 scrollbar-none">
-              {categories.map((cat) => {
-                const count = cat === 'All'
-                  ? displayImages.length
-                  : displayImages.filter(img => img.category === cat).length;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap text-left flex items-center justify-between gap-3 ${
-                      activeCategory === cat
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                    }`}
-                  >
-                    <span>{cat}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-                      activeCategory === cat ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-500'
-                    }`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+              <Image
+                src={displayImages[0].r2_url}
+                alt="Property display 1"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="50vw"
+                priority
+                placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[0]?.blur_data_url || undefined}
+              />
+            </div>
+            <div
+              className="col-span-2 h-full relative overflow-hidden"
+              onClick={() => openGalleryAt(1, 'carousel')}
+            >
+              <Image
+                src={displayImages[1].r2_url}
+                alt="Property display 2"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="50vw"
+                placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[1]?.blur_data_url || undefined}
+              />
+            </div>
+          </>
+        ) : displayImages.length === 3 ? (
+          <>
+            <div
+              className="col-span-2 row-span-2 h-full relative overflow-hidden"
+              onClick={() => openGalleryAt(0, 'carousel')}
+            >
+              <Image
+                src={displayImages[0].r2_url}
+                alt="Property display 1"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="50vw"
+                priority
+                placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[0]?.blur_data_url || undefined}
+              />
+            </div>
+            <div
+              className="col-span-2 h-full relative overflow-hidden"
+              onClick={() => openGalleryAt(1, 'carousel')}
+            >
+              <Image
+                src={displayImages[1].r2_url}
+                alt="Property display 2"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="50vw"
+                placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[1]?.blur_data_url || undefined}
+              />
+            </div>
+            <div
+              className="col-span-2 h-full relative overflow-hidden"
+              onClick={() => openGalleryAt(2, 'carousel')}
+            >
+              <Image
+                src={displayImages[2].r2_url}
+                alt="Property display 3"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                sizes="50vw"
+                placeholder={displayImages[2]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[2]?.blur_data_url || undefined}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Left Main Hero Image (#0) */}
+            <div
+              className="col-span-2 row-span-2 h-full relative overflow-hidden cursor-pointer"
+              onClick={() => openGalleryAt(0, 'carousel')}
+            >
+              <Image
+                src={displayImages[0].r2_url}
+                alt="Property main display"
+                fill
+                className="object-cover hover:scale-[1.01] transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+                placeholder={displayImages[0]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[0]?.blur_data_url || undefined}
+              />
             </div>
 
-            {/* Photo Grid container */}
-            <div className="flex-1 p-6 md:p-10 overflow-y-auto max-h-[calc(100vh-73px)]">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 max-w-5xl mx-auto pb-12">
-                {filteredImages.map((img, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedImage(img)}
-                    className="relative aspect-[3/2] w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 group cursor-pointer shadow-md transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:border-slate-200"
-                  >
-                    <Image
-                      src={img.r2_url}
-                      alt={`Property photo ${idx + 1}`}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      placeholder={img.blur_data_url ? 'blur' : undefined}
-                      blurDataURL={img.blur_data_url || undefined}
-                    />
-                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="p-3 bg-white/95 backdrop-blur-xs rounded-full border border-slate-200 shadow-md scale-90 group-hover:scale-100 transition-transform duration-300 text-slate-700">
-                        <Maximize2 className="h-5 w-5" />
-                      </div>
-                    </div>
-                    {/* Category pill */}
-                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-xs px-3 py-1 rounded-xl text-[10px] font-bold text-slate-800 uppercase tracking-wider border border-slate-200/80 shadow-xs">
-                      {img.category || 'Room'}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Top Right Photos (#1, #2) */}
+            <div
+              className="col-span-1 h-full relative overflow-hidden cursor-pointer"
+              onClick={() => openGalleryAt(1, 'carousel')}
+            >
+              <Image
+                src={displayImages[1]?.r2_url || fallbackImage}
+                alt="Property detail 1"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={displayImages[1]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[1]?.blur_data_url || undefined}
+              />
+            </div>
+
+            <div
+              className="col-span-1 h-full relative overflow-hidden cursor-pointer"
+              onClick={() => openGalleryAt(2, 'carousel')}
+            >
+              <Image
+                src={displayImages[2]?.r2_url || fallbackImage}
+                alt="Property detail 2"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={displayImages[2]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[2]?.blur_data_url || undefined}
+              />
+            </div>
+
+            {/* Bottom Right Photos (#3, #4) */}
+            <div
+              className="col-span-1 h-full relative overflow-hidden cursor-pointer"
+              onClick={() => openGalleryAt(3, 'carousel')}
+            >
+              <Image
+                src={displayImages[3]?.r2_url || fallbackImage}
+                alt="Property detail 3"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={displayImages[3]?.blur_data_url ? 'blur' : undefined}
+                blurDataURL={displayImages[3]?.blur_data_url || undefined}
+              />
+            </div>
+
+            <div
+              className="col-span-1 h-full relative overflow-hidden cursor-pointer"
+              onClick={() => openGalleryAt(4 % displayImages.length, 'carousel')}
+            >
+              <Image
+                src={displayImages[4]?.r2_url || displayImages[0].r2_url}
+                alt="Property detail 4"
+                fill
+                className="object-cover hover:scale-[1.02] transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 25vw"
+                placeholder={
+                  (displayImages[4] || displayImages[0])?.blur_data_url
+                    ? 'blur'
+                    : undefined
+                }
+                blurDataURL={
+                  (displayImages[4] || displayImages[0])?.blur_data_url ||
+                  undefined
+                }
+              />
+            </div>
+          </>
+        )}
+
+        {/* Show all photos floating button */}
+        {displayImages.length > 1 && (
+          <button
+            type="button"
+            onClick={() => openGalleryAt(0, 'grid')}
+            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-900 font-bold text-xs py-2 px-4 rounded-xl border border-slate-200 shadow-md flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer z-20"
+          >
+            <LayoutGrid className="h-4 w-4 text-emerald-600" />
+            <span>Show all photos</span>
+            <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-extrabold">
+              {displayImages.length}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* ── Fullscreen Overlay System (Grid or Carousel) ───────────────────── */}
+      {viewMode === 'grid' && (
+        <div className="fixed inset-0 z-[100] bg-white flex flex-col text-slate-900 animate-in fade-in duration-200">
+          {/* Header */}
+          <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-slate-900 font-extrabold text-lg tracking-tight">
+                Photo Gallery
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                {displayImages.length} total photos available
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setViewMode('carousel')}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all cursor-pointer shadow-sm"
+              >
+                Slideshow Mode
+              </button>
+              <button
+                type="button"
+                onClick={closeGallery}
+                className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 rounded-full transition-colors cursor-pointer"
+                aria-label="Close photo gallery"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
           </div>
+
+          {/* Masonry Layout */}
+          <GalleryMasonryGrid
+            images={displayImages}
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            onImageClick={(idx) => openGalleryAt(idx, 'carousel')}
+            onOpenCarousel={(idx = 0) => openGalleryAt(idx, 'carousel')}
+            onClose={closeGallery}
+          />
         </div>
       )}
 
-      {/* Lightbox overlay for single image */}
-      {selectedImage && (
-        <div className="fixed inset-0 bg-black/95 z-99 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-          <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-6 right-6 p-2 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white rounded-full transition-colors cursor-pointer border border-slate-800"
-          >
-            <X className="h-6 w-6" />
-          </button>
-          <div className="max-w-5xl max-h-[85vh] overflow-hidden rounded-2xl border border-slate-800 shadow-2xl relative">
-            <Image
-              src={selectedImage.r2_url}
-              alt="Detailed view"
-              width={1200}
-              height={800}
-              className="object-contain max-h-[85vh] max-w-full"
-              placeholder={selectedImage.blur_data_url ? 'blur' : undefined}
-              blurDataURL={selectedImage.blur_data_url || undefined}
-              unoptimized
-            />
-          </div>
-        </div>
+      {viewMode === 'carousel' && (
+        <GalleryCarouselViewer
+          images={displayImages}
+          currentIndex={activePhotoIndex}
+          onNavigate={setActivePhotoIndex}
+          onSwitchToGrid={() => setViewMode('grid')}
+          onClose={closeGallery}
+        />
       )}
     </div>
   );
