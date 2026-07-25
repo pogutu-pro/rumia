@@ -21,8 +21,6 @@ export const metadata: Metadata = {
   },
 };
 
-const PAGE_SIZE = 24;
-
 async function getAllActiveListings(): Promise<Listing[]> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -48,7 +46,6 @@ export default async function HostelsPage() {
     <Suspense>
       <HostelsSearch
         allListings={allListings}
-        pageSize={PAGE_SIZE}
       />
     </Suspense>
   );

@@ -56,10 +56,9 @@ function ListingSkeleton() {
 
 interface HostelsSearchProps {
   allListings: Listing[];
-  pageSize: number;
 }
 
-export default function HostelsSearch({ allListings, pageSize }: HostelsSearchProps) {
+export default function HostelsSearch({ allListings }: HostelsSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
@@ -209,28 +208,6 @@ export default function HostelsSearch({ allListings, pageSize }: HostelsSearchPr
   );
 
   const totalCountState = allFiltered.length;
-
-  const [visibleCount, setVisibleCount] = useState(pageSize);
-  const filterKey = `${combinedFilters.searchText}|${combinedFilters.genders.join(',')}|${combinedFilters.amenities.join(',')}|${combinedFilters.roomTypes.join(',')}|${combinedFilters.minPrice}|${combinedFilters.maxPrice}|${combinedFilters.zones.join(',')}`;
-  const prevFilterKeyRef = useRef(filterKey);
-
-  useEffect(() => {
-    if (prevFilterKeyRef.current !== filterKey) {
-      prevFilterKeyRef.current = filterKey;
-      setVisibleCount(pageSize);
-    }
-  }, [filterKey, pageSize]);
-
-  const listings = useMemo(
-    () => allFiltered.slice(0, visibleCount),
-    [allFiltered, visibleCount],
-  );
-
-  const hasMore = visibleCount < allFiltered.length;
-
-  const loadMore = useCallback(() => {
-    setVisibleCount((prev) => Math.min(prev + pageSize, allFiltered.length));
-  }, [pageSize, allFiltered.length]);
 
   // ── URL sync ───────────────────────────────────────────────────────────────
 
@@ -542,10 +519,10 @@ export default function HostelsSearch({ allListings, pageSize }: HostelsSearchPr
           </Link>
         </div>
 
-        {/* Listing Grid */}
-        {listings.length > 0 ? (
+        {/* Listing Grid — all listings render in HTML for crawlers */}
+        {allFiltered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {listings.map((item) => {
+            {allFiltered.map((item) => {
               const sorted = [...(item.listing_images || [])].sort(
                 (a, b) => a.display_order - b.display_order,
               );
@@ -577,7 +554,10 @@ export default function HostelsSearch({ allListings, pageSize }: HostelsSearchPr
               }
 
               return (
-                <div key={item.id} className="relative group/card">
+                <div
+                  key={item.id}
+                  className="relative group/card"
+                >
                   <Link
                     href={href}
                     className={`group flex flex-col bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full cursor-pointer ${
@@ -694,19 +674,6 @@ export default function HostelsSearch({ allListings, pageSize }: HostelsSearchPr
               className="mt-5 inline-flex items-center px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Clear all filters
-            </button>
-          </div>
-        )}
-
-        {/* Load More */}
-        {hasMore && listings.length > 0 && (
-          <div className="mt-8 text-center">
-            <button
-              type="button"
-              onClick={loadMore}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/10 hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer"
-            >
-              Load more hostels
             </button>
           </div>
         )}
