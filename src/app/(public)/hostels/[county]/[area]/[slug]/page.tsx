@@ -51,6 +51,7 @@ const getListing = cache(async (slug: string) => {
       security_type, electricity_included, water_included, wifi_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category, pays_commission,
+      landlord_phone,
       listing_images ( id, r2_url, category, display_order, blur_data_url, width, height, format ),
       agents ( id, name, phone, whatsapp, slug )
     `,
@@ -538,6 +539,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     listingTitle={listing.title}
                     agentId={listing.agents?.id}
                     agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+                    landlordPhone={listing.landlord_phone}
                     paysCommission={listing.pays_commission ?? true}
                   />
                 </div>
@@ -723,6 +725,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
               listingTitle={listing.title}
               agentId={listing.agents?.id}
               agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+              landlordPhone={listing.landlord_phone}
               paysCommission={listing.pays_commission ?? true}
             />
           </div>

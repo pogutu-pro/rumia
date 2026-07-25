@@ -53,7 +53,19 @@ export function agentInquiryMessage(hostelTitle: string, agentName: string): str
   return `Hi ${agentName}, I saw ${hostelTitle} on Rumia and I'd like your help with accommodation. Could you assist me with availability, pricing, and arranging a viewing?`;
 }
 
-/** WhatsApp message for Rumia Agent — non-commission hostel (user accepted KES 50 fee) */
-export function agentFeeAcceptedMessage(hostelTitle: string, agentName: string): string {
-  return `Hi ${agentName}, I saw ${hostelTitle} on Rumia and I'd like your help with accommodation. I understand a KES 50 consultation fee may apply and I accept this. Could you assist me with availability, pricing, and arranging a viewing?`;
+/**
+ * WhatsApp message for Rumia Agent — non-commission hostel (user accepted KES 50 fee).
+ *
+ * IMPORTANT: This message is deliberately self-contained. It explains the fee,
+ * names the amount, and tells the agent exactly what to do next (confirm + send
+ * payment instructions). The user should not need to type anything after this,
+ * and the agent's first reply should be a one-liner.
+ *
+ * NO payment-verification gate exists in the app. WhatsApp is outside Rumia's
+ * control — enforcement of actual payment is the agent's responsibility, not
+ * a technical gate. Do NOT add any payment-verification logic here or in the
+ * contact flow. The message wording is the only mechanism.
+ */
+export function agentFeeAcceptedMessage(hostelTitle: string, agentPhone: string): string {
+  return `Hi, I'd like insider details about ${hostelTitle} that aren't listed on Rumia — the kind of info that helps me decide before moving in. I accept to pay Ksh. 50 to ${agentPhone} for this consultation before we continue. Please confirm and I'll send payment.`;
 }

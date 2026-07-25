@@ -6,6 +6,7 @@ export default async function ListingsPage() {
 
   const { data: listingsRaw } = await (supabase as any).from('listings').select(`
     id, title, location, price, is_active, created_at, sort_position,
+    pays_commission, commission_locked_by_admin,
     agents(id, name),
     leads(id),
     listing_images(r2_url, display_order)
@@ -34,6 +35,8 @@ export default async function ListingsPage() {
       agent_name: listing.agents?.name ?? '—',
       agent_id: listing.agents?.id ?? '',
       cover_image: coverImage,
+      pays_commission: listing.pays_commission ?? true,
+      commission_locked_by_admin: listing.commission_locked_by_admin ?? false,
     };
   });
 

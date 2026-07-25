@@ -109,6 +109,7 @@ interface InitialListingData {
   price_sharing?: number | string | null;
   mpesa_details?: string | null;
   distance_category?: string | null;
+  landlord_phone?: string | null;
   listing_images?: Array<{
     id?: string;
     r2_url: string;
@@ -429,6 +430,7 @@ export function NewListingForm({
     initialListing?.amenities || [],
   );
   const [whatsappNumber, setWhatsappNumber] = useState(agentWhatsapp || '');
+  const [landlordPhone, setLandlordPhone] = useState(initialListing?.landlord_phone || '');
   const [images, setImages] = useState<UploadedImage[]>(() =>
     initialImages(initialListing),
   );
@@ -710,6 +712,7 @@ export function NewListingForm({
         price_sharing: priceSharing || null,
         mpesa_details: mpesaDetails,
         distance_category: distanceCategory,
+        landlord_phone: landlordPhone || null,
         images: images,
         roomTypes: roomTypes,
       };
@@ -938,6 +941,25 @@ export function NewListingForm({
             <p className="text-[11px] text-slate-400 font-medium">
               This updates your agent profile and is the number students will
               contact on WhatsApp.
+            </p>
+          </div>
+
+          {/* Landlord/Owner Phone */}
+          <div className="sm:col-span-2 space-y-2">
+            <Label htmlFor="landlordPhone">Hostel Owner Phone</Label>
+            <Input
+              id="landlordPhone"
+              type="tel"
+              value={landlordPhone}
+              onChange={(e) => setLandlordPhone(e.target.value)}
+              placeholder="e.g. 0712 345 678"
+              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
+            <p className="text-[11px] text-slate-400 font-medium">
+              The landlord or caretaker's direct phone number. When a student
+              chooses "Hostel Owner" in the contact flow, they'll be connected
+              directly to this number via WhatsApp. If left empty, the Hostel
+              Owner option will use your agent number as fallback.
             </p>
           </div>
 

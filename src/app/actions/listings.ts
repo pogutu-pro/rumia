@@ -27,7 +27,7 @@ function listingPayload(formData: any, agentId: string) {
     youtube_id: formData.youtube_id || null,
     is_youtube_shorts: !!formData.is_youtube_shorts,
     is_active: formData.is_active,
-    landlord_phone: null,
+    landlord_phone: formData.landlord_phone || null,
     room_type: formData.room_type,
     amenities: formData.amenities,
     bathroom_type: formData.bathroom_type,

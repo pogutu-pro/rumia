@@ -149,6 +149,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, whatsappUrl });
     } else if (contact_type === 'rumia_agent') {
       // Determine if fee was accepted (non-commission hostel)
+      // NOTE: There is no payment-verification gate. WhatsApp is outside Rumia's
+      // control. The fee is enforced only by the message wording and the agent's
+      // own conduct — not by app logic. Do NOT add payment verification here.
       const feeAccepted = body.fee_accepted === true;
       const { data: agentRow } = await supabase
         .from('agents')
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
         .single();
       const agentName = agentRow?.name || 'your agent';
       message = feeAccepted
-        ? agentFeeAcceptedMessage(listing.title, agentName)
+        ? agentFeeAcceptedMessage(listing.title, formattedPhone)
         : agentInquiryMessage(listing.title, agentName);
     } else {
       // Legacy fallback: original message

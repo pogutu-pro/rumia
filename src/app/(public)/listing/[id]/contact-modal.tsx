@@ -87,6 +87,7 @@ interface ContactModalProps {
   listingTitle: string;
   agentId: string;
   agentPhone: string;
+  landlordPhone?: string | null;
   paysCommission: boolean;
   resumedContactType?: 'hostel_owner' | 'rumia_agent' | null;
 }
@@ -100,6 +101,7 @@ export function ContactModal({
   listingTitle,
   agentId,
   agentPhone,
+  landlordPhone,
   paysCommission,
   resumedContactType,
 }: ContactModalProps) {
@@ -298,18 +300,28 @@ export function ContactModal({
       }
     } catch (err) {
       console.error('Track lead error:', err);
-      // Graceful fallback — still open WhatsApp
-      const { buildWhatsAppUrl, hostelOwnerMessage, agentInquiryMessage } = await import('@/lib/utils/phone');
-      const msg = type === 'hostel_owner'
-        ? hostelOwnerMessage(listingTitle)
-        : agentInquiryMessage(listingTitle, 'your agent');
-      window.open(buildWhatsAppUrl(agentPhone, msg), '_blank');
+      // Graceful fallback — still open WhatsApp.
+      // If the API is down, we still open WhatsApp so the student can reach
+      // the agent. The fee-accepted message is used when the user has already
+      // seen and accepted the fee disclosure.
+      const { buildWhatsAppUrl, hostelOwnerMessage, agentInquiryMessage, agentFeeAcceptedMessage } = await import('@/lib/utils/phone');
+      const fallbackPhone = type === 'hostel_owner' && landlordPhone ? landlordPhone : agentPhone;
+      let msg: string;
+      if (type === 'hostel_owner') {
+        msg = hostelOwnerMessage(listingTitle);
+      } else if (!paysCommission) {
+        // Non-commission hostel: user accepted the fee before reaching here
+        msg = agentFeeAcceptedMessage(listingTitle, agentPhone);
+      } else {
+        msg = agentInquiryMessage(listingTitle, 'your agent');
+      }
+      window.open(buildWhatsAppUrl(fallbackPhone, msg), '_blank');
       toast.error('Lead tracking failed, connecting directly…');
     } finally {
       setIsLoading(false);
       handleClose();
     }
-  }, [listingId, agentId, listingTitle, agentPhone, paysCommission, handleClose]);
+  }, [listingId, agentId, listingTitle, agentPhone, landlordPhone, paysCommission, handleClose]);
 
   if (!mounted) return null;
 
@@ -515,18 +527,16 @@ function ModalContent({
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </button>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Consultation Fee</h2>
-            <p className="text-xs text-gray-500">One quick thing before we connect</p>
+            <h2 className="text-lg font-bold text-gray-900">Get the real details</h2>
+            <p className="text-xs text-gray-500">Insider information from the agent</p>
           </div>
         </div>
 
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
-          <p className="text-sm font-bold text-amber-900 mb-2">
-            This hostel does not pay commission.
-          </p>
-          <p className="text-sm text-amber-800 leading-relaxed">
-            A <span className="font-bold">KES 50</span> consultation fee may apply when speaking
-            with a Rumia Agent for this listing.
+          <p className="text-sm text-amber-900 leading-relaxed">
+            Get insider details about this hostel that aren't listed on Rumia —
+            the kind of info that helps you decide before moving in. This costs{' '}
+            <span className="font-bold">KES 50</span>, paid directly to the agent.
           </p>
         </div>
 
@@ -546,7 +556,7 @@ function ModalContent({
             {isLoading ? (
               <><Loader2 className="h-4 w-4 animate-spin mr-2" />Opening…</>
             ) : (
-              'Continue'
+              'Accept and Continue'
             )}
           </Button>
         </div>

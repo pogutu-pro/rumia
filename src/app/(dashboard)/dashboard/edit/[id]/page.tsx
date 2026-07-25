@@ -41,6 +41,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
       latitude, longitude, gender, proximity_description, is_active,
       county, area,
       specific_location, price_single, price_sharing, mpesa_details, distance_category,
+      landlord_phone,
       listing_images ( id, r2_url, category, display_order, blur_data_url )
     `)
     .eq('id', id)

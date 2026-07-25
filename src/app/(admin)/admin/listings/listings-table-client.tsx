@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { GripVertical, ArrowUpDown, Save, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { filterListings } from '@/lib/utils/admin-filters';
-import { updateListingActiveAction, deleteListingAction, updateListingsOrderAction } from '@/app/actions/admin';
+import { updateListingActiveAction, deleteListingAction, updateListingsOrderAction, toggleCommissionLockAction, setListingCommissionAction } from '@/app/actions/admin';
 import { TransferOwnershipModal } from './transfer-ownership-modal';
 import {
   DndContext,
@@ -38,6 +38,8 @@ interface ListingRow {
   agent_name: string;
   agent_id: string;
   cover_image: string | null;
+  pays_commission?: boolean;
+  commission_locked_by_admin?: boolean;
 }
 
 interface ListingsTableClientProps {
@@ -54,6 +56,8 @@ function SortableRow({
   onToggleActive,
   onTransfer,
   onDelete,
+  onToggleCommission,
+  onToggleCommissionLock,
   isReorderMode,
 }: {
   listing: ListingRow;
@@ -62,6 +66,8 @@ function SortableRow({
   onToggleActive: (l: ListingRow) => void;
   onTransfer: (l: ListingRow) => void;
   onDelete: (l: ListingRow) => void;
+  onToggleCommission: (l: ListingRow) => void;
+  onToggleCommissionLock: (l: ListingRow) => void;
   isReorderMode: boolean;
 }) {
   const {
@@ -113,6 +119,30 @@ function SortableRow({
           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Inactive</span>
         )}
       </td>
+      <td className="px-5 py-4">
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={() => onToggleCommission(listing)}
+            className={`text-xs font-medium px-2 py-0.5 rounded-full transition-colors ${
+              listing.pays_commission
+                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+            }`}
+          >
+            {listing.pays_commission ? 'Pays Comm.' : 'No Comm.'}
+          </button>
+          <button
+            onClick={() => onToggleCommissionLock(listing)}
+            className={`text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+              listing.commission_locked_by_admin
+                ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+            }`}
+          >
+            {listing.commission_locked_by_admin ? 'Locked' : 'Unlocked'}
+          </button>
+        </div>
+      </td>
       <td className="text-sm text-gray-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
       <td className="px-5 py-4">
         <div className="flex items-center gap-2 text-sm">
@@ -136,6 +166,8 @@ function SortableMobileCard({
   onToggleActive,
   onTransfer,
   onDelete,
+  onToggleCommission,
+  onToggleCommissionLock,
   isReorderMode,
 }: {
   listing: ListingRow;
@@ -144,6 +176,8 @@ function SortableMobileCard({
   onToggleActive: (l: ListingRow) => void;
   onTransfer: (l: ListingRow) => void;
   onDelete: (l: ListingRow) => void;
+  onToggleCommission: (l: ListingRow) => void;
+  onToggleCommissionLock: (l: ListingRow) => void;
   isReorderMode: boolean;
 }) {
   const {
@@ -197,6 +231,28 @@ function SortableMobileCard({
       <div className="flex items-center justify-between text-xs text-gray-500">
         <span>{listing.agent_name} &middot; {listing.leads_count} leads</span>
         <span>{new Date(listing.created_at).toLocaleDateString()}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => onToggleCommission(listing)}
+          className={`text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+            listing.pays_commission
+              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+          }`}
+        >
+          {listing.pays_commission ? 'Pays Comm.' : 'No Comm.'}
+        </button>
+        <button
+          onClick={() => onToggleCommissionLock(listing)}
+          className={`text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+            listing.commission_locked_by_admin
+              ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+              : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+          }`}
+        >
+          {listing.commission_locked_by_admin ? 'Locked' : 'Unlocked'}
+        </button>
       </div>
       <div className="flex items-center gap-3 pt-1 text-xs font-medium">
         <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">View Live</a>
@@ -257,6 +313,28 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     else { toast.error(result.error); }
   }
 
+  async function handleToggleCommission(listing: ListingRow) {
+    const newStatus = !listing.pays_commission;
+    const result = await setListingCommissionAction(listing.id, newStatus);
+    if (result.success) {
+      toast.success(`Commission set to ${newStatus ? 'Pays Commission' : 'Consultation Fee'}`);
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  async function handleToggleCommissionLock(listing: ListingRow) {
+    const newLocked = !listing.commission_locked_by_admin;
+    const result = await toggleCommissionLockAction(listing.id, newLocked);
+    if (result.success) {
+      toast.success(`Commission ${newLocked ? 'locked' : 'unlocked'} by admin`);
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -299,7 +377,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     setIsReorderMode(true);
   }
 
-  const desktopColCount = isReorderMode ? 10 : 9;
+  const desktopColCount = isReorderMode ? 11 : 10;
 
   return (
     <div>
@@ -377,7 +455,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 {isReorderMode && <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-3 py-3 w-10"></th>}
-                {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Created', 'Actions'].map((h) => (
+                {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Commission', 'Created', 'Actions'].map((h) => (
                   <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
                 ))}
               </tr>
@@ -395,6 +473,8 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                     onToggleActive={handleToggleActive}
                     onTransfer={setTransferListing}
                     onDelete={handleDelete}
+                    onToggleCommission={handleToggleCommission}
+                    onToggleCommissionLock={handleToggleCommissionLock}
                     isReorderMode={isReorderMode}
                   />
                 ))}
@@ -419,6 +499,8 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                 onToggleActive={handleToggleActive}
                 onTransfer={setTransferListing}
                 onDelete={handleDelete}
+                onToggleCommission={handleToggleCommission}
+                onToggleCommissionLock={handleToggleCommissionLock}
                 isReorderMode={isReorderMode}
               />
             ))}

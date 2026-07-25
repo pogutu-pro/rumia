@@ -195,6 +195,75 @@ export async function updateListingActiveAction(
 }
 
 /**
+ * Admin toggle for commission lock on a listing.
+ * When locked, the agent cannot change the pays_commission setting.
+ * Admin always has final authority over commission status.
+ */
+export async function toggleCommissionLockAction(
+  listingId: string,
+  locked: boolean
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('listings')
+      .update({ commission_locked_by_admin: locked })
+      .eq('id', listingId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Admin override for pays_commission on a listing.
+ * Admin can force a listing to pay or not pay commission,
+ * regardless of the agent's setting.
+ */
+export async function setListingCommissionAction(
+  listingId: string,
+  paysCommission: boolean
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('listings')
+      .update({ pays_commission: paysCommission })
+      .eq('id', listingId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/dashboard');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Permanently deletes a listing record.
  *
  * Validates: Requirements 9.5, 9.6
