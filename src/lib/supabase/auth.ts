@@ -1,12 +1,6 @@
 import { createClient } from './client';
-import { GOOGLE_AUTH_ENABLED, openGoogleAuthModal } from '@/lib/google-auth';
 
 export async function signInWithGoogle(next?: string) {
-  if (!GOOGLE_AUTH_ENABLED) {
-    openGoogleAuthModal();
-    return { data: null, error: new Error('Google Sign-In is temporarily unavailable') };
-  }
-
   const supabase = createClient();
   const baseUrl = `${window.location.origin}/auth/callback`;
   const redirectTo = next
