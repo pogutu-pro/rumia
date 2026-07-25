@@ -540,7 +540,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     agentId={listing.agents?.id}
                     agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
                     landlordPhone={listing.landlord_phone}
-                    paysCommission={listing.pays_commission ?? true}
+                    paysCommission={listing.pays_commission ?? false}
                   />
                 </div>
               </div>
@@ -726,7 +726,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
               agentId={listing.agents?.id}
               agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
               landlordPhone={listing.landlord_phone}
-              paysCommission={listing.pays_commission ?? true}
+              paysCommission={listing.pays_commission ?? false}
             />
           </div>
         </div>

@@ -1,0 +1,94 @@
+source_no, hostel_name, phone_1, phone_2, contact_type_as_labeled, contact_person_name, zone, flag
+1,Sunrise Hostel Block CD,0703753641,,,,Near campus (main list - no zone header given),
+2,Sunrise Hostel Block AB,0116891682,,,,Near campus (main list - no zone header given),
+3,Kimathi Students Centre,0100492929,0707862475,,,Near campus (main list - no zone header given),
+4,La Duvet Hostel,0718862632,,,,Near campus (main list - no zone header given),
+5,Maisha Hostels,0745409929,,,,Near campus (main list - no zone header given),
+6,Mimshack Students Residence,0724693216,,,,Near campus (main list - no zone header given),DUPLICATE NAME+NUMBER also appears as row 10 with different paybill in source - verify if same hostel/two blocks
+7,DE-LA-NOVA Apartment,0722305973,,,,Near campus (main list - no zone header given),
+8,TAKIMU Apartment,0718921088,,,,Near campus (main list - no zone header given),SAME NUMBER as row 9 Urban Suits - verify not a mix-up in source
+9,Urban Suits,0718921088,,,,Near campus (main list - no zone header given),SAME NUMBER as row 8 TAKIMU Apartment - verify not a mix-up in source
+10,Mimshack Students Residence,0724693216,,,,Near campus (main list - no zone header given),DUPLICATE NAME+NUMBER also appears as row 6 with different paybill in source - verify if same hostel/two blocks
+11,Arch Bishop Kirima (Ladies Hostel),0721611281,,,,Near campus (main list - no zone header given),
+12,Grace Apartment,0795580924,0753844727,,,Near campus (main list - no zone header given),
+13,Purple House,0141663686,,,,Near campus (main list - no zone header given),
+14,Wisdom Suites Hostel,0722274497,,,,Near campus (main list - no zone header given),
+15,Warmu Apartment,0722489642,,,,Near campus (main list - no zone header given),
+16,Emma Apartment,0706409650,,,,Near campus (main list - no zone header given),
+17,Mt. Kenya Hostel,0726969255,,,,Near campus (main list - no zone header given),
+18,Achievers Hostel Ltd,0742964281,,,,Near campus (main list - no zone header given),
+19,Mumford Hostel,0791039446,,,,Near campus (main list - no zone header given),
+20,Stepna Hostel,0723753475,,,,Near campus (main list - no zone header given),
+21,Ngepo Apartment,0701194407,,,,Near campus (main list - no zone header given),
+22,Imani Insuit Hostel,0702727710,0725509720,,,Near campus (main list - no zone header given),
+23,Elegant Hostel,0728543703,,,,Near campus (main list - no zone header given),SHARED NUMBER cluster - same 0728543703 appears for rows 23/24/34/58/59/61/77 - likely one management company, not individual owners - verify before treating as owner
+24,Stoneville Hostel,0728543703,,,,Near campus (main list - no zone header given),SHARED NUMBER cluster - see row 23 note
+25,Amazing Grace,0724072020,,,,Near campus (main list - no zone header given),
+26,Tamaal Hostel A,0726176330,,,,Near campus (main list - no zone header given),
+27,Tamaal Hostel B,0726176330,,,,Near campus (main list - no zone header given),SAME NUMBER as Tamaal Hostel A - likely same owner, two blocks
+28,Lolan Hub Scholars,0722160189,,,,Near campus (main list - no zone header given),
+29,Samrice Hostel,0722370937,,,,Near campus (main list - no zone header given),
+30,Der Comfort,0724686064,,,,Near campus (main list - no zone header given),
+31,Grand Hostel,0711728143,,,,Near campus (main list - no zone header given),
+32,Kens Hostel,0791863678,,,,Near campus (main list - no zone header given),
+33,Popular Hostel,0721727254,,,,Near campus (main list - no zone header given),
+34,Heaven on Earth,0728543703,,,,Near campus (main list - no zone header given),SHARED NUMBER cluster - see row 23 note
+35,Muruguru Hostel,0721300959,,,,Near campus (main list - no zone header given),
+36,Paradise Hostel,0710905822,,,,Near campus (main list - no zone header given),
+37,Chairmans Hostel,0720370925,,Landlord,,Near campus (main list - no zone header given),
+38,Baraka Hostel,0790396326,,,,Near campus (main list - no zone header given),Distinct from row 84 "Baraka Hostels" - different phone number, likely a different property despite similar name
+39,Allexandria,0707803616,0714447933,,,Near campus (main list - no zone header given),
+40,Pearls Gates,0721866056,,Landlady,Florence Kabui,Near campus (main list - no zone header given),
+41,Paresi Hostels,0748879159,,,,Near campus (main list - no zone header given),
+42,Shirikisho Hostel,0713889599,,,,Near campus (main list - no zone header given),
+43,Ngamia,0729303782,0721527355,Landlord,Agatha Njeri,Near campus (main list - no zone header given),Second number 0721527355 listed alongside landlord name in source payment column
+44,Mwalimu Hostel,0728675316,,Landlord,Francis Maina,Near campus (main list - no zone header given),
+45,Carls Hostel,0726530269,,Agent,Highrise Agent,Near campus (main list - no zone header given),NOT A LANDLORD - source explicitly labels this "Highrise Agent" - do not auto-fill into hostel owner field
+46,Glian Hostel,0726530269,,Agent,Highrise Agent (assumed - same number as Carls Hostel),Near campus (main list - no zone header given),NOT A LANDLORD - same number as row 45's agent contact - do not auto-fill into hostel owner field
+47,Kathy Hostel,0721990754,,,Douglas Munge,Near campus (main list - no zone header given),No explicit landlord/agent label given for this name
+48,M & M Ladies Hostel,0722356852,,Landlady,,Near campus (main list - no zone header given),
+49,Joyce Mbogo,0722639416,,Landlady,Joyce Mbogo,Near campus (main list - no zone header given),Hostel listed under the owner's personal name in source - confirm actual hostel name before matching
+50,Vivians Hostel,0723670077,,Landlady,,Near campus (main list - no zone header given),
+51,Angies Hostel,0726451805,,,,Nyeri View & Kahawa Ridge (1-2km),
+52,Solid 4 (Gents),0720490033,,,,Nyeri View & Kahawa Ridge (1-2km),
+53,Selene Hostel,0722632527,,,,Nyeri View & Kahawa Ridge (1-2km),
+54,Florida Hostel,0725744312,,,,Nyeri View & Kahawa Ridge (1-2km),
+55,Autum's Hostel Gents,0721458070,,,,Nyeri View & Kahawa Ridge (1-2km),
+56,Lush Corner,0721426707,,,,Nyeri View & Kahawa Ridge (1-2km),
+57,Kings & Queens,0746050532,0799536591,Landlady (2nd number),,Nyeri View & Kahawa Ridge (1-2km),
+58,Purple Gardens Hostel,0728543703,,,,Nyeri View & Kahawa Ridge (1-2km),SHARED NUMBER cluster - see row 23 note
+59,Mid-black,0728543703,,,,Nyeri View & Kahawa Ridge (1-2km),SHARED NUMBER cluster - see row 23 note
+60,El shaddai Hostel,0721719939,,,,Nyeri View & Kahawa Ridge (1-2km),
+61,Crystal Hostel,0728543703,,,,Nyeri View & Kahawa Ridge (1-2km),SHARED NUMBER cluster - see row 23 note
+62,Red Marple Court,0700647172,0758028398,Landlady (2nd number),,Nyeri View & Kahawa Ridge (1-2km),
+63,Eagles Hostel,0723165589,0720500496,,,Nyeri View & Kahawa Ridge (1-2km),
+64,Riverside Hostel,0741134010,,,,Nyeri View & Kahawa Ridge (1-2km),
+65,Njetika Hostels,0721270473,,,,Nyeri View & Kahawa Ridge (1-2km),
+66,Evergreen Hostel,0791550984,,,,Nyeri View & Kahawa Ridge (1-2km),
+67,Uzima Hostel,0780758544,,,,Nyeri View & Kahawa Ridge (1-2km),
+68,St. Joseph Hostel,0722771084,,,,Nyeri View & Kahawa Ridge (1-2km),
+69,Alwake,0722401961,,Landlord,,Nyeri View & Kahawa Ridge (1-2km),
+70,Pride Hostel,0740491208,,,,Nyeri View & Kahawa Ridge (1-2km),
+71,Veterans Hostels,0743906999,0711602845,,,Nyeri View & Kahawa Ridge (1-2km),
+72,Blessed Anne,0721452058,,,,Nyeri View & Kahawa Ridge (1-2km),
+73,Flang Investment,0722636816,,Landlady,,Nyeri View & Kahawa Ridge (1-2km),
+74,Pauline Gakenia,0721827777,,Landlady,Pauline Gakenia,Nyeri View & Kahawa Ridge (1-2km),Hostel listed under the owner's personal name in source - confirm actual hostel name before matching
+75,Charity Wachira,0722623966,,Landlady,Charity Wachira,Nyeri View & Kahawa Ridge (1-2km),Hostel listed under the owner's personal name in source - confirm actual hostel name before matching
+76,Mary W. Wamugunda,0721433851,,,Mary W. Wamugunda,Nyeri View & Kahawa Ridge (1-2km),Hostel listed under the owner's personal name in source - confirm actual hostel name before matching
+77,Baru Hostel,0728543703,,,,Nyeri View & Kahawa Ridge (1-2km),SHARED NUMBER cluster - see row 23 note
+78,Forest View Hostel,0720452702,,,,Nyeri View & Kahawa Ridge (1-2km),
+79,Valley Creek Hostel,0740671690,,,,Embassy (3km),
+80,Dios Aumentara Place,0797844116,,Landlady,,Embassy (3km),
+81,Zion City Hostel,0702276550,,,,Embassy (3km),
+82,Sunset Apartment,0723447638,,,,Embassy (3km),
+83,Jowa Investment,0724348119,,,,Embassy (3km),
+84,Baraka Hostels,0113065235,,,,Embassy (3km),Distinct from row 38 "Baraka Hostel" - different phone number, likely a different property despite similar name
+85,Eunice Ladies Hostels,0721322172,,,,Embassy (3km),
+86,Rosalia Wairimu,0721645975,,Landlady,Rosalia Wairimu,Embassy (3km),Hostel listed under the owner's personal name in source - confirm actual hostel name before matching
+87,Jostey Hostel,0748665756,0725823237,,,Embassy (3km),
+88,Stacy's Hostels,0781127803,0720994270,Landlady (2nd number),,Embassy (3km),
+89,Gateway Shelter,0711486252,,,,Embassy (3km),
+90,Edgeview Heights,0727650200,0722357522,,,Nyaribo (3km),
+91,New City,0723212446,,Landlord,,Nyaribo (3km),
+92,Yachonan,0725311504,,Landlord,,Nyaribo (3km),
+93,Kwa Josiah,0720573323,,Landlord,,Nyaribo (3km),

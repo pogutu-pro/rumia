@@ -159,6 +159,8 @@ export function ContactModal({
 
     setStep('redirecting');
 
+    let shouldClose = true;
+
     try {
       const { session } = await getSession();
       let name: string | undefined;
@@ -187,6 +189,17 @@ export function ContactModal({
 
       const data = await response.json();
 
+      if (response.status === 409 && data.requiresFee) {
+        shouldClose = false;
+        setIsLoading(false);
+        setStep('fee');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to record lead');
+      }
+
       if (data.whatsappUrl) {
         window.open(data.whatsappUrl, '_blank');
         toast.success('Opening WhatsApp…');
@@ -202,7 +215,7 @@ export function ContactModal({
       if (type === 'hostel_owner') {
         msg = hostelOwnerMessage(listingTitle);
       } else if (!paysCommission) {
-        msg = agentFeeAcceptedMessage(listingTitle, agentPhone);
+        msg = agentFeeAcceptedMessage(listingTitle);
       } else {
         msg = agentInquiryMessage(listingTitle, 'your agent');
       }
@@ -210,7 +223,9 @@ export function ContactModal({
       toast.error('Lead tracking failed, connecting directly…');
     } finally {
       setIsLoading(false);
-      handleClose();
+      if (shouldClose) {
+        handleClose();
+      }
     }
   }, [listingId, agentId, listingTitle, agentPhone, landlordPhone, paysCommission, handleClose]);
 

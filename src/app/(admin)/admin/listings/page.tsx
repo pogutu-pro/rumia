@@ -5,7 +5,7 @@ export default async function ListingsPage() {
   const supabase = await createClient();
 
   const { data: listingsRaw } = await (supabase as any).from('listings').select(`
-    id, title, location, price, is_active, created_at, sort_position,
+    id, title, location, price, is_active, created_at, sort_position, landlord_phone,
     pays_commission, commission_locked_by_admin,
     agents(id, name),
     leads(id),
@@ -35,6 +35,7 @@ export default async function ListingsPage() {
       agent_name: listing.agents?.name ?? '—',
       agent_id: listing.agents?.id ?? '',
       cover_image: coverImage,
+      landlord_phone: listing.landlord_phone ?? null,
       pays_commission: listing.pays_commission ?? true,
       commission_locked_by_admin: listing.commission_locked_by_admin ?? false,
     };

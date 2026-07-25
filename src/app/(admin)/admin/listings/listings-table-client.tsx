@@ -1,12 +1,22 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import type { FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { GripVertical, ArrowUpDown, Save, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { filterListings } from '@/lib/utils/admin-filters';
-import { updateListingActiveAction, deleteListingAction, updateListingsOrderAction, toggleCommissionLockAction, setListingCommissionAction } from '@/app/actions/admin';
+import { isValidKenyanPhone } from '@/lib/utils/phone';
+import {
+  updateListingActiveAction,
+  deleteListingAction,
+  updateListingsOrderAction,
+  toggleCommissionLockAction,
+  setListingCommissionAction,
+  updateListingOwnerPhoneAction,
+} from '@/app/actions/admin';
 import { TransferOwnershipModal } from './transfer-ownership-modal';
 import {
   DndContext,
@@ -38,6 +48,7 @@ interface ListingRow {
   agent_name: string;
   agent_id: string;
   cover_image: string | null;
+  landlord_phone: string | null;
   pays_commission?: boolean;
   commission_locked_by_admin?: boolean;
 }
@@ -58,6 +69,7 @@ function SortableRow({
   onDelete,
   onToggleCommission,
   onToggleCommissionLock,
+  onEditOwnerPhone,
   isReorderMode,
 }: {
   listing: ListingRow;
@@ -68,6 +80,7 @@ function SortableRow({
   onDelete: (l: ListingRow) => void;
   onToggleCommission: (l: ListingRow) => void;
   onToggleCommissionLock: (l: ListingRow) => void;
+  onEditOwnerPhone: (l: ListingRow) => void;
   isReorderMode: boolean;
 }) {
   const {
@@ -121,6 +134,19 @@ function SortableRow({
       </td>
       <td className="px-5 py-4">
         <div className="flex flex-col gap-1">
+          <span className="text-xs font-mono text-gray-600">
+            {listing.landlord_phone || 'Not set'}
+          </span>
+          <button
+            onClick={() => onEditOwnerPhone(listing)}
+            className="text-xs font-medium text-emerald-600 hover:underline text-left"
+          >
+            Edit
+          </button>
+        </div>
+      </td>
+      <td className="px-5 py-4">
+        <div className="flex flex-col gap-1">
           <button
             onClick={() => onToggleCommission(listing)}
             className={`text-xs font-medium px-2 py-0.5 rounded-full transition-colors ${
@@ -168,6 +194,7 @@ function SortableMobileCard({
   onDelete,
   onToggleCommission,
   onToggleCommissionLock,
+  onEditOwnerPhone,
   isReorderMode,
 }: {
   listing: ListingRow;
@@ -178,6 +205,7 @@ function SortableMobileCard({
   onDelete: (l: ListingRow) => void;
   onToggleCommission: (l: ListingRow) => void;
   onToggleCommissionLock: (l: ListingRow) => void;
+  onEditOwnerPhone: (l: ListingRow) => void;
   isReorderMode: boolean;
 }) {
   const {
@@ -232,6 +260,15 @@ function SortableMobileCard({
         <span>{listing.agent_name} &middot; {listing.leads_count} leads</span>
         <span>{new Date(listing.created_at).toLocaleDateString()}</span>
       </div>
+      <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2">
+        <span className="text-xs font-medium text-gray-500">Owner phone</span>
+        <button
+          onClick={() => onEditOwnerPhone(listing)}
+          className="text-xs font-mono font-medium text-emerald-700 hover:underline"
+        >
+          {listing.landlord_phone || 'Set number'}
+        </button>
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => onToggleCommission(listing)}
@@ -267,6 +304,101 @@ function SortableMobileCard({
   );
 }
 
+function OwnerPhoneDialog({
+  listing,
+  onClose,
+  onSaved,
+}: {
+  listing: ListingRow | null;
+  onClose: () => void;
+  onSaved: (listingId: string, phone: string | null) => void;
+}) {
+  const [phone, setPhone] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setPhone(listing?.landlord_phone ?? '');
+  }, [listing]);
+
+  if (!listing) return null;
+
+  const trimmedPhone = phone.trim();
+  const hasInvalidPhone = trimmedPhone.length > 0 && !isValidKenyanPhone(trimmedPhone);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!listing || hasInvalidPhone || isSaving) return;
+
+    setIsSaving(true);
+    const result = await updateListingOwnerPhoneAction(
+      listing.id,
+      trimmedPhone || null,
+    );
+    setIsSaving(false);
+
+    if (result.success) {
+      onSaved(listing.id, trimmedPhone || null);
+      toast.success('Owner phone updated');
+      onClose();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-label="Edit owner phone">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">Owner Phone</h2>
+            <p className="mt-0.5 text-xs font-medium text-gray-500 line-clamp-1">
+              {listing.title}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <Input
+            type="tel"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            placeholder="e.g. 0712 345 678"
+            className={hasInvalidPhone ? 'border-rose-400 focus-visible:ring-rose-400' : ''}
+            autoFocus
+          />
+          {hasInvalidPhone && (
+            <p className="text-xs font-medium text-rose-600">
+              Enter a valid Kenyan number, or clear the field.
+            </p>
+          )}
+        </div>
+
+        <div className="mt-5 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose} className="rounded-lg">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSaving || hasInvalidPhone}
+            className="rounded-lg bg-emerald-600 hover:bg-emerald-700"
+          >
+            {isSaving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
+            Save
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export function ListingsTableClient({ listings, agents }: ListingsTableClientProps) {
   const router = useRouter();
   const [agentFilter, setAgentFilter] = useState('');
@@ -275,6 +407,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [transferListing, setTransferListing] = useState<ListingRow | null>(null);
+  const [ownerPhoneListing, setOwnerPhoneListing] = useState<ListingRow | null>(null);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [orderedListings, setOrderedListings] = useState<ListingRow[]>(listings);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
@@ -335,6 +468,15 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     }
   }
 
+  function handleOwnerPhoneSaved(listingId: string, phone: string | null) {
+    setOrderedListings((current) =>
+      current.map((listing) =>
+        listing.id === listingId ? { ...listing, landlord_phone: phone } : listing,
+      ),
+    );
+    router.refresh();
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -377,7 +519,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     setIsReorderMode(true);
   }
 
-  const desktopColCount = isReorderMode ? 11 : 10;
+  const desktopColCount = isReorderMode ? 12 : 11;
 
   return (
     <div>
@@ -455,7 +597,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 {isReorderMode && <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-3 py-3 w-10"></th>}
-                {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Commission', 'Created', 'Actions'].map((h) => (
+                {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Owner Phone', 'Commission', 'Created', 'Actions'].map((h) => (
                   <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
                 ))}
               </tr>
@@ -475,6 +617,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                     onDelete={handleDelete}
                     onToggleCommission={handleToggleCommission}
                     onToggleCommissionLock={handleToggleCommissionLock}
+                    onEditOwnerPhone={setOwnerPhoneListing}
                     isReorderMode={isReorderMode}
                   />
                 ))}
@@ -501,6 +644,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                 onDelete={handleDelete}
                 onToggleCommission={handleToggleCommission}
                 onToggleCommissionLock={handleToggleCommissionLock}
+                onEditOwnerPhone={setOwnerPhoneListing}
                 isReorderMode={isReorderMode}
               />
             ))}
@@ -519,6 +663,12 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
         onOpenChange={(open) => { if (!open) setTransferListing(null); }}
         listing={transferListing ? { id: transferListing.id, title: transferListing.title, agent_name: transferListing.agent_name, agent_id: transferListing.agent_id } : null}
         agents={agents}
+      />
+
+      <OwnerPhoneDialog
+        listing={ownerPhoneListing}
+        onClose={() => setOwnerPhoneListing(null)}
+        onSaved={handleOwnerPhoneSaved}
       />
     </div>
   );

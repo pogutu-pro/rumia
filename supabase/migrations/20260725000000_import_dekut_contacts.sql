@@ -1,9 +1,10 @@
 -- Import DEKUT hostel owner phone numbers into landlord_phone field.
--- This script matches listing titles against the DEKUT contact list using
--- normalized name matching and sets landlord_phone for high-confidence matches.
+-- This script matches listing titles against the DEKUT contact list and sets
+-- landlord_phone for high-confidence matches only.
 --
--- For hostels with no matching DEKUT entry, landlord_phone defaults to
--- the agent's own phone number as a temporary placeholder.
+-- For hostels with no high-confidence DEKUT entry, landlord_phone remains NULL.
+-- Runtime contact flows may fall back to the agent number, but the database
+-- must not persist agent numbers as owner/caretaker numbers.
 --
 -- The two Sunrise hostels (New Sunrise, Sunrise Hostel) are LEFT AMBIGUOUS
 -- because DeKUT lists two blocks (CD, AB) and we cannot reliably pair them
@@ -83,14 +84,3 @@ WHERE l.is_active = true
     OR l.title ILIKE '%grace%hostel%'
     OR l.title ILIKE '%grace%apartment%'
   );
-
--- Step 2: Default remaining hostels to their agent's own phone number as placeholder.
--- This ensures "Hostel Owner" always has a number to fall back to.
-UPDATE listings l
-SET landlord_phone = COALESCE(
-  (SELECT a.whatsapp FROM agents a WHERE a.id = l.agent_id),
-  (SELECT a.phone FROM agents a WHERE a.id = l.agent_id),
-  '0000000000'
-)
-WHERE l.is_active = true
-  AND l.landlord_phone IS NULL;

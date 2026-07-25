@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { listing_id, agent_id, contact_type, name, phone: userPhone } = body;
+    const resolvedContactType = contact_type || 'rumia_agent';
 
     if (!listing_id || !agent_id) {
       return NextResponse.json(
@@ -42,10 +43,10 @@ export async function POST(request: NextRequest) {
 
     const isDuplicate = existingLeads && existingLeads.length > 0;
 
-    // Fetch listing details to calculate commission and get agent details
+    // Fetch listing details to calculate commission and enforce contact rules
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('price, title')
+      .select('price, title, pays_commission, landlord_phone')
       .eq('id', listing_id)
       .single();
 
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Fetch agent to get WhatsApp and commission balance
     const { data: agent, error: agentError } = await supabase
       .from('agents')
-      .select('whatsapp, phone, commission_balance')
+      .select('name, whatsapp, phone, commission_balance')
       .eq('id', agent_id)
       .single();
 
@@ -70,6 +71,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const paysCommission = listing.pays_commission === true;
+    const feeAccepted = body.fee_accepted === true;
+
+    if (resolvedContactType === 'rumia_agent' && !paysCommission && !feeAccepted) {
+      return NextResponse.json(
+        { error: 'Fee disclosure required before contacting a Rumia Agent.', requiresFee: true },
+        { status: 409 }
+      );
+    }
+
     // Record the lead if not a duplicate
     if (!isDuplicate) {
       const { error: leadError } = await supabase.from('leads').insert({
@@ -77,7 +88,7 @@ export async function POST(request: NextRequest) {
         agent_id,
         clicked_at: new Date().toISOString(),
         ip_hash: ipHash,
-        contact_type: contact_type || null,
+        contact_type: resolvedContactType,
         name: name || null,
         phone: userPhone || null,
       });
@@ -102,29 +113,31 @@ export async function POST(request: NextRequest) {
         }).catch(() => {});
       }
 
-      // Calculate commission (10% of monthly listing price or flat rate of KSh 1,000)
-      const commissionAmount = Math.max(1000, Math.round(listing.price * 0.1));
+      if (paysCommission) {
+        // Calculate commission (10% of monthly listing price or flat rate of KSh 1,000)
+        const commissionAmount = Math.max(1000, Math.round(listing.price * 0.1));
 
-      // Insert commission
-      const { error: commError } = await supabase.from('commissions').insert({
-        agent_id,
-        listing_id,
-        amount: commissionAmount,
-        status: 'pending',
-      });
+        // Insert commission
+        const { error: commError } = await supabase.from('commissions').insert({
+          agent_id,
+          listing_id,
+          amount: commissionAmount,
+          status: 'pending',
+        });
 
-      if (commError) {
-        console.error('Error inserting commission:', commError);
-      } else {
-        // Increment agent commission balance
-        const newBalance = (agent.commission_balance || 0) + commissionAmount;
-        const { error: agentUpdateError } = await supabase
-          .from('agents')
-          .update({ commission_balance: newBalance })
-          .eq('id', agent_id);
+        if (commError) {
+          console.error('Error inserting commission:', commError);
+        } else {
+          // Increment agent commission balance
+          const newBalance = (agent.commission_balance || 0) + commissionAmount;
+          const { error: agentUpdateError } = await supabase
+            .from('agents')
+            .update({ commission_balance: newBalance })
+            .eq('id', agent_id);
 
-        if (agentUpdateError) {
-          console.error('Error updating agent balance:', agentUpdateError);
+          if (agentUpdateError) {
+            console.error('Error updating agent balance:', agentUpdateError);
+          }
         }
       }
     }
@@ -134,33 +147,22 @@ export async function POST(request: NextRequest) {
     const waPhone = cleanPhone(formattedPhone);
 
     let message: string;
-    if (contact_type === 'hostel_owner') {
+    if (resolvedContactType === 'hostel_owner') {
       // hostel_owner: use landlord_phone if available, else agent phone
-      const { data: listingFull } = await supabase
-        .from('listings')
-        .select('landlord_phone')
-        .eq('id', listing_id)
-        .single();
-      const ownerPhone = listingFull?.landlord_phone
-        ? cleanPhone(listingFull.landlord_phone)
+      const ownerPhone = listing.landlord_phone
+        ? cleanPhone(listing.landlord_phone)
         : waPhone;
       message = hostelOwnerMessage(listing.title);
       const whatsappUrl = buildWhatsAppUrl(ownerPhone, message);
       return NextResponse.json({ success: true, whatsappUrl });
-    } else if (contact_type === 'rumia_agent') {
+    } else if (resolvedContactType === 'rumia_agent') {
       // Determine if fee was accepted (non-commission hostel)
       // NOTE: There is no payment-verification gate. WhatsApp is outside Rumia's
       // control. The fee is enforced only by the message wording and the agent's
       // own conduct — not by app logic. Do NOT add payment verification here.
-      const feeAccepted = body.fee_accepted === true;
-      const { data: agentRow } = await supabase
-        .from('agents')
-        .select('name')
-        .eq('id', agent_id)
-        .single();
-      const agentName = agentRow?.name || 'your agent';
+      const agentName = agent.name || 'your agent';
       message = feeAccepted
-        ? agentFeeAcceptedMessage(listing.title, formattedPhone)
+        ? agentFeeAcceptedMessage(listing.title)
         : agentInquiryMessage(listing.title, agentName);
     } else {
       // Legacy fallback: original message

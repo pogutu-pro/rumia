@@ -66,6 +66,6 @@ export function agentInquiryMessage(hostelTitle: string, agentName: string): str
  * a technical gate. Do NOT add any payment-verification logic here or in the
  * contact flow. The message wording is the only mechanism.
  */
-export function agentFeeAcceptedMessage(hostelTitle: string, agentPhone: string): string {
-  return `Hi, I'd like insider details about ${hostelTitle} that aren't listed on Rumia — the kind of info that helps me decide before moving in. I accept to pay Ksh. 50 to ${agentPhone} for this consultation before we continue. Please confirm and I'll send payment.`;
+export function agentFeeAcceptedMessage(hostelTitle: string): string {
+  return `Hi, I'd like insider details about ${hostelTitle} that aren't listed on Rumia — the kind of info that helps me decide before moving in. I accept to pay Ksh. 50 to this number for this consultation before we continue. Please confirm and I'll send payment.`;
 }

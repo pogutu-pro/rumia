@@ -5,6 +5,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { isAdminUser } from '@/lib/utils/admin';
+import { isValidKenyanPhone } from '@/lib/utils/phone';
 import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
 import { sendPushToUser } from '@/lib/push';
 import type { CreateAgentInput, CreateCommissionInput } from '@/types';
@@ -256,6 +257,57 @@ export async function setListingCommissionAction(
     revalidatePath('/admin/listings');
     revalidatePath('/dashboard');
     revalidatePath('/admin');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Admin override for the landlord/caretaker phone on any listing.
+ * Empty values intentionally clear the owner phone and restore runtime fallback.
+ */
+export async function updateListingOwnerPhoneAction(
+  listingId: string,
+  ownerPhone: string | null
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const cleaned = typeof ownerPhone === 'string' ? ownerPhone.trim() : '';
+  if (cleaned && !isValidKenyanPhone(cleaned)) {
+    return { success: false, error: 'Please enter a valid Kenyan owner phone number.' };
+  }
+
+  try {
+    const { data: listing, error: listingError } = await supabaseAdmin
+      .from('listings')
+      .select('id, slug, county, area')
+      .eq('id', listingId)
+      .single();
+
+    if (listingError || !listing) {
+      return { success: false, error: 'Listing not found' };
+    }
+
+    const { error } = await supabaseAdmin
+      .from('listings')
+      .update({ landlord_phone: cleaned || null })
+      .eq('id', listingId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/dashboard');
+    revalidatePath(`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}`);
+    if (listing.slug) {
+      revalidatePath(`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`);
+    }
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error';
