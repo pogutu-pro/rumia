@@ -8,7 +8,7 @@ export default async function LeadsPage() {
   const { data: leadsRaw } = await (supabase as any)
     .from('leads')
     .select(`
-      id, agent_id, listing_id, clicked_at, ip_hash,
+      id, agent_id, listing_id, clicked_at, ip_hash, contact_type, name, phone,
       listings(id, title),
       agents(id, name)
     `)
@@ -32,6 +32,9 @@ export default async function LeadsPage() {
     listing_id: lead.listing_id ?? null,
     clicked_at: lead.clicked_at,
     ip_hash: lead.ip_hash,
+    contact_type: lead.contact_type ?? null,
+    name: lead.name ?? null,
+    phone: lead.phone ?? null,
     listings: lead.listings
       ? { id: lead.listings.id, title: lead.listings.title }
       : null,

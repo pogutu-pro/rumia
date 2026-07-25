@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { filterLeads } from '@/lib/utils/admin-filters';
 import { CreateCommissionModal } from './create-commission-modal';
+import { Building2, UserCheck, MessageCircle, Copy, Check } from 'lucide-react';
 
 interface LeadRow {
   id: string;
@@ -12,6 +14,9 @@ interface LeadRow {
   listing_id: string | null;
   clicked_at: string;
   ip_hash: string;
+  contact_type: string | null;
+  name: string | null;
+  phone: string | null;
   listings: { id: string; title: string } | null;
   agents: { id: string; name: string } | null;
 }
@@ -36,6 +41,39 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
   const [endDate, setEndDate] = useState('');
   const [selectedLead, setSelectedLead] = useState<SelectedLead>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | number | null>(null);
+
+  const handleCopyPhone = (phone: string, id: string | number) => {
+    navigator.clipboard.writeText(phone);
+    setCopiedId(id);
+    toast.success('Phone number copied to clipboard');
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const getContactBadge = (type?: string | null) => {
+    if (type === 'hostel_owner') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700">
+          <Building2 className="h-3 w-3" />
+          Owner
+        </span>
+      );
+    }
+    if (type === 'rumia_agent') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+          <UserCheck className="h-3 w-3" />
+          Agent
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+        <MessageCircle className="h-3 w-3" />
+        Legacy
+      </span>
+    );
+  };
 
   const hasActiveFilters = agentFilter !== '' || listingFilter !== '' || startDate !== '' || endDate !== '';
 
@@ -92,14 +130,14 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50">
-              {['Date & Time', 'Listing', 'Agent', 'IP Hash', 'Actions'].map((h) => (
+              {['Date & Time', 'Listing', 'Agent', 'Contact', 'IP Hash', 'Actions'].map((h) => (
                 <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {filtered.length === 0 ? (
-              <tr><td colSpan={5} className="text-sm text-gray-400 text-center px-5 py-8">No leads recorded.</td></tr>
+              <tr><td colSpan={6} className="text-sm text-gray-400 text-center px-5 py-8">No leads recorded.</td></tr>
             ) : filtered.map((lead) => {
               const date = new Date(lead.clicked_at);
               return (
@@ -116,6 +154,26 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
                     {lead.agents ? (
                       <Link href={`/admin/agents/${lead.agents.id}`} className="text-emerald-600 hover:underline font-medium">{lead.agents.name}</Link>
                     ) : <span className="text-gray-400">—</span>}
+                  </td>
+                  <td className="px-5 py-4 min-w-[200px]">
+                    <div className="flex flex-col gap-1.5 items-start">
+                      {getContactBadge(lead.contact_type)}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {lead.name && (
+                          <span className="text-xs font-semibold text-slate-700">{lead.name}</span>
+                        )}
+                        {lead.name && lead.phone && <span className="text-slate-300">•</span>}
+                        {lead.phone && (
+                          <button
+                            onClick={() => handleCopyPhone(lead.phone!, lead.id)}
+                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
+                          >
+                            {copiedId === lead.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {lead.phone}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="text-sm text-gray-500 px-5 py-4 font-mono text-xs">{lead.ip_hash.slice(0, 12)}...</td>
                   <td className="px-5 py-4">
@@ -137,13 +195,33 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-900 truncate">{lead.listings?.title ?? 'Unknown Listing'}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{lead.agents?.name ?? 'Unknown Agent'}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs text-gray-500">{lead.agents?.name ?? 'Unknown Agent'}</p>
+                  {getContactBadge(lead.contact_type)}
+                </div>
               </div>
               <span className="text-xs text-gray-400 shrink-0 ml-2">
                 {new Date(lead.clicked_at).toLocaleDateString()}
               </span>
             </div>
-            <div className="flex items-center justify-between">
+            {(lead.name || lead.phone) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {lead.name && (
+                  <span className="text-xs font-semibold text-slate-700">{lead.name}</span>
+                )}
+                {lead.name && lead.phone && <span className="text-slate-300">•</span>}
+                {lead.phone && (
+                  <button
+                    onClick={() => handleCopyPhone(lead.phone!, lead.id)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
+                  >
+                    {copiedId === lead.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {lead.phone}
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-50">
               <span className="text-xs text-gray-400 font-mono">{lead.ip_hash.slice(0, 12)}...</span>
               <Button size="sm" variant="outline" onClick={() => openCommissionModal(lead)} className="rounded-lg text-xs h-8">Create Commission</Button>
             </div>
