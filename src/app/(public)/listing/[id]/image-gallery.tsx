@@ -47,7 +47,6 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         ];
 
   // Gallery state
-  const [mobileIndex, setMobileIndex] = useState(0);
   const [viewMode, setViewMode] = useState<GalleryViewMode | null>(null); // null means closed
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
@@ -77,17 +76,6 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     };
   }, [viewMode]);
 
-  // Mobile slider controls
-  const handleMobilePrev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setMobileIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
-  };
-
-  const handleMobileNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setMobileIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
-  };
-
   // Open gallery at a specific index
   const openGalleryAt = (index: number, mode: GalleryViewMode = 'carousel') => {
     if (viewMode === null) {
@@ -109,58 +97,45 @@ export function ImageGallery({ images }: ImageGalleryProps) {
 
   return (
     <div className="relative w-full">
-      {/* ── Mobile View Aspect Slider ─────────────────────────────────────── */}
-      <div className="md:hidden relative aspect-[4/3] w-full overflow-hidden bg-slate-100 rounded-2xl border border-slate-100 shadow-xs">
+      {/* ── Mobile View Photo Hero ───────────────────────────────────────── */}
+      <div
+        className="md:hidden relative aspect-[4/3] w-full overflow-hidden bg-slate-100 rounded-2xl border border-slate-100 shadow-xs cursor-pointer group"
+        onClick={() => openGalleryAt(0, 'grid')}
+      >
         <Image
-          src={displayImages[mobileIndex]?.r2_url}
-          alt={displayImages[mobileIndex]?.alt || `Property image ${mobileIndex + 1}`}
+          src={displayImages[0]?.r2_url}
+          alt={displayImages[0]?.alt || 'Hostel main view'}
           fill
-          className="object-cover cursor-pointer"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           sizes="100vw"
-          priority={mobileIndex === 0}
+          priority
           placeholder={
-            displayImages[mobileIndex]?.blur_data_url ? 'blur' : undefined
+            displayImages[0]?.blur_data_url ? 'blur' : undefined
           }
-          blurDataURL={displayImages[mobileIndex]?.blur_data_url || undefined}
-          onClick={() => openGalleryAt(mobileIndex, 'carousel')}
+          blurDataURL={displayImages[0]?.blur_data_url || undefined}
         />
 
+        {/* Mobile Badges: Count 1/X on bottom left, 'See all photos' button on bottom right */}
         {displayImages.length > 1 && (
           <>
-            <button
-              type="button"
-              onClick={handleMobilePrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-xs p-2 rounded-full shadow-md text-slate-700 hover:bg-white transition-all cursor-pointer z-10"
-              aria-label="Previous photo"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={handleMobileNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-xs p-2 rounded-full shadow-md text-slate-700 hover:bg-white transition-all cursor-pointer z-10"
-              aria-label="Next photo"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-
-            {/* Counter pill */}
-            <div className="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur-xs px-3 py-1 rounded-full text-[11px] font-extrabold text-white uppercase tracking-wider shadow-sm">
-              {mobileIndex + 1} / {displayImages.length}
+            {/* Bottom Left: Photo count 1 / X */}
+            <div className="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-white tracking-wider shadow-sm z-10">
+              1 / {displayImages.length}
             </div>
-          </>
-        )}
 
-        {/* Show all photos button */}
-        {displayImages.length > 1 && (
-          <button
-            type="button"
-            onClick={() => openGalleryAt(0, 'grid')}
-            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-900 font-bold text-xs py-2 px-3.5 rounded-xl border border-slate-200 shadow-md flex items-center gap-1.5 transition-all cursor-pointer z-20"
-          >
-            <LayoutGrid className="h-4 w-4 text-emerald-600" />
-            Show all photos
-          </button>
+            {/* Bottom Right: Clean white button 'See all photos' */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openGalleryAt(0, 'grid');
+              }}
+              className="absolute bottom-4 right-4 bg-white hover:bg-slate-50 text-slate-900 font-bold text-xs py-1.5 px-3.5 rounded-xl border border-slate-200 shadow-md flex items-center gap-1.5 transition-all cursor-pointer z-20"
+            >
+              <LayoutGrid className="h-3.5 w-3.5 text-slate-700" />
+              <span>See all photos</span>
+            </button>
+          </>
         )}
       </div>
 
