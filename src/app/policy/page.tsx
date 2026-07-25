@@ -67,7 +67,7 @@ const sections = [
       'We do not sell your personal data to third parties. We may share data with:',
     ],
     subList: [
-      'Infrastructure providers (Supabase for database hosting, Cloudflare for storage) under strict data processing terms',
+      'Infrastructure providers (secure servers for database hosting, Cloudflare for CDN and storage) under strict data processing terms',
       'Analytics tools to understand platform usage in aggregate',
       'Law enforcement if required by Kenyan law',
     ],
@@ -77,7 +77,7 @@ const sections = [
     id: 'data-security',
     title: '5. Data Storage and Security',
     content:
-      'Your data is stored on Supabase-hosted infrastructure with industry-standard security measures including encryption at rest and in transit. Access to personal data is restricted to authorised Stratnovo personnel only. No system is completely secure. If you suspect unauthorised access to your account, contact us immediately.',
+      'Your data is stored on secure cloud infrastructure with industry-standard security measures including encryption at rest and in transit. Access to personal data is restricted to authorised Stratnovo personnel only. No system is completely secure. If you suspect unauthorised access to your account, contact us immediately.',
   },
   {
     id: 'cookies',
