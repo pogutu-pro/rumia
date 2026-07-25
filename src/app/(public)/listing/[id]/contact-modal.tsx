@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -117,6 +117,7 @@ export function ContactModal({
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneAttempts, setPhoneAttempts] = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -136,118 +137,12 @@ export function ContactModal({
     setContactType(null);
     setPhone('');
     setPhoneError('');
+    setPhoneAttempts(0);
     onClose();
   }, [onClose]);
 
-  // ── Step 1: User picks a contact type ───────────────────────────────────────
-  const handleContactTypeSelect = useCallback(async (type: 'hostel_owner' | 'rumia_agent') => {
-    setContactType(type);
-    setIsLoading(true);
-
-    try {
-      const { session } = await getSession();
-
-      // Not logged in → save state and trigger Google OAuth redirect
-      if (!session?.user) {
-        const pending: PendingContact = {
-          hostelId: listingId,
-          hostelTitle: listingTitle,
-          agentId,
-          agentPhone,
-          paysCommission,
-          contactType: type,
-          returnPath: window.location.pathname,
-        };
-        savePendingContact(pending);
-        const { error } = await signInWithGoogle(window.location.pathname);
-        if (error) {
-          setIsLoading(false);
-          return;
-        }
-        return; // page will redirect
-      }
-
-      // Logged in → check for phone number
-      const supabase = createClient();
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('phone')
-        .eq('id', session.user.id)
-        .single();
-
-      if (!profile?.phone || !isValidKenyanPhone(profile.phone)) {
-        // No valid phone → show phone step
-        setIsLoading(false);
-        setStep('phone');
-        return;
-      }
-
-      // Has phone → continue to fee check or WhatsApp
-      await continueToWhatsApp(type, profile.phone, false);
-    } catch (err) {
-      console.error('Contact flow error:', err);
-      toast.error('Something went wrong. Please try again.');
-      setIsLoading(false);
-    }
-  }, [listingId, listingTitle, agentId, agentPhone, paysCommission]);
-
-  // Handle seamless resumption
-  useEffect(() => {
-    if (isOpen && resumedContactType) {
-      handleContactTypeSelect(resumedContactType);
-    }
-  }, [isOpen, resumedContactType, handleContactTypeSelect]);
-
-  // ── Step 2 (optional): Phone capture ────────────────────────────────────────
-  const handlePhoneSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPhoneError('');
-
-    if (!isValidKenyanPhone(phone)) {
-      setPhoneError('Please enter a valid Kenyan WhatsApp number (e.g. 0712 345 678)');
-      return;
-    }
-
-    setSavingPhone(true);
-    try {
-      const { session } = await getSession();
-      if (!session?.user) {
-        toast.error('Session expired. Please try again.');
-        setSavingPhone(false);
-        return;
-      }
-
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('profiles')
-        .update({ phone: phone.trim(), updated_at: new Date().toISOString() })
-        .eq('id', session.user.id);
-
-      if (error) throw error;
-
-      setSavingPhone(false);
-      await continueToWhatsApp(contactType!, phone.trim(), false);
-    } catch (err) {
-      console.error('Phone save error:', err);
-      toast.error('Failed to save phone number. Please try again.');
-      setSavingPhone(false);
-    }
-  }, [phone, contactType]);
-
-  // ── Step 3 (optional): Fee disclosure accepted ───────────────────────────────
-  const handleFeeAccepted = useCallback(async () => {
-    const { session } = await getSession();
-    const supabase = createClient();
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('phone')
-      .eq('id', session?.user?.id ?? '')
-      .single();
-
-    await continueToWhatsApp(contactType!, profile?.phone ?? '', true);
-  }, [contactType]);
-
   // ── Core: Track lead + open WhatsApp ────────────────────────────────────────
+  // Defined FIRST so all downstream callbacks can reference it via ref.
   const continueToWhatsApp = useCallback(async (
     type: 'hostel_owner' | 'rumia_agent',
     userPhone: string,
@@ -301,16 +196,12 @@ export function ContactModal({
     } catch (err) {
       console.error('Track lead error:', err);
       // Graceful fallback — still open WhatsApp.
-      // If the API is down, we still open WhatsApp so the student can reach
-      // the agent. The fee-accepted message is used when the user has already
-      // seen and accepted the fee disclosure.
       const { buildWhatsAppUrl, hostelOwnerMessage, agentInquiryMessage, agentFeeAcceptedMessage } = await import('@/lib/utils/phone');
       const fallbackPhone = type === 'hostel_owner' && landlordPhone ? landlordPhone : agentPhone;
       let msg: string;
       if (type === 'hostel_owner') {
         msg = hostelOwnerMessage(listingTitle);
       } else if (!paysCommission) {
-        // Non-commission hostel: user accepted the fee before reaching here
         msg = agentFeeAcceptedMessage(listingTitle, agentPhone);
       } else {
         msg = agentInquiryMessage(listingTitle, 'your agent');
@@ -323,6 +214,122 @@ export function ContactModal({
     }
   }, [listingId, agentId, listingTitle, agentPhone, landlordPhone, paysCommission, handleClose]);
 
+  // Ref always holds the latest continueToWhatsApp, avoiding stale closures
+  // in handleContactTypeSelect / handlePhoneSubmit / handleFeeAccepted.
+  const continueRef = useRef(continueToWhatsApp);
+  continueRef.current = continueToWhatsApp;
+
+  // ── Step 1: User picks a contact type ───────────────────────────────────────
+  const handleContactTypeSelect = useCallback(async (type: 'hostel_owner' | 'rumia_agent') => {
+    setContactType(type);
+    setIsLoading(true);
+
+    try {
+      const { session } = await getSession();
+
+      if (!session?.user) {
+        const pending: PendingContact = {
+          hostelId: listingId,
+          hostelTitle: listingTitle,
+          agentId,
+          agentPhone,
+          paysCommission,
+          contactType: type,
+          returnPath: window.location.pathname,
+        };
+        savePendingContact(pending);
+        const { error } = await signInWithGoogle(window.location.pathname);
+        if (error) {
+          setIsLoading(false);
+          return;
+        }
+        return;
+      }
+
+      const supabase = createClient();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile?.phone || !isValidKenyanPhone(profile.phone)) {
+        setIsLoading(false);
+        setStep('phone');
+        return;
+      }
+
+      await continueRef.current(type, profile.phone, false);
+    } catch (err) {
+      console.error('Contact flow error:', err);
+      toast.error('Something went wrong. Please try again.');
+      setIsLoading(false);
+    }
+  }, [listingId, listingTitle, agentId, agentPhone, paysCommission]);
+
+  // Handle seamless resumption after OAuth
+  useEffect(() => {
+    if (isOpen && resumedContactType) {
+      handleContactTypeSelect(resumedContactType);
+    }
+  }, [isOpen, resumedContactType, handleContactTypeSelect]);
+
+  // ── Step 2 (optional): Phone capture ────────────────────────────────────────
+  const handlePhoneSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError('');
+
+    if (!isValidKenyanPhone(phone)) {
+      const attempts = phoneAttempts + 1;
+      setPhoneAttempts(attempts);
+      if (attempts >= 2) {
+        setPhoneError('That number still doesn\'t look right. Please try again — use a valid Kenyan number like 0712 345 678.');
+      } else {
+        setPhoneError('That doesn\'t look like a valid Kenyan number. Please try again (e.g. 0712 345 678).');
+      }
+      toast.error('Invalid phone number. Please try again.');
+      return;
+    }
+
+    setSavingPhone(true);
+    try {
+      const { session } = await getSession();
+      if (!session?.user) {
+        toast.error('Session expired. Please try again.');
+        setSavingPhone(false);
+        return;
+      }
+
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('profiles')
+        .update({ phone: phone.trim(), updated_at: new Date().toISOString() })
+        .eq('id', session.user.id);
+
+      if (error) throw error;
+
+      setSavingPhone(false);
+      await continueRef.current(contactType!, phone.trim(), false);
+    } catch (err) {
+      console.error('Phone save error:', err);
+      toast.error('Failed to save phone number. Please try again.');
+      setSavingPhone(false);
+    }
+  }, [phone, contactType, phoneAttempts]);
+
+  // ── Step 3 (optional): Fee disclosure accepted ───────────────────────────────
+  const handleFeeAccepted = useCallback(async () => {
+    const { session } = await getSession();
+    const supabase = createClient();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('phone')
+      .eq('id', session?.user?.id ?? '')
+      .single();
+
+    await continueRef.current(contactType!, profile?.phone ?? '', true);
+  }, [contactType]);
+
   if (!mounted) return null;
 
   const content = (
@@ -333,6 +340,7 @@ export function ContactModal({
       phone={phone}
       setPhone={setPhone}
       phoneError={phoneError}
+      setPhoneError={setPhoneError}
       savingPhone={savingPhone}
       paysCommission={paysCommission}
       onChooseHostelOwner={() => handleContactTypeSelect('hostel_owner')}
@@ -402,6 +410,7 @@ interface ModalContentProps {
   phone: string;
   setPhone: (v: string) => void;
   phoneError: string;
+  setPhoneError: (v: string) => void;
   savingPhone: boolean;
   paysCommission: boolean;
   onChooseHostelOwner: () => void;
@@ -418,6 +427,7 @@ function ModalContent({
   phone,
   setPhone,
   phoneError,
+  setPhoneError,
   savingPhone,
   paysCommission,
   onChooseHostelOwner,
@@ -476,7 +486,19 @@ function ModalContent({
                 type="tel"
                 placeholder="e.g. 0712 345 678"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPhone(val);
+                  if (val.trim().length >= 9) {
+                    setPhoneError(
+                      isValidKenyanPhone(val)
+                        ? ''
+                        : 'Please enter a valid Kenyan number (07xx or 01xx)',
+                    );
+                  } else {
+                    setPhoneError('');
+                  }
+                }}
                 className={cn(
                   'h-11 pl-10',
                   phoneError
@@ -500,7 +522,7 @@ function ModalContent({
 
           <Button
             type="submit"
-            disabled={savingPhone || !phone.trim()}
+            disabled={savingPhone || !phone.trim() || (phone.trim().length >= 9 && !isValidKenyanPhone(phone))}
             className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all duration-300 border-0"
           >
             {savingPhone ? (

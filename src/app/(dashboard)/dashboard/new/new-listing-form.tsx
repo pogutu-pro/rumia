@@ -13,6 +13,8 @@ import {
   DISTANCE_CATEGORY_OPTIONS,
 } from '@/lib/constants/dekut-areas';
 import { processAndUploadImage } from '@/lib/r2/upload';
+import { isValidKenyanPhone } from '@/lib/utils/phone';
+import { cn } from '@/lib/utils/cn';
 
 // Dynamically imported with ssr:false because @googlemaps/js-api-loader
 // references `window` at module-evaluation time, which crashes Next.js SSR.
@@ -29,7 +31,7 @@ const GoogleLocationInput = dynamic(
   },
 );
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, UploadCloud, Youtube, GripVertical, Star, ChevronUp, ChevronDown } from 'lucide-react';
+import { Loader2, Plus, Trash2, UploadCloud, Youtube, GripVertical, Star, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
 
 import { Zap, Droplets, Wifi } from 'lucide-react';
 import {
@@ -431,6 +433,8 @@ export function NewListingForm({
   );
   const [whatsappNumber, setWhatsappNumber] = useState(agentWhatsapp || '');
   const [landlordPhone, setLandlordPhone] = useState(initialListing?.landlord_phone || '');
+  const [whatsappError, setWhatsappError] = useState('');
+  const [landlordPhoneError, setLandlordPhoneError] = useState('');
   const [images, setImages] = useState<UploadedImage[]>(() =>
     initialImages(initialListing),
   );
@@ -667,6 +671,16 @@ export function NewListingForm({
       toast.error(
         'Please fill in all required fields: Title, Area, and WhatsApp number',
       );
+      return;
+    }
+
+    if (!isValidKenyanPhone(whatsappNumber)) {
+      toast.error('Please enter a valid Kenyan WhatsApp number (e.g. 0712 345 678)');
+      return;
+    }
+
+    if (landlordPhone && !isValidKenyanPhone(landlordPhone)) {
+      toast.error('Please enter a valid Kenyan phone number for the Hostel Owner');
       return;
     }
 
@@ -934,10 +948,31 @@ export function NewListingForm({
               type="tel"
               required
               value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value)}
-              placeholder="e.g. +254700000000"
-              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+              onChange={(e) => {
+                const val = e.target.value;
+                setWhatsappNumber(val);
+                if (val.trim().length >= 9) {
+                  setWhatsappError(
+                    isValidKenyanPhone(val)
+                      ? ''
+                      : 'Please enter a valid Kenyan number (07xx or 01xx)',
+                  );
+                } else {
+                  setWhatsappError('');
+                }
+              }}
+              placeholder="e.g. 0712 345 678"
+              className={cn(
+                'h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm',
+                whatsappError && 'border-rose-400 focus-visible:ring-rose-400',
+              )}
             />
+            {whatsappError && (
+              <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {whatsappError}
+              </p>
+            )}
             <p className="text-[11px] text-slate-400 font-medium">
               This updates your agent profile and is the number students will
               contact on WhatsApp.
@@ -951,10 +986,31 @@ export function NewListingForm({
               id="landlordPhone"
               type="tel"
               value={landlordPhone}
-              onChange={(e) => setLandlordPhone(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setLandlordPhone(val);
+                if (val.trim().length >= 9) {
+                  setLandlordPhoneError(
+                    isValidKenyanPhone(val)
+                      ? ''
+                      : 'Please enter a valid Kenyan number (07xx or 01xx)',
+                  );
+                } else {
+                  setLandlordPhoneError('');
+                }
+              }}
               placeholder="e.g. 0712 345 678"
-              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+              className={cn(
+                'h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm',
+                landlordPhoneError && 'border-rose-400 focus-visible:ring-rose-400',
+              )}
             />
+            {landlordPhoneError && (
+              <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {landlordPhoneError}
+              </p>
+            )}
             <p className="text-[11px] text-slate-400 font-medium">
               The landlord or caretaker's direct phone number. When a student
               chooses "Hostel Owner" in the contact flow, they'll be connected

@@ -13,6 +13,7 @@ import {
   Building2,
   ArrowLeft,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ import { getTourPrice, formatTourPrice, LISTING_SPECIFIC_PRICE, ZONE_SPECIFIC_PR
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/client';
 import { HostelPickerModal } from '@/components/tours/hostel-picker-modal';
+import { isValidKenyanPhone } from '@/lib/utils/phone';
 import type { TourType, TourTimeWindow, TourBooking } from '@/types';
 
 interface BookTourFormProps {
@@ -114,6 +116,8 @@ export function BookTourForm({
   const [preferredTime, setPreferredTime] = useState<TourTimeWindow>('morning');
   const [studentName, setStudentName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [phoneAttempts, setPhoneAttempts] = useState(0);
   const [linkedUserId, setLinkedUserId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -176,6 +180,8 @@ export function BookTourForm({
     setPreferredTime('morning');
     setStudentName('');
     setPhone('');
+    setPhoneError('');
+    setPhoneAttempts(0);
     setLinkedUserId(null);
     setIsLoggedIn(false);
     setSelectedHostels([]);
@@ -213,8 +219,14 @@ export function BookTourForm({
       toast.error('Please enter your name');
       return;
     }
-    if (!phone.trim() || phone.replace(/\D/g, '').length < 7) {
-      toast.error('Please enter a valid phone number');
+    if (!phone.trim() || !isValidKenyanPhone(phone)) {
+      const attempts = phoneAttempts + 1;
+      setPhoneAttempts(attempts);
+      if (attempts >= 2) {
+        toast.error('That number still doesn\'t look right. Please try again — use a valid Kenyan number like 0712 345 678.');
+      } else {
+        toast.error('That doesn\'t look like a valid Kenyan number. Please try again (e.g. 0712 345 678).');
+      }
       return;
     }
     if (!zone) {
@@ -344,7 +356,7 @@ export function BookTourForm({
               </div>
               <div className="px-5 pb-6 pt-2">
                 {step === 'form' ? (
-                  <FormContent
+                   <FormContent
                     tourType={tourType}
                     setTourType={handleTourTypeChange}
                     preferredDate={preferredDate}
@@ -355,6 +367,8 @@ export function BookTourForm({
                     setStudentName={setStudentName}
                     phone={phone}
                     setPhone={setPhone}
+                    phoneError={phoneError}
+                    setPhoneError={setPhoneError}
                     price={price}
                     zone={zone}
                     listingTitle={listingTitle}
@@ -406,6 +420,8 @@ export function BookTourForm({
                       setStudentName={setStudentName}
                       phone={phone}
                       setPhone={setPhone}
+                      phoneError={phoneError}
+                      setPhoneError={setPhoneError}
                       price={price}
                       zone={zone}
                       listingTitle={listingTitle}
@@ -460,6 +476,8 @@ interface FormContentProps {
   setStudentName: (v: string) => void;
   phone: string;
   setPhone: (v: string) => void;
+  phoneError: string;
+  setPhoneError: (v: string) => void;
   price: number | null;
   zone: string | null;
   listingTitle: string;
@@ -483,6 +501,8 @@ function FormContent({
   setStudentName,
   phone,
   setPhone,
+  phoneError,
+  setPhoneError,
   price,
   zone,
   listingTitle,
@@ -736,11 +756,34 @@ function FormContent({
               type="tel"
               placeholder="e.g. 0712 345 678"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="h-11 pl-10 border-gray-300 focus:border-gray-500"
+              onChange={(e) => {
+                const val = e.target.value;
+                setPhone(val);
+                if (val.trim().length >= 9) {
+                  setPhoneError(
+                    isValidKenyanPhone(val)
+                      ? ''
+                      : 'Please enter a valid Kenyan number (07xx or 01xx)',
+                  );
+                } else {
+                  setPhoneError('');
+                }
+              }}
+              className={cn(
+                'h-11 pl-10',
+                phoneError
+                  ? 'border-rose-400 focus-visible:ring-rose-400'
+                  : 'border-gray-300 focus:border-gray-500',
+              )}
               required
             />
           </div>
+          {phoneError && (
+            <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              {phoneError}
+            </p>
+          )}
           <p className="text-[10px] text-gray-400 font-medium">
             {isLoggedIn
               ? 'From your account profile'

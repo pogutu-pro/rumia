@@ -26,19 +26,30 @@ const sections = [
     ],
   },
   {
+    id: 'contact-flow',
+    title: '3. Contact Flow and Phone Numbers',
+    content: null,
+    paragraphs: [
+      'When you choose to contact a listing on Rumia, you are presented with two options: Hostel Owner (direct contact with the landlord or caretaker) and Rumia Agent (contact through a student agent for guided assistance).',
+      'To initiate contact, you must be signed in and have a valid Kenyan phone number saved to your profile. Your phone number is shared with the agent or landlord so they can respond to your enquiry via WhatsApp.',
+      'Rumia collects and logs contact leads for commission tracking purposes. By contacting an agent or landlord through Rumia, you consent to your name and phone number being shared with that party.',
+    ],
+  },
+  {
     id: 'student-responsibilities',
-    title: '3. Student Responsibilities',
+    title: '4. Student Responsibilities',
     content: null,
     items: [
-      'Provide accurate personal information when registering or contacting an agent',
+      'Provide accurate personal information — including a valid Kenyan phone number — when registering or contacting an agent',
       'Use the platform only to find genuine accommodation for yourself',
       'Not misrepresent your identity or contact multiple agents for the same room simultaneously with no intent to rent',
       'Not use Rumia\'s agent contact details for spam or any purpose unrelated to finding accommodation',
+      'Verify room conditions in person before paying any deposit or signing any agreement',
     ],
   },
   {
     id: 'agent-responsibilities',
-    title: '4. Agent Responsibilities',
+    title: '5. Agent Responsibilities',
     content: null,
     items: [
       'Only list rooms that are genuinely available and accurately described',
@@ -46,25 +57,43 @@ const sections = [
       'Not inflate pricing, misrepresent room conditions, or use misleading photos',
       'Respond to genuine student enquiries in good faith',
       'Not list rooms without the knowledge and approval of the landlord or caretaker',
+      'Provide accurate phone numbers for both the agent WhatsApp and the hostel owner/landlord',
     ],
     note: 'Rumia reserves the right to remove any listing that is reported as inaccurate, misleading, or no longer available, and to suspend agents who repeatedly violate this.',
   },
   {
     id: 'commission',
-    title: '5. Lead Generation and Commission',
+    title: '6. Lead Generation and Commission',
     content: null,
     paragraphs: [
       'Rumia operates on a lead generation model. When a student contacts an agent through Rumia and subsequently moves into the listed property, a commission fee is owed to Rumia by the landlord.',
+      'Some hostels are designated as commission-paying (managed by Rumia agents with landlord agreements), while others are not. The commission status is displayed on each listing.',
     ],
     items: [
       'The commission split is 40% to Rumia, 60% to the agent, based on the agreed commission rate with the landlord.',
       'Rumia\'s 40% share is non-negotiable and forms the basis of our business model.',
+      'For non-commission hostels, a KES 50 consultation fee may apply when contacting a Rumia Agent. This fee is paid directly to the agent and is clearly disclosed before the contact is made.',
       'Agents and landlords who attempt to circumvent this arrangement — for example by redirecting students off-platform to avoid commission attribution — are in breach of these terms and will be permanently removed from the platform.',
     ],
   },
   {
+    id: 'tour-bookings',
+    title: '7. Tour Bookings and Pricing',
+    content: null,
+    paragraphs: [
+      'Rumia offers a guided hostel tour service where a student agent accompanies you to visit hostels in person. Tours must be booked and paid for through the platform before the visit.',
+    ],
+    items: [
+      'Listing-specific tour (from a listing details page): KSh 100 — visit up to 4 hostels in the same area',
+      'Specific-hostel tour (from the /book-tour page): KSh 300 — pick up to 4 hostels from a zone',
+      'Full search tour: pricing varies by zone (KSh 600 – KSh 1,500 depending on the area)',
+      'Tour bookings are confirmed only after payment. Cancellations must be made at least 24 hours before the scheduled tour',
+      'Rumia is not responsible for the outcome of any tour — a tour does not guarantee a room will be available',
+    ],
+  },
+  {
     id: 'prohibited-conduct',
-    title: '6. Prohibited Conduct',
+    title: '8. Prohibited Conduct',
     content: null,
     items: [
       'Creating fake, duplicate, or misleading listings',
@@ -72,13 +101,14 @@ const sections = [
       'Deliberately redirecting students away from Rumia\'s tracked contact flow to avoid commission',
       'Harassing or spamming other users',
       'Using automated tools to scrape listings or contact information',
+      'Providing false phone numbers or contact details',
       'Any activity that violates Kenyan law',
     ],
     note: 'Violations may result in immediate account suspension without notice.',
   },
   {
     id: 'intellectual-property',
-    title: '7. Intellectual Property',
+    title: '9. Intellectual Property',
     content: null,
     paragraphs: [
       'The Rumia name, logo, platform design, and all content created by Stratnovo are the intellectual property of Stratnovo. You may not reproduce, copy, or use any part of the platform for commercial purposes without written permission.',
@@ -87,13 +117,14 @@ const sections = [
   },
   {
     id: 'disclaimers',
-    title: '8. Disclaimers',
+    title: '10. Disclaimers',
     content: null,
     items: [
       'The accuracy of any listing submitted by an agent',
       'The conduct of any agent, landlord, or student using the platform',
       'Any dispute arising from a rental arrangement made through Rumia',
       'Any loss, damage, or dissatisfaction resulting from accommodation found through the platform',
+      'WhatsApp availability or delivery of messages — WhatsApp is operated by a third party and is outside Rumia\'s control',
     ],
     note: 'Use Rumia\'s listings as a starting point. Always verify room conditions in person before paying any deposit or signing any agreement.',
     preamble:
@@ -101,19 +132,19 @@ const sections = [
   },
   {
     id: 'termination',
-    title: '9. Account Termination',
+    title: '11. Account Termination',
     content:
       'Rumia reserves the right to suspend or permanently terminate any account that violates these Terms of Service, engages in fraudulent activity, or damages the reputation or operation of the platform. No refund of any kind will be issued upon termination for cause. You may delete your own account at any time by contacting us at legal@rumia.co.ke.',
   },
   {
     id: 'governing-law',
-    title: '10. Governing Law',
+    title: '12. Governing Law',
     content:
       'These Terms of Service are governed by the laws of the Republic of Kenya. Any disputes arising from the use of Rumia shall be subject to the jurisdiction of Kenyan courts.',
   },
   {
     id: 'contact',
-    title: '11. Contact',
+    title: '13. Contact',
     content: null,
     contact: true,
     lines: [
@@ -155,7 +186,7 @@ export default function TermsOfServicePage() {
               Terms of Service
             </h1>
             <p className="mt-3 text-sm text-slate-500">
-              Effective Date: June 1, 2025 &middot; Last Updated: June 1, 2025
+              Effective Date: June 1, 2025 &middot; Last Updated: July 25, 2025
             </p>
           </div>
 

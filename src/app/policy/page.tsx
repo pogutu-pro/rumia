@@ -24,10 +24,11 @@ const sections = [
       {
         subtitle: 'Information you provide:',
         items: [
-          'Full name',
+          'Full name (from Google OAuth or manual input)',
           'Email address',
-          'Phone number (optional at registration, required to contact an agent)',
+          'Phone number (required to contact agents or landlords via WhatsApp)',
           'University and year of study',
+          'Tour booking preferences (hostel selection, preferred date and time)',
         ],
       },
       {
@@ -47,7 +48,9 @@ const sections = [
     content: null,
     items: [
       'Display relevant hostel listings based on your search and location preferences',
-      'Connect you with student agents when you initiate contact',
+      'Connect you with student agents or landlords when you initiate contact through WhatsApp',
+      'Track contact leads for commission attribution and platform operations',
+      'Process and manage tour bookings',
       'Send platform notifications and updates (WhatsApp or email)',
       'Improve search results, listing quality, and platform performance',
       'Detect and prevent fraudulent listings or abuse',
@@ -59,7 +62,8 @@ const sections = [
     title: '4. Information Sharing',
     content: null,
     items: [
-      'When you choose to contact an agent through Rumia, your name and contact information are shared with that agent so they can respond to your enquiry.',
+      'When you choose to contact an agent or landlord through Rumia, your name and phone number are shared with that party via WhatsApp so they can respond to your enquiry.',
+      'When you book a tour, your name, phone number, and tour preferences are shared with the assigned student agent.',
       'We do not sell your personal data to third parties. We may share data with:',
     ],
     subList: [
@@ -67,6 +71,7 @@ const sections = [
       'Analytics tools to understand platform usage in aggregate',
       'Law enforcement if required by Kenyan law',
     ],
+    note: 'WhatsApp communication happens outside Rumia\'s control. Once your phone number is shared with an agent or landlord via WhatsApp, Rumia cannot control how that party uses your information.',
   },
   {
     id: 'data-security',
@@ -76,10 +81,11 @@ const sections = [
   },
   {
     id: 'cookies',
-    title: '6. Cookies',
+    title: '6. Cookies and Session Data',
     content: null,
     items: [
       'Keeping you logged in (session cookies)',
+      'Storing your pending contact state during OAuth redirects (session storage, cleared after use)',
       'Understanding how users navigate the platform (analytics)',
     ],
     note: 'You can disable cookies in your browser settings, though some features may not work correctly.',
@@ -92,6 +98,7 @@ const sections = [
       'Request a copy of the data we hold about you',
       'Request correction of inaccurate data',
       'Request deletion of your account and associated data',
+      'Opt out of non-essential data collection',
     ],
     note: 'To exercise any of these rights, email privacy@rumia.co.ke. We will respond within 14 days.',
   },
@@ -151,7 +158,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy
             </h1>
             <p className="mt-3 text-sm text-slate-500">
-              Effective Date: June 1, 2025 &middot; Last Updated: June 1, 2025
+              Effective Date: June 1, 2025 &middot; Last Updated: July 25, 2025
             </p>
           </div>
 
