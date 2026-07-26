@@ -68,45 +68,45 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Users</h1>
-          <p className="text-sm text-gray-500 mt-1">{users.length} user{users.length !== 1 ? 's' : ''} registered</p>
+          <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Users</h1>
+          <p className="text-sm text-slate-500 mt-1">{users.length} user{users.length !== 1 ? 's' : ''} registered</p>
         </div>
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+      <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
+            <tr className="border-b border-slate-200/80 bg-slate-50">
               {['User', 'Email', 'Phone', 'Role', 'Agent', 'Joined', 'Updated', 'Actions'].map((h) => (
-                <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3 whitespace-nowrap">{h}</th>
+                <th key={h} className="text-xs font-medium text-slate-500 uppercase tracking-wider text-left px-5 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-50">
             {users.length === 0 ? (
-              <tr><td colSpan={8} className="text-sm text-gray-400 text-center px-5 py-8">No users found.</td></tr>
+              <tr><td colSpan={8} className="text-sm text-slate-400 text-center px-5 py-8">No users found.</td></tr>
             ) : users.map((user) => {
               const badge = ROLE_BADGES[user.role] ?? ROLE_BADGES.student;
               return (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0 flex items-center justify-center">
-                          <span className="text-xs font-medium text-gray-400">{(user.full_name || '?')[0]}</span>
+                        <div className="w-8 h-8 rounded-full bg-slate-100 shrink-0 flex items-center justify-center">
+                          <span className="text-xs font-medium text-slate-400">{(user.full_name || '?')[0]}</span>
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{user.full_name || '—'}</p>
-                        <p className="text-xs text-gray-400 font-mono">{user.id.slice(0, 8)}...</p>
+                        <p className="text-sm font-medium text-slate-900">{user.full_name || '—'}</p>
+                        <p className="text-xs text-slate-400 font-mono">{user.id.slice(0, 8)}...</p>
                       </div>
                     </div>
                   </td>
-                  <td className="text-sm text-gray-600 px-5 py-4 max-w-[200px] truncate">{user.email}</td>
-                  <td className="text-sm text-gray-600 px-5 py-4 whitespace-nowrap">{user.phone || '—'}</td>
+                  <td className="text-sm text-slate-600 px-5 py-4 max-w-[200px] truncate">{user.email}</td>
+                  <td className="text-sm text-slate-600 px-5 py-4 whitespace-nowrap">{user.phone || '—'}</td>
                   <td className="px-5 py-4">
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${badge.class}`}>{badge.label}</span>
                   </td>
@@ -116,18 +116,18 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                         <Link href={`/admin/agents/${user.agent_slug || ''}`} className="text-emerald-600 hover:underline font-medium">
                           {user.agent_name}
                         </Link>
-                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                           {user.agent_status}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="text-sm text-gray-500 px-5 py-4 whitespace-nowrap">
+                  <td className="text-sm text-slate-500 px-5 py-4 whitespace-nowrap">
                     {new Date(user.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
-                  <td className="text-sm text-gray-500 px-5 py-4 whitespace-nowrap">
+                  <td className="text-sm text-slate-500 px-5 py-4 whitespace-nowrap">
                     {user.updated_at ? new Date(user.updated_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                   </td>
                   <td className="px-5 py-4">
@@ -169,18 +169,18 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                       )}
                     </div>
                     {promoteForm === user.id && (
-                      <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-2 border border-gray-200 min-w-[280px]">
-                        <p className="text-xs font-medium text-gray-600">Promote to Agent</p>
+                      <div className="mt-3 p-3 bg-slate-50 rounded-lg space-y-2 border border-slate-200/80 min-w-[280px]">
+                        <p className="text-xs font-medium text-slate-600">Promote to Agent</p>
                         <input type="text" placeholder="Full name" value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg bg-white" />
+                          className="w-full text-sm px-2.5 py-1.5 border border-slate-200/80 rounded-lg bg-white" />
                         <div className="grid grid-cols-2 gap-2">
                           <input type="text" placeholder="Phone" value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg bg-white" />
+                            className="w-full text-sm px-2.5 py-1.5 border border-slate-200/80 rounded-lg bg-white" />
                           <input type="text" placeholder="WhatsApp (optional)" value={formData.whatsapp}
                             onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                            className="w-full text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg bg-white" />
+                            className="w-full text-sm px-2.5 py-1.5 border border-slate-200/80 rounded-lg bg-white" />
                         </div>
                         <div className="flex justify-end">
                           <Button size="sm" onClick={() => handlePromoteToAgent(user.id)}
@@ -201,38 +201,38 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {users.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No users found.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No users found.</div>
         ) : users.map((user) => {
           const badge = ROLE_BADGES[user.role] ?? ROLE_BADGES.student;
           return (
-            <div key={user.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3">
+            <div key={user.id} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   {user.avatar_url ? (
                     <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-100 shrink-0 flex items-center justify-center">
-                      <span className="text-sm font-medium text-gray-400">{(user.full_name || '?')[0]}</span>
+                    <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 flex items-center justify-center">
+                      <span className="text-sm font-medium text-slate-400">{(user.full_name || '?')[0]}</span>
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{user.full_name || '—'}</p>
-                    <p className="text-xs text-gray-400">{user.email}</p>
+                    <p className="text-sm font-semibold text-slate-900">{user.full_name || '—'}</p>
+                    <p className="text-xs text-slate-400">{user.email}</p>
                   </div>
                 </div>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.class}`}>{badge.label}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+              <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
                 <span>Phone: {user.phone || '—'}</span>
                 <span>Joined: {new Date(user.created_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 {user.updated_at && <span>Updated: {new Date(user.updated_at).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' })}</span>}
                 <span>ID: {user.id.slice(0, 8)}...</span>
               </div>
               {user.has_agent && (
-                <div className="text-xs bg-gray-50 rounded-lg p-2 flex items-center gap-2">
-                  <span className="text-gray-500">Agent:</span>
+                <div className="text-xs bg-slate-50 rounded-lg p-2 flex items-center gap-2">
+                  <span className="text-slate-500">Agent:</span>
                   <Link href={`/admin/agents/${user.agent_slug || ''}`} className="text-emerald-600 hover:underline font-medium">{user.agent_name}</Link>
-                  <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                  <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                     {user.agent_status}
                   </span>
                 </div>
@@ -272,17 +272,17 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                 )}
               </div>
               {promoteForm === user.id && (
-                <div className="p-3 bg-gray-50 rounded-lg space-y-2 border border-gray-200">
-                  <p className="text-xs font-medium text-gray-600">Promote to Agent</p>
+                <div className="p-3 bg-slate-50 rounded-lg space-y-2 border border-slate-200/80">
+                  <p className="text-xs font-medium text-slate-600">Promote to Agent</p>
                   <input type="text" placeholder="Full name" value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg bg-white" />
+                    className="w-full text-sm px-2.5 py-1.5 border border-slate-200/80 rounded-lg bg-white" />
                   <input type="text" placeholder="Phone" value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg bg-white" />
+                    className="w-full text-sm px-2.5 py-1.5 border border-slate-200/80 rounded-lg bg-white" />
                   <input type="text" placeholder="WhatsApp (optional)" value={formData.whatsapp}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                    className="w-full text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg bg-white" />
+                    className="w-full text-sm px-2.5 py-1.5 border border-slate-200/80 rounded-lg bg-white" />
                   <div className="flex justify-end">
                     <Button size="sm" onClick={() => handlePromoteToAgent(user.id)}
                       disabled={promoteUserId === user.id} className="rounded-lg text-xs">

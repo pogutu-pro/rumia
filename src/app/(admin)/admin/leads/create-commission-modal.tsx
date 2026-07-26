@@ -76,13 +76,13 @@ export function CreateCommissionModal({
             {/* Agent — read-only */}
             <div className="space-y-1.5">
               <Label>Agent</Label>
-              <p className="text-sm text-gray-700 py-2">{lead?.agentName ?? '—'}</p>
+              <p className="text-sm text-slate-700 py-2">{lead?.agentName ?? '—'}</p>
             </div>
 
             {/* Listing — read-only */}
             <div className="space-y-1.5">
               <Label>Listing</Label>
-              <p className="text-sm text-gray-700 py-2">{lead?.listingTitle ?? '—'}</p>
+              <p className="text-sm text-slate-700 py-2">{lead?.listingTitle ?? '—'}</p>
             </div>
 
             {/* Amount */}

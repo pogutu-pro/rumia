@@ -102,14 +102,14 @@ function SortableRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`hover:bg-gray-50 transition-colors ${isDragging ? 'bg-gray-50 shadow-lg opacity-80' : ''}`}
+      className={`hover:bg-slate-50 transition-colors ${isDragging ? 'bg-slate-50 shadow-lg opacity-80' : ''}`}
     >
       {isReorderMode && (
         <td className="px-3 py-4 w-10">
           <button
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none"
+            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 touch-none"
           >
             <GripVertical className="h-4 w-4" />
           </button>
@@ -118,23 +118,23 @@ function SortableRow({
       <td className="px-5 py-4">
         {listing.cover_image ? (
           <img src={listing.cover_image} alt={listing.title} className="h-10 w-14 object-cover rounded-lg" />
-        ) : <div className="h-10 w-14 bg-gray-100 rounded-lg" />}
+        ) : <div className="h-10 w-14 bg-slate-100 rounded-lg" />}
       </td>
-      <td className="text-sm px-5 py-4 font-medium text-gray-900">{listing.title}</td>
-      <td className="text-sm text-gray-500 px-5 py-4">{listing.location}</td>
-      <td className="text-sm text-gray-700 px-5 py-4">{listing.price.toLocaleString()}</td>
-      <td className="text-sm text-gray-600 px-5 py-4">{listing.agent_name}</td>
-      <td className="text-sm text-gray-600 px-5 py-4">{listing.leads_count}</td>
+      <td className="text-sm px-5 py-4 font-medium text-slate-900">{listing.title}</td>
+      <td className="text-sm text-slate-500 px-5 py-4">{listing.location}</td>
+      <td className="text-sm text-slate-700 px-5 py-4">{listing.price.toLocaleString()}</td>
+      <td className="text-sm text-slate-600 px-5 py-4">{listing.agent_name}</td>
+      <td className="text-sm text-slate-600 px-5 py-4">{listing.leads_count}</td>
       <td className="px-5 py-4">
         {listing.is_active ? (
           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
         ) : (
-          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Inactive</span>
+          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Inactive</span>
         )}
       </td>
       <td className="px-5 py-4">
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-mono text-gray-600">
+          <span className="text-xs font-mono text-slate-600">
             {listing.landlord_phone || 'Not set'}
           </span>
           <button
@@ -162,14 +162,14 @@ function SortableRow({
             className={`text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
               listing.commission_locked_by_admin
                 ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
             }`}
           >
             {listing.commission_locked_by_admin ? 'Locked' : 'Unlocked'}
           </button>
         </div>
       </td>
-      <td className="text-sm text-gray-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
+      <td className="text-sm text-slate-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
       <td className="px-5 py-4">
         <div className="flex items-center gap-2 text-sm">
           <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">Live</a>
@@ -227,41 +227,41 @@ function SortableMobileCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3 ${isDragging ? 'shadow-lg opacity-80 border-emerald-300' : ''}`}
+      className={`bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3 ${isDragging ? 'shadow-lg opacity-80 border-emerald-300' : ''}`}
     >
       {isReorderMode && (
-        <div className="flex items-center gap-2 pb-2 border-b border-gray-50">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-50">
           <button
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none"
+            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 touch-none"
           >
             <GripVertical className="h-4 w-4" />
           </button>
-          <span className="text-xs font-medium text-gray-400">#{index + 1}</span>
+          <span className="text-xs font-medium text-slate-400">#{index + 1}</span>
         </div>
       )}
       <div className="flex items-start gap-3">
         {listing.cover_image ? (
           <img src={listing.cover_image} alt={listing.title} className="h-14 w-20 object-cover rounded-lg shrink-0" />
-        ) : <div className="h-14 w-20 bg-gray-100 rounded-lg shrink-0" />}
+        ) : <div className="h-14 w-20 bg-slate-100 rounded-lg shrink-0" />}
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 leading-snug">{listing.title}</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{listing.location}</p>
-          <p className="text-sm font-bold text-gray-900 mt-1">KES {listing.price.toLocaleString()}</p>
+          <h3 className="text-sm font-semibold text-slate-900 leading-snug">{listing.title}</h3>
+          <p className="text-xs text-slate-500 mt-0.5">{listing.location}</p>
+          <p className="text-sm font-bold text-slate-900 mt-1">KES {listing.price.toLocaleString()}</p>
         </div>
         {listing.is_active ? (
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Active</span>
         ) : (
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 shrink-0">Inactive</span>
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 shrink-0">Inactive</span>
         )}
       </div>
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-slate-500">
         <span>{listing.agent_name} &middot; {listing.leads_count} leads</span>
         <span>{new Date(listing.created_at).toLocaleDateString()}</span>
       </div>
-      <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2">
-        <span className="text-xs font-medium text-gray-500">Owner phone</span>
+      <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2">
+        <span className="text-xs font-medium text-slate-500">Owner phone</span>
         <button
           onClick={() => onEditOwnerPhone(listing)}
           className="text-xs font-mono font-medium text-emerald-700 hover:underline"
@@ -285,7 +285,7 @@ function SortableMobileCard({
           className={`text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
             listing.commission_locked_by_admin
               ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-              : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+              : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
           }`}
         >
           {listing.commission_locked_by_admin ? 'Locked' : 'Unlocked'}
@@ -347,18 +347,18 @@ function OwnerPhoneDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-label="Edit owner phone">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-gray-900">Owner Phone</h2>
-            <p className="mt-0.5 text-xs font-medium text-gray-500 line-clamp-1">
+            <h2 className="text-base font-bold text-slate-900">Owner Phone</h2>
+            <p className="mt-0.5 text-xs font-medium text-slate-500 line-clamp-1">
               {listing.title}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -524,7 +524,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Listings</h1>
+        <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Listings</h1>
         <div className="flex items-center gap-2">
           {isReorderMode ? (
             <>
@@ -565,7 +565,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
           )}
         </div>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
+      <p className="text-sm text-slate-500 mb-6">{listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
 
       {isReorderMode && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-sm text-amber-800">
@@ -574,7 +574,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
         <select value={agentFilter} onChange={(e) => { setAgentFilter(e.target.value); setVisibleCount(PAGE_SIZE); }}
           className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="">All Agents</option>
@@ -591,21 +591,21 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                {isReorderMode && <th className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-3 py-3 w-10"></th>}
+              <tr className="border-b border-slate-200/80 bg-slate-50">
+                {isReorderMode && <th className="text-xs font-medium text-slate-500 uppercase tracking-wider text-left px-3 py-3 w-10"></th>}
                 {['Photo', 'Hostel', 'Location', 'Price (KES)', 'Agent', 'Leads', 'Status', 'Owner Phone', 'Commission', 'Created', 'Actions'].map((h) => (
-                  <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
+                  <th key={h} className="text-xs font-medium text-slate-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
                 ))}
               </tr>
             </thead>
             <SortableContext items={orderedListings.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-slate-50">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={desktopColCount} className="text-sm text-gray-400 text-center px-5 py-8">No listings found.</td></tr>
+                  <tr><td colSpan={desktopColCount} className="text-sm text-slate-400 text-center px-5 py-8">No listings found.</td></tr>
                 ) : visible.map((listing, index) => (
                   <SortableRow
                     key={listing.id}
@@ -632,7 +632,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
         <div className="md:hidden space-y-3">
           <SortableContext items={orderedListings.map((l) => l.id)} strategy={verticalListSortingStrategy}>
             {filtered.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No listings found.</div>
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No listings found.</div>
             ) : visible.map((listing, index) => (
               <SortableMobileCard
                 key={listing.id}

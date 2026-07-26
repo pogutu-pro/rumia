@@ -118,14 +118,14 @@ export function TransferOwnershipModal({
         {step === 'select' ? (
           <div className="px-6 pb-2 space-y-4">
             {/* Current owner info */}
-            <div className="bg-gray-50 rounded-lg p-3 text-sm">
-              <span className="text-gray-500">Current owner:</span>{' '}
-              <span className="font-medium text-gray-900">{currentOwnerName}</span>
+            <div className="bg-slate-50 rounded-lg p-3 text-sm">
+              <span className="text-slate-500">Current owner:</span>{' '}
+              <span className="font-medium text-slate-900">{currentOwnerName}</span>
             </div>
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Search agents..."
                 value={search}
@@ -136,9 +136,9 @@ export function TransferOwnershipModal({
             </div>
 
             {/* Agent list */}
-            <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg divide-y">
+            <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-lg divide-y">
               {filteredAgents.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-6">
+                <p className="text-sm text-slate-400 text-center py-6">
                   {search
                     ? 'No agents match your search.'
                     : 'No other active agents available.'}
@@ -149,10 +149,10 @@ export function TransferOwnershipModal({
                     key={agent.id}
                     type="button"
                     onClick={() => handleSelectAgent(agent.id)}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors flex items-center justify-between group"
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between group"
                   >
-                    <span className="font-medium text-gray-900">{agent.name}</span>
-                    <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                    <span className="font-medium text-slate-900">{agent.name}</span>
+                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
                   </button>
                 ))
               )}

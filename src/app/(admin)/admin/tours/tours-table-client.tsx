@@ -71,7 +71,6 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
     }
   }
 
-  // Identify overdue pending_payment bookings (past their scheduled date)
   const today = new Date().toISOString().split('T')[0];
   const overdueBookings = tours.filter(
     (t) => t.status === 'pending_payment' && t.preferred_date < today,
@@ -79,17 +78,16 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
 
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+      <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight mb-1 flex items-center gap-2">
         <CalendarCheck className="h-5 w-5" />
         Tour Bookings
       </h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-slate-500 mb-6">
         {tours.length} booking{tours.length !== 1 ? 's' : ''} total
       </p>
 
-      {/* Overdue warning */}
       {overdueBookings.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-start gap-3">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-amber-800">
@@ -102,9 +100,8 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
         </div>
       )}
 
-      {/* Update error */}
       {updateError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 flex items-start gap-3">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-red-800">Status update failed</p>
@@ -119,8 +116,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
         </div>
       )}
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -164,16 +160,15 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
         )}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
+            <tr className="border-b border-slate-200/80 bg-slate-50">
               {['Student', 'Date & Time', 'Zone', 'Type', 'Amount', 'Agent', 'Status', 'Actions'].map(
                 (h) => (
                   <th
                     key={h}
-                    className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3"
+                    className="text-xs font-medium text-slate-500 uppercase tracking-wider text-left px-5 py-3"
                   >
                     {h}
                   </th>
@@ -181,10 +176,10 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-50">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-sm text-gray-400 text-center px-5 py-8">
+                <td colSpan={8} className="text-sm text-slate-400 text-center px-5 py-8">
                   No tour bookings found.
                 </td>
               </tr>
@@ -192,28 +187,28 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
               filtered.map((t) => (
                 <tr
                   key={t.id}
-                  className={`hover:bg-gray-50 transition-colors ${
+                  className={`hover:bg-slate-50 transition-colors ${
                     t.status === 'pending_payment' && t.preferred_date < today
                       ? 'bg-amber-50/50'
                       : ''
                   }`}
                 >
                   <td className="px-5 py-4">
-                    <p className="text-sm font-medium text-gray-900">{t.student_name}</p>
-                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-sm font-medium text-slate-900">{t.student_name}</p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
                       <Phone className="h-3 w-3" />
                       {t.phone}
                     </p>
                   </td>
                   <td className="px-5 py-4">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-slate-600">
                       {new Date(t.preferred_date + 'T00:00:00').toLocaleDateString('en-KE', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })}
                     </p>
-                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
                       <Clock className="h-3 w-3" />
                       {t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1)}
                     </p>
@@ -227,14 +222,14 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                       </div>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{t.zone}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">
+                  <td className="px-5 py-4 text-sm text-slate-600">{t.zone}</td>
+                  <td className="px-5 py-4 text-sm text-slate-600">
                     {t.tour_type === 'specific_hostel' ? 'Specific' : 'Full Search'}
                   </td>
-                  <td className="px-5 py-4 text-sm font-bold text-gray-900">
+                  <td className="px-5 py-4 text-sm font-bold text-slate-900">
                     {formatTourPrice(t.amount)}
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-600">
+                  <td className="px-5 py-4 text-sm text-slate-600">
                     {t.agents ? (
                       <Link
                         href={`/admin/agents/${t.agents.id}`}
@@ -243,7 +238,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                         {t.agents.name}
                       </Link>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-slate-400">—</span>
                     )}
                   </td>
                   <td className="px-5 py-4">
@@ -276,17 +271,16 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
         </table>
       </div>
 
-      {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">
             No tour bookings found.
           </div>
         ) : (
           filtered.map((t) => (
             <div
               key={t.id}
-              className={`bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3 ${
+              className={`bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3 ${
                 t.status === 'pending_payment' && t.preferred_date < today
                   ? 'border-l-4 border-l-amber-400'
                   : ''
@@ -294,8 +288,8 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">{t.student_name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{t.phone}</p>
+                  <p className="text-sm font-medium text-slate-900">{t.student_name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.phone}</p>
                 </div>
                 <StatusBadge
                   status={t.status.replace('_', ' ')}
@@ -303,22 +297,22 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                 />
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1.5 text-gray-600">
-                  <CalendarCheck className="h-3.5 w-3.5 text-gray-400" />
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <CalendarCheck className="h-3.5 w-3.5 text-slate-400" />
                   {new Date(t.preferred_date + 'T00:00:00').toLocaleDateString('en-KE', {
                     month: 'short',
                     day: 'numeric',
                   })}
                 </div>
-                <div className="flex items-center gap-1.5 text-gray-600">
-                  <Clock className="h-3.5 w-3.5 text-gray-400" />
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <Clock className="h-3.5 w-3.5 text-slate-400" />
                   {t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1)}
                 </div>
-                <div className="flex items-center gap-1.5 text-gray-600">
-                  <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
                   {t.zone}
                 </div>
-                <div className="font-bold text-gray-900">{formatTourPrice(t.amount)}</div>
+                <div className="font-bold text-slate-900">{formatTourPrice(t.amount)}</div>
                 {ACTIVE_STATUSES.has(t.status) && (
                   <div className="col-span-2">
                     <TourCountdown
@@ -330,7 +324,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                 )}
               </div>
               {t.agents && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500">
                   Agent:{' '}
                   <Link
                     href={`/admin/agents/${t.agents.id}`}

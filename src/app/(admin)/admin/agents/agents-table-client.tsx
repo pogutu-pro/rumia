@@ -94,37 +94,37 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Agents</h1>
-          <p className="text-sm text-gray-500 mt-1">{agents.length} agent{agents.length !== 1 ? 's' : ''} registered</p>
+          <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Agents</h1>
+          <p className="text-sm text-slate-500 mt-1">{agents.length} agent{agents.length !== 1 ? 's' : ''} registered</p>
         </div>
-        <Button onClick={() => setAddSheetOpen(true)} className="rounded-xl">Add Agent</Button>
+        <Button onClick={() => setAddSheetOpen(true)} className="rounded-2xl">Add Agent</Button>
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
+            <tr className="border-b border-slate-200/80 bg-slate-50">
               {['Name', 'Phone / WhatsApp', 'Active Listings', 'Total Leads', 'Commission Pending (KES)', 'Role', 'Status', 'Official', 'Founder', 'Actions'].map((h) => (
-                <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
+                <th key={h} className="text-xs font-medium text-slate-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-50">
             {agents.length === 0 ? (
-              <tr><td colSpan={10} className="text-sm text-gray-400 text-center px-5 py-8">No agents registered.</td></tr>
+              <tr><td colSpan={10} className="text-sm text-slate-400 text-center px-5 py-8">No agents registered.</td></tr>
             ) : agents.map((agent) => (
-              <tr key={agent.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={agent.id} className="hover:bg-slate-50 transition-colors">
                 <td className="text-sm px-5 py-4">
-                  <Link href={`/admin/agents/${agent.id}`} className="font-medium text-gray-900 hover:text-emerald-600">{agent.name}</Link>
+                  <Link href={`/admin/agents/${agent.id}`} className="font-medium text-slate-900 hover:text-emerald-600">{agent.name}</Link>
                 </td>
-                <td className="text-sm text-gray-600 px-5 py-4">
+                <td className="text-sm text-slate-600 px-5 py-4">
                   <div>{agent.phone}</div>
-                  {agent.whatsapp && agent.whatsapp !== agent.phone && <div className="text-gray-400 text-xs">{agent.whatsapp}</div>}
+                  {agent.whatsapp && agent.whatsapp !== agent.phone && <div className="text-slate-400 text-xs">{agent.whatsapp}</div>}
                 </td>
-                <td className="text-sm text-gray-600 px-5 py-4">{agent.active_listings_count ?? 0}</td>
-                <td className="text-sm text-gray-600 px-5 py-4">{agent.total_leads_count ?? 0}</td>
-                <td className="text-sm text-gray-600 px-5 py-4">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</td>
+                <td className="text-sm text-slate-600 px-5 py-4">{agent.active_listings_count ?? 0}</td>
+                <td className="text-sm text-slate-600 px-5 py-4">{agent.total_leads_count ?? 0}</td>
+                <td className="text-sm text-slate-600 px-5 py-4">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</td>
 
                 {/* Role */}
                 <td className="px-5 py-4">
@@ -158,7 +158,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                   {agent.status === 'active' ? (
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
                   ) : (
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Suspended</span>
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Suspended</span>
                   )}
                 </td>
 
@@ -171,7 +171,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
                       agent.is_featured
                         ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-                        : 'bg-gray-50 text-gray-400 border border-gray-200 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200'
+                        : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200'
                     }`}
                   >
                     {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Official' : '☆ Official'}
@@ -187,7 +187,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
                       agent.is_founder
                         ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100'
-                        : 'bg-gray-50 text-gray-400 border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'
+                        : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'
                     }`}
                   >
                     {pendingFounderId === agent.id ? '...' : agent.is_founder ? '🏅 Founder' : '○ Founder'}
@@ -200,7 +200,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                     <Link href={`/admin/agents/${agent.id}`} className="text-emerald-600 hover:underline font-medium">View</Link>
                     <button
                       onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })}
-                      className="text-gray-500 hover:text-gray-700 hover:underline font-medium"
+                      className="text-slate-500 hover:text-slate-700 hover:underline font-medium"
                     >
                       Edit
                     </button>
@@ -224,13 +224,13 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {agents.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No agents registered.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No agents registered.</div>
         ) : agents.map((agent) => (
-          <div key={agent.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3">
+          <div key={agent.id} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3">
             <div className="flex items-start justify-between">
               <div>
-                <Link href={`/admin/agents/${agent.id}`} className="text-sm font-semibold text-gray-900 hover:text-emerald-600">{agent.name}</Link>
-                <p className="text-xs text-gray-400 mt-0.5">{agent.phone}</p>
+                <Link href={`/admin/agents/${agent.id}`} className="text-sm font-semibold text-slate-900 hover:text-emerald-600">{agent.name}</Link>
+                <p className="text-xs text-slate-400 mt-0.5">{agent.phone}</p>
               </div>
               <div className="flex items-center gap-1.5 flex-wrap justify-end">
                 {agent.role === 'admin' ? (
@@ -241,7 +241,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 {agent.status === 'active' ? (
                   <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
                 ) : (
-                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">Suspended</span>
+                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Suspended</span>
                 )}
                 {agent.is_featured && (
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">★ Official</span>
@@ -253,17 +253,17 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-400">Listings</p>
-                <p className="text-sm font-semibold text-gray-900">{agent.active_listings_count ?? 0}</p>
+              <div className="bg-slate-50 rounded-lg p-2">
+                <p className="text-xs text-slate-400">Listings</p>
+                <p className="text-sm font-semibold text-slate-900">{agent.active_listings_count ?? 0}</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-400">Leads</p>
-                <p className="text-sm font-semibold text-gray-900">{agent.total_leads_count ?? 0}</p>
+              <div className="bg-slate-50 rounded-lg p-2">
+                <p className="text-xs text-slate-400">Leads</p>
+                <p className="text-sm font-semibold text-slate-900">{agent.total_leads_count ?? 0}</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-400">Commission</p>
-                <p className="text-sm font-semibold text-gray-900">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</p>
+              <div className="bg-slate-50 rounded-lg p-2">
+                <p className="text-xs text-slate-400">Commission</p>
+                <p className="text-sm font-semibold text-slate-900">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</p>
               </div>
             </div>
 
@@ -271,7 +271,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
               <Link href={`/admin/agents/${agent.id}`} className="text-xs font-medium text-emerald-600 hover:underline">View Profile</Link>
               <button
                 onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })}
-                className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline"
+                className="text-xs font-medium text-slate-500 hover:text-slate-700 hover:underline"
               >
                 Edit
               </button>
@@ -281,7 +281,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 onClick={() => handleToggleOfficial(agent.id, !!agent.is_featured)}
                 disabled={pendingFeaturedId === agent.id}
                 className={`text-xs font-medium disabled:opacity-50 ${
-                  agent.is_featured ? 'text-amber-600 hover:underline' : 'text-gray-400 hover:text-amber-600 hover:underline'
+                  agent.is_featured ? 'text-amber-600 hover:underline' : 'text-slate-400 hover:text-amber-600 hover:underline'
                 }`}
               >
                 {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Remove Official' : '☆ Grant Official'}
@@ -292,7 +292,7 @@ export function AgentsTableClient({ agents }: AgentsTableClientProps) {
                 onClick={() => handleToggleFounder(agent.id, !!agent.is_founder)}
                 disabled={pendingFounderId === agent.id}
                 className={`text-xs font-medium disabled:opacity-50 ${
-                  agent.is_founder ? 'text-indigo-600 hover:underline' : 'text-gray-400 hover:text-indigo-600 hover:underline'
+                  agent.is_founder ? 'text-indigo-600 hover:underline' : 'text-slate-400 hover:text-indigo-600 hover:underline'
                 }`}
               >
                 {pendingFounderId === agent.id ? '...' : agent.is_founder ? '🏅 Remove Founder' : '○ Grant Founder'}

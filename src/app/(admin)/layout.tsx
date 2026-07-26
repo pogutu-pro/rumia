@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { isAdminUser } from '@/lib/utils/admin';
-import { AdminSidebar } from './admin-sidebar';
+import { AdminHeader } from './admin-header';
 
 export default async function AdminLayout({
   children,
@@ -37,12 +37,15 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminSidebar userName={userName} userEmail={user.email ?? ''} isAdmin={isAdmin} hasAgent={hasAgent} />
-      <main className="lg:ml-60 pt-14 lg:pt-0 min-h-screen">
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pb-20 lg:pb-8 max-w-7xl mx-auto">
-          {children}
-        </div>
+    <div className="min-h-screen bg-white">
+      <AdminHeader
+        userName={userName}
+        userEmail={user.email ?? ''}
+        isAdmin={isAdmin}
+        hasAgent={hasAgent}
+      />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
+        {children}
       </main>
     </div>
   );

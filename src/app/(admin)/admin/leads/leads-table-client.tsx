@@ -103,57 +103,57 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
 
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Leads</h1>
-      <p className="text-sm text-gray-500 mb-6">{leads.length} lead{leads.length !== 1 ? 's' : ''} recorded</p>
+      <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">Leads</h1>
+      <p className="text-sm text-slate-500 mb-6">{leads.length} lead{leads.length !== 1 ? 's' : ''} recorded</p>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
         <select value={agentFilter} onChange={(e) => setAgentFilter(e.target.value)}
-          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          className="h-10 rounded-lg border border-slate-200/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="">All Agents</option>
           {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
         <select value={listingFilter} onChange={(e) => setListingFilter(e.target.value)}
-          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          className="h-10 rounded-lg border border-slate-200/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="">All Listings</option>
           {listings.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
         </select>
         <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          className="h-10 rounded-lg border border-slate-200/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          className="h-10 rounded-lg border border-slate-200/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-lg">Clear</Button>}
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
+            <tr className="border-b border-slate-200/80 bg-slate-50">
               {['Date & Time', 'Listing', 'Agent', 'Contact', 'IP Hash', 'Actions'].map((h) => (
-                <th key={h} className="text-xs font-medium text-gray-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
+                <th key={h} className="text-xs font-medium text-slate-500 uppercase tracking-wider text-left px-5 py-3">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-50">
             {filtered.length === 0 ? (
-              <tr><td colSpan={6} className="text-sm text-gray-400 text-center px-5 py-8">No leads recorded.</td></tr>
+              <tr><td colSpan={6} className="text-sm text-slate-400 text-center px-5 py-8">No leads recorded.</td></tr>
             ) : filtered.map((lead) => {
               const date = new Date(lead.clicked_at);
               return (
-                <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="text-sm text-gray-600 px-5 py-4 whitespace-nowrap">
+                <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="text-sm text-slate-600 px-5 py-4 whitespace-nowrap">
                     {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td className="text-sm px-5 py-4">
                     {lead.listings ? (
                       <Link href={`/listing/${lead.listings.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">{lead.listings.title}</Link>
-                    ) : <span className="text-gray-400">—</span>}
+                    ) : <span className="text-slate-400">—</span>}
                   </td>
                   <td className="text-sm px-5 py-4">
                     {lead.agents ? (
                       <Link href={`/admin/agents/${lead.agents.id}`} className="text-emerald-600 hover:underline font-medium">{lead.agents.name}</Link>
-                    ) : <span className="text-gray-400">—</span>}
+                    ) : <span className="text-slate-400">—</span>}
                   </td>
                   <td className="px-5 py-4 min-w-[200px]">
                     <div className="flex flex-col gap-1.5 items-start">
@@ -175,7 +175,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
                       </div>
                     </div>
                   </td>
-                  <td className="text-sm text-gray-500 px-5 py-4 font-mono text-xs">{lead.ip_hash.slice(0, 12)}...</td>
+                  <td className="text-sm text-slate-500 px-5 py-4 font-mono text-xs">{lead.ip_hash.slice(0, 12)}...</td>
                   <td className="px-5 py-4">
                     <Button size="sm" variant="outline" onClick={() => openCommissionModal(lead)} className="rounded-lg text-xs h-8">Create Commission</Button>
                   </td>
@@ -189,18 +189,18 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 text-center text-sm text-gray-400 shadow-sm">No leads recorded.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No leads recorded.</div>
         ) : filtered.map((lead) => (
-          <div key={lead.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-3">
+          <div key={lead.id} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate">{lead.listings?.title ?? 'Unknown Listing'}</p>
+                <p className="text-sm font-medium text-slate-900 truncate">{lead.listings?.title ?? 'Unknown Listing'}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-xs text-gray-500">{lead.agents?.name ?? 'Unknown Agent'}</p>
+                  <p className="text-xs text-slate-500">{lead.agents?.name ?? 'Unknown Agent'}</p>
                   {getContactBadge(lead.contact_type)}
                 </div>
               </div>
-              <span className="text-xs text-gray-400 shrink-0 ml-2">
+              <span className="text-xs text-slate-400 shrink-0 ml-2">
                 {new Date(lead.clicked_at).toLocaleDateString()}
               </span>
             </div>
@@ -222,7 +222,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
               </div>
             )}
             <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-              <span className="text-xs text-gray-400 font-mono">{lead.ip_hash.slice(0, 12)}...</span>
+              <span className="text-xs text-slate-400 font-mono">{lead.ip_hash.slice(0, 12)}...</span>
               <Button size="sm" variant="outline" onClick={() => openCommissionModal(lead)} className="rounded-lg text-xs h-8">Create Commission</Button>
             </div>
           </div>
