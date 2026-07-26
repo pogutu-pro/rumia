@@ -828,3 +828,191 @@ export async function transferListingAction(
     return { success: false, error: message };
   }
 }
+
+/**
+ * Admin-only action to update ANY listing, bypassing agent ownership checks.
+ * Mirrors the agent's updateListingAction but uses supabaseAdmin.
+ */
+export async function adminUpdateListingAction(
+  formData: any
+): Promise<ActionResult & { listingId?: string; listingUrl?: string }> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  if (!formData.listing_id) {
+    return { success: false, error: 'Missing listing id.' };
+  }
+
+  try {
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from('listings')
+      .select('id, slug, county, area, price, agent_id')
+      .eq('id', formData.listing_id)
+      .single();
+
+    if (existingError || !existing) {
+      return { success: false, error: 'Listing not found.' };
+    }
+
+    const agentId = formData.agent_id || existing.agent_id;
+
+    const payload = {
+      title: formData.title,
+      county: formData.county || 'nyeri',
+      area: formData.area || 'dekut',
+      description: formData.description,
+      price: parseFloat(formData.price_single || formData.price) || null,
+      location: formData.location,
+      agent_id: agentId,
+      youtube_id: formData.youtube_id || null,
+      is_youtube_shorts: !!formData.is_youtube_shorts,
+      is_active: formData.is_active,
+      landlord_phone: formData.landlord_phone || null,
+      room_type: formData.room_type,
+      amenities: formData.amenities,
+      bathroom_type: formData.bathroom_type,
+      distance_to_campus: formData.distance_to_campus,
+      security_type: formData.security_type,
+      electricity_included: formData.electricity_included,
+      water_included: formData.water_included,
+      wifi_included: formData.wifi_included,
+      latitude: nullableCoord(formData.latitude),
+      longitude: nullableCoord(formData.longitude),
+      gender: formData.gender || 'mixed',
+      proximity_description: formData.proximity_description || '',
+      specific_location: formData.specific_location || null,
+      price_single:
+        formData.price_single && parseInt(formData.price_single) > 0
+          ? parseInt(formData.price_single)
+          : null,
+      price_sharing:
+        formData.price_sharing && parseInt(formData.price_sharing) > 0
+          ? parseInt(formData.price_sharing)
+          : null,
+      mpesa_details: formData.mpesa_details || null,
+      distance_category: formData.distance_category || null,
+    };
+
+    const { data: listing, error: listingError } = await supabaseAdmin
+      .from('listings')
+      .update(payload)
+      .eq('id', existing.id)
+      .select('id, slug, county, area')
+      .single();
+
+    if (listingError || !listing) {
+      return {
+        success: false,
+        error: listingError?.message || 'Failed to update listing',
+      };
+    }
+
+    // Replace images
+    const { error: deleteImgError } = await supabaseAdmin
+      .from('listing_images')
+      .delete()
+      .eq('listing_id', listing.id);
+
+    if (deleteImgError) {
+      return {
+        success: false,
+        error: 'Listing updated, but failed to clear old images',
+      };
+    }
+
+    const images = formData.images || [];
+    if (images.length > 0) {
+      const imageInserts = images.map((img: any, idx: number) => ({
+        listing_id: listing.id,
+        r2_url: img.url,
+        display_order: idx,
+        category: img.category || 'Room',
+        blur_data_url: img.blurDataUrl || img.blur_data_url || null,
+        width: img.width || null,
+        height: img.height || null,
+        format: img.format || null,
+        image_upload_id: img.imageUploadId || img.image_upload_id || null,
+      }));
+      const { error: insertImgError } = await supabaseAdmin
+        .from('listing_images')
+        .insert(imageInserts);
+      if (insertImgError) {
+        return {
+          success: false,
+          error: 'Listing updated, but failed to save some images',
+        };
+      }
+    }
+
+    // Replace room types
+    const { error: deleteRtError } = await supabaseAdmin
+      .from('listing_room_types')
+      .delete()
+      .eq('listing_id', listing.id);
+
+    if (deleteRtError) {
+      return {
+        success: false,
+        error: 'Listing updated, but failed to clear old room types',
+      };
+    }
+
+    const roomTypes = formData.roomTypes || [];
+    const validRoomTypes = roomTypes
+      .filter((rt: any) => (rt.room_type || rt.category) && rt.price)
+      .map((rt: any) => ({
+        listing_id: listing.id,
+        room_type: rt.room_type || rt.category,
+        price: Math.round(parseFloat(rt.price)),
+        is_available: rt.is_available,
+        deposit:
+          rt.deposit && parseInt(rt.deposit) > 0 ? parseInt(rt.deposit) : null,
+        furnishing_items: rt.furnishing_items?.length
+          ? rt.furnishing_items
+          : null,
+        category: rt.category || null,
+        occupancy: rt.occupancy || null,
+        floor: rt.floor || null,
+        size: rt.size || null,
+      }));
+
+    if (validRoomTypes.length > 0) {
+      const { error: insertRtError } = await supabaseAdmin
+        .from('listing_room_types')
+        .insert(validRoomTypes);
+      if (insertRtError) {
+        return {
+          success: false,
+          error: 'Listing updated, but failed to save some room types',
+        };
+      }
+    }
+
+    revalidatePath('/admin/listings');
+    revalidatePath('/admin');
+    revalidatePath('/hostels');
+    revalidatePath('/');
+    revalidatePath(
+      `/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`
+    );
+
+    return {
+      success: true,
+      listingId: listing.id,
+      listingUrl: `/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+function nullableCoord(value: unknown) {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}

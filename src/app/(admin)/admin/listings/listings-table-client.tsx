@@ -173,6 +173,10 @@ function SortableRow({
       <td className="px-5 py-4">
         <div className="flex items-center gap-2 text-sm">
           <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">Live</a>
+          <a href={`/admin/listings/edit/${listing.id}`} className="text-blue-600 hover:underline font-medium">Edit</a>
+          <a href={`/admin/listings/${listing.id}/leads`} className="text-indigo-600 hover:underline font-medium">
+            Leads {listing.leads_count > 0 ? `(${listing.leads_count})` : ''}
+          </a>
           <button onClick={() => onToggleActive(listing)} disabled={pendingId === listing.id}
             className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
             {listing.is_active ? 'Deactivate' : 'Activate'}
@@ -293,6 +297,10 @@ function SortableMobileCard({
       </div>
       <div className="flex items-center gap-3 pt-1 text-xs font-medium">
         <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">View Live</a>
+        <a href={`/admin/listings/edit/${listing.id}`} className="text-blue-600 hover:underline">Edit</a>
+        <a href={`/admin/listings/${listing.id}/leads`} className="text-indigo-600 hover:underline">
+          Leads {listing.leads_count > 0 ? `(${listing.leads_count})` : ''}
+        </a>
         <button onClick={() => onToggleActive(listing)} disabled={pendingId === listing.id}
           className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
           {listing.is_active ? 'Deactivate' : 'Activate'}

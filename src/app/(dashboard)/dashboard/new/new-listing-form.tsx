@@ -57,6 +57,7 @@ interface NewListingFormProps {
   agentWhatsapp?: string | null;
   initialListing?: InitialListingData;
   mode?: 'create' | 'edit';
+  customUpdateAction?: (formData: any) => Promise<{ success: boolean; error?: string; listingId?: string; listingUrl?: string }>;
 }
 
 interface UploadedImage {
@@ -413,6 +414,7 @@ export function NewListingForm({
   agentWhatsapp,
   initialListing,
   mode = 'create',
+  customUpdateAction,
 }: NewListingFormProps) {
   const router = useRouter();
   const isEditing = mode === 'edit' && !!initialListing;
@@ -732,7 +734,9 @@ export function NewListingForm({
       };
 
       const result = isEditing
-        ? await updateListingAction(payload)
+        ? customUpdateAction
+          ? await customUpdateAction(payload)
+          : await updateListingAction(payload)
         : await createListingAction(payload);
 
       if (!result.success) {
