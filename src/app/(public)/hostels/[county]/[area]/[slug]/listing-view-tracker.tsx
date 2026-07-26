@@ -1,22 +1,55 @@
 'use client';
 
 import { useEffect } from 'react';
+import { recordRecentlyViewedHostel } from '@/lib/utils/recently-viewed';
 
 interface ListingViewTrackerProps {
   listingId: string;
+  title?: string;
+  price?: number;
+  location?: string;
+  slug?: string;
+  county?: string;
+  area?: string;
+  imageUrl?: string;
 }
 
-export function ListingViewTracker({ listingId }: ListingViewTrackerProps) {
+export function ListingViewTracker({
+  listingId,
+  title,
+  price,
+  location,
+  slug,
+  county,
+  area,
+  imageUrl,
+}: ListingViewTrackerProps) {
   useEffect(() => {
     if (!listingId) return;
 
+    // Record server-side view count
     void fetch('/api/listing-views', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ listing_id: listingId }),
       keepalive: true,
     }).catch(() => {});
-  }, [listingId]);
+
+    // Record client-side recently viewed
+    if (title && price != null && location && slug) {
+      recordRecentlyViewedHostel({
+        id: listingId,
+        title,
+        price,
+        location,
+        slug,
+        county,
+        area,
+        imageUrl,
+      });
+    }
+  }, [listingId, title, price, location, slug, county, area, imageUrl]);
 
   return null;
 }
+

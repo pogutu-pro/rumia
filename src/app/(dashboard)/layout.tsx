@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { AgentSidebar } from './agent-sidebar';
+import { AgentHeader } from './agent-header';
 import { isAdminUser } from '@/lib/utils/admin';
+
+export const revalidate = 0;
 
 export default async function DashboardLayout({
   children,
@@ -9,7 +11,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/auth/login');
@@ -27,13 +31,16 @@ export default async function DashboardLayout({
     redirect('/account');
   }
 
-  let agentName = agent.name || user.email || '';
+  const agentName = agent.name || user.email || '';
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <AgentSidebar agentName={agentName} userEmail={user.email ?? ''} isAdmin={isAdmin} />
-      {/* lg: offset by sidebar width; mobile: offset by top bar height */}
-      <main className="flex-1 lg:ml-60 overflow-auto pt-14 lg:pt-0 p-4 lg:p-8">
+    <div className="min-h-screen bg-white">
+      <AgentHeader
+        agentName={agentName}
+        userEmail={user.email ?? ''}
+        isAdmin={isAdmin}
+      />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         {children}
       </main>
     </div>

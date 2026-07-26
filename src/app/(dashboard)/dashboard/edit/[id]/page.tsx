@@ -34,16 +34,16 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
 
   const { data: listing, error } = await supabase
     .from('listings')
-    .select(`
-      id, title, description, price, location, youtube_id, is_youtube_shorts, room_type,
+    .select(
+      `id, title, description, price, location, youtube_id, is_youtube_shorts, room_type,
       amenities, bathroom_type, distance_to_campus,
       security_type, water_included, electricity_included, wifi_included,
       latitude, longitude, gender, proximity_description, is_active,
       county, area,
       specific_location, price_single, price_sharing, mpesa_details, distance_category,
       landlord_phone,
-      listing_images ( id, r2_url, category, display_order, blur_data_url )
-    `)
+      listing_images ( id, r2_url, category, display_order, blur_data_url )`
+    )
     .eq('id', id)
     .eq('agent_id', agent.id)
     .single();
@@ -54,7 +54,9 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
 
   const { data: roomTypes } = await supabase
     .from('listing_room_types')
-    .select('id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size')
+    .select(
+      'id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size'
+    )
     .eq('listing_id', id);
 
   (listing as any).listing_room_types = roomTypes || [];
@@ -64,16 +66,15 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
       <div>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors mb-2"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
         </Link>
-
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
           Edit Listing
         </h1>
-        <p className="text-slate-500 font-medium mt-1">
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">
           Update address, room details, photos, and publishing status.
         </p>
       </div>

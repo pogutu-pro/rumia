@@ -1,21 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Download, X, Share } from "lucide-react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 export function InstallBanner() {
+  const [mounted, setMounted] = useState(false);
   const { shouldShow, isIOS, handleInstall, handleDismiss } = usePWAInstall();
 
-  if (!shouldShow) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-      <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden">
+  if (!mounted || !shouldShow) return null;
+
+  return createPortal(
+    <div
+      className="fixed left-0 right-0 z-50 p-4 pointer-events-none md:bottom-0"
+      style={{ bottom: "calc(4.25rem + env(safe-area-inset-bottom, 0px))" }}
+    >
+      <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/15 border border-slate-200/80 overflow-hidden pointer-events-auto">
         <div className="relative p-4">
           <button
             onClick={handleDismiss}
             aria-label="Dismiss install prompt"
-            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -31,7 +41,7 @@ export function InstallBanner() {
 
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-bold text-slate-900">
-                Install Rumia
+                Install Rumia App
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
                 {isIOS
@@ -44,19 +54,20 @@ export function InstallBanner() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={handleInstall}
-              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-500 active:scale-[0.98] transition-all"
+              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
             >
               {isIOS ? "Got it" : "Install"}
             </button>
             <button
               onClick={handleDismiss}
-              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Not now
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

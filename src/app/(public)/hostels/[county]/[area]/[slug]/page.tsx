@@ -225,7 +225,16 @@ export default async function ListingSlugPage({ params }: PageProps) {
   return (
     <div className="relative min-h-screen bg-white pb-24 md:pb-16 font-sans">
       <JsonLd data={accommodationSchema} />
-      <ListingViewTracker listingId={listing.id} />
+      <ListingViewTracker
+        listingId={listing.id}
+        title={listing.title}
+        price={startingPrice}
+        location={listing.location}
+        slug={listing.slug}
+        county={listing.county || county}
+        area={listing.area || area}
+        imageUrl={images[0]?.r2_url}
+      />
 
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 pt-4 md:hidden">
         <Link

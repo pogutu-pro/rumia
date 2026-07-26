@@ -1,24 +1,36 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ListingsList } from './listings-list';
-import { GettingStarted } from './getting-started';
-import { LeadsTable } from './leads-table';
-import { CommissionTable } from './commission-table';
-import { Building2, MessageCircle, Landmark, Plus, Wallet, Eye, CalendarCheck } from 'lucide-react';
+import {
+  Building2,
+  MessageCircle,
+  Plus,
+  Wallet,
+  Eye,
+  CalendarCheck,
+  ArrowRight,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
 
-export const revalidate = 0; // Fresh statistics always
+export const revalidate = 0;
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  
-  // Get authenticated user
-  const { data: { user } } = await supabase.auth.getUser();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     redirect('/auth/login');
   }
 
-  // Find agent profile, fallback to creating one if missing
   let { data: agent, error: agentError } = await supabase
     .from('agents')
     .select('*')
@@ -30,8 +42,8 @@ export default async function DashboardPage() {
   }
 
   if (!agent) {
-    // Attempt auto-creation of agent profile for developer/tester convenience
-    const displayName = user.user_metadata?.full_name || user.user_metadata?.name || null;
+    const displayName =
+      user.user_metadata?.full_name || user.user_metadata?.name || null;
     const agentName = displayName || 'New Agent';
     const { data: newAgent, error: createError } = await supabase
       .from('agents')
@@ -49,10 +61,11 @@ export default async function DashboardPage() {
     if (createError) {
       console.error('Failed to auto-create agent profile:', createError);
       return (
-        <div className="bg-white p-8 rounded-2xl border border-rose-100 text-center text-rose-600 max-w-md mx-auto mt-12 shadow-sm">
-          <h2 className="font-extrabold text-xl mb-2">Agent Access Error</h2>
-          <p className="text-sm font-medium">
-            Could not find or create an agent profile associated with this account. Please contact administrator Paul.
+        <div className="bg-white p-8 rounded-2xl border border-rose-100 text-center text-rose-600 max-w-md mx-auto mt-12">
+          <h2 className="font-bold text-xl mb-2">Agent Access Error</h2>
+          <p className="text-sm text-slate-600">
+            Could not find or create an agent profile associated with this
+            account. Please contact administrator Paul.
           </p>
         </div>
       );
@@ -60,326 +73,245 @@ export default async function DashboardPage() {
     agent = newAgent;
   }
 
-  // Fetch agent's listings
   const { data: listings } = await supabase
     .from('listings')
-    .select(`
-      id,
-      title,
-      price,
-      location,
-      is_active,
-      pays_commission,
-      commission_locked_by_admin,
-      listing_images (
-        r2_url
-      )
-    `)
-    .eq('agent_id', agent.id)
-    .order('id', { ascending: false });
+    .select('id, is_active')
+    .eq('agent_id', agent.id);
 
-  const activeListingsCount = listings?.filter((l: any) => l.is_active).length || 0;
+  const activeListingsCount =
+    listings?.filter((l: any) => l.is_active).length || 0;
 
-  // Fetch all leads for this agent to calculate "Leads This Month" and populate Leads Table
-  const { data: allLeads } = await supabase
+  const { count: leadsThisMonthCount } = await supabase
     .from('leads')
-    .select('*')
+    .select('*', { count: 'exact', head: true })
     .eq('agent_id', agent.id)
-    .order('clicked_at', { ascending: false });
-    
-  const leads = allLeads || [];
+    .gte('clicked_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
 
-  // Calculate leads this month
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-  
-  const leadsThisMonthCount = leads.filter(
-    (lead: any) => new Date(lead.clicked_at) >= startOfMonth
-  ).length;
+  const { count: totalLeadsCount } = await supabase
+    .from('leads')
+    .select('*', { count: 'exact', head: true })
+    .eq('agent_id', agent.id);
 
-  // Pre-calculate leads count per listing for the commission table
-  const leadsCountByListing: Record<string, number> = {};
-  leads.forEach((lead: any) => {
-    leadsCountByListing[lead.listing_id] = (leadsCountByListing[lead.listing_id] || 0) + 1;
-  });
-
-  // Fetch commissions
-  const { data: allCommissions } = await supabase
-    .from('commissions')
-    .select('*')
-    .eq('agent_id', agent.id)
-    .order('id', { ascending: false });
-
-  const commissions = allCommissions || [];
-
-  const { data: listingViewAnalyticsRaw } = await (supabase as any).rpc(
-    'get_agent_listing_view_analytics',
-    { p_agent_id: agent.id }
-  );
-
-  const listingViewAnalytics = (listingViewAnalyticsRaw ?? []).map((row: any) => ({
-    listing_id: row.listing_id,
-    listing_title: row.listing_title,
-    listing_slug: row.listing_slug,
-    county: row.county || 'nyeri',
-    area: row.area || 'dekut',
-    today_count: Number(row.today_count || 0),
-    week_count: Number(row.week_count || 0),
-    month_count: Number(row.month_count || 0),
-    all_time_count: Number(row.all_time_count || 0),
-  }));
-
-  const viewSummary = listingViewAnalytics.reduce(
-    (acc: any, row: any) => ({
-      today: acc.today + row.today_count,
-      week: acc.week + row.week_count,
-      month: acc.month + row.month_count,
-      allTime: acc.allTime + row.all_time_count,
-    }),
-    { today: 0, week: 0, month: 0, allTime: 0 }
-  );
-
-  const commissionOwed = commissions
-    .filter((c: any) => c.status === 'pending')
-    .reduce((acc: number, c: any) => acc + c.amount, 0);
-
-  const totalEarned = commissions
-    .filter((c: any) => c.status === 'paid')
-    .reduce((acc: number, c: any) => acc + c.amount, 0);
-
-  // Fetch tour bookings for this agent
-  const { data: tourBookingsRaw } = await (supabase as any)
+  const { count: pendingToursCount } = await supabase
     .from('tour_bookings')
-    .select(`
-      *,
-      listings(id, title, area),
-      agents(id, name)
-    `)
+    .select('*', { count: 'exact', head: true })
     .eq('agent_id', agent.id)
-    .order('preferred_date', { ascending: true })
-    .order('preferred_time', { ascending: true });
+    .in('status', ['pending_payment', 'confirmed']);
 
-  const tourBookings = (tourBookingsRaw ?? []).map((b: any) => ({
-    ...b,
-    listings: b.listings ?? null,
-    agents: b.agents ?? null,
-  }));
+  const { data: paidTours } = await supabase
+    .from('tour_bookings')
+    .select('amount')
+    .eq('agent_id', agent.id)
+    .in('status', ['paid', 'completed']);
 
-  const pendingToursCount = tourBookings.filter(
-    (b: any) => b.status === 'pending_payment' || b.status === 'confirmed',
-  ).length;
+  const tourEarnings = (paidTours || []).reduce(
+    (acc: number, t: any) => acc + (t.amount || 0),
+    0
+  );
+
+  const firstName = (agent.name || 'Agent').split(' ')[0];
+  const greeting = `${getGreeting()}, ${firstName} 👋`;
 
   return (
-    <div className="space-y-8">
-      {/* Getting Started Progress */}
-      <GettingStarted agent={agent} listings={listings as any || []} />
-
-      {/* Welcome header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Welcome back, {agent.name}!
-          </h1>
-          <p className="text-slate-500 font-medium mt-1 text-sm sm:text-base">
-            Manage your properties, review performance, and track your payouts.
-          </p>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
-          <div className="p-3 sm:p-4 rounded-xl bg-slate-100 text-slate-700">
-            <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-          <div>
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Active Listings
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
-              {activeListingsCount}
-            </h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
-          <div className="p-3 sm:p-4 rounded-xl bg-emerald-50 text-emerald-700">
-            <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-          <div>
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Leads This Month
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
-              {leadsThisMonthCount}
-            </h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
-          <div className="p-3 sm:p-4 rounded-xl bg-amber-50 text-amber-700">
-            <Landmark className="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Pending
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 truncate">
-              KES {commissionOwed.toLocaleString()}
-            </h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
-          <div className="p-3 sm:p-4 rounded-xl bg-indigo-50 text-indigo-700">
-            <Wallet className="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Total Earned
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 truncate">
-              KES {totalEarned.toLocaleString()}
-            </h3>
-          </div>
-        </div>
-      </div>
-
-      {/* Analytics */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
-            Analytics
-          </h2>
-          <p className="text-sm font-medium text-slate-500 mt-1">
-            Student views across your listings.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          {[
-            ['Today', viewSummary.today],
-            ['This Week', viewSummary.week],
-            ['This Month', viewSummary.month],
-            ['All Time', viewSummary.allTime],
-          ].map(([label, value]) => (
-            <div key={label} className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3 sm:gap-5">
-              <div className="p-3 sm:p-4 rounded-xl bg-blue-50 text-blue-700">
-                <Eye className="h-5 w-5 sm:h-6 sm:w-6" />
-              </div>
-              <div>
-                <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  {label}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
-                  {Number(value).toLocaleString()}
-                </h3>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xs">
-          {listingViewAnalytics.length === 0 ? (
-            <div className="px-6 py-10 text-center text-sm font-semibold text-slate-400">
-              View analytics will appear after students visit your listings.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  <tr>
-                    <th className="px-5 py-3">Listing</th>
-                    <th className="px-5 py-3 text-right">Today</th>
-                    <th className="px-5 py-3 text-right">This Week</th>
-                    <th className="px-5 py-3 text-right">This Month</th>
-                    <th className="px-5 py-3 text-right">All Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {listingViewAnalytics.map((row: any) => {
-                    const href = row.listing_slug
-                      ? `/hostels/${row.county}/${row.area}/${row.listing_slug}`
-                      : `/listing/${row.listing_id}`;
-
-                    return (
-                      <tr key={row.listing_id} className="hover:bg-slate-50/60">
-                        <td className="px-5 py-4 font-bold text-slate-900">
-                          <Link href={href} className="hover:text-emerald-600">
-                            {row.listing_title}
-                          </Link>
-                        </td>
-                        <td className="px-5 py-4 text-right font-semibold text-slate-600">{row.today_count.toLocaleString()}</td>
-                        <td className="px-5 py-4 text-right font-semibold text-slate-600">{row.week_count.toLocaleString()}</td>
-                        <td className="px-5 py-4 text-right font-semibold text-slate-900">{row.month_count.toLocaleString()}</td>
-                        <td className="px-5 py-4 text-right font-semibold text-slate-600">{row.all_time_count.toLocaleString()}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main Section — My Listings */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
-            My Listings
-          </h2>
-          <Link
-            href="/dashboard/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md shadow-emerald-600/10 transition-all self-start sm:self-auto"
-          >
-            <Plus className="h-4 w-4" />
-            Add New Listing
-          </Link>
-        </div>
-        <ListingsList 
-          initialListings={listings as any || []} 
-          leadsCountByListing={leadsCountByListing} 
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-        <div className="space-y-3">
-          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">Recent Leads</h2>
-          <LeadsTable leads={leads.slice(0, 10)} listings={listings as any || []} />
-        </div>
-
-        <div className="space-y-3">
-          <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">Commission Status</h2>
-          <CommissionTable 
-            commissions={commissions} 
-            listings={listings as any || []} 
-            leadsCountByListing={leadsCountByListing}
-          />
-        </div>
-      </div>
-
-      {/* Tour Bookings Summary */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-xs p-5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-amber-50 text-amber-700">
-            <CalendarCheck className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Tour Bookings</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {pendingToursCount > 0
-                ? `${pendingToursCount} pending tour${pendingToursCount !== 1 ? 's' : ''} awaiting action`
-                : `${tourBookings.length} total booking${tourBookings.length !== 1 ? 's' : ''}`}
+    <div className="space-y-6 sm:space-y-8">
+      {/* Welcome & Greeting Banner */}
+      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="space-y-1">
+            <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
+              {greeting}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600">
+              {activeListingsCount > 0
+                ? `You have ${activeListingsCount} active listing${activeListingsCount !== 1 ? 's' : ''} bringing in student leads.`
+                : 'Create your first listing to start receiving student leads.'}
             </p>
           </div>
+          <Link
+            href="/dashboard/new"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-sm shrink-0"
+          >
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            New Listing
+          </Link>
         </div>
+      </div>
+
+      {/* Navigation Cards Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        {/* My Listings Card */}
+        <Link
+          href="/dashboard/listings"
+          className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
+        >
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
+                {activeListingsCount} Active
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
+                My Listings
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
+                Manage your hostel listings, photos, pricing, and availability.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-emerald-700">
+            <span>Manage Listings</span>
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Tours Card */}
         <Link
           href="/dashboard/tours"
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors"
+          className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
         >
-          View all
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <CalendarCheck className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
+                {pendingToursCount || 0} Pending
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-amber-700 transition-colors leading-tight">
+                Tour Bookings
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
+                {(pendingToursCount || 0) > 0
+                  ? `${pendingToursCount} tour${pendingToursCount !== 1 ? 's' : ''} awaiting your action.`
+                  : 'View and manage all scheduled student tours.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-amber-700">
+            <span>View Tours</span>
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Analytics Card (includes leads + views + commissions) */}
+        <Link
+          href="/dashboard/analytics"
+          className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
+        >
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
+                {leadsThisMonthCount || 0} Leads
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
+                Analytics & Leads
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
+                Student views across all your listings over time.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-indigo-600">
+            <span>View Analytics</span>
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Tour Earnings Card */}
+        <Link
+          href="/dashboard/earnings"
+          className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
+        >
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
+                KES {tourEarnings.toLocaleString()}
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-rose-600 transition-colors leading-tight">
+                Tour Earnings
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
+                Revenue from completed and paid tour bookings.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-rose-600">
+            <span>View Earnings</span>
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Student Leads Card */}
+        <Link
+          href="/dashboard/leads"
+          className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
+        >
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
+                {totalLeadsCount || 0} Total
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                Student Leads
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
+                {(totalLeadsCount || 0) > 0
+                  ? `${totalLeadsCount} total lead${totalLeadsCount !== 1 ? 's' : ''} across all listings.`
+                  : 'Leads will appear when students view your listings.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-blue-600">
+            <span>View Leads</span>
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Profile Card */}
+        <Link
+          href="/dashboard/profile"
+          className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
+        >
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-slate-700 transition-colors leading-tight">
+                Profile & Settings
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
+                Update your profile, service areas, and notification preferences.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-slate-700">
+            <span>Edit Profile</span>
+            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+          </div>
         </Link>
       </div>
     </div>

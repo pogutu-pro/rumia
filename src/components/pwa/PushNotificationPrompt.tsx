@@ -1,28 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Bell, X } from "lucide-react";
 import { useNotificationPrompt } from "@/hooks/useNotificationPrompt";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 export function PushNotificationPrompt() {
+  const [mounted, setMounted] = useState(false);
   const { shouldShow, dismiss } = useNotificationPrompt();
   const { subscribe, permission } = usePushSubscription();
 
-  if (!shouldShow || permission !== "default") return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !shouldShow || permission !== "default") return null;
 
   const handleEnable = async () => {
     await subscribe();
     dismiss();
   };
 
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-      <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden">
+  return createPortal(
+    <div
+      className="fixed left-0 right-0 z-50 p-4 pointer-events-none md:bottom-0"
+      style={{ bottom: "calc(4.25rem + env(safe-area-inset-bottom, 0px))" }}
+    >
+      <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/15 border border-slate-200/80 overflow-hidden pointer-events-auto">
         <div className="relative p-4">
           <button
             onClick={dismiss}
             aria-label="Dismiss"
-            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -46,19 +56,20 @@ export function PushNotificationPrompt() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={handleEnable}
-              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-500 active:scale-[0.98] transition-all"
+              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
             >
               Enable notifications
             </button>
             <button
               onClick={dismiss}
-              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Not now
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
