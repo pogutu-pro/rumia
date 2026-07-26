@@ -21,12 +21,18 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { getTourPrice, formatTourPrice, LISTING_SPECIFIC_PRICE, ZONE_SPECIFIC_PRICE } from '@/lib/constants/tour-pricing';
+import {
+  getTourPrice,
+  formatTourPrice,
+  LISTING_SPECIFIC_PRICE,
+  ZONE_SPECIFIC_PRICE,
+} from '@/lib/constants/tour-pricing';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/client';
 import { HostelPickerModal } from '@/components/tours/hostel-picker-modal';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
 import type { TourType, TourTimeWindow, TourBooking } from '@/types';
+import posthog from 'posthog-js';
 
 interface BookTourFormProps {
   isOpen: boolean;
@@ -47,7 +53,11 @@ interface SelectedHostel {
   agent_name: string | null;
 }
 
-const TIME_OPTIONS: Array<{ value: TourTimeWindow; label: string; icon: string }> = [
+const TIME_OPTIONS: Array<{
+  value: TourTimeWindow;
+  label: string;
+  icon: string;
+}> = [
   { value: 'morning', label: 'Morning', icon: '' },
   { value: 'afternoon', label: 'Afternoon', icon: '' },
   { value: 'evening', label: 'Evening', icon: '' },
@@ -72,7 +82,12 @@ const desktopModalVariants = {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: { type: 'spring' as const, damping: 28, stiffness: 340, mass: 0.9 },
+    transition: {
+      type: 'spring' as const,
+      damping: 28,
+      stiffness: 340,
+      mass: 0.9,
+    },
   },
   exit: {
     opacity: 0,
@@ -86,7 +101,12 @@ const mobileSheetVariants = {
   hidden: { y: '100%' },
   visible: {
     y: 0,
-    transition: { type: 'spring' as const, damping: 32, stiffness: 320, mass: 1 },
+    transition: {
+      type: 'spring' as const,
+      damping: 32,
+      stiffness: 320,
+      mass: 1,
+    },
   },
   exit: {
     y: '100%',
@@ -169,7 +189,9 @@ export function BookTourForm({
     }
 
     loadProfile();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
   const resetForm = useCallback(() => {
@@ -208,7 +230,9 @@ export function BookTourForm({
     setSelectedHostels(hostels);
     setPickerOpen(false);
     if (hostels.length > 0) {
-      toast.success(`${hostels.length} hostel${hostels.length > 1 ? 's' : ''} selected for tour`);
+      toast.success(
+        `${hostels.length} hostel${hostels.length > 1 ? 's' : ''} selected for tour`,
+      );
     }
   }, []);
 
@@ -223,9 +247,13 @@ export function BookTourForm({
       const attempts = phoneAttempts + 1;
       setPhoneAttempts(attempts);
       if (attempts >= 2) {
-        toast.error('That number still doesn\'t look right. Please try again — use a valid Kenyan number like 0712 345 678.');
+        toast.error(
+          "That number still doesn't look right. Please try again — use a valid Kenyan number like 0712 345 678.",
+        );
       } else {
-        toast.error('That doesn\'t look like a valid Kenyan number. Please try again (e.g. 0712 345 678).');
+        toast.error(
+          "That doesn't look like a valid Kenyan number. Please try again (e.g. 0712 345 678).",
+        );
       }
       return;
     }
@@ -235,7 +263,11 @@ export function BookTourForm({
     }
 
     // Validate hostel selection for zone-specific tours
-    if (tourType === 'specific_hostel' && !fromListing && selectedHostels.length === 0) {
+    if (
+      tourType === 'specific_hostel' &&
+      !fromListing &&
+      selectedHostels.length === 0
+    ) {
       toast.error('Please select at least one hostel to tour');
       setPickerOpen(true);
       return;
@@ -245,9 +277,10 @@ export function BookTourForm({
 
     try {
       // For zone-specific tours, send the first selected listing as the primary
-      const primaryListingId = tourType === 'specific_hostel' && !fromListing
-        ? selectedHostels[0]?.id || ''
-        : listingId;
+      const primaryListingId =
+        tourType === 'specific_hostel' && !fromListing
+          ? selectedHostels[0]?.id || ''
+          : listingId;
 
       const response = await fetch('/api/tour-bookings', {
         method: 'POST',
@@ -263,9 +296,10 @@ export function BookTourForm({
           agent_id: agentId,
           linked_user_id: linkedUserId,
           from_listing: fromListing,
-          selected_listing_ids: tourType === 'specific_hostel' && !fromListing
-            ? selectedHostels.map((h) => h.id)
-            : undefined,
+          selected_listing_ids:
+            tourType === 'specific_hostel' && !fromListing
+              ? selectedHostels.map((h) => h.id)
+              : undefined,
         }),
       });
 
@@ -277,11 +311,21 @@ export function BookTourForm({
 
       setBooking(data.booking);
       setStep('confirmation');
+      posthog.capture('tour_booked', {
+        listing_id: String(listingId),
+        tour_type: tourType,
+        zone,
+        preferred_time: preferredTime,
+        from_listing: fromListing,
+      });
       toast.success('Tour booked successfully!');
     } catch (error) {
+      posthog.captureException(error);
       console.error('Booking error:', error);
       toast.error(
-        error instanceof Error ? error.message : 'Failed to book tour. Please try again.',
+        error instanceof Error
+          ? error.message
+          : 'Failed to book tour. Please try again.',
       );
     } finally {
       setIsSubmitting(false);
@@ -356,7 +400,7 @@ export function BookTourForm({
               </div>
               <div className="px-5 pb-6 pt-2">
                 {step === 'form' ? (
-                   <FormContent
+                  <FormContent
                     tourType={tourType}
                     setTourType={handleTourTypeChange}
                     preferredDate={preferredDate}
@@ -537,10 +581,9 @@ function FormContent({
           Don&apos;t waste your first choice
         </p>
         <p className="text-xs text-amber-700 leading-relaxed">
-          Don&apos;t waste time getting lost, asking random people, or
-          returning another day because the caretaker isn&apos;t available.
-          Rumia knows the hostels, guides you there, and ensures you&apos;re
-          expected.
+          Don&apos;t waste time getting lost, asking random people, or returning
+          another day because the caretaker isn&apos;t available. Rumia knows
+          the hostels, guides you there, and ensures you&apos;re expected.
         </p>
       </div>
 
@@ -577,13 +620,17 @@ function FormContent({
               <Building2
                 className={cn(
                   'h-5 w-5',
-                  tourType === 'specific_hostel' ? 'text-slate-900' : 'text-gray-400',
+                  tourType === 'specific_hostel'
+                    ? 'text-slate-900'
+                    : 'text-gray-400',
                 )}
               />
               <span
                 className={cn(
                   'text-sm font-semibold',
-                  tourType === 'specific_hostel' ? 'text-slate-900' : 'text-gray-600',
+                  tourType === 'specific_hostel'
+                    ? 'text-slate-900'
+                    : 'text-gray-600',
                 )}
               >
                 Specific Hostel
@@ -613,13 +660,17 @@ function FormContent({
               <Search
                 className={cn(
                   'h-5 w-5',
-                  tourType === 'full_search' ? 'text-slate-900' : 'text-gray-400',
+                  tourType === 'full_search'
+                    ? 'text-slate-900'
+                    : 'text-gray-400',
                 )}
               />
               <span
                 className={cn(
                   'text-sm font-semibold',
-                  tourType === 'full_search' ? 'text-slate-900' : 'text-gray-600',
+                  tourType === 'full_search'
+                    ? 'text-slate-900'
+                    : 'text-gray-600',
                 )}
               >
                 Full Search
@@ -638,7 +689,8 @@ function FormContent({
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-bold text-emerald-800">
-                    {selectedHostels.length} hostel{selectedHostels.length > 1 ? 's' : ''} selected
+                    {selectedHostels.length} hostel
+                    {selectedHostels.length > 1 ? 's' : ''} selected
                   </p>
                   <button
                     type="button"
@@ -674,7 +726,10 @@ function FormContent({
 
         {/* Preferred Date */}
         <div className="space-y-2">
-          <Label htmlFor="tour-date" className="text-sm font-semibold text-gray-700">
+          <Label
+            htmlFor="tour-date"
+            className="text-sm font-semibold text-gray-700"
+          >
             Preferred date
           </Label>
           <Input
@@ -709,13 +764,17 @@ function FormContent({
                 <Clock
                   className={cn(
                     'h-4 w-4',
-                    preferredTime === option.value ? 'text-slate-900' : 'text-gray-400',
+                    preferredTime === option.value
+                      ? 'text-slate-900'
+                      : 'text-gray-400',
                   )}
                 />
                 <span
                   className={cn(
                     'text-xs font-semibold',
-                    preferredTime === option.value ? 'text-slate-900' : 'text-gray-600',
+                    preferredTime === option.value
+                      ? 'text-slate-900'
+                      : 'text-gray-600',
                   )}
                 >
                   {option.label}
@@ -727,7 +786,10 @@ function FormContent({
 
         {/* Name */}
         <div className="space-y-2">
-          <Label htmlFor="tour-name" className="text-sm font-semibold text-gray-700">
+          <Label
+            htmlFor="tour-name"
+            className="text-sm font-semibold text-gray-700"
+          >
             Your name
           </Label>
           <div className="relative">
@@ -746,7 +808,10 @@ function FormContent({
 
         {/* Phone */}
         <div className="space-y-2">
-          <Label htmlFor="tour-phone" className="text-sm font-semibold text-gray-700">
+          <Label
+            htmlFor="tour-phone"
+            className="text-sm font-semibold text-gray-700"
+          >
             Phone number
           </Label>
           <div className="relative">
@@ -793,9 +858,7 @@ function FormContent({
 
         {/* Price Display */}
         {price !== null && (
-          <div
-            className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between"
-          >
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Tour fee
@@ -815,11 +878,10 @@ function FormContent({
         )}
 
         {price === null && zone && (
-          <div
-            className="bg-amber-50 border border-amber-200 rounded-xl p-4"
-          >
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <p className="text-sm font-semibold text-amber-800">
-              Pricing unavailable for this area. Please contact the agent directly.
+              Pricing unavailable for this area. Please contact the agent
+              directly.
             </p>
           </div>
         )}
@@ -845,9 +907,7 @@ function FormContent({
           </Button>
         </div>
 
-        <p
-          className="text-[10px] text-center text-gray-400 font-medium"
-        >
+        <p className="text-[10px] text-center text-gray-400 font-medium">
           Pay the agent directly when you arrive. No online payment required.
         </p>
       </form>
@@ -882,10 +942,14 @@ function ConfirmationContent({
   const tourTypeLabel =
     booking.tour_type === 'specific_hostel' ? 'Specific Hostel' : 'Full Search';
 
-  const dateStr = new Date(booking.preferred_date + 'T00:00:00').toLocaleDateString(
-    'en-KE',
-    { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
-  );
+  const dateStr = new Date(
+    booking.preferred_date + 'T00:00:00',
+  ).toLocaleDateString('en-KE', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <div className="text-center py-4">
@@ -894,9 +958,7 @@ function ConfirmationContent({
         <Check className="h-8 w-8 text-emerald-600" />
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 mb-1">
-        Tour Booked!
-      </h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-1">Tour Booked!</h2>
       <p className="text-sm text-gray-500 mb-6">
         {isLoggedIn
           ? 'Your tour has been scheduled and linked to your account.'
@@ -909,7 +971,9 @@ function ConfirmationContent({
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             Tour Type
           </span>
-          <span className="text-sm font-semibold text-gray-900">{tourTypeLabel}</span>
+          <span className="text-sm font-semibold text-gray-900">
+            {tourTypeLabel}
+          </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
@@ -921,13 +985,17 @@ function ConfirmationContent({
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             Time
           </span>
-          <span className="text-sm font-semibold text-gray-900">{timeLabel}</span>
+          <span className="text-sm font-semibold text-gray-900">
+            {timeLabel}
+          </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             Zone
           </span>
-          <span className="text-sm font-semibold text-gray-900">{booking.zone}</span>
+          <span className="text-sm font-semibold text-gray-900">
+            {booking.zone}
+          </span>
         </div>
         <div className="h-px bg-gray-200" />
         <div className="flex items-center justify-between">
@@ -935,7 +1003,9 @@ function ConfirmationContent({
             Pay on Arrival
           </span>
           <span className="text-lg font-black text-slate-900">
-            {price !== null ? formatTourPrice(price) : formatTourPrice(booking.amount)}
+            {price !== null
+              ? formatTourPrice(price)
+              : formatTourPrice(booking.amount)}
           </span>
         </div>
       </div>
@@ -943,7 +1013,8 @@ function ConfirmationContent({
       {/* Payment instruction */}
       <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-5">
         <p className="text-sm font-semibold text-amber-900">
-          Pay {formatTourPrice(booking.amount)} directly to the agent when you arrive.
+          Pay {formatTourPrice(booking.amount)} directly to the agent when you
+          arrive.
         </p>
         <p className="text-xs text-amber-700 mt-1">
           Cash or direct Till payment accepted.

@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Heart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils/cn';
+import posthog from 'posthog-js';
 
 interface SaveButtonProps {
   listingId: string;
@@ -12,7 +13,11 @@ interface SaveButtonProps {
   variant?: 'icon' | 'text';
 }
 
-export function SaveButton({ listingId, className = '', variant = 'text' }: SaveButtonProps) {
+export function SaveButton({
+  listingId,
+  className = '',
+  variant = 'text',
+}: SaveButtonProps) {
   const router = useRouter();
   const supabase = createClient();
   const [isSaved, setIsSaved] = useState(false);
@@ -20,7 +25,9 @@ export function SaveButton({ listingId, className = '', variant = 'text' }: Save
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session?.user) return;
 
       const { data } = await supabase
@@ -36,7 +43,9 @@ export function SaveButton({ listingId, className = '', variant = 'text' }: Save
   }, [listingId]);
 
   const handleToggle = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     if (!session?.user) {
       router.push('/saved');
@@ -55,6 +64,7 @@ export function SaveButton({ listingId, className = '', variant = 'text' }: Save
 
         if (error) throw error;
         setIsSaved(false);
+        posthog.capture('hostel_unsaved', { listing_id: listingId });
       } else {
         const { error } = await supabase
           .from('saved_hostels')
@@ -62,6 +72,7 @@ export function SaveButton({ listingId, className = '', variant = 'text' }: Save
 
         if (error) throw error;
         setIsSaved(true);
+        posthog.capture('hostel_saved', { listing_id: listingId });
       }
     } catch {
       setIsSaved(isSaved);
@@ -79,7 +90,9 @@ export function SaveButton({ listingId, className = '', variant = 'text' }: Save
         disabled={isLoading}
         className={cn(
           'pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 shadow-md backdrop-blur-sm transition-colors hover:bg-white',
-          isSaved ? 'text-red-500 hover:text-red-600' : 'text-slate-700 hover:text-slate-950',
+          isSaved
+            ? 'text-red-500 hover:text-red-600'
+            : 'text-slate-700 hover:text-slate-950',
           className,
         )}
         aria-label={isSaved ? 'Remove from saved' : 'Save hostel'}

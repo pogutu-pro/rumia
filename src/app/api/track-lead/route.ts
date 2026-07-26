@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sendPushToUser } from '@/lib/push';
-import { cleanPhone, buildWhatsAppUrl, hostelOwnerMessage, agentInquiryMessage, agentFeeAcceptedMessage } from '@/lib/utils/phone';
+import {
+  cleanPhone,
+  buildWhatsAppUrl,
+  hostelOwnerMessage,
+  agentInquiryMessage,
+  agentFeeAcceptedMessage,
+} from '@/lib/utils/phone';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (!listing_id || !agent_id) {
       return NextResponse.json(
         { error: 'Missing listing_id or agent_id' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +36,9 @@ export async function POST(request: NextRequest) {
     const data = encoder.encode(ip);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const ipHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    const ipHash = hashArray
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
 
     // Check if this IP clicked this listing in the last 24 hours to prevent spam
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -51,10 +60,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (listingError || !listing) {
-      return NextResponse.json(
-        { error: 'Listing not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
     }
 
     // Fetch agent to get WhatsApp and commission balance
@@ -65,19 +71,23 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (agentError || !agent) {
-      return NextResponse.json(
-        { error: 'Agent not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
     }
 
     const paysCommission = listing.pays_commission === true;
     const feeAccepted = body.fee_accepted === true;
 
-    if (resolvedContactType === 'rumia_agent' && !paysCommission && !feeAccepted) {
+    if (
+      resolvedContactType === 'rumia_agent' &&
+      !paysCommission &&
+      !feeAccepted
+    ) {
       return NextResponse.json(
-        { error: 'Fee disclosure required before contacting a Rumia Agent.', requiresFee: true },
-        { status: 409 }
+        {
+          error: 'Fee disclosure required before contacting a Rumia Agent.',
+          requiresFee: true,
+        },
+        { status: 409 },
       );
     }
 
@@ -115,7 +125,10 @@ export async function POST(request: NextRequest) {
 
       if (paysCommission) {
         // Calculate commission (10% of monthly listing price or flat rate of KSh 1,000)
-        const commissionAmount = Math.max(1000, Math.round(listing.price * 0.1));
+        const commissionAmount = Math.max(
+          1000,
+          Math.round(listing.price * 0.1),
+        );
 
         // Insert commission
         const { error: commError } = await supabase.from('commissions').insert({
@@ -139,6 +152,23 @@ export async function POST(request: NextRequest) {
             console.error('Error updating agent balance:', agentUpdateError);
           }
         }
+      }
+
+      const distinctId = request.headers.get('x-posthog-distinct-id') ?? ipHash;
+      const ph = getPostHogClient();
+      if (ph) {
+        ph.capture({
+          distinctId,
+          event: 'lead_created',
+          properties: {
+            listing_id,
+            agent_id,
+            contact_type: resolvedContactType,
+            pays_commission: paysCommission,
+            fee_accepted: feeAccepted,
+          },
+        });
+        await ph.flush();
       }
     }
 
@@ -175,7 +205,7 @@ export async function POST(request: NextRequest) {
     console.error('Lead tracking error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

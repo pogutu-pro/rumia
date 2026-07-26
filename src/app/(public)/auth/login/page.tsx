@@ -4,15 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
+import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import {
-  KeyRound,
-  Mail,
-  Loader2,
-} from 'lucide-react';
+import { KeyRound, Mail, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -90,6 +87,8 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (profile?.role === 'admin') {
+        posthog.identify(userId);
+        posthog.capture('user_signed_in', { method: 'email', role: 'admin' });
         toast.success('Logged in as administrator');
         router.push('/admin');
         router.refresh();
@@ -103,15 +102,20 @@ export default function LoginPage() {
         .single();
 
       if (agent) {
+        posthog.identify(userId);
+        posthog.capture('user_signed_in', { method: 'email', role: 'agent' });
         toast.success('Welcome back, Agent!');
         router.push('/dashboard');
         router.refresh();
       } else {
+        posthog.identify(userId);
+        posthog.capture('user_signed_in', { method: 'email', role: 'user' });
         toast.success('Signed in successfully');
         router.push(getNextParam() || '/account');
         router.refresh();
       }
-    } catch {
+    } catch (err) {
+      posthog.captureException(err);
       toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsSigningIn(false);
@@ -141,7 +145,10 @@ export default function LoginPage() {
 
         {/* Google Sign-In — prominent */}
         <button
-          onClick={() => signInWithGoogle(getNextParam() || '/account')}
+          onClick={() => {
+            posthog.capture('google_sign_in_initiated');
+            signInWithGoogle(getNextParam() || '/account');
+          }}
           className="w-full flex items-center justify-center gap-3 h-13 py-3.5 border-2 border-slate-200 rounded-xl font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm"
         >
           <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">

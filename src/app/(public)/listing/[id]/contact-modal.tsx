@@ -22,6 +22,7 @@ import { useIsMobile } from '@/hooks/use-media-query';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/client';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
+import posthog from 'posthog-js';
 
 // ── localStorage key for resuming flow after OAuth redirect ───────────────────
 const PENDING_CONTACT_KEY = 'rumia_pending_contact';
@@ -62,16 +63,39 @@ const overlayVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
 const desktopModalVariants = {
   hidden: { opacity: 0, scale: 0.92, y: 8 },
   visible: {
-    opacity: 1, scale: 1, y: 0,
-    transition: { type: 'spring' as const, damping: 28, stiffness: 340, mass: 0.9 },
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      damping: 28,
+      stiffness: 340,
+      mass: 0.9,
+    },
   },
-  exit: { opacity: 0, scale: 0.92, y: 8, transition: { duration: 0.15, ease: 'easeIn' as const } },
+  exit: {
+    opacity: 0,
+    scale: 0.92,
+    y: 8,
+    transition: { duration: 0.15, ease: 'easeIn' as const },
+  },
 };
 
 const mobileSheetVariants = {
   hidden: { y: '100%' },
-  visible: { y: 0, transition: { type: 'spring' as const, damping: 32, stiffness: 320, mass: 1 } },
-  exit: { y: '100%', transition: { duration: 0.2, ease: [0.32, 0.72, 0, 1] as const } },
+  visible: {
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      damping: 32,
+      stiffness: 320,
+      mass: 1,
+    },
+  },
+  exit: {
+    y: '100%',
+    transition: { duration: 0.2, ease: [0.32, 0.72, 0, 1] as const },
+  },
 };
 
 // ── Step types ────────────────────────────────────────────────────────────────
@@ -110,7 +134,9 @@ export function ContactModal({
 
   // Flow state
   const [step, setStep] = useState<Step>('choose');
-  const [contactType, setContactType] = useState<'hostel_owner' | 'rumia_agent' | null>(null);
+  const [contactType, setContactType] = useState<
+    'hostel_owner' | 'rumia_agent' | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Phone capture state
@@ -119,7 +145,9 @@ export function ContactModal({
   const [savingPhone, setSavingPhone] = useState(false);
   const [phoneAttempts, setPhoneAttempts] = useState(0);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lock body scroll
   useEffect(() => {
@@ -128,7 +156,9 @@ export function ContactModal({
     } else {
       document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   // Reset when modal closes
@@ -143,91 +173,115 @@ export function ContactModal({
 
   // ── Core: Track lead + open WhatsApp ────────────────────────────────────────
   // Defined FIRST so all downstream callbacks can reference it via ref.
-  const continueToWhatsApp = useCallback(async (
-    type: 'hostel_owner' | 'rumia_agent',
-    userPhone: string,
-    feeAccepted: boolean,
-  ) => {
-    setIsLoading(true);
+  const continueToWhatsApp = useCallback(
+    async (
+      type: 'hostel_owner' | 'rumia_agent',
+      userPhone: string,
+      feeAccepted: boolean,
+    ) => {
+      setIsLoading(true);
 
-    // For Rumia Agent on a non-commission hostel → show fee modal first
-    if (type === 'rumia_agent' && !paysCommission && !feeAccepted) {
-      setIsLoading(false);
-      setStep('fee');
-      return;
-    }
-
-    setStep('redirecting');
-
-    let shouldClose = true;
-
-    try {
-      const { session } = await getSession();
-      let name: string | undefined;
-      if (session?.user) {
-        const supabase = createClient();
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', session.user.id)
-          .single();
-        name = profile?.full_name ?? undefined;
-      }
-
-      const response = await fetch('/api/track-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          listing_id: listingId,
-          agent_id: agentId,
-          contact_type: type,
-          name,
-          phone: userPhone,
-          fee_accepted: feeAccepted,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.status === 409 && data.requiresFee) {
-        shouldClose = false;
+      // For Rumia Agent on a non-commission hostel → show fee modal first
+      if (type === 'rumia_agent' && !paysCommission && !feeAccepted) {
         setIsLoading(false);
         setStep('fee');
         return;
       }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to record lead');
-      }
+      setStep('redirecting');
 
-      if (data.whatsappUrl) {
-        window.open(data.whatsappUrl, '_blank');
-        toast.success('Opening WhatsApp…');
-      } else {
-        throw new Error('No WhatsApp URL returned');
+      let shouldClose = true;
+
+      try {
+        const { session } = await getSession();
+        let name: string | undefined;
+        if (session?.user) {
+          const supabase = createClient();
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', session.user.id)
+            .single();
+          name = profile?.full_name ?? undefined;
+        }
+
+        const response = await fetch('/api/track-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            listing_id: listingId,
+            agent_id: agentId,
+            contact_type: type,
+            name,
+            phone: userPhone,
+            fee_accepted: feeAccepted,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.status === 409 && data.requiresFee) {
+          shouldClose = false;
+          setIsLoading(false);
+          setStep('fee');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to record lead');
+        }
+
+        if (data.whatsappUrl) {
+          posthog.capture('contact_whatsapp_opened', {
+            listing_id: listingId,
+            contact_type: type,
+            pays_commission: paysCommission,
+            fee_accepted: feeAccepted,
+          });
+          window.open(data.whatsappUrl, '_blank');
+          toast.success('Opening WhatsApp…');
+        } else {
+          throw new Error('No WhatsApp URL returned');
+        }
+      } catch (err) {
+        posthog.captureException(err);
+        console.error('Track lead error:', err);
+        // Graceful fallback — still open WhatsApp.
+        const {
+          buildWhatsAppUrl,
+          hostelOwnerMessage,
+          agentInquiryMessage,
+          agentFeeAcceptedMessage,
+        } = await import('@/lib/utils/phone');
+        const fallbackPhone =
+          type === 'hostel_owner' && landlordPhone ? landlordPhone : agentPhone;
+        let msg: string;
+        if (type === 'hostel_owner') {
+          msg = hostelOwnerMessage(listingTitle);
+        } else if (!paysCommission) {
+          msg = agentFeeAcceptedMessage(listingTitle);
+        } else {
+          msg = agentInquiryMessage(listingTitle, 'your agent');
+        }
+        window.open(buildWhatsAppUrl(fallbackPhone, msg), '_blank');
+        toast.error('Lead tracking failed, connecting directly…');
+      } finally {
+        setIsLoading(false);
+        if (shouldClose) {
+          handleClose();
+        }
       }
-    } catch (err) {
-      console.error('Track lead error:', err);
-      // Graceful fallback — still open WhatsApp.
-      const { buildWhatsAppUrl, hostelOwnerMessage, agentInquiryMessage, agentFeeAcceptedMessage } = await import('@/lib/utils/phone');
-      const fallbackPhone = type === 'hostel_owner' && landlordPhone ? landlordPhone : agentPhone;
-      let msg: string;
-      if (type === 'hostel_owner') {
-        msg = hostelOwnerMessage(listingTitle);
-      } else if (!paysCommission) {
-        msg = agentFeeAcceptedMessage(listingTitle);
-      } else {
-        msg = agentInquiryMessage(listingTitle, 'your agent');
-      }
-      window.open(buildWhatsAppUrl(fallbackPhone, msg), '_blank');
-      toast.error('Lead tracking failed, connecting directly…');
-    } finally {
-      setIsLoading(false);
-      if (shouldClose) {
-        handleClose();
-      }
-    }
-  }, [listingId, agentId, listingTitle, agentPhone, landlordPhone, paysCommission, handleClose]);
+    },
+    [
+      listingId,
+      agentId,
+      listingTitle,
+      agentPhone,
+      landlordPhone,
+      paysCommission,
+      handleClose,
+    ],
+  );
 
   // Ref always holds the latest continueToWhatsApp, avoiding stale closures
   // in handleContactTypeSelect / handlePhoneSubmit / handleFeeAccepted.
@@ -235,52 +289,55 @@ export function ContactModal({
   continueRef.current = continueToWhatsApp;
 
   // ── Step 1: User picks a contact type ───────────────────────────────────────
-  const handleContactTypeSelect = useCallback(async (type: 'hostel_owner' | 'rumia_agent') => {
-    setContactType(type);
-    setIsLoading(true);
+  const handleContactTypeSelect = useCallback(
+    async (type: 'hostel_owner' | 'rumia_agent') => {
+      setContactType(type);
+      setIsLoading(true);
 
-    try {
-      const { session } = await getSession();
+      try {
+        const { session } = await getSession();
 
-      if (!session?.user) {
-        const pending: PendingContact = {
-          hostelId: listingId,
-          hostelTitle: listingTitle,
-          agentId,
-          agentPhone,
-          paysCommission,
-          contactType: type,
-          returnPath: window.location.pathname,
-        };
-        savePendingContact(pending);
-        const { error } = await signInWithGoogle(window.location.pathname);
-        if (error) {
-          setIsLoading(false);
+        if (!session?.user) {
+          const pending: PendingContact = {
+            hostelId: listingId,
+            hostelTitle: listingTitle,
+            agentId,
+            agentPhone,
+            paysCommission,
+            contactType: type,
+            returnPath: window.location.pathname,
+          };
+          savePendingContact(pending);
+          const { error } = await signInWithGoogle(window.location.pathname);
+          if (error) {
+            setIsLoading(false);
+            return;
+          }
           return;
         }
-        return;
-      }
 
-      const supabase = createClient();
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('phone')
-        .eq('id', session.user.id)
-        .single();
+        const supabase = createClient();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('id', session.user.id)
+          .single();
 
-      if (!profile?.phone || !isValidKenyanPhone(profile.phone)) {
+        if (!profile?.phone || !isValidKenyanPhone(profile.phone)) {
+          setIsLoading(false);
+          setStep('phone');
+          return;
+        }
+
+        await continueRef.current(type, profile.phone, false);
+      } catch (err) {
+        console.error('Contact flow error:', err);
+        toast.error('Something went wrong. Please try again.');
         setIsLoading(false);
-        setStep('phone');
-        return;
       }
-
-      await continueRef.current(type, profile.phone, false);
-    } catch (err) {
-      console.error('Contact flow error:', err);
-      toast.error('Something went wrong. Please try again.');
-      setIsLoading(false);
-    }
-  }, [listingId, listingTitle, agentId, agentPhone, paysCommission]);
+    },
+    [listingId, listingTitle, agentId, agentPhone, paysCommission],
+  );
 
   // Handle seamless resumption after OAuth
   useEffect(() => {
@@ -290,50 +347,58 @@ export function ContactModal({
   }, [isOpen, resumedContactType, handleContactTypeSelect]);
 
   // ── Step 2 (optional): Phone capture ────────────────────────────────────────
-  const handlePhoneSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPhoneError('');
+  const handlePhoneSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setPhoneError('');
 
-    if (!isValidKenyanPhone(phone)) {
-      const attempts = phoneAttempts + 1;
-      setPhoneAttempts(attempts);
-      if (attempts >= 2) {
-        setPhoneError('That number still doesn\'t look right. Please try again — use a valid Kenyan number like 0712 345 678.');
-      } else {
-        setPhoneError('That doesn\'t look like a valid Kenyan number. Please try again (e.g. 0712 345 678).');
-      }
-      toast.error('Invalid phone number. Please try again.');
-      return;
-    }
-
-    setSavingPhone(true);
-    try {
-      const { session } = await getSession();
-      if (!session?.user) {
-        toast.error('Session expired. Please try again.');
-        setSavingPhone(false);
+      if (!isValidKenyanPhone(phone)) {
+        const attempts = phoneAttempts + 1;
+        setPhoneAttempts(attempts);
+        if (attempts >= 2) {
+          setPhoneError(
+            "That number still doesn't look right. Please try again — use a valid Kenyan number like 0712 345 678.",
+          );
+        } else {
+          setPhoneError(
+            "That doesn't look like a valid Kenyan number. Please try again (e.g. 0712 345 678).",
+          );
+        }
+        toast.error('Invalid phone number. Please try again.');
         return;
       }
 
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('profiles')
-        .update({ phone: phone.trim(), updated_at: new Date().toISOString() })
-        .eq('id', session.user.id);
+      setSavingPhone(true);
+      try {
+        const { session } = await getSession();
+        if (!session?.user) {
+          toast.error('Session expired. Please try again.');
+          setSavingPhone(false);
+          return;
+        }
 
-      if (error) throw error;
+        const supabase = createClient();
+        const { error } = await supabase
+          .from('profiles')
+          .update({ phone: phone.trim(), updated_at: new Date().toISOString() })
+          .eq('id', session.user.id);
 
-      setSavingPhone(false);
-      await continueRef.current(contactType!, phone.trim(), false);
-    } catch (err) {
-      console.error('Phone save error:', err);
-      toast.error('Failed to save phone number. Please try again.');
-      setSavingPhone(false);
-    }
-  }, [phone, contactType, phoneAttempts]);
+        if (error) throw error;
+
+        setSavingPhone(false);
+        await continueRef.current(contactType!, phone.trim(), false);
+      } catch (err) {
+        console.error('Phone save error:', err);
+        toast.error('Failed to save phone number. Please try again.');
+        setSavingPhone(false);
+      }
+    },
+    [phone, contactType, phoneAttempts],
+  );
 
   // ── Step 3 (optional): Fee disclosure accepted ───────────────────────────────
   const handleFeeAccepted = useCallback(async () => {
+    posthog.capture('fee_disclosure_accepted', { listing_id: listingId });
     const { session } = await getSession();
     const supabase = createClient();
     const { data: profile } = await supabase
@@ -343,7 +408,7 @@ export function ContactModal({
       .single();
 
     await continueRef.current(contactType!, profile?.phone ?? '', true);
-  }, [contactType]);
+  }, [contactType, listingId]);
 
   if (!mounted) return null;
 
@@ -369,7 +434,12 @@ export function ContactModal({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Contact hostel">
+        <div
+          className="fixed inset-0 z-[100]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Contact hostel"
+        >
           {/* Overlay */}
           <motion.div
             className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
@@ -458,7 +528,9 @@ function ModalContent({
         <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
           <Loader2 className="h-7 w-7 animate-spin text-emerald-600" />
         </div>
-        <p className="text-sm font-semibold text-slate-600">Opening WhatsApp…</p>
+        <p className="text-sm font-semibold text-slate-600">
+          Opening WhatsApp…
+        </p>
       </div>
     );
   }
@@ -476,22 +548,29 @@ function ModalContent({
             <X className="h-5 w-5 text-gray-500" />
           </button>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Your WhatsApp Number</h2>
+            <h2 className="text-lg font-bold text-gray-900">
+              Your WhatsApp Number
+            </h2>
             <p className="text-xs text-gray-500">Required to continue</p>
           </div>
         </div>
 
         <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5">
-          <p className="text-sm font-semibold text-emerald-900 mb-1">Why we need this</p>
+          <p className="text-sm font-semibold text-emerald-900 mb-1">
+            Why we need this
+          </p>
           <p className="text-xs text-emerald-700 leading-relaxed">
-            Please enter the WhatsApp number you actually use. This number will be used when
-            contacting hostel owners and Rumia agents.
+            Please enter the WhatsApp number you actually use. This number will
+            be used when contacting hostel owners and Rumia agents.
           </p>
         </div>
 
         <form onSubmit={onPhoneSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="contact-phone" className="text-sm font-semibold text-gray-700">
+            <Label
+              htmlFor="contact-phone"
+              className="text-sm font-semibold text-gray-700"
+            >
               Phone number
             </Label>
             <div className="relative">
@@ -537,11 +616,18 @@ function ModalContent({
 
           <Button
             type="submit"
-            disabled={savingPhone || !phone.trim() || (phone.trim().length >= 9 && !isValidKenyanPhone(phone))}
+            disabled={
+              savingPhone ||
+              !phone.trim() ||
+              (phone.trim().length >= 9 && !isValidKenyanPhone(phone))
+            }
             className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all duration-300 border-0"
           >
             {savingPhone ? (
-              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving…</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Saving…
+              </>
             ) : (
               'Continue'
             )}
@@ -564,8 +650,12 @@ function ModalContent({
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </button>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Get the real details</h2>
-            <p className="text-xs text-gray-500">Insider information from the agent</p>
+            <h2 className="text-lg font-bold text-gray-900">
+              Get the real details
+            </h2>
+            <p className="text-xs text-gray-500">
+              Insider information from the agent
+            </p>
           </div>
         </div>
 
@@ -573,7 +663,8 @@ function ModalContent({
           <p className="text-sm text-amber-900 leading-relaxed">
             Get insider details about this hostel that aren't listed on Rumia —
             the kind of info that helps you decide before moving in. This costs{' '}
-            <span className="font-bold">KES 50</span>, paid directly to the agent.
+            <span className="font-bold">KES 50</span>, paid directly to the
+            agent.
           </p>
         </div>
 
@@ -591,7 +682,10 @@ function ModalContent({
             className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl border-0 transition-all"
           >
             {isLoading ? (
-              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Opening…</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Opening…
+              </>
             ) : (
               'Accept and Continue'
             )}
@@ -607,7 +701,9 @@ function ModalContent({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Contact</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Who would you like to speak to?</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Who would you like to speak to?
+          </p>
         </div>
         <button
           onClick={onClose}
@@ -627,7 +723,9 @@ function ModalContent({
             'flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 text-left',
             'border-slate-200 hover:border-slate-900 hover:bg-slate-50',
             'disabled:opacity-60 disabled:cursor-wait',
-            isLoading && contactType === 'hostel_owner' && 'border-slate-900 bg-slate-50',
+            isLoading &&
+              contactType === 'hostel_owner' &&
+              'border-slate-900 bg-slate-50',
           )}
           aria-label="Contact Hostel Owner"
         >
@@ -641,7 +739,9 @@ function ModalContent({
             </div>
           )}
           <div>
-            <p className="text-sm font-bold text-slate-900 text-center">Hostel Owner</p>
+            <p className="text-sm font-bold text-slate-900 text-center">
+              Hostel Owner
+            </p>
             <p className="text-[11px] text-slate-500 text-center mt-0.5 leading-snug">
               Speak directly with the landlord
             </p>
@@ -656,7 +756,9 @@ function ModalContent({
             'flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 text-left',
             'border-emerald-200 hover:border-emerald-600 hover:bg-emerald-50/50',
             'disabled:opacity-60 disabled:cursor-wait',
-            isLoading && contactType === 'rumia_agent' && 'border-emerald-600 bg-emerald-50/50',
+            isLoading &&
+              contactType === 'rumia_agent' &&
+              'border-emerald-600 bg-emerald-50/50',
           )}
           aria-label="Contact Rumia Agent"
         >
@@ -670,7 +772,9 @@ function ModalContent({
             </div>
           )}
           <div>
-            <p className="text-sm font-bold text-slate-900 text-center">Rumia Agent</p>
+            <p className="text-sm font-bold text-slate-900 text-center">
+              Rumia Agent
+            </p>
             <p className="text-[11px] text-slate-500 text-center mt-0.5 leading-snug">
               Get guided help from an expert
             </p>

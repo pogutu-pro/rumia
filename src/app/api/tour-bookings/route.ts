@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getTourPrice } from '@/lib/constants/tour-pricing';
 import { sendPushToUser } from '@/lib/push';
 import type { CreateTourBookingInput, TourType, TourTimeWindow } from '@/types';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +28,14 @@ export async function POST(request: NextRequest) {
     };
 
     // Validate required fields
-    if (!student_name || !phone || !zone || !tour_type || !preferred_date || !preferred_time) {
+    if (
+      !student_name ||
+      !phone ||
+      !zone ||
+      !tour_type ||
+      !preferred_date ||
+      !preferred_time
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 },
@@ -36,13 +44,20 @@ export async function POST(request: NextRequest) {
 
     // Validate enums
     const validTourTypes: TourType[] = ['specific_hostel', 'full_search'];
-    const validTimeWindows: TourTimeWindow[] = ['morning', 'afternoon', 'evening'];
+    const validTimeWindows: TourTimeWindow[] = [
+      'morning',
+      'afternoon',
+      'evening',
+    ];
 
     if (!validTourTypes.includes(tour_type)) {
       return NextResponse.json({ error: 'Invalid tour type' }, { status: 400 });
     }
     if (!validTimeWindows.includes(preferred_time)) {
-      return NextResponse.json({ error: 'Invalid time window' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid time window' },
+        { status: 400 },
+      );
     }
 
     // Validate phone (basic: at least 7 digits)
@@ -115,7 +130,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Use service-role client for insert (bypasses RLS for anon inserts)
-    const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+    const { createClient: createServiceClient } =
+      await import('@supabase/supabase-js');
     const supabase = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -156,13 +172,19 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (agentProfile?.user_id) {
-        const timeLabel = preferred_time === 'morning' ? 'morning' : preferred_time === 'afternoon' ? 'afternoon' : 'evening';
+        const timeLabel =
+          preferred_time === 'morning'
+            ? 'morning'
+            : preferred_time === 'afternoon'
+              ? 'afternoon'
+              : 'evening';
         const hostelCount = selected_listing_ids?.length || 0;
-        const tourDescription = tour_type === 'specific_hostel'
-          ? from_listing
-            ? 'hostel'
-            : `${hostelCount} hostel${hostelCount !== 1 ? 's' : ''}`
-          : 'area';
+        const tourDescription =
+          tour_type === 'specific_hostel'
+            ? from_listing
+              ? 'hostel'
+              : `${hostelCount} hostel${hostelCount !== 1 ? 's' : ''}`
+            : 'area';
 
         sendPushToUser(agentProfile.user_id, {
           title: 'New tour booking',
@@ -196,6 +218,25 @@ export async function POST(request: NextRequest) {
         }
       }),
     );
+
+    const distinctId = linked_user_id ?? booking.id;
+    const ph = getPostHogClient();
+    if (ph) {
+      ph.capture({
+        distinctId,
+        event: 'tour_booking_created',
+        properties: {
+          booking_id: booking.id,
+          tour_type,
+          zone,
+          preferred_time,
+          amount,
+          from_listing: !!from_listing,
+          listing_id: listing_id ?? null,
+        },
+      });
+      await ph.flush();
+    }
 
     return NextResponse.json({ success: true, booking });
   } catch (error) {

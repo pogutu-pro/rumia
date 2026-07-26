@@ -4,10 +4,16 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { signInWithGoogle } from '@/lib/supabase/auth';
+import posthog from 'posthog-js';
 import { Loader2 } from 'lucide-react';
 import { AccountHeader } from './account-header';
 import type { AccountTab } from './account-tabs';
-import { AccountOverviewTab, type OverviewUpcomingTour, type OverviewSavedItem, type RecommendedHostel } from './account-overview-tab';
+import {
+  AccountOverviewTab,
+  type OverviewUpcomingTour,
+  type OverviewSavedItem,
+  type RecommendedHostel,
+} from './account-overview-tab';
 import type { PlatformInsightData } from '@/lib/utils/insight-engine';
 import { AccountToursTab } from './account-tours-tab';
 import { AccountSavedTab } from './account-saved-tab';
@@ -15,9 +21,18 @@ import { AccountFeedbackTab } from './account-feedback-tab';
 import { AccountSettingsTab } from './account-settings-tab';
 import { ProfileCompletionModal } from './profile-completion-modal';
 import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
-import { getRecentlyViewedHostels, type RecentlyViewedHostel } from '@/lib/utils/recently-viewed';
+import {
+  getRecentlyViewedHostels,
+  type RecentlyViewedHostel,
+} from '@/lib/utils/recently-viewed';
 
-const VALID_TABS = new Set<AccountTab>(['overview', 'tours', 'saved', 'feedback', 'settings']);
+const VALID_TABS = new Set<AccountTab>([
+  'overview',
+  'tours',
+  'saved',
+  'feedback',
+  'settings',
+]);
 
 function getValidTab(value: string | null): AccountTab {
   if (value && VALID_TABS.has(value as AccountTab)) return value as AccountTab;
@@ -43,11 +58,19 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [savedCount, setSavedCount] = useState(0);
   const [activeToursCount, setActiveToursCount] = useState(0);
-  const [upcomingTour, setUpcomingTour] = useState<OverviewUpcomingTour | null>(null);
+  const [upcomingTour, setUpcomingTour] = useState<OverviewUpcomingTour | null>(
+    null,
+  );
   const [savedPreview, setSavedPreview] = useState<OverviewSavedItem[]>([]);
-  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedHostel[]>([]);
-  const [recommendedHostels, setRecommendedHostels] = useState<RecommendedHostel[]>([]);
-  const [platformData, setPlatformData] = useState<PlatformInsightData | undefined>(undefined);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedHostel[]>(
+    [],
+  );
+  const [recommendedHostels, setRecommendedHostels] = useState<
+    RecommendedHostel[]
+  >([]);
+  const [platformData, setPlatformData] = useState<
+    PlatformInsightData | undefined
+  >(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,26 +86,41 @@ export default function AccountPage() {
         return;
       }
 
-      const [profileRes, agentRes, savedRes, toursRes, recommendedRes, platformRes] = await Promise.all([
+      const [
+        profileRes,
+        agentRes,
+        savedRes,
+        toursRes,
+        recommendedRes,
+        platformRes,
+      ] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('agents').select('id').eq('user_id', user.id).maybeSingle(),
+        supabase
+          .from('agents')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle(),
         supabase
           .from('saved_hostels')
           .select(
             `id, listing_id, created_at,
              listings(id, title, price, location, slug, county, area,
-               listing_images(r2_url, display_order))`
+               listing_images(r2_url, display_order))`,
           )
           .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
         supabase
           .from('tour_bookings')
-          .select(`id, status, preferred_date, preferred_time, amount, listings(id, title, area, slug, county)`)
+          .select(
+            `id, status, preferred_date, preferred_time, amount, listings(id, title, area, slug, county)`,
+          )
           .eq('linked_user_id', user.id)
           .order('preferred_date', { ascending: true }),
         supabase
           .from('listings')
-          .select('id, title, price, location, area, county, slug, room_type, listing_images(r2_url, display_order)')
+          .select(
+            'id, title, price, location, area, county, slug, room_type, listing_images(r2_url, display_order)',
+          )
           .eq('is_active', true)
           .order('created_at', { ascending: false })
           .limit(3),
@@ -95,10 +133,14 @@ export default function AccountPage() {
       ]);
 
       if (!cancelled) {
-        setProfile({
+        const resolvedProfile = {
           ...profileRes.data,
           email: profileRes.data?.email || user.email || '',
-        } as Profile);
+        } as Profile;
+        posthog.identify(user.id, {
+          role: resolvedProfile.role ?? undefined,
+        });
+        setProfile(resolvedProfile);
         setHasAgent(!!agentRes.data);
 
         if (savedRes.data) {
@@ -109,14 +151,19 @@ export default function AccountPage() {
         if (toursRes.data) {
           const tours = toursRes.data as unknown as OverviewUpcomingTour[];
           const activeTours = tours.filter(
-            (b) => b.status !== 'cancelled' && b.status !== 'completed' && b.status !== 'no_show'
+            (b) =>
+              b.status !== 'cancelled' &&
+              b.status !== 'completed' &&
+              b.status !== 'no_show',
           );
           setActiveToursCount(activeTours.length);
           setUpcomingTour(activeTours[0] || null);
         }
 
         if (recommendedRes.data) {
-          setRecommendedHostels(recommendedRes.data as unknown as RecommendedHostel[]);
+          setRecommendedHostels(
+            recommendedRes.data as unknown as RecommendedHostel[],
+          );
         }
 
         if (platformRes.data && platformRes.data.length > 0) {
@@ -169,10 +216,22 @@ export default function AccountPage() {
             className="w-full flex items-center justify-center gap-3 h-11 border border-slate-300 rounded-lg font-medium text-slate-800 hover:bg-slate-50 transition-colors text-sm cursor-pointer"
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
             </svg>
             Continue with Google
           </button>
@@ -181,7 +240,8 @@ export default function AccountPage() {
     );
   }
 
-  const needsProfileCompletion = !profile.full_name?.trim() || !profile.phone?.trim();
+  const needsProfileCompletion =
+    !profile.full_name?.trim() || !profile.phone?.trim();
 
   return (
     <div className="min-h-screen bg-white">
@@ -193,7 +253,9 @@ export default function AccountPage() {
           currentPhone={profile.phone}
           onSuccess={(data) => {
             setProfile((prev) =>
-              prev ? { ...prev, full_name: data.full_name, phone: data.phone } : prev,
+              prev
+                ? { ...prev, full_name: data.full_name, phone: data.phone }
+                : prev,
             );
           }}
         />
@@ -225,15 +287,21 @@ export default function AccountPage() {
         )}
 
         {activeTab === 'tours' && (
-          <AccountToursTab onBackToOverview={() => handleTabChange('overview')} />
+          <AccountToursTab
+            onBackToOverview={() => handleTabChange('overview')}
+          />
         )}
 
         {activeTab === 'saved' && (
-          <AccountSavedTab onBackToOverview={() => handleTabChange('overview')} />
+          <AccountSavedTab
+            onBackToOverview={() => handleTabChange('overview')}
+          />
         )}
 
         {activeTab === 'feedback' && (
-          <AccountFeedbackTab onBackToOverview={() => handleTabChange('overview')} />
+          <AccountFeedbackTab
+            onBackToOverview={() => handleTabChange('overview')}
+          />
         )}
 
         {activeTab === 'settings' && (

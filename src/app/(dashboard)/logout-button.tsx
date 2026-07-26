@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import posthog from 'posthog-js';
 
 export function LogoutButton() {
   const router = useRouter();
@@ -12,6 +13,8 @@ export function LogoutButton() {
 
   const handleSignOut = async () => {
     try {
+      posthog.capture('user_signed_out');
+      posthog.reset();
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       toast.success('Logged out successfully');

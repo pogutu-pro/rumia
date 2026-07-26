@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { recordRecentlyViewedHostel } from '@/lib/utils/recently-viewed';
+import posthog from 'posthog-js';
 
 interface ListingViewTrackerProps {
   listingId: string;
@@ -48,8 +49,13 @@ export function ListingViewTracker({
         imageUrl,
       });
     }
+
+    posthog.capture('listing_viewed', {
+      listing_id: listingId,
+      listing_zone: area ?? null,
+      listing_county: county ?? null,
+    });
   }, [listingId, title, price, location, slug, county, area, imageUrl]);
 
   return null;
 }
-
