@@ -10,8 +10,25 @@ const nextConfig = {
   turbopack: {},
   output: 'standalone',
   reactStrictMode: true,
+  skipTrailingSlashRedirect: true,
   typescript: {
     ignoreBuildErrors: false,
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/ingest/static/:path*',
+        destination: 'https://eu-assets.i.posthog.com/static/:path*',
+      },
+      {
+        source: '/ingest/array/:path*',
+        destination: 'https://eu-assets.i.posthog.com/array/:path*',
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://eu.i.posthog.com/:path*',
+      },
+    ];
   },
   images: {
     loader: 'custom',
