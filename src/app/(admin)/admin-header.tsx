@@ -10,12 +10,6 @@ import {
   ShieldAlert,
   LayoutDashboard,
   User,
-  BarChart3,
-  MousePointerClick,
-  DollarSign,
-  ArrowLeftRight,
-  MessageSquare,
-  Settings,
 } from 'lucide-react';
 
 interface AdminHeaderProps {
@@ -31,32 +25,10 @@ const mainNavLinks = [
   { href: '/agents', label: 'Agents', icon: Users },
 ];
 
-const adminNavLinks = [
-  { href: '/admin', label: 'Overview', exact: true },
-  { href: '/admin/analytics', label: 'Analytics', exact: false },
-  { href: '/admin/agents', label: 'Agents', exact: false },
-  { href: '/admin/users', label: 'Users', exact: false },
-  { href: '/admin/listings', label: 'Listings', exact: false },
-  { href: '/admin/official-hostels', label: 'Official Hostels', exact: false },
-  { href: '/admin/tours', label: 'Tours', exact: false },
-];
-
-const adminSecondaryLinks = [
-  { href: '/admin/leads', label: 'Leads', icon: MousePointerClick },
-  { href: '/admin/commissions', label: 'Commissions', icon: DollarSign },
-  { href: '/admin/transfers', label: 'Transfers', icon: ArrowLeftRight },
-  { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-];
-
 export function AdminHeader({ userName, userEmail, isAdmin, hasAgent }: AdminHeaderProps) {
   const pathname = usePathname();
 
   const displayName = userName || 'Admin';
-
-  function isActive(href: string, exact?: boolean) {
-    return exact ? pathname === href : pathname.startsWith(href);
-  }
 
   const dashboardLinks = [
     { href: '/admin', label: 'Admin', icon: ShieldAlert, show: true },
@@ -69,7 +41,7 @@ export function AdminHeader({ userName, userEmail, isAdmin, hasAgent }: AdminHea
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Left: Logo + Desktop Nav */}
+          {/* Left: Logo */}
           <div className="flex items-center gap-6">
             <Link href="/admin" className="shrink-0">
               <Image
@@ -93,23 +65,6 @@ export function AdminHeader({ userName, userEmail, isAdmin, hasAgent }: AdminHea
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       active
                         ? 'text-slate-900 bg-slate-100 font-semibold'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-
-              {adminNavLinks.map(({ href, label, exact }) => {
-                const active = isActive(href, exact);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      active
-                        ? 'text-emerald-700 bg-emerald-50 font-semibold'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
@@ -165,50 +120,6 @@ export function AdminHeader({ userName, userEmail, isAdmin, hasAgent }: AdminHea
               })}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Admin sub-navigation - horizontal scroll on desktop, icon row on mobile */}
-      <div className="border-t border-slate-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="hidden md:flex items-center gap-1 overflow-x-auto scrollbar-hide py-2 -mx-1">
-            {adminNavLinks.map(({ href, label, exact }) => {
-              const active = isActive(href, exact);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
-                    active
-                      ? 'text-emerald-700 bg-emerald-50 font-semibold'
-                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-          {/* Mobile admin nav icons */}
-          <nav className="flex md:hidden items-center gap-0.5 overflow-x-auto py-2 -mx-1">
-            {adminNavLinks.map(({ href, label, exact }) => {
-              const active = isActive(href, exact);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg text-xs transition-colors shrink-0 ${
-                    active
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
       </div>
     </header>

@@ -46,22 +46,6 @@ export function ManagerHeader({
   };
 
   const displayName = userName || 'Manager';
-  const initials = displayName.charAt(0).toUpperCase();
-
-  const navItems = [
-    { href: '/manager', label: 'Overview', icon: ShieldCheck },
-    { href: '/manager/applications', label: 'Applications', icon: FileCheck2 },
-    { href: '/manager/agents', label: 'Agents', icon: Users },
-    { href: '/manager/listings', label: 'Listings', icon: Building2 },
-    { href: '/manager/requests', label: 'Hostel Requests', icon: MessageSquareText },
-    { href: '/manager/announcements', label: 'Announcements', icon: Megaphone },
-    { href: '/manager/zones', label: 'Zones', icon: MapPin },
-    { href: '/manager/settings', label: 'Settings', icon: Settings },
-  ];
-
-  if (isSuperAdmin) {
-    navItems.push({ href: '/manager/staff', label: 'Staff', icon: Users });
-  }
 
   const dashboardLinks = [
     { href: '/manager', label: 'Manager', icon: ShieldCheck },
@@ -69,6 +53,25 @@ export function ManagerHeader({
     { href: '/account', label: 'Student', icon: User },
     { href: '/', label: 'Site', icon: Home },
   ];
+
+  const managerNavLinks = [
+    { href: '/manager', label: 'Overview', exact: true },
+    { href: '/manager/applications', label: 'Applications', exact: false },
+    { href: '/manager/agents', label: 'Agents', exact: false },
+    { href: '/manager/listings', label: 'Listings', exact: false },
+    { href: '/manager/requests', label: 'Hostel Requests', exact: false },
+    { href: '/manager/announcements', label: 'Announcements', exact: false },
+    { href: '/manager/zones', label: 'Zones', exact: false },
+    { href: '/manager/settings', label: 'Settings', exact: false },
+  ];
+
+  if (isSuperAdmin) {
+    managerNavLinks.push({ href: '/manager/staff', label: 'Staff', exact: false });
+  }
+
+  function isActive(href: string, exact?: boolean) {
+    return exact ? pathname === href : pathname.startsWith(href);
+  }
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -93,42 +96,21 @@ export function ManagerHeader({
             </span>
           </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map(({ href, label, icon: Icon }) => {
-              const isActive = href === '/manager' ? pathname === '/manager' : pathname.startsWith(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    isActive
-                      ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right: Notifications + dashboard icons + sign out */}
+          {/* Right: Notifications + dashboard icons */}
           <div className="flex items-center gap-1 sm:gap-2">
             <NotificationBell />
 
-            {/* Dashboard switcher icons - visible on all screens */}
+            {/* Desktop dashboard switcher */}
             <div className="hidden md:flex items-center gap-1">
               {dashboardLinks.map(({ href, label, icon: Icon }) => {
-                const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
+                const active = pathname === href || (href !== '/' && pathname.startsWith(href));
                 return (
                   <Link
                     key={href}
                     href={href}
                     title={label}
                     className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      isActive
+                      active
                         ? 'bg-emerald-50 text-emerald-700'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
@@ -143,35 +125,14 @@ export function ManagerHeader({
             {/* Mobile: compact icon buttons for dashboard switching */}
             <div className="flex md:hidden items-center gap-0.5">
               {dashboardLinks.map(({ href, label, icon: Icon }) => {
-                const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
+                const active = pathname === href || (href !== '/' && pathname.startsWith(href));
                 return (
                   <Link
                     key={href}
                     href={href}
                     title={label}
                     className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs transition-colors ${
-                      isActive
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Mobile nav icons */}
-            <div className="flex lg:hidden items-center gap-0.5">
-              {navItems.slice(0, 5).map(({ href, label, icon: Icon }) => {
-                const isActive = href === '/manager' ? pathname === '/manager' : pathname.startsWith(href);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    title={label}
-                    className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs transition-colors ${
-                      isActive
+                      active
                         ? 'bg-emerald-50 text-emerald-700'
                         : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                     }`}
@@ -182,6 +143,50 @@ export function ManagerHeader({
               })}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Manager sub-navigation - horizontal scroll on desktop, icon row on mobile */}
+      <div className="border-t border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="hidden md:flex items-center gap-1 overflow-x-auto scrollbar-hide py-2 -mx-1">
+            {managerNavLinks.map(({ href, label, exact }) => {
+              const active = isActive(href, exact);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
+                    active
+                      ? 'text-emerald-700 bg-emerald-50 font-semibold'
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
+          {/* Mobile manager nav icons */}
+          <nav className="flex md:hidden items-center gap-0.5 overflow-x-auto py-2 -mx-1">
+            {managerNavLinks.map(({ href, label, exact }) => {
+              const active = isActive(href, exact);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  title={label}
+                  className={`flex items-center justify-center w-9 h-9 rounded-lg text-xs transition-colors shrink-0 ${
+                    active
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </header>

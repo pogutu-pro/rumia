@@ -25,21 +25,9 @@ const mainNavLinks = [
   { href: '/agents', label: 'Agents', icon: Users },
 ];
 
-const agentSectionLinks = [
-  { href: '/dashboard', label: 'Dashboard', exact: true },
-  { href: '/dashboard/tours', label: 'Tours', exact: false },
-  { href: '/dashboard/listings', label: 'My Listings', exact: false },
-  { href: '/dashboard/profile', label: 'Profile', exact: false },
-  { href: '/dashboard/new', label: 'New Listing', exact: false },
-];
-
 export function AgentHeader({ agentName, userEmail, isAdmin, isManager }: AgentHeaderProps) {
   const pathname = usePathname();
   const displayName = agentName || 'Agent';
-
-  function isActive(href: string, exact?: boolean) {
-    return exact ? pathname === href : pathname.startsWith(href);
-  }
 
   const dashboardLinks = [
     { href: '/dashboard', label: 'Agent', icon: LayoutDashboard, show: true },
@@ -53,7 +41,7 @@ export function AgentHeader({ agentName, userEmail, isAdmin, isManager }: AgentH
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Left: Logo + Desktop Nav */}
+          {/* Left: Logo */}
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="shrink-0">
               <Image
@@ -77,23 +65,6 @@ export function AgentHeader({ agentName, userEmail, isAdmin, isManager }: AgentH
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       active
                         ? 'text-slate-900 bg-slate-100 font-semibold'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-
-              {agentSectionLinks.map(({ href, label, exact }) => {
-                const active = isActive(href, exact);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      active
-                        ? 'text-emerald-700 bg-emerald-50 font-semibold'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
@@ -149,50 +120,6 @@ export function AgentHeader({ agentName, userEmail, isAdmin, isManager }: AgentH
               })}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Agent section nav - horizontal scroll on desktop, icon row on mobile */}
-      <div className="border-t border-slate-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="hidden md:flex items-center gap-1 overflow-x-auto scrollbar-hide py-2 -mx-1">
-            {agentSectionLinks.map(({ href, label, exact }) => {
-              const active = isActive(href, exact);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
-                    active
-                      ? 'text-emerald-700 bg-emerald-50 font-semibold'
-                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-          {/* Mobile agent nav icons */}
-          <nav className="flex md:hidden items-center gap-0.5 overflow-x-auto py-2 -mx-1">
-            {agentSectionLinks.map(({ href, label, exact }) => {
-              const active = isActive(href, exact);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg text-xs transition-colors shrink-0 ${
-                    active
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
       </div>
     </header>
