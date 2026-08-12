@@ -105,6 +105,9 @@ function matchesParsedFilters(listing: SearchListing, parsed: ReturnType<typeof 
   return true;
 }
 
+// Admin-pinned listings (sort_position set) always stay ahead of the default
+// newest-first order. Input usually arrives pre-sorted from the database, so
+// this keeps a stable order with no visible change for already-sorted input.
 function sortResults(listings: SearchListing[]): SearchListing[] {
   return [...listings].sort((a, b) => {
     const aPos = a.sort_position ?? null;

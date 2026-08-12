@@ -916,8 +916,9 @@ export async function markCommissionPaidAction(
 }
 
 /**
- * Updates sort_position for multiple listings in a single batch.
- * Logs each change to listing_sort_history for audit trail.
+ * Updates sort_position for multiple listings using a single set-based UPDATE
+ * (reorder_listings RPC). Logs each change to listing_sort_history inside the
+ * same atomic statement — no per-listing round trips.
  * Listings with sort_position set appear first, ordered ascending.
  * Null sort_position means "use default ordering" (created_at DESC).
  */
@@ -929,60 +930,51 @@ export async function updateListingsOrderAction(
     return { success: false, error: 'Unauthorized' };
   }
 
+  if (updates.length === 0) {
+    return { success: true };
+  }
+
   try {
-    // Fetch current positions for audit logging
-    const listingIds = updates.map((u) => u.id);
-    const { data: currentListings, error: fetchError } = await supabaseAdmin
-      .from('listings')
-      .select('id, sort_position')
-      .in('id', listingIds);
+    const { error } = await supabaseAdmin.rpc('reorder_listings', {
+      p_positions: JSON.stringify(
+        updates.map((u) => ({ listing_id: u.id, new_position: u.sort_position })),
+      ),
+      p_admin_id: user.id,
+    });
 
-    if (fetchError) {
-      return { success: false, error: fetchError.message };
+    if (error) {
+      return { success: false, error: `Failed to save order: ${error.message}` };
     }
 
-    const oldPositionMap = new Map<string, number | null>();
-    for (const listing of currentListings ?? []) {
-      oldPositionMap.set(listing.id, listing.sort_position);
-    }
+    revalidatePath('/admin/listings');
+    revalidatePath('/admin');
+    revalidatePath('/hostels');
+    revalidatePath('/');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
 
-    // Apply updates one by one (Supabase doesn't support bulk update with different values per row)
-    const auditEntries: Array<{
-      listing_id: string;
-      admin_id: string;
-      old_position: number | null;
-      new_position: number | null;
-    }> = [];
+/**
+ * Resets all listings to the default newest-first ordering (created_at DESC)
+ * via a single bulk UPDATE (reset_listing_order RPC). Any manual custom order
+ * is cleared so freshly created listings automatically rise to the top again.
+ */
+export async function resetListingsOrderAction(): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
 
-    for (const update of updates) {
-      const oldPosition = oldPositionMap.get(update.id) ?? null;
+  try {
+    const { error } = await supabaseAdmin.rpc('reset_listing_order', {
+      p_admin_id: user.id,
+    });
 
-      const { error: updateError } = await supabaseAdmin
-        .from('listings')
-        .update({ sort_position: update.sort_position })
-        .eq('id', update.id);
-
-      if (updateError) {
-        return { success: false, error: `Failed to update listing ${update.id}: ${updateError.message}` };
-      }
-
-      auditEntries.push({
-        listing_id: update.id,
-        admin_id: user.id,
-        old_position: oldPosition,
-        new_position: update.sort_position,
-      });
-    }
-
-    // Batch insert audit log entries
-    if (auditEntries.length > 0) {
-      const { error: auditError } = await supabaseAdmin
-        .from('listing_sort_history')
-        .insert(auditEntries);
-
-      if (auditError) {
-        console.error('Failed to record sort history:', auditError);
-      }
+    if (error) {
+      return { success: false, error: `Failed to reset order: ${error.message}` };
     }
 
     revalidatePath('/admin/listings');

@@ -11,6 +11,7 @@ import {
   Settings,
   Compass,
   MessageSquareText,
+  Megaphone,
 } from 'lucide-react';
 import { RoleGuideBanner } from '@/components/dashboard/role-guide-banner';
 import { HostelFindingFeeCard } from './hostel-finding-fee-card';
@@ -156,6 +157,14 @@ export default async function ManagerDashboardPage() {
       badge: `${waitingHostelRequestsCount} Waiting`,
       color: 'bg-amber-50 text-amber-600',
       hoverColor: 'group-hover:text-amber-700',
+    },
+    {
+      href: '/manager/announcements',
+      title: 'Announcements',
+      desc: 'Publish campus updates that appear at the top of the public site.',
+      icon: Megaphone,
+      color: 'bg-slate-100 text-slate-700',
+      hoverColor: 'group-hover:text-slate-900',
     },
   ];
 

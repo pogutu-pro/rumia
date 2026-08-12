@@ -4,7 +4,6 @@ import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 import {
   MapPin,
   ArrowLeft,
@@ -101,11 +100,12 @@ async function getNearbyListings(listing: any) {
     .eq('county', listing.county || 'nyeri')
     .eq('area', listing.area || 'dekut')
     .neq('id', listing.id)
+    .order('sort_position', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(4);
 
   if (error || !data) return [];
-  return sortListingsByPosition(data as any[]);
+  return data as any[];
 }
 
 export async function generateMetadata({

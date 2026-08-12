@@ -4,7 +4,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowLeft, Calendar, ShieldCheck, Globe, ExternalLink } from 'lucide-react';
-import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -77,9 +76,10 @@ export default async function AgentSlugPage({ params }: PageProps) {
     `)
     .eq('agent_id', agent.id)
     .eq('is_active', true)
-    .order('id', { ascending: false });
+    .order('sort_position', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
 
-  const listings = sortListingsByPosition((listingsData || []) as any[]);
+  const listings = (listingsData || []) as any[];
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
   const canonicalUrl = `${metadataBase}/agents/${slug}`;
 

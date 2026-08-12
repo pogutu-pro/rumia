@@ -4,18 +4,31 @@ import { ListingsTableClient } from './listings-table-client';
 export default async function ListingsPage() {
   const supabase = await createClient();
 
-  const { data: listingsRaw } = await (supabase as any).from('listings').select(`
-    id, title, location, price, is_active, verified, created_at, sort_position, landlord_phone,
-    pays_commission, commission_locked_by_admin,
-    agents(id, name, verified),
-    leads(id),
-    listing_images(r2_url, display_order)
-  `);
+  const { data: listingsRaw } = await (supabase as any)
+    .from('listings')
+    .select(`
+      id, title, location, price, is_active, verified, created_at, sort_position, landlord_phone,
+      pays_commission, commission_locked_by_admin,
+      agents(id, name, verified),
+      leads(id),
+      listing_images(r2_url, display_order)
+    `)
+    .order('sort_position', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
 
   const { data: agentsRaw } = await (supabase as any)
     .from('agents')
     .select('id, name, status')
     .order('name');
+
+  // Latest reorder timestamp for admin feedback ("last reordered X ago").
+  const { data: lastReorderRaw } = await (supabase as any)
+    .from('listing_sort_history')
+    .select('changed_at')
+    .order('changed_at', { ascending: false })
+    .limit(1);
+
+  const lastReorderAt: string | null = lastReorderRaw?.[0]?.changed_at ?? null;
 
   const listings = (listingsRaw ?? []).map((listing: any) => {
     const images: Array<{ r2_url: string; display_order: number }> =
@@ -46,17 +59,21 @@ export default async function ListingsPage() {
     };
   });
 
-  // Sort: positioned listings first (ascending), then unpositioned by created_at DESC
-  listings.sort((a: (typeof listings)[number], b: (typeof listings)[number]) => {
-    if (a.sort_position !== null && b.sort_position !== null) return a.sort_position - b.sort_position;
-    if (a.sort_position !== null) return -1;
-    if (b.sort_position !== null) return 1;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
-
   const agents: Array<{ id: string; name: string; status: string }> = (agentsRaw ?? []).map(
     (a: any) => ({ id: a.id, name: a.name, status: a.status })
   );
 
-  return <ListingsTableClient listings={listings} agents={agents} />;
+  // True when any listing has an explicit position, i.e. a custom order is in effect.
+  const hasCustomOrder = (listings as Array<{ sort_position: number | null }>).some(
+    (l) => l.sort_position !== null,
+  );
+
+  return (
+    <ListingsTableClient
+      listings={listings}
+      agents={agents}
+      lastReorderAt={lastReorderAt}
+      hasCustomOrder={hasCustomOrder}
+    />
+  );
 }

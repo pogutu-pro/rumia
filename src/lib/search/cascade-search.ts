@@ -261,7 +261,7 @@ async function fetchExactPhrase(
 
   q = parsed.sortByProximity
     ? q.order('proximity_description', { ascending: true })
-    : q.order('created_at', { ascending: false });
+    : q.order('sort_position', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false });
 
   q = q.range(from, to);
 
@@ -301,7 +301,7 @@ async function fetchWordLevel(
 
   q = parsed.sortByProximity
     ? q.order('proximity_description', { ascending: true })
-    : q.order('created_at', { ascending: false });
+    : q.order('sort_position', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false });
 
   q = q.range(from, to);
 
@@ -480,21 +480,12 @@ export async function fetchListings(
 
   q = parsed.sortByProximity
     ? q.order('proximity_description', { ascending: true })
-    : q.order('created_at', { ascending: false });
+    : q.order('sort_position', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false });
 
   q = q.range(from, to);
 
   const { data, count } = await q;
   const results = (data as SearchListing[]) || [];
-
-  results.sort((a, b) => {
-    const aPos = a.sort_position ?? null;
-    const bPos = b.sort_position ?? null;
-    if (aPos !== null && bPos !== null) return aPos - bPos;
-    if (aPos !== null) return -1;
-    if (bPos !== null) return 1;
-    return 0;
-  });
 
   return { listings: results, count: count || 0 };
 }

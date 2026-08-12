@@ -2,7 +2,9 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { supabasePublic } from '@/lib/supabase/public';
 import HostelsSearch, { type Listing } from './hostels-search';
-import { sortListingsByPosition } from '@/lib/utils/listing-sort';
+import { PublicAnnouncements } from '@/components/announcements/public-announcements';
+import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
+import { getActiveAnnouncements } from '@/lib/data/announcements';
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
@@ -37,16 +39,30 @@ async function getAllActiveListings(): Promise<Listing[]> {
        listing_images(r2_url, display_order, blur_data_url),
        agents(name, phone, whatsapp)`,
     )
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .order('sort_position', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
 
-  return sortListingsByPosition(data as unknown as Listing[]) || [];
+  return (data as unknown as Listing[]) || [];
 }
 
 export default async function HostelsPage() {
-  const allListings = await getAllActiveListings();
+  const campus = await getCampusBySlug('dekut');
+
+  const [allListings, activeAnnouncements] = await Promise.all([
+    getAllActiveListings(),
+    getActiveAnnouncements(isFallbackCampus(campus) ? null : campus.id),
+  ]);
 
   return (
     <Suspense>
+      {activeAnnouncements.length > 0 && (
+        <div className="bg-slate-50/50 pt-6 lg:pt-10">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <PublicAnnouncements announcements={activeAnnouncements} />
+          </div>
+        </div>
+      )}
       <HostelsSearch
         allListings={allListings}
       />

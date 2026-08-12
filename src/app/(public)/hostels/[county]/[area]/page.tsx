@@ -3,9 +3,10 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { supabasePublic } from '@/lib/supabase/public';
 import { JsonLd } from '@/components/seo/json-ld';
-import { sortListingsByPosition } from '@/lib/utils/listing-sort';
-import { getAllCampusesStatic } from '@/lib/data/campuses';
+import { getAllCampusesStatic, isFallbackCampus } from '@/lib/data/campuses';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
+import { getActiveAnnouncements } from '@/lib/data/announcements';
+import { PublicAnnouncements } from '@/components/announcements/public-announcements';
 import HostelsSearch, { type Listing } from '../../hostels-search';
 import type { Campus } from '@/types';
 
@@ -124,16 +125,21 @@ export default async function CampusLandingPage({ params }: PageProps) {
     query = query.eq('area', campus.slug);
   }
 
-  query = query.order('created_at', { ascending: false }).limit(50);
+  query = query
+    .order('sort_position', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   const { data: listingsData } = await query;
 
-  const rawListings = (listingsData || []).map((item: any) => ({
+  const activeAnnouncements = await getActiveAnnouncements(
+    isFallbackCampus(campus) ? null : campus.id,
+  );
+
+  const listings = (listingsData || []).map((item: any) => ({
     ...item,
     agents: Array.isArray(item.agents) ? item.agents[0] ?? null : item.agents,
   })) as Listing[];
-
-  const listings = sortListingsByPosition(rawListings);
 
   const shortName = campus.short_name ?? campus.name;
   const chips = [...GENERIC_CHIPS, ...flagStrings(campus, 'landing_chips')];
@@ -171,6 +177,15 @@ export default async function CampusLandingPage({ params }: PageProps) {
           )}
         </div>
       </section>
+
+      {/* Announcements */}
+      {activeAnnouncements.length > 0 && (
+        <section className="bg-slate-50/50 pt-6 lg:pt-10">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <PublicAnnouncements announcements={activeAnnouncements} />
+          </div>
+        </section>
+      )}
 
       {/* Search, filters & listings — reused from /hostels */}
       <Suspense>

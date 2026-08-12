@@ -17,6 +17,7 @@ import {
   User,
   Home,
   MessageSquareText,
+  Megaphone,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { NotificationBell } from '@/components/notifications/notification-bell';
@@ -70,6 +71,7 @@ export function ManagerHeader({
     { href: '/manager/agents', label: 'Agents', icon: Users },
     { href: '/manager/listings', label: 'Listings', icon: Building2 },
     { href: '/manager/requests', label: 'Hostel Requests', icon: MessageSquareText },
+    { href: '/manager/announcements', label: 'Announcements', icon: Megaphone },
     { href: '/manager/zones', label: 'Zones', icon: MapPin },
     { href: '/manager/settings', label: 'Settings', icon: Settings },
   ];

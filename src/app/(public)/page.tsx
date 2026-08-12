@@ -9,6 +9,8 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { CampusPickerCards } from '@/components/home/campus-picker-cards';
 import { FindMeAHostel } from '@/app/account/find-me-a-hostel';
 import { getCampusBySlug, getAllCampuses, isFallbackCampus } from '@/lib/data/campuses';
+import { getActiveAnnouncements } from '@/lib/data/announcements';
+import { PublicAnnouncements } from '@/components/announcements/public-announcements';
 import type { Campus } from '@/types';
 
 export const revalidate = 3600;
@@ -59,6 +61,10 @@ export default async function HomePage() {
     getCampusBySlug('dekut'),
     getAllCampuses(),
   ]);
+
+  const activeAnnouncements = await getActiveAnnouncements(
+    isFallbackCampus(campus) ? null : campus.id,
+  );
 
   let locQuery = supabasePublic
     .from('listings')
@@ -158,6 +164,13 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Announcements — only rendered when there are active ones */}
+      {activeAnnouncements.length > 0 && (
+        <section className="container mx-auto px-4 pt-6 sm:pt-8 pb-8">
+          <PublicAnnouncements announcements={activeAnnouncements} />
+        </section>
+      )}
 
       {/* University Campus Picker Cards Section */}
       <CampusPickerCards campuses={campuses} />

@@ -4,7 +4,19 @@ import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { GripVertical, ArrowUpDown, Save, X, Loader2, ShieldCheck, ShieldOff } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  GripVertical,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
+  ListOrdered,
+  Save,
+  X,
+  Loader2,
+  ShieldCheck,
+  ShieldOff,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { filterListings } from '@/lib/utils/admin-filters';
@@ -13,17 +25,20 @@ import {
   updateListingActiveAction,
   deleteListingAction,
   updateListingsOrderAction,
+  resetListingsOrderAction,
   toggleCommissionLockAction,
   setListingCommissionAction,
   updateListingOwnerPhoneAction,
   toggleListingVerifiedAction,
 } from '@/app/actions/admin';
 import { TransferOwnershipModal } from './transfer-ownership-modal';
+import { buildOrderPositions, moveListingWithin } from '@/lib/utils/listing-order';
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -58,6 +73,8 @@ interface ListingRow {
 interface ListingsTableClientProps {
   listings: ListingRow[];
   agents: Array<{ id: string; name: string; status: string }>;
+  lastReorderAt?: string | null;
+  hasCustomOrder?: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -65,6 +82,8 @@ const PAGE_SIZE = 20;
 function SortableRow({
   listing,
   index,
+  isFirst,
+  isLast,
   pendingId,
   onToggleActive,
   onTransfer,
@@ -73,10 +92,13 @@ function SortableRow({
   onToggleCommissionLock,
   onEditOwnerPhone,
   onToggleVerified,
+  onMove,
   isReorderMode,
 }: {
   listing: ListingRow;
   index: number;
+  isFirst: boolean;
+  isLast: boolean;
   pendingId: string | null;
   onToggleActive: (l: ListingRow) => void;
   onTransfer: (l: ListingRow) => void;
@@ -85,6 +107,7 @@ function SortableRow({
   onToggleCommissionLock: (l: ListingRow) => void;
   onEditOwnerPhone: (l: ListingRow) => void;
   onToggleVerified: (l: ListingRow) => void;
+  onMove: (l: ListingRow, delta: number) => void;
   isReorderMode: boolean;
 }) {
   const {
@@ -106,17 +129,44 @@ function SortableRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`hover:bg-slate-50 transition-colors ${isDragging ? 'bg-slate-50 shadow-lg opacity-80' : ''}`}
+      className={`hover:bg-slate-50 transition-colors ${
+        isDragging ? 'bg-emerald-50/60 shadow-lg ring-2 ring-emerald-300/70 opacity-90' : ''
+      }`}
     >
       {isReorderMode && (
-        <td className="px-3 py-4 w-10">
-          <button
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 touch-none"
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
+        <td className="px-2 py-4 w-20">
+          <div className="flex items-center gap-1">
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-2.5 rounded-lg cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-700 hover:bg-slate-100 touch-none select-none"
+              title="Drag to reorder"
+              aria-label={`Drag to reorder ${listing.title}`}
+            >
+              <GripVertical className="h-5 w-5" />
+            </button>
+            <div className="flex flex-col items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => onMove(listing, -1)}
+                disabled={isFirst}
+                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                aria-label={`Move ${listing.title} up`}
+              >
+                <ChevronUp className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-xs font-semibold text-slate-400 tabular-nums">{index + 1}</span>
+              <button
+                type="button"
+                onClick={() => onMove(listing, 1)}
+                disabled={isLast}
+                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                aria-label={`Move ${listing.title} down`}
+              >
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
         </td>
       )}
       <td className="px-5 py-4">
@@ -214,6 +264,8 @@ function SortableRow({
 function SortableMobileCard({
   listing,
   index,
+  isFirst,
+  isLast,
   pendingId,
   onToggleActive,
   onTransfer,
@@ -222,10 +274,13 @@ function SortableMobileCard({
   onToggleCommissionLock,
   onEditOwnerPhone,
   onToggleVerified,
+  onMove,
   isReorderMode,
 }: {
   listing: ListingRow;
   index: number;
+  isFirst: boolean;
+  isLast: boolean;
   pendingId: string | null;
   onToggleActive: (l: ListingRow) => void;
   onTransfer: (l: ListingRow) => void;
@@ -234,6 +289,7 @@ function SortableMobileCard({
   onToggleCommissionLock: (l: ListingRow) => void;
   onEditOwnerPhone: (l: ListingRow) => void;
   onToggleVerified: (l: ListingRow) => void;
+  onMove: (l: ListingRow, delta: number) => void;
   isReorderMode: boolean;
 }) {
   const {
@@ -255,18 +311,44 @@ function SortableMobileCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3 ${isDragging ? 'shadow-lg opacity-80 border-emerald-300' : ''}`}
+      className={`bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3 ${
+        isDragging ? 'shadow-xl ring-2 ring-emerald-300/70 border-emerald-300 opacity-90' : ''
+      }`}
     >
       {isReorderMode && (
-        <div className="flex items-center gap-2 pb-2 border-b border-slate-50">
+        <div className="flex items-center gap-1 -mx-1 px-1 pb-2 border-b border-slate-100">
           <button
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 touch-none"
+            className="flex flex-1 items-center gap-3 py-3 -my-1 cursor-grab active:cursor-grabbing text-slate-500 touch-none select-none"
+            title="Hold and drag to reorder"
+            aria-label={`Drag to reorder ${listing.title}`}
           >
-            <GripVertical className="h-4 w-4" />
+            <GripVertical className="h-7 w-7 text-slate-400" />
+            <span className="text-xs font-medium text-slate-400">
+              Hold & drag · #{index + 1}
+            </span>
           </button>
-          <span className="text-xs font-medium text-slate-400">#{index + 1}</span>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => onMove(listing, -1)}
+              disabled={isFirst}
+              className="p-2.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+              aria-label={`Move ${listing.title} up`}
+            >
+              <ChevronUp className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onMove(listing, 1)}
+              disabled={isLast}
+              className="p-2.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+              aria-label={`Move ${listing.title} down`}
+            >
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       )}
       <div className="flex items-start gap-3">
@@ -448,7 +530,12 @@ function OwnerPhoneDialog({
   );
 }
 
-export function ListingsTableClient({ listings, agents }: ListingsTableClientProps) {
+export function ListingsTableClient({
+  listings,
+  agents,
+  lastReorderAt = null,
+  hasCustomOrder = false,
+}: ListingsTableClientProps) {
   const router = useRouter();
   const [agentFilter, setAgentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -460,10 +547,14 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [orderedListings, setOrderedListings] = useState<ListingRow[]>(listings);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [isResettingOrder, setIsResettingOrder] = useState(false);
   const [hasOrderChanges, setHasOrderChanges] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    // Mouse: drag immediately. Touch: long-press (150ms) on the handle so
+    // normal scrolling isn't hijacked. Keyboard stays for accessibility.
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -539,12 +630,39 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     setHasOrderChanges(true);
   }
 
+  // Move a listing one step up/down within the currently visible (filtered) list.
+  function handleMove(listing: ListingRow, delta: number) {
+    const next = moveListingWithin(orderedListings, filtered, listing.id, delta);
+    if (next === orderedListings) return;
+    setOrderedListings(next);
+    setHasOrderChanges(true);
+  }
+
+  async function handleResetOrder() {
+    if (
+      !window.confirm(
+        'Reset all listings to newest-first ordering? This clears any custom order you have saved.',
+      )
+    ) {
+      return;
+    }
+    setIsResettingOrder(true);
+    const result = await resetListingsOrderAction();
+    setIsResettingOrder(false);
+
+    if (result.success) {
+      toast.success('Listings reordered — newest first');
+      setIsReorderMode(false);
+      setHasOrderChanges(false);
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
   async function handleSaveOrder() {
     setIsSavingOrder(true);
-    const updates = orderedListings.map((listing, index) => ({
-      id: listing.id,
-      sort_position: index + 1,
-    }));
+    const updates = buildOrderPositions(orderedListings);
 
     const result = await updateListingsOrderAction(updates);
     setIsSavingOrder(false);
@@ -587,7 +705,21 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
     <div>
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Listings</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetOrder}
+            disabled={isResettingOrder}
+            className="rounded-lg"
+          >
+            {isResettingOrder ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <ListOrdered className="h-4 w-4 mr-1" />
+            )}
+            Reorder Listings
+          </Button>
           {isReorderMode ? (
             <>
               <Button
@@ -622,16 +754,34 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
               className="rounded-lg"
             >
               <ArrowUpDown className="h-4 w-4 mr-1" />
-              Reorder
+              Custom Order
             </Button>
           )}
         </div>
       </div>
-      <p className="text-sm text-slate-500 mb-6">{listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-6">
+        <p className="text-sm text-slate-500">
+          {listings.length} listing{listings.length !== 1 ? 's' : ''}
+          {' · '}
+          <span
+            className={
+              hasCustomOrder ? 'font-medium text-amber-600' : 'font-medium text-emerald-600'
+            }
+          >
+            {hasCustomOrder ? 'custom order applied' : 'newest first'}
+          </span>
+        </p>
+        {lastReorderAt && (
+          <p className="text-xs text-slate-400 sm:ml-auto">
+            Last reordered {formatDistanceToNow(new Date(lastReorderAt), { addSuffix: true })}
+          </p>
+        )}
+      </div>
 
       {isReorderMode && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-sm text-amber-800">
-          Drag listings to reorder. Position 1 appears first on the public page. Click <strong>Save Order</strong> when done.
+          Drag listings with the handle (long-press on touch) or use the up/down arrows. Position 1
+          appears first on the public page. Click <strong>Save Order</strong> when done.
         </div>
       )}
 
@@ -673,6 +823,8 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                     key={listing.id}
                     listing={listing}
                     index={index}
+                    isFirst={index === 0}
+                    isLast={index === filtered.length - 1}
                     pendingId={pendingId}
                     onToggleActive={handleToggleActive}
                     onTransfer={setTransferListing}
@@ -681,6 +833,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                     onToggleCommissionLock={handleToggleCommissionLock}
                     onEditOwnerPhone={setOwnerPhoneListing}
                     onToggleVerified={handleToggleVerified}
+                    onMove={handleMove}
                     isReorderMode={isReorderMode}
                   />
                 ))}
@@ -701,6 +854,8 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                 key={listing.id}
                 listing={listing}
                 index={index}
+                isFirst={index === 0}
+                isLast={index === filtered.length - 1}
                 pendingId={pendingId}
                 onToggleActive={handleToggleActive}
                 onTransfer={setTransferListing}
@@ -709,6 +864,7 @@ export function ListingsTableClient({ listings, agents }: ListingsTableClientPro
                 onToggleCommissionLock={handleToggleCommissionLock}
                 onEditOwnerPhone={setOwnerPhoneListing}
                 onToggleVerified={handleToggleVerified}
+                onMove={handleMove}
                 isReorderMode={isReorderMode}
               />
             ))}

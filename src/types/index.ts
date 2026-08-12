@@ -426,6 +426,30 @@ export interface AppNotification {
   created_at: string;
 }
 
+// ── Announcements ───────────────────────────────────────────────────────
+
+export type AnnouncementType = 'info' | 'warning' | 'encouragement';
+
+export interface Announcement {
+  id: string;
+  campus_id: string;
+  title: string;
+  message: string;
+  type: AnnouncementType;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+/** Columns selected for the public announcement section (kept minimal). */
+export interface PublicAnnouncement {
+  id: string;
+  title: string;
+  message: string;
+  type: AnnouncementType;
+}
+
 export interface VerificationRunResult {
   listing_id: string;
   listing_title: string;

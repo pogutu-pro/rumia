@@ -5,7 +5,6 @@ import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabasePublic } from '@/lib/supabase/public';
-import { sortListingsByPosition } from '@/lib/utils/listing-sort';
 
 export const revalidate = 0;
 
@@ -72,11 +71,13 @@ export default async function BrowsePage({ searchParams }: PageProps) {
     }
   }
 
-  // Order listings by ID descending
-  dbQuery = dbQuery.order('id', { ascending: false });
+  // Order: pinned listings first (sort_position), then newest created_at DESC
+  dbQuery = dbQuery
+    .order('sort_position', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
 
   const { data: listingsData } = await dbQuery;
-  let listings = sortListingsByPosition((listingsData || []) as any[]);
+  let listings = (listingsData || []) as any[];
 
 
 
