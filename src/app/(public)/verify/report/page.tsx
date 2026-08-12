@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { ReportForm } from './report-form';
 import { getCampusBySlug } from '@/lib/data/campuses';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Report a Hostel Concern — Hakikisha',

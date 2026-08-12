@@ -11,7 +11,7 @@ import { AgentContactSection } from '@/components/agents/agent-contact-section';
 import { ShareAgentProfile } from '@/components/agents/share-agent-profile';
 import { getCampusBySlug } from '@/lib/data/campuses';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ slug: string }>;

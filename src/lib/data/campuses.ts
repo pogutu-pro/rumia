@@ -15,7 +15,7 @@ export function isFallbackCampus(campus: Campus): boolean {
   return campus.id === DEKUT_CAMPUS_FALLBACK.id;
 }
 
-const CAMPUS_CACHE_REVALIDATE = 3600;
+const CAMPUS_CACHE_REVALIDATE = 86400;
 
 async function fetchCampusBySlug(slug: string): Promise<Campus> {
   const { data } = await supabasePublic
@@ -33,8 +33,9 @@ async function fetchCampusBySlug(slug: string): Promise<Campus> {
 }
 
 export const getCampusBySlug = cache(
-  unstable_cache(fetchCampusBySlug, ['campus-by-slug'], {
+  unstable_cache(fetchCampusBySlug, ['campuses'], {
     revalidate: CAMPUS_CACHE_REVALIDATE,
+    tags: ['campuses'],
   }),
 );
 
@@ -61,8 +62,8 @@ export const getCampusById = cache(
       }
       return fetchCampusById(id);
     },
-    ['campus-by-id'],
-    { revalidate: CAMPUS_CACHE_REVALIDATE },
+    ['campuses'],
+    { revalidate: CAMPUS_CACHE_REVALIDATE, tags: ['campuses'] },
   ),
 );
 
@@ -81,8 +82,9 @@ async function fetchAllCampuses(): Promise<Campus[]> {
 }
 
 export const getAllCampuses = cache(
-  unstable_cache(fetchAllCampuses, ['all-campuses'], {
+  unstable_cache(fetchAllCampuses, ['campuses'], {
     revalidate: CAMPUS_CACHE_REVALIDATE,
+    tags: ['campuses'],
   }),
 );
 

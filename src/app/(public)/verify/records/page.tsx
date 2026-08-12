@@ -6,7 +6,7 @@ import { OfficialRecordsTable } from './records-table';
 import { buildOfficialPhoneIndex, parseOfficialRecord } from '@/lib/utils/dekut-verification';
 import type { OfficialDeKutRecord } from '@/lib/utils/dekut-verification';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Official DeKUT Hostel Records — Hakikisha',

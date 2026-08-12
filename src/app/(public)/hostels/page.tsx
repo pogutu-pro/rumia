@@ -10,7 +10,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
 // Search is client-side over a single filtered snapshot; ISR keeps this
 // expensive joined query from re-running on every list visit.
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Student Hostels Near DeKUT Nyeri — Search & Filter',

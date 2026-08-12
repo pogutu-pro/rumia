@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 
 // Redirect legacy UUID-based agent URLs to their canonical slug URLs.
 // Immutable id → redirect target; ISR caches the tiny lookup per id.
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ id: string }>;

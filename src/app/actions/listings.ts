@@ -232,7 +232,6 @@ function revalidateListingSurfaces(
   area = 'dekut',
   slug?: string | null,
 ) {
-  revalidatePath('/');
   revalidatePath('/hostels');
   revalidatePath('/dashboard');
   revalidatePath('/admin/listings');

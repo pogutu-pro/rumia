@@ -4,7 +4,7 @@ import { getAllCampuses } from '@/lib/data/campuses';
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const campuses = await getAllCampuses();

@@ -4,7 +4,7 @@ import { supabasePublic } from '@/lib/supabase/public';
 import { HakisaChecker } from '@/components/agents/hakisa-checker';
 import type { ListingMatchCandidate } from '@/lib/utils/dekut-verification';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Hakikisha — Verify Before You Pay',

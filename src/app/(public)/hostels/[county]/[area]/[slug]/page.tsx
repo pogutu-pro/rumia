@@ -28,15 +28,15 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
 import { ListingDescription } from './listing-description';
 import {
-  formatListingViewLine,
-  getListingViewCounts,
-} from '@/lib/listing-views';
+  ListingViewCountsAllTime,
+  ListingViewCountsLine,
+} from './listing-view-counts';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
 import { isFallbackCampus } from '@/lib/data/campuses';
 import type { Campus } from '@/types';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ county: string; area: string; slug: string }>;
@@ -162,7 +162,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
   const agentSlug = listing.agents?.slug;
   const nearbyListings = await getNearbyListings(listing);
-  const viewCounts = await getListingViewCounts(listing.id);
 
   // ── Best price computation ──────────────────────────────────────────────
   // Always prefer the cheapest shared-occupancy variant as the "Starting from" price.
@@ -262,12 +261,13 @@ export default async function ListingSlugPage({ params }: PageProps) {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div className="pointer-events-auto flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-500">
-            <Eye className="h-3 w-3" />
-            {viewCounts.allTime.toLocaleString()}
-          </span>
-          <SaveButton listingId={listing.id} variant="icon" />
+          <div className="pointer-events-auto flex items-center gap-2">
+            <ListingViewCountsAllTime
+              listingId={listing.id}
+              className="text-xs font-bold text-slate-500"
+              iconSize={3}
+            />
+            <SaveButton listingId={listing.id} variant="icon" />
           <ShareListingButton
             variant="icon"
             listing={{
@@ -292,10 +292,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
             Back to hostels
           </Link>
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500">
-              <Eye className="h-4 w-4" />
-              {viewCounts.allTime.toLocaleString()}
-            </span>
+            <ListingViewCountsAllTime
+              listingId={listing.id}
+              className="text-sm font-bold text-slate-500 gap-1.5"
+              iconSize={4}
+            />
             <ShareListingButton
               listing={{
                 name: listing.title,
@@ -356,10 +357,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 </div>
               )}
 
-              <p className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-700">
-                <Eye className="h-4 w-4" />
-                {formatListingViewLine(viewCounts)}
-              </p>
+              <ListingViewCountsLine listingId={listing.id} />
 
               <h2 className="flex items-center gap-1.5 text-slate-500 font-semibold text-sm">
                 <MapPin className="h-4 w-4 text-slate-400" />

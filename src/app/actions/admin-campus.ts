@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { isAdminUser } from '@/lib/utils/admin';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 async function getAdminUser() {
   const supabase = await createClient();
@@ -33,6 +33,7 @@ export async function adminCreateCampusAction(data: { name: string; city: string
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
+    revalidateTag('campuses', 'page');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to create campus' };
@@ -53,6 +54,7 @@ export async function adminActivateCampusAction(campusId: string) {
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
+    revalidateTag('campuses', 'page');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to activate campus' };
@@ -73,6 +75,7 @@ export async function adminDeactivateCampusAction(campusId: string) {
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
+    revalidateTag('campuses', 'page');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to deactivate campus' };
@@ -93,6 +96,7 @@ export async function adminSuspendCampusAction(campusId: string) {
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
+    revalidateTag('campuses', 'page');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to suspend campus' };
@@ -116,6 +120,7 @@ export async function adminUpdateCampusAction(
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
+    revalidateTag('campuses', 'page');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to update campus' };

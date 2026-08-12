@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 // Redirect legacy UUID-based listing URLs to their canonical slug URLs.
 // The middleware handles this at the edge; this is the SSR fallback.
 // Immutable id → redirect target; ISR caches the tiny lookup per id.
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ id: string }>;

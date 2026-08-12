@@ -13,7 +13,7 @@ import { getActiveAnnouncements } from '@/lib/data/announcements';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
 import type { Campus } from '@/types';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 

@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { getManagerUser } from './manager';
 import { checkManagerCampusScope } from '@/lib/utils/manager';
 
@@ -127,7 +127,8 @@ export async function updateCampusSettingsAction(
 
   revalidatePath('/manager/settings');
   revalidatePath('/[campusSlug]', 'layout');
-  revalidatePath('/'); // Homepage picker
+  revalidatePath('/');
+  revalidateTag('campuses', 'page');
 
   return { success: true };
 }
@@ -169,5 +170,6 @@ export async function createCampusAction(data: {
 
   revalidatePath('/manager/settings');
   revalidatePath('/');
+  revalidateTag('campuses', 'page');
   return { success: true };
 }

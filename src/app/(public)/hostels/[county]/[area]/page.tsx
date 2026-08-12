@@ -10,7 +10,7 @@ import { PublicAnnouncements } from '@/components/announcements/public-announcem
 import HostelsSearch, { type Listing } from '../../hostels-search';
 import type { Campus } from '@/types';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
