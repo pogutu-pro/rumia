@@ -124,11 +124,13 @@ export function agentInquiryMessage(params: {
   whatsapp: string;
   pochiLaBiasharaNumber?: string | null;
   expectedName?: string | null;
+  consultationFee?: number | null;
 }): string {
-  const { agentName, whatsapp, pochiLaBiasharaNumber, expectedName } = params;
+  const { agentName, whatsapp, pochiLaBiasharaNumber, expectedName, consultationFee } = params;
   const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
   const paymentName = expectedName ?? agentName;
-  return `Hi ${agentName}, I found your profile on Rumia and I am looking for a hostel. I would like your help picking one based on my budget, preferred location, and other needs. This is a paid consultation of KES 50, payable to ${paymentNumber}, registered under ${paymentName}. I will send payment once you confirm you are available.`;
+  const fee = consultationFee ?? 50;
+  return `Hello ${agentName}, I am interested in a hostel and would like to request your professional consultation. Please advise on available options within my budget and preferred location. Paid consultation fee: KES ${fee}. Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
 }
 
 /**
@@ -148,6 +150,7 @@ export function agentHostelInquiryMessage(params: {
   whatsapp: string;
   pochiLaBiasharaNumber?: string | null;
   expectedName?: string | null;
+  consultationFee?: number | null;
 }): string {
   const {
     listingTitle,
@@ -155,8 +158,10 @@ export function agentHostelInquiryMessage(params: {
     whatsapp,
     pochiLaBiasharaNumber,
     expectedName,
+    consultationFee,
   } = params;
   const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
   const paymentName = expectedName ?? agentName;
-  return `Hi, I am looking at ${listingTitle} on Rumia and would like your help deciding if it fits my budget and needs before I move in, or if there is a better option for me. This is a paid consultation of KES 50, payable to ${paymentNumber}, registered under ${paymentName}. I will send payment once you confirm you are available.`;
+  const fee = consultationFee ?? 50;
+  return `Hello, I am interested in ${listingTitle} on Rumia and would like your professional guidance on whether it suits my budget and requirements, or if you can recommend better alternatives. Paid consultation fee: KES ${fee}. Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
 }

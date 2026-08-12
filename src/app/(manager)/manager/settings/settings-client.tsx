@@ -14,7 +14,7 @@ import {
   MapPin,
   Edit2,
   Trash2,
-  MessageSquareText,
+  LogOut,
 } from 'lucide-react';
 import {
   updateCampusSettingsAction,
@@ -29,6 +29,9 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { processAndUploadImage } from '@/lib/r2/upload';
 import { DISTANCE_CATEGORY_OPTIONS } from '@/lib/constants/dekut-areas';
 import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
+import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
 
 interface SettingsClientProps {
   campuses: any[];
@@ -83,13 +86,13 @@ export function SettingsClient({
     og_description: selectedCampus?.og_description || '',
     twitter_description: selectedCampus?.twitter_description || '',
     hero_image: selectedCampus?.hero_image || null,
-    hostel_finding_fee: selectedCampus?.hostel_finding_fee ?? 100,
   });
 
   const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [newCampusImageFile, setNewCampusImageFile] = useState<File | null>(
     null,
   );
+  const [loggingOut, setLoggingOut] = useState(false);
 
   // Create Campus Modal State
   const [isCreatingCampus, setIsCreatingCampus] = useState(false);
@@ -121,7 +124,6 @@ export function SettingsClient({
         og_description: campus.og_description || '',
         twitter_description: campus.twitter_description || '',
         hero_image: campus.hero_image || null,
-        hostel_finding_fee: campus.hostel_finding_fee ?? 100,
       });
       setHeroImageFile(null);
     }
@@ -214,6 +216,14 @@ export function SettingsClient({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSignOut = async () => {
+    setLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut({ scope: 'local' });
+    toast.success('Signed out successfully');
+    window.location.href = '/auth/login';
   };
 
   const handleSaveZone = () => {
@@ -363,6 +373,19 @@ export function SettingsClient({
           {successMsg}
         </div>
       )}
+
+      {/* Notifications */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-900 mb-1">Notifications</h2>
+          <p className="text-sm text-slate-500">
+            Get alerted about new agent applications, hostel requests, and system events.
+          </p>
+        </div>
+        <NotificationSettings />
+      </div>
+
+      <PushNotificationPrompt />
 
       {/* Settings Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -611,45 +634,6 @@ export function SettingsClient({
                 placeholder="e.g. support@rumia.co.ke"
                 className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-slate-900"
               />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3b: Hostel-Finding Service Fee */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-4">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <MessageSquareText className="w-4 h-4 text-emerald-600" />
-              Hostel-Finding Service Fee
-            </h2>
-          </div>
-
-          <div className="space-y-3.5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Find Me a Hostel fee (KSh)
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={formData.hostel_finding_fee ?? 100}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      hostel_finding_fee: Number(e.target.value),
-                    })
-                  }
-                  className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-slate-900"
-                />
-                <span className="text-sm font-bold text-slate-500">KSh</span>
-              </div>
-              <p className="mt-2 text-xs text-slate-500">
-                Charged for a &quot;Find Me a Hostel&quot; request. This amount is
-                kept private and is only shown to the student after they submit a
-                request on the request form.
-              </p>
             </div>
           </div>
         </div>
@@ -1019,6 +1003,29 @@ export function SettingsClient({
           </div>
         </div>
       )}
+
+      {/* Sign Out */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900">Account Session</h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Sign out of your manager account on this device.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={loggingOut}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100/80 text-red-700 text-xs font-semibold transition-colors disabled:opacity-50"
+        >
+          {loggingOut ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LogOut className="h-4 w-4" />
+          )}
+          {loggingOut ? 'Signing out...' : 'Sign Out'}
+        </button>
+      </div>
     </div>
   );
 }

@@ -68,7 +68,8 @@ const getListing = cache(async (slug: string) => {
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category, pays_commission,
       landlord_phone,
       listing_images ( id, r2_url, category, display_order, blur_data_url, width, height, format ),
-      agents ( id, name, phone, whatsapp, slug )
+      agents ( id, name, phone, whatsapp, slug ),
+      campuses ( consultation_fee )
     `,
     )
     .eq('slug', slug)
@@ -574,6 +575,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
                     landlordPhone={listing.landlord_phone}
                     paysCommission={listing.pays_commission ?? false}
+                    consultationFee={listing.campuses?.[0]?.consultation_fee ?? undefined}
                   />
                 </div>
               </div>
@@ -752,16 +754,17 @@ export default async function ListingSlugPage({ params }: PageProps) {
               agentId={listing.agents?.id}
             />
           </div>
-          <div className="flex-1">
-            <ContactButton
-              listingId={listing.id}
-              listingTitle={listing.title}
-              agentId={listing.agents?.id}
-              agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
-              landlordPhone={listing.landlord_phone}
-              paysCommission={listing.pays_commission ?? false}
-            />
-          </div>
+            <div className="flex-1">
+              <ContactButton
+                listingId={listing.id}
+                listingTitle={listing.title}
+                agentId={listing.agents?.id}
+                agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+                landlordPhone={listing.landlord_phone}
+                paysCommission={listing.pays_commission ?? false}
+                consultationFee={listing.campuses?.[0]?.consultation_fee ?? undefined}
+              />
+            </div>
         </div>
       </div>
     </div>

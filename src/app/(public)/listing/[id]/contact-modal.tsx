@@ -113,6 +113,7 @@ interface ContactModalProps {
   agentPhone: string;
   landlordPhone?: string | null;
   paysCommission: boolean;
+  consultationFee?: number | null;
   resumedContactType?: 'hostel_owner' | 'rumia_agent' | null;
 }
 
@@ -127,6 +128,7 @@ export function ContactModal({
   agentPhone,
   landlordPhone,
   paysCommission,
+  consultationFee,
   resumedContactType,
 }: ContactModalProps) {
   const isMobile = useIsMobile();
@@ -263,6 +265,7 @@ export function ContactModal({
             listingTitle: listingTitle,
             agentName: 'your agent',
             whatsapp: fallbackPhone,
+            consultationFee: consultationFee || undefined,
           });
         }
         window.open(buildWhatsAppUrl(fallbackPhone, msg), '_blank');
@@ -425,6 +428,7 @@ export function ContactModal({
       setPhoneError={setPhoneError}
       savingPhone={savingPhone}
       paysCommission={paysCommission}
+      consultationFee={consultationFee}
       onChooseHostelOwner={() => handleContactTypeSelect('hostel_owner')}
       onChooseRumiaAgent={() => handleContactTypeSelect('rumia_agent')}
       onPhoneSubmit={handlePhoneSubmit}
@@ -500,6 +504,7 @@ interface ModalContentProps {
   setPhoneError: (v: string) => void;
   savingPhone: boolean;
   paysCommission: boolean;
+  consultationFee?: number | null;
   onChooseHostelOwner: () => void;
   onChooseRumiaAgent: () => void;
   onPhoneSubmit: (e: React.FormEvent) => void;
@@ -517,6 +522,7 @@ function ModalContent({
   setPhoneError,
   savingPhone,
   paysCommission,
+  consultationFee,
   onChooseHostelOwner,
   onChooseRumiaAgent,
   onPhoneSubmit,
@@ -663,9 +669,8 @@ function ModalContent({
 
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
           <p className="text-sm text-amber-900 leading-relaxed">
-            Talk to an agent who can help you weigh this hostel against your budget, location needs, and other options nearby. This costs{' '}
-            <span className="font-bold">KES 50</span>, paid directly to the
-            agent.
+            Get professional guidance from a verified Rumia agent to evaluate this property against your budget, location preferences, and requirements. A consultation fee of{' '}
+            <span className="font-bold">KES {consultationFee ?? 50}</span> applies, paid directly to the agent.
           </p>
         </div>
 

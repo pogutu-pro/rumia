@@ -12,9 +12,9 @@ import {
   Compass,
   MessageSquareText,
   Megaphone,
+  Wallet,
 } from 'lucide-react';
 import { RoleGuideBanner } from '@/components/dashboard/role-guide-banner';
-import { HostelFindingFeeCard } from './hostel-finding-fee-card';
 
 export default async function ManagerDashboardPage() {
   const manager = await getManagerUser();
@@ -140,6 +140,14 @@ export default async function ManagerDashboardPage() {
       icon: MapPin,
       color: 'bg-slate-100 text-slate-700',
       hoverColor: 'group-hover:text-slate-900',
+    },
+    {
+      href: '/manager/payments',
+      title: 'Payments & Fees',
+      desc: 'Set hostel-finding and agent consultation fees.',
+      icon: Wallet,
+      color: 'bg-emerald-50 text-emerald-600',
+      hoverColor: 'group-hover:text-emerald-700',
     },
     {
       href: '/manager/settings',
@@ -270,9 +278,6 @@ export default async function ManagerDashboardPage() {
           </span>
         </Link>
       </div>
-
-      {/* Hostel-Finding Service Fee — editable right from the dashboard */}
-      <HostelFindingFeeCard campuses={(feeCampuses || []) as any[]} />
 
       {/* Quick Actions Grid — 2-col on mobile like admin */}
       <div className="space-y-4">

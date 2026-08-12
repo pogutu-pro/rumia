@@ -12,6 +12,7 @@ interface ContactButtonProps {
   agentPhone: string;
   landlordPhone?: string | null;
   paysCommission: boolean;
+  consultationFee?: number | null;
   className?: string;
   fullWidth?: boolean;
 }
@@ -23,6 +24,7 @@ export function ContactButton({
   agentPhone,
   landlordPhone,
   paysCommission,
+  consultationFee,
   className,
   fullWidth = true,
 }: ContactButtonProps) {
@@ -62,6 +64,7 @@ export function ContactButton({
         agentPhone={agentPhone}
         landlordPhone={landlordPhone}
         paysCommission={paysCommission}
+        consultationFee={consultationFee}
         resumedContactType={resumedType}
       />
     </>

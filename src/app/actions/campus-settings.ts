@@ -33,6 +33,7 @@ export async function updateCampusSettingsAction(
     og_description?: string | null;
     twitter_description?: string | null;
     hostel_finding_fee?: number | null;
+    consultation_fee?: number | null;
     // Admin only
     name?: string;
     slug?: string;
@@ -107,6 +108,8 @@ export async function updateCampusSettingsAction(
   if (data.hero_image !== undefined) updatePayload.hero_image = data.hero_image;
   if (data.hostel_finding_fee !== undefined)
     updatePayload.hostel_finding_fee = data.hostel_finding_fee;
+  if (data.consultation_fee !== undefined)
+    updatePayload.consultation_fee = data.consultation_fee;
 
   // Additional fields allowed only for Super Admins
   if (context.isSuperAdmin) {

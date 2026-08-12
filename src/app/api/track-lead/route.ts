@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Fetch listing details to calculate commission and enforce contact rules
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('price, title, pays_commission, landlord_phone, room_type, area, slug, county, youtube_id')
+      .select('price, title, pays_commission, landlord_phone, room_type, area, slug, county, youtube_id, campus_id, campuses ( consultation_fee )')
       .eq('id', listing_id)
       .single();
 
@@ -81,6 +81,10 @@ export async function POST(request: NextRequest) {
     if (agentError || !agent) {
       return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
     }
+
+    const consultationFee = listing.campuses?.[0]?.consultation_fee != null
+      ? Number(listing.campuses[0].consultation_fee)
+      : null;
 
     const paysCommission = listing.pays_commission === true;
     const feeAccepted = body.fee_accepted === true;
@@ -208,6 +212,7 @@ export async function POST(request: NextRequest) {
         whatsapp: agent.whatsapp || agent.phone || '',
         pochiLaBiasharaNumber: agent.pochi_la_biashara_number,
         expectedName: agent.expected_name,
+        consultationFee: consultationFee ?? undefined,
       });
     } else {
       // Legacy fallback: original message

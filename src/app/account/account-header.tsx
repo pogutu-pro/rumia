@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldAlert, LayoutDashboard, Home, Search, Users } from 'lucide-react';
+import { ShieldAlert, LayoutDashboard, Home, Search, Users, User } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
@@ -26,6 +26,13 @@ export function AccountHeader({
     { href: '/', label: 'Home', icon: Home },
     { href: '/hostels', label: 'Browse', icon: Search },
     { href: '/agents', label: 'Agents', icon: Users },
+  ];
+
+  const dashboardLinks = [
+    { href: '/account', label: 'Student', icon: User, show: true },
+    { href: '/dashboard', label: 'Agent', icon: LayoutDashboard, show: hasAgent },
+    { href: '/admin', label: 'Admin', icon: ShieldAlert, show: isAdmin },
+    { href: '/', label: 'Site', icon: Home, show: true },
   ];
 
   return (
@@ -57,7 +64,7 @@ export function AccountHeader({
             </div>
           </div>
 
-          {/* Right: Actions & Role Links */}
+          {/* Right: Nav links + Dashboard switcher icons */}
           <div className="flex items-center gap-2">
             <nav className="hidden md:flex items-center gap-1 mr-2">
               {navLinks.map(({ href, label }) => {
@@ -78,27 +85,48 @@ export function AccountHeader({
               })}
             </nav>
 
-            {hasAgent && (
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                title="Agent Dashboard"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5 text-slate-500" />
-                <span className="hidden sm:inline">Agent Dashboard</span>
-              </Link>
-            )}
+            {/* Desktop dashboard switcher */}
+            <div className="hidden md:flex items-center gap-1">
+              {dashboardLinks.filter(l => l.show).map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    title={label}
+                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      active
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="hidden xl:inline">{label}</span>
+                  </Link>
+                );
+              })}
+            </div>
 
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                title="Admin Dashboard"
-              >
-                <ShieldAlert className="h-3.5 w-3.5 text-slate-500" />
-                <span className="hidden sm:inline">Admin</span>
-              </Link>
-            )}
+            {/* Mobile: compact icon buttons for dashboard switching */}
+            <div className="flex md:hidden items-center gap-0.5">
+              {dashboardLinks.filter(l => l.show).map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    title={label}
+                    className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs transition-colors ${
+                      active
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
