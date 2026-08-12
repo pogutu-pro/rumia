@@ -1,0 +1,162 @@
+/**
+ * Shared phone and WhatsApp utilities for Rumia.
+ *
+ * Consolidates the `cleanPhone` / WhatsApp URL builder that was previously
+ * duplicated across:
+ *  - agent-card.tsx
+ *  - agent-contact-section.tsx
+ *  - whatsapp-button.tsx
+ *  - api/track-lead/route.ts
+ *
+ * ALL new code must import from here — never inline.
+ */
+
+/**
+ * Normalises a Kenyan phone number to E.164 format (+254…).
+ * Strips all non-digit/non-plus characters, then adds the +254 country code
+ * if no international prefix is present.
+ */
+export function cleanPhone(phone: string): string {
+  const clean = phone.replace(/[^\d+]/g, '');
+  return clean.startsWith('+') ? clean : clean.replace(/^0?/, '+254');
+}
+
+/**
+ * Validates a raw Kenyan phone string.
+ * Accepts: 07XXXXXXXX, 01XXXXXXXX, +2547XXXXXXX, 2547XXXXXXX
+ * Returns true only when the number has 9 local digits (after country code).
+ */
+export function isValidKenyanPhone(phone: string): boolean {
+  const cleaned = cleanPhone(phone);
+  // Must be +254 followed by 9 digits
+  return /^\+254[17]\d{8}$/.test(cleaned);
+}
+
+/**
+ * Builds a wa.me deep-link.
+ * @param phone - Any Kenyan phone format; will be cleaned automatically.
+ * @param message - Optional pre-filled message text.
+ */
+export function buildWhatsAppUrl(phone: string, message?: string): string {
+  const cleaned = cleanPhone(phone);
+  if (!message) return `https://wa.me/${cleaned}`;
+  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * WhatsApp message for Hostel Owner contact flow.
+ * Dynamically builds the message from listing data so it stays
+ * in sync with the actual listing content.
+ */
+export interface HostelOwnerMessageParams {
+  title: string;
+  roomType?: string;
+  price?: number;
+  zone?: string;
+  slug?: string;
+  county?: string;
+  hasVideo?: boolean;
+}
+
+/**
+ * Builds a WhatsApp pre-filled message for contacting a hostel owner directly.
+ * If the listing has no video, the "and the video" clause is dropped while
+ * keeping the rest of the sentence grammatically correct.
+ */
+export function hostelOwnerMessage(params: HostelOwnerMessageParams): string {
+  const {
+    title,
+    roomType,
+    price,
+    zone,
+    slug,
+    county = 'nyeri',
+    hasVideo = false,
+  } = params;
+
+  const parts: string[] = [];
+  parts.push(`Hi, I saw ${title} on Rumia.`);
+
+  if (roomType && price != null) {
+    parts.push(
+      `It's the ${roomType} going for KES ${price.toLocaleString()} in ${zone ?? 'the area'}.`,
+    );
+  } else if (roomType) {
+    parts.push(`It's the ${roomType} in ${zone ?? 'the area'}.`);
+  } else if (price != null) {
+    parts.push(
+      `It's going for KES ${price.toLocaleString()} in ${zone ?? 'the area'}.`,
+    );
+  } else if (zone) {
+    parts.push(`It's in ${zone}.`);
+  }
+
+  if (hasVideo) {
+    parts.push(
+      "I've already gone through the details,photos and the video, so I have a good idea of the place.",
+    );
+  } else {
+    parts.push(
+      "I've already gone through the photos, so I have a good idea of the place.",
+    );
+  }
+
+  parts.push(
+    'Is it still available, and how do I pay the deposit to reserve it?',
+  );
+
+  let message = parts.join(' ');
+
+  if (slug && zone) {
+    message = `${message}\n\nListing: rumia.co.ke/hostels/${county}/${zone}/${slug}`;
+  }
+
+  return message;
+}
+
+/**
+ * WhatsApp message for a general agent inquiry (Verify page, agent profile, agent card).
+ * Uses Pochi payment details when both are set; falls back to the agent's
+ * base WhatsApp number and display name otherwise.
+ */
+export function agentInquiryMessage(params: {
+  agentName: string;
+  whatsapp: string;
+  pochiLaBiasharaNumber?: string | null;
+  expectedName?: string | null;
+}): string {
+  const { agentName, whatsapp, pochiLaBiasharaNumber, expectedName } = params;
+  const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
+  const paymentName = expectedName ?? agentName;
+  return `Hi ${agentName}, I found your profile on Rumia and I am looking for a hostel. I would like your help picking one based on my budget, preferred location, and other needs. This is a paid consultation of KES 50, payable to ${paymentNumber}, registered under ${paymentName}. I will send payment once you confirm you are available.`;
+}
+
+/**
+ * WhatsApp message for a hostel-specific agent inquiry (listing page, Rumia Agent flow).
+ * Uses Pochi payment details when both are set; falls back to the agent's
+ * base WhatsApp number and the agent's display name otherwise.
+ *
+ * @param listingTitle - the hostel being viewed
+ * @param agentName - the agent's display name
+ * @param whatsapp - the agent's base WhatsApp number (used as fallback)
+ * @param pochiLaBiasharaNumber - optional Pochi la Biashara number
+ * @param expectedName - optional name registered to the Pochi number
+ */
+export function agentHostelInquiryMessage(params: {
+  listingTitle: string;
+  agentName: string;
+  whatsapp: string;
+  pochiLaBiasharaNumber?: string | null;
+  expectedName?: string | null;
+}): string {
+  const {
+    listingTitle,
+    agentName,
+    whatsapp,
+    pochiLaBiasharaNumber,
+    expectedName,
+  } = params;
+  const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
+  const paymentName = expectedName ?? agentName;
+  return `Hi, I am looking at ${listingTitle} on Rumia and would like your help deciding if it fits my budget and needs before I move in, or if there is a better option for me. This is a paid consultation of KES 50, payable to ${paymentNumber}, registered under ${paymentName}. I will send payment once you confirm you are available.`;
+}

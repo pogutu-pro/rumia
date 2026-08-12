@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rumia — Back Soon</title>
+<meta
+  name="description"
+  content="Rumia is temporarily offline while we resolve a billing issue on our servers. Verified campus accommodations will be back as soon as possible. Get updates on WhatsApp."
+/>
+<meta property="og:title" content="Rumia — Back Soon" />
+<meta property="og:description" content="Rumia is temporarily offline while we resolve a billing issue on our servers. We'll be back as soon as possible with verified campus accommodations." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Rumia" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 597.1 655.8'%3E%3Cpolygon fill='%230B8E55' points='291.43 342.26 241.05 342.26 241.05 264.17 208.12 264.17 208.12 342.26 241.05 342.26 291.43 378.29 291.43 479.16 241.05 479.16 241.05 398.04 208.12 398.04 208.12 479.16 104.68 479.16 104.68 464.72 157.74 464.72 157.74 224.64 250.64 224.64 291.43 241.1 291.43 342.26'/%3E%3Cpath fill='%230B8E55' d='M258.7 211.19 258.7 192.93 342.98 141.22 342.98 324.76 300.84 302.45 300.84 224.63 258.7 211.19'/%3E%3Cpath fill='%230B8E55' d='M352.67 331.86 352.67 149.33 367.95 160.48 367.95 341.66 352.67 331.86'/%3E%3Cpath fill='%230B8E55' d='M372.69 163.41 387.75 174.68 387.75 351.89 372.69 344.82 372.69 163.41'/%3E%3Cpath fill='%230B8E55' d='M407.98 190.69 407.98 364.87 392.92 355.87 392.92 179.65 407.98 190.69'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --primary: #0B8E55;
+    --primary-strong: #047857;
+    --accent: #FAB316;
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --foreground: #0a0a14;
+    --muted-foreground: #6b7280;
+    --border: #e5e9f0;
+    --ink-dark: #020617;
+  }
+
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--foreground);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: rgba(11, 142, 85, 0.2);
+  }
+
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- Header ---------- */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(11, 142, 85, 0.12);
+    transition: background 0.3s ease;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f0fdf4;
+    border: 1px solid rgba(11, 142, 85, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-mark svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .brand-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: #0a0a14;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(250, 179, 22, 0.14);
+    border: 1px solid rgba(250, 179, 22, 0.45);
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fab316;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(250, 179, 22, 0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(250, 179, 22, 0); }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    background: #ffffff;
+    color: var(--foreground);
+    padding: 160px 0 96px;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(640px 420px at 85% -10%, rgba(16, 185, 129, 0.22), transparent 70%),
+      radial-gradient(560px 380px at 0% 110%, rgba(250, 179, 22, 0.22), transparent 70%),
+      radial-gradient(480px 320px at 45% 120%, rgba(14, 165, 233, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(11, 142, 85, 0.1);
+    border: 1px solid rgba(11, 142, 85, 0.25);
+    color: #047857;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0a0a14;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 .gradient {
+    background: linear-gradient(90deg, #0B8E55, #10b981, #FAB316);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .hero p.lede {
+    font-size: 1.125rem;
+    color: #475569;
+    max-width: 620px;
+    margin-bottom: 36px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+
+  .btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(11, 142, 85, 0.35);
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-strong);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    background: #ffffff;
+    border-color: var(--border);
+    color: #334155;
+  }
+
+  .btn-ghost:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border-color: rgba(11, 142, 85, 0.5);
+    color: #047857;
+  }
+
+  .btn-outline:hover {
+    background: rgba(11, 142, 85, 0.08);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+
+  .hero-meta .dot-sep {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #cbd5e1;
+  }
+
+  /* ---------- Sections ---------- */
+  section {
+    padding: 88px 0;
+  }
+
+  .section-head {
+    max-width: 640px;
+    margin-bottom: 48px;
+  }
+
+  .section-head .kicker {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+
+  .section-head p {
+    color: var(--muted-foreground);
+    font-size: 1.05rem;
+  }
+
+  /* ---------- Status card ---------- */
+  .status-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 32px;
+  }
+
+  .status-item .icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    background: rgba(11, 142, 85, 0.1);
+    color: var(--primary);
+  }
+
+  .status-item .icon-wrap.warn {
+    background: rgba(251, 179, 22, 0.14);
+    color: #b45309;
+  }
+
+  .status-item h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .status-item p {
+    color: var(--muted-foreground);
+    font-size: 0.925rem;
+  }
+
+  /* ---------- Timeline ---------- */
+  .timeline {
+    display: grid;
+    gap: 0;
+  }
+
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    padding-bottom: 36px;
+    position: relative;
+  }
+
+  .timeline-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 40px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .timeline-item:last-child::before {
+    display: none;
+  }
+
+  .timeline-node {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .timeline-node.muted {
+    background: #94a3b8;
+  }
+
+  .timeline-node.active {
+    background: var(--accent);
+    color: #0a0a14;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  .timeline-content h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .timeline-content p {
+    color: var(--muted-foreground);
+    font-size: 0.925rem;
+  }
+
+  /* ---------- Update banner ---------- */
+  .banner {
+    background: linear-gradient(135deg, #0B8E55, #047857);
+    border-radius: 20px;
+    padding: 48px;
+    color: #ffffff;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .banner h2 {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .banner p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+  }
+
+  .banner .btn-white {
+    background: #ffffff;
+    color: var(--primary-strong);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .banner .btn-white:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ---------- Footer ---------- */
+  .footer {
+    background: var(--ink-dark);
+    border-top: 1px solid #1e293b;
+    color: #94a3b8;
+    padding: 56px 0 40px;
+  }
+
+  .footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .footer-brand .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .footer-brand .brand-mark svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .footer-brand-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    color: #ffffff;
+    font-size: 18px;
+  }
+
+  .footer-tagline {
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+
+  .socials {
+    display: flex;
+    gap: 12px;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #94a3b8;
+    transition: all 0.25s ease;
+  }
+
+  .social-link:hover {
+    border-color: rgba(11, 142, 85, 0.5);
+    color: #34d399;
+    transform: translateY(-2px);
+  }
+
+  .social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 28px;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .footer-bottom .heart {
+    color: #f43f5e;
+  }
+
+  @media (max-width: 640px) {
+    .header-inner {
+      padding: 12px 16px;
+    }
+
+    .status-pill {
+      padding: 6px 10px;
+      font-size: 10px;
+    }
+
+    .brand-name {
+      font-size: 17px;
+    }
+
+    .hero {
+      padding: 130px 0 64px;
+    }
+
+    section {
+      padding: 64px 0;
+    }
+
+    .status-card,
+    .banner {
+      padding: 28px;
+    }
+
+    .timeline-item {
+      grid-template-columns: 40px 1fr;
+      gap: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 597.1 655.8" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rumia logo">
+            <polygon fill="#0B8E55" points="291.43 342.26 241.05 342.26 241.05 264.17 208.12 264.17 208.12 342.26 241.05 342.26 291.43 378.29 291.43 479.16 241.05 479.16 241.05 398.04 208.12 398.04 208.12 479.16 104.68 479.16 104.68 464.72 157.74 464.72 157.74 224.64 250.64 224.64 291.43 241.1 291.43 342.26"/>
+            <polygon fill="#0B8E55" points="258.7 211.19 258.7 192.93 342.98 141.22 342.98 324.76 300.84 302.45 300.84 224.63 258.7 211.19"/>
+            <polygon fill="#0B8E55" points="352.67 331.86 352.67 149.33 367.95 160.48 367.95 341.66 352.67 331.86"/>
+            <polygon fill="#0B8E55" points="372.69 163.41 387.75 174.68 387.75 351.89 372.69 344.82 372.69 163.41"/>
+            <polygon fill="#0B8E55" points="407.98 190.69 407.98 364.87 392.92 355.87 392.92 179.65 407.98 190.69"/>
+            <path fill="#0f172a" d="M416.81,464.26v-76.11l-117.32-66.91v156.54h168.77v-13.52h-51.46ZM358.26,444.65h-21.52v-26.15h21.52v26.15ZM358.26,415.13h-21.52v-41.23h4.24l17.28,10.23v31ZM383.23,444.65h-21.73v-26.15h21.73v26.15ZM383.23,415.13h-21.73v-29.08l21.73,12.85v16.23Z"/>
+          </svg>
+        </div>
+        <span class="brand-name">RUMIA</span>
+      </div>
+      <span class="status-pill"><span class="status-dot"></span> Back soon</span>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <span class="eyebrow">Temporary outage — we're on it</span>
+        <h1>Rumia is taking a short break.<br /><span class="gradient">We'll be back soon.</span></h1>
+        <p class="lede">
+          We're currently experiencing a billing issue with our servers and are working hard to sort it out.
+          The platform will be restored as soon as possible, so you can get back to finding verified student
+          hostels near your campus.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://wa.me/254114845619?text=Hi%20Rumia%2C%20is%20the%20platform%20back%20up%20yet%3F" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 2.12.56 4.16 1.62 5.97L0 24l6.22-1.63A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0zm0 21.6c-1.9 0-3.76-.5-5.38-1.45l-.39-.23-3.69.97.98-3.6-.25-.39A9.56 9.56 0 0 1 2.4 12 9.6 9.6 0 1 1 12 21.6zm5.28-7.2c-.29-.15-1.71-.84-1.98-.94-.27-.1-.46-.15-.65.15-.19.29-.74.94-.9 1.13-.17.19-.34.21-.63.07-.29-.14-1.22-.45-2.32-1.43a8.6 8.6 0 0 1-1.6-2c-.17-.29-.02-.44.13-.59.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.5-.07-.15-.65-1.57-.9-2.15-.24-.57-.48-.49-.65-.5h-.56c-.19 0-.5.07-.76.36-.26.29-1 .98-1 2.38 0 1.4 1.02 2.76 1.17 2.95.14.19 2.01 3.07 4.87 4.31.68.29 1.21.47 1.63.6.68.22 1.31.19 1.8.11.55-.08 1.71-.7 1.95-1.37.24-.67.24-1.25.17-1.37-.07-.12-.26-.19-.55-.34z"/></svg>
+            Get updates on WhatsApp
+          </a>
+          <a class="btn btn-ghost" href="https://www.instagram.com/rumia_kenya" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.26.07 1.64.07 4.85s0 3.6-.07 4.85c-.05 1.17-.25 1.8-.41 2.23a3.7 3.7 0 0 1-.9 1.38c-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.26.06-1.64.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.7c-3.14 0-3.51.01-4.75.07-1.08.05-1.66.23-2.05.38-.51.2-.88.44-1.27.82-.38.38-.62.76-.82 1.27-.15.39-.33.97-.38 2.05-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.08.23 1.66.38 2.05.2.51.44.88.82 1.27.38.38.76.62 1.27.82.39.15.97.33 2.05.38 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.08-.05 1.66-.23 2.05-.38.51-.2.88-.44 1.27-.82.38-.38.62-.76.82-1.27.15-.39.33-.97.38-2.05.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.08-.23-1.66-.38-2.05-.2-.51-.44-.88-.82-1.27a3.4 3.4 0 0 0-1.27-.82c-.39-.15-.97-.33-2.05-.38C15.51 3.9 15.14 3.9 12 3.9zm0 4.17a5.63 5.63 0 1 1 0 11.26 5.63 5.63 0 0 1 0-11.26zm0 1.7a3.93 3.93 0 1 0 0 7.86 3.93 3.93 0 0 0 0-7.86zm6.4-2.96a1.32 1.32 0 1 1-2.63 0 1.32 1.32 0 0 1 2.63 0z"/></svg>
+            Follow us on Instagram
+          </a>
+          <a class="btn btn-outline" href="https://www.dkut.ac.ke/downloads/External-Hostels-around-Dedan-Kimathi-University-of-Technology-2026.pdf" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Official DeKUT Hostel List (PDF)
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span>Zero booking fees</span>
+          <span class="dot-sep"></span>
+          <span>Verified student accommodations</span>
+          <span class="dot-sep"></span>
+          <span>Contact agents directly</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What happened -->
+  <section id="status">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Status</div>
+        <h2>Where things stand</h2>
+        <p>
+          Here's a simple breakdown of what happened, what it means for you, and what we're doing about it.
+        </p>
+      </div>
+
+      <div class="status-card">
+        <div class="status-item">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
+          </div>
+          <h3>Platform offline</h3>
+          <p>We're experiencing a billing issue with our servers, which has temporarily taken the platform offline.</p>
+        </div>
+        <div class="status-item">
+          <div class="icon-wrap warn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h3>Your saved data</h3>
+          <p>Account and listing data lives with our database provider and is being checked while we restore service.</p>
+        </div>
+        <div class="status-item">
+          <div class="icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><polyline points="21 3 21 9 15 9"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><polyline points="3 21 3 15 9 15"/></svg>
+          </div>
+          <h3>Rebuilding now</h3>
+          <p>Our team is working on sorting out the issue and restoring the platform as soon as possible.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section id="plan" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Our plan</div>
+        <h2>What we're doing to get back</h2>
+        <p>We're working through this as fast as we can. Here's what's happening:</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-node">1</div>
+          <div class="timeline-content">
+            <h3>Resolving the billing issue</h3>
+            <p>Sorting out the server billing issue with our provider to restore access.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-node">2</div>
+          <div class="timeline-content">
+            <h3>Restoring the platform</h3>
+            <p>Bringing the full Rumia experience back online — hostel search, verification, and agent contact.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-node">3</div>
+          <div class="timeline-content">
+            <h3>Reconnecting data</h3>
+            <p>Reconnecting listings and accounts to our database so everything looks the way it did.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-node active">4</div>
+          <div class="timeline-content">
+            <h3>We'll be back as soon as possible</h3>
+            <p>We'll announce it on WhatsApp and Instagram the moment you can search hostels again.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Update banner -->
+  <section>
+    <div class="container">
+      <div class="banner">
+        <div>
+          <h2>Want a heads-up when we're back?</h2>
+          <p>Send us a quick message on WhatsApp and we'll notify you the moment Rumia is live again.</p>
+        </div>
+        <a class="btn btn-white" href="https://wa.me/254114845619?text=Hi%20Rumia%2C%20please%20notify%20me%20when%20the%20platform%20is%20back%20online." target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0C5.37 0 0 5.37 0 12c0 2.12.56 4.16 1.62 5.97L0 24l6.22-1.63A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0zm0 21.6c-1.9 0-3.76-.5-5.38-1.45l-.39-.23-3.69.97.98-3.6-.25-.39A9.56 9.56 0 0 1 2.4 12 9.6 9.6 0 1 1 12 21.6zm5.28-7.2c-.29-.15-1.71-.84-1.98-.94-.27-.1-.46-.15-.65.15-.19.29-.74.94-.9 1.13-.17.19-.34.21-.63.07-.29-.14-1.22-.45-2.32-1.43a8.6 8.6 0 0 1-1.6-2c-.17-.29-.02-.44.13-.59.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.5-.07-.15-.65-1.57-.9-2.15-.24-.57-.48-.49-.65-.5h-.56c-.19 0-.5.07-.76.36-.26.29-1 .98-1 2.38 0 1.4 1.02 2.76 1.17 2.95.14.19 2.01 3.07 4.87 4.31.68.29 1.21.47 1.63.6.68.22 1.31.19 1.8.11.55-.08 1.71-.7 1.95-1.37.24-.67.24-1.25.17-1.37-.07-.12-.26-.19-.55-.34z"/></svg>
+          Notify me on WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand">
+            <div class="brand-mark">
+              <svg viewBox="0 0 597.1 655.8" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rumia logo">
+                <polygon fill="#0B8E55" points="291.43 342.26 241.05 342.26 241.05 264.17 208.12 264.17 208.12 342.26 241.05 342.26 291.43 378.29 291.43 479.16 241.05 479.16 241.05 398.04 208.12 398.04 208.12 479.16 104.68 479.16 104.68 464.72 157.74 464.72 157.74 224.64 250.64 224.64 291.43 241.1 291.43 342.26"/>
+                <polygon fill="#0B8E55" points="258.7 211.19 258.7 192.93 342.98 141.22 342.98 324.76 300.84 302.45 300.84 224.63 258.7 211.19"/>
+                <polygon fill="#0B8E55" points="352.67 331.86 352.67 149.33 367.95 160.48 367.95 341.66 352.67 331.86"/>
+                <polygon fill="#0B8E55" points="372.69 163.41 387.75 174.68 387.75 351.89 372.69 344.82 372.69 163.41"/>
+                <polygon fill="#0B8E55" points="407.98 190.69 407.98 364.87 392.92 355.87 392.92 179.65 407.98 190.69"/>
+                <path fill="#0f172a" d="M416.81,464.26v-76.11l-117.32-66.91v156.54h168.77v-13.52h-51.46ZM358.26,444.65h-21.52v-26.15h21.52v26.15ZM358.26,415.13h-21.52v-41.23h4.24l17.28,10.23v31ZM383.23,444.65h-21.73v-26.15h21.73v26.15ZM383.23,415.13h-21.73v-29.08l21.73,12.85v16.23Z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="footer-brand-name">RUMIA</div>
+              <div class="footer-tagline">Verified campus accommodations and simplified lead generation.</div>
+            </div>
+          </div>
+        </div>
+        <div class="socials">
+          <a class="social-link" href="https://wa.me/254114845619" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 2.12.56 4.16 1.62 5.97L0 24l6.22-1.63A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0zm0 21.6c-1.9 0-3.76-.5-5.38-1.45l-.39-.23-3.69.97.98-3.6-.25-.39A9.56 9.56 0 0 1 2.4 12 9.6 9.6 0 1 1 12 21.6zm5.28-7.2c-.29-.15-1.71-.84-1.98-.94-.27-.1-.46-.15-.65.15-.19.29-.74.94-.9 1.13-.17.19-.34.21-.63.07-.29-.14-1.22-.45-2.32-1.43a8.6 8.6 0 0 1-1.6-2c-.17-.29-.02-.44.13-.59.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.5-.07-.15-.65-1.57-.9-2.15-.24-.57-.48-.49-.65-.5h-.56c-.19 0-.5.07-.76.36-.26.29-1 .98-1 2.38 0 1.4 1.02 2.76 1.17 2.95.14.19 2.01 3.07 4.87 4.31.68.29 1.21.47 1.63.6.68.22 1.31.19 1.8.11.55-.08 1.71-.7 1.95-1.37.24-.67.24-1.25.17-1.37-.07-.12-.26-.19-.55-.34z"/></svg>
+          </a>
+          <a class="social-link" href="https://www.instagram.com/rumia_kenya" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.26.07 1.64.07 4.85s0 3.6-.07 4.85c-.05 1.17-.25 1.8-.41 2.23a3.7 3.7 0 0 1-.9 1.38c-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.26.06-1.64.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.7c-3.14 0-3.51.01-4.75.07-1.08.05-1.66.23-2.05.38-.51.2-.88.44-1.27.82-.38.38-.62.76-.82 1.27-.15.39-.33.97-.38 2.05-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.08.23 1.66.38 2.05.2.51.44.88.82 1.27.38.38.76.62 1.27.82.39.15.97.33 2.05.38 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.08-.05 1.66-.23 2.05-.38.51-.2.88-.44 1.27-.82.38-.38.62-.76.82-1.27.15-.39.33-.97.38-2.05.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.08-.23-1.66-.38-2.05-.2-.51-.44-.88-.82-1.27a3.4 3.4 0 0 0-1.27-.82c-.39-.15-.97-.33-2.05-.38C15.51 3.9 15.14 3.9 12 3.9zm0 4.17a5.63 5.63 0 1 1 0 11.26 5.63 5.63 0 0 1 0-11.26zm0 1.7a3.93 3.93 0 1 0 0 7.86 3.93 3.93 0 0 0 0-7.86zm6.4-2.96a1.32 1.32 0 1 1-2.63 0 1.32 1.32 0 0 1 2.63 0z"/></svg>
+          </a>
+          <a class="social-link" href="https://www.tiktok.com/@rumia_kenya" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.3 0 .58.04.86.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.42c.6-.57 1.05-1.28 1.3-2.06V9.3a8.2 8.2 0 0 0 4.43 1.27V7.14a4.77 4.77 0 0 1-.46-.02l-.54-.08z"/></svg>
+          </a>
+          <a class="social-link" href="https://www.linkedin.com/company/127854119" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zm1.77 13.02H3.56V9h3.55v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="year">2026</span> RUMIA. All rights reserved.</p>
+        <p>Built with <span class="heart">&hearts;</span> for university students in Kenya.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2278 @@
+[
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Sunrise Hostel Block CD",
+    "official_contacts": "0703753641",
+    "official_payments": "Till: 9383225",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Sunrise Hostel Block AB",
+    "official_contacts": "0116891682",
+    "official_payments": "Paybill 100400, A/C Sun#(Room No.)",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "ca1b9b00-7535-4dab-b447-2deb77dba867",
+      "title": "SUNRISE HOSTEL",
+      "slug": "sunrice-hostel-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 6800,
+      "is_active": true,
+      "landlord_phone": "0116 891682",
+      "mpesa_details": null,
+      "agent_id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae"
+    },
+    "rumia_agent": {
+      "id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae",
+      "name": "Simon Mwendwa",
+      "phone": "+254768712019",
+      "whatsapp": "+254768712019",
+      "verified": false,
+      "slug": "simon-mwendwa"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Kimathi Students Centre",
+    "official_contacts": "0100492929, 0707862475",
+    "official_payments": "Paybill 452452 A/C 852880; Paybill 111999 A/C 38972",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "c31cb6b9-6edf-43d9-bd77-b075aaad277d",
+      "title": "KIMATHI STUDENT CENTRE HOSTEL(GREENS)",
+      "slug": "kimathi-student-centre-hostelsgreens-near-gate-a",
+      "location": "",
+      "county": "nyeri",
+      "area": "Near Gate A",
+      "price": 5000,
+      "is_active": true,
+      "landlord_phone": "0100492929",
+      "mpesa_details": "Paybill  542542 ,A/C 852880",
+      "agent_id": "ff984b0d-6c13-484a-9638-a86edc754887"
+    },
+    "rumia_agent": {
+      "id": "ff984b0d-6c13-484a-9638-a86edc754887",
+      "name": "Victor Kyania",
+      "phone": "+254742692160",
+      "whatsapp": "+254742692160",
+      "verified": false,
+      "slug": "victor-kyania"
+    },
+    "flags": [
+      "multiple_payment_methods_detected",
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "La Duvet Hostel",
+    "official_contacts": "0718862632",
+    "official_payments": "Paybill 584850",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "40376d7c-5a9a-4b7b-8e8c-d5fac9b6d9e8",
+      "title": "LA DUVET",
+      "slug": "la-duvet-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 10000,
+      "is_active": true,
+      "landlord_phone": "0718862632",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Maisha Hostels",
+    "official_contacts": "0745409929",
+    "official_payments": "Paybill 400222",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "7a08267c-86d7-45cd-866e-c40bc368eaa6",
+      "title": "MAISHA HOSTEL",
+      "slug": "maisha-hostel-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 10000,
+      "is_active": true,
+      "landlord_phone": "0745409929",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mimshack Students Residence",
+    "official_contacts": "0724693216",
+    "official_payments": "Paybill 500006, A/No. BA100060490AP",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "79405b39-2bfd-44c3-87ff-7f2772f41dc0",
+      "title": "MimShack ",
+      "slug": "mimshack-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 6000,
+      "is_active": true,
+      "landlord_phone": "0724693216",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "DE-LA-NOVA Apartment",
+    "official_contacts": "0722305973",
+    "official_payments": "Paybill 522533 A/C 7887516",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "0aa0f41a-c40e-4c00-b7ac-eba0782a444d",
+      "title": "Delanova",
+      "slug": "delanova-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 10000,
+      "is_active": true,
+      "landlord_phone": "0722305973",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "TAKIMU Apartment",
+    "official_contacts": "0718921088",
+    "official_payments": "Paybill 460871 A/C EA014",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "86e71ee5-bb4b-40c9-9195-320396f2741f",
+      "title": "URBAN SUITES",
+      "slug": "urban-suites-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 6550,
+      "is_active": true,
+      "landlord_phone": "0718921088",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Urban Suits",
+    "official_contacts": "0718921088",
+    "official_payments": "Paybill 460871 A/C EA018",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "86e71ee5-bb4b-40c9-9195-320396f2741f",
+      "title": "URBAN SUITES",
+      "slug": "urban-suites-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 6550,
+      "is_active": true,
+      "landlord_phone": "0718921088",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mimshack Students Residence",
+    "official_contacts": "0724693216",
+    "official_payments": "Paybill 303030, Acc. 2033420091 ABSA",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "79405b39-2bfd-44c3-87ff-7f2772f41dc0",
+      "title": "MimShack ",
+      "slug": "mimshack-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 6000,
+      "is_active": true,
+      "landlord_phone": "0724693216",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Arch Bishop Kirima (Ladies Hostel)",
+    "official_contacts": "0721611281",
+    "official_payments": "A/C 0110268693174; Paybill 247247; Acc. 288222 #Bed Code",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Grace Apartment",
+    "official_contacts": "0795580924, 0753844727",
+    "official_payments": "A/C 0100561768001, Name: Cate Holdings",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "afdfa595-5e72-45db-b7cf-72e519b82343",
+      "title": "Grace Hostels",
+      "slug": "grace-hostels-near-gate-a",
+      "location": "",
+      "county": "nyeri",
+      "area": "Near Gate A",
+      "price": 9000,
+      "is_active": true,
+      "landlord_phone": "0795580924",
+      "mpesa_details": "PAYBILL:400200 , ACC/NO:01100561768001",
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "multiple_payment_methods_detected",
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Purple House",
+    "official_contacts": "0141663686",
+    "official_payments": "Paybill 522533, Ac. 8022184",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "6625de26-8cb6-43dc-9d1e-1594ee5a3b2e",
+      "title": " PURPLE HOUSE",
+      "slug": "spacious-hostels-near-gate-a-near-gate-a",
+      "location": "",
+      "county": "nyeri",
+      "area": "Near Gate A",
+      "price": 9000,
+      "is_active": true,
+      "landlord_phone": "0711701027",
+      "mpesa_details": null,
+      "agent_id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719"
+    },
+    "rumia_agent": {
+      "id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719",
+      "name": "James Mbugua",
+      "phone": "+254115463607",
+      "whatsapp": "0115463607",
+      "verified": false,
+      "slug": "james-mbugua"
+    },
+    "flags": []
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Wisdom Suites Hostel",
+    "official_contacts": "0722274497",
+    "official_payments": "Paybill 522522, Ac. 7982692",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Warmu Apartment",
+    "official_contacts": "0722489642",
+    "official_payments": "Paybill 541900, Ac. B048799 #Rm.No.",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "e4408ae3-436a-47bd-b89e-967bb66a85ee",
+      "title": "WARMU",
+      "slug": "warmu-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 9000,
+      "is_active": true,
+      "landlord_phone": "0722489642",
+      "mpesa_details": null,
+      "agent_id": "fcc31392-8063-40c8-af06-24ff316fb140"
+    },
+    "rumia_agent": {
+      "id": "fcc31392-8063-40c8-af06-24ff316fb140",
+      "name": "Charles Kinyua",
+      "phone": "+254701136834",
+      "whatsapp": "+254701136834",
+      "verified": false,
+      "slug": "charles"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Emma Apartment",
+    "official_contacts": "0706409650",
+    "official_payments": "Paybill 4037293, A/C Room No.",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "3637dc77-9aae-495d-89f7-8b776d5aeec2",
+      "title": "EMMA",
+      "slug": "emma-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 8500,
+      "is_active": true,
+      "landlord_phone": "0706409650",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mt. Kenya Hostel",
+    "official_contacts": "0726969255",
+    "official_payments": "Paybill 880100, Ac. 072121",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "956188f5-db4a-454e-8fc7-ada5770f09fb",
+      "title": "Mt Kenya ",
+      "slug": "mt-kenya-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 6000,
+      "is_active": true,
+      "landlord_phone": "0726969255",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Achievers Hostel Ltd",
+    "official_contacts": "0742964281",
+    "official_payments": "KCB 522522 Ac. 5975215; Equity 247247 Ac. 835300",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mumford Hostel",
+    "official_contacts": "0791039446",
+    "official_payments": "Equity 0270164893999",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Stepna Hostel",
+    "official_contacts": "0723753475",
+    "official_payments": "Equity Acc. 0080195018500",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Ngepo Apartment",
+    "official_contacts": "0701194407",
+    "official_payments": "247247 Ac. 399135",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Imani Insuit Hostel",
+    "official_contacts": "0702727710, 0725509720",
+    "official_payments": "Paybill 222111, Acc 846451",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing",
+      "multiple_payment_methods_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Elegant Hostel",
+    "official_contacts": "0728543703",
+    "official_payments": "0110166490057 Equity Bank",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Stoneville Hostel",
+    "official_contacts": "0728543703",
+    "official_payments": "0110166490057 Equity Bank",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Amazing Grace",
+    "official_contacts": "0724072020",
+    "official_payments": "055000045413 Family Bank",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Tamaal Hostel A",
+    "official_contacts": "0726176330",
+    "official_payments": "Paybill 247247 Ac. 758362",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "e2235303-0530-4ad3-aee3-5817d2849129",
+      "title": "OLD TAMAAL HOSTEL",
+      "slug": "old-tamaal-hostel-near-gate-c-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 8500,
+      "is_active": true,
+      "landlord_phone": "0726176330",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Tamaal Hostel B",
+    "official_contacts": "0726176330",
+    "official_payments": "Paybill 247247 Ac. 758362",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "e2235303-0530-4ad3-aee3-5817d2849129",
+      "title": "OLD TAMAAL HOSTEL",
+      "slug": "old-tamaal-hostel-near-gate-c-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 8500,
+      "is_active": true,
+      "landlord_phone": "0726176330",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Lolan Hub Scholars",
+    "official_contacts": "0722160189",
+    "official_payments": "Paybill 400200, Acc. 01148232809000",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "9285990b-8c9a-485f-8e7f-bbc8f4eb9083",
+      "title": "LOLAN SCHOLARS HUB",
+      "slug": "lolan-scholars-hub-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 8200,
+      "is_active": true,
+      "landlord_phone": "0722160189",
+      "mpesa_details": null,
+      "agent_id": "ff984b0d-6c13-484a-9638-a86edc754887"
+    },
+    "rumia_agent": {
+      "id": "ff984b0d-6c13-484a-9638-a86edc754887",
+      "name": "Victor Kyania",
+      "phone": "+254742692160",
+      "whatsapp": "+254742692160",
+      "verified": false,
+      "slug": "victor-kyania"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Samrice Hostel",
+    "official_contacts": "0722370937",
+    "official_payments": "Paybill 400200, Acc. 1774161#Name",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "58f4c0cf-d51a-4631-aea1-e77ef7fa6802",
+      "title": "SAMRICE HOSTELS ",
+      "slug": "samrice-hostels-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 9000,
+      "is_active": true,
+      "landlord_phone": "0722370937",
+      "mpesa_details": null,
+      "agent_id": "ff984b0d-6c13-484a-9638-a86edc754887"
+    },
+    "rumia_agent": {
+      "id": "ff984b0d-6c13-484a-9638-a86edc754887",
+      "name": "Victor Kyania",
+      "phone": "+254742692160",
+      "whatsapp": "+254742692160",
+      "verified": false,
+      "slug": "victor-kyania"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Der Comfort",
+    "official_contacts": "0724686064",
+    "official_payments": "Till: 522522, Acc. 6017791 RM No.",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Grand Hostel",
+    "official_contacts": "0711728143",
+    "official_payments": "Paybill 247247 A/c 6020814",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Kens Hostel",
+    "official_contacts": "0791863678",
+    "official_payments": "Paybill 522522, KCB Till 02081",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "52da7c81-39b8-49e4-89a0-6daf47e46e6e",
+      "title": "KENS HOSTEL ",
+      "slug": "kens-hostels-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 9000,
+      "is_active": true,
+      "landlord_phone": "0791863678",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Popular Hostel",
+    "official_contacts": "0721727254",
+    "official_payments": "055000023641 Family Bank",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Heaven on Earth",
+    "official_contacts": "0728543703",
+    "official_payments": "Acc. 0110166490057 Family Bank",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Muruguru Hostel",
+    "official_contacts": "0721300959",
+    "official_payments": "Acc. 1730174420929 Equity Bank",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Paradise Hostel",
+    "official_contacts": "0710905822",
+    "official_payments": "Paybill 400222 Ac. 1062440#",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "b4f342bb-8128-4ff2-b4e7-472aa604612c",
+      "title": "PARADISE",
+      "slug": "paradise-near-gate-a",
+      "location": "",
+      "county": "nyeri",
+      "area": "Near Gate A",
+      "price": 7500,
+      "is_active": true,
+      "landlord_phone": "0710905822",
+      "mpesa_details": null,
+      "agent_id": "fcc31392-8063-40c8-af06-24ff316fb140"
+    },
+    "rumia_agent": {
+      "id": "fcc31392-8063-40c8-af06-24ff316fb140",
+      "name": "Charles Kinyua",
+      "phone": "+254701136834",
+      "whatsapp": "+254701136834",
+      "verified": false,
+      "slug": "charles"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Chairmans Hostel",
+    "official_contacts": "0720370925",
+    "official_payments": "Paybill 247247 Ac. 0720370925 (Landlord)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Baraka Hostel",
+    "official_contacts": "0790396326",
+    "official_payments": "247247 Acc. 453700#room No.",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "e4b43775-2077-476f-ac13-bc7bb23bd4f8",
+      "title": "BARAKA ",
+      "slug": "baraka-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 9300,
+      "is_active": true,
+      "landlord_phone": "0790396326",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Allexandria",
+    "official_contacts": "0707803616, 0714447933",
+    "official_payments": "ABSA Paybill 0707803616, Acc. 2035024320",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing",
+      "multiple_payment_methods_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Pearls Gates",
+    "official_contacts": "0721866056",
+    "official_payments": "Florence Kabui (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Paresi Hostels",
+    "official_contacts": "0748879159",
+    "official_payments": "Paybill 625625 Acc. 0125712434100",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "8e7cc8f2-97f8-47d0-a4e5-963a2171dc72",
+      "title": "PARESI HOSTEL",
+      "slug": "paresi-hostels-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 8000,
+      "is_active": true,
+      "landlord_phone": "0748879159",
+      "mpesa_details": "Paybill  625625 ,A/C 01257102434100",
+      "agent_id": "ff984b0d-6c13-484a-9638-a86edc754887"
+    },
+    "rumia_agent": {
+      "id": "ff984b0d-6c13-484a-9638-a86edc754887",
+      "name": "Victor Kyania",
+      "phone": "+254742692160",
+      "whatsapp": "+254742692160",
+      "verified": false,
+      "slug": "victor-kyania"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Shirikisho Hostel",
+    "official_contacts": "0713889599",
+    "official_payments": "Acc. 01109379837900 Co-operative",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Ngamia",
+    "official_contacts": "0729303782",
+    "official_payments": "Agatha Njeri (Landlord), 0721527355",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mwalimu Hostel",
+    "official_contacts": "0728675316 (Landlord)",
+    "official_payments": "Mpesa 0728675316, Francis Maina",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "97e988f2-3153-482a-b8c9-2c9f44bc2215",
+      "title": "Mwalimu hostels ",
+      "slug": "mwalimu-hostels-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 4500,
+      "is_active": true,
+      "landlord_phone": "0738 553559",
+      "mpesa_details": null,
+      "agent_id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae"
+    },
+    "rumia_agent": {
+      "id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae",
+      "name": "Simon Mwendwa",
+      "phone": "+254768712019",
+      "whatsapp": "+254768712019",
+      "verified": false,
+      "slug": "simon-mwendwa"
+    },
+    "flags": []
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Carls Hostel",
+    "official_contacts": "0726530269",
+    "official_payments": "Highrise Agent",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Glian Hostel",
+    "official_contacts": "0726530269",
+    "official_payments": "Paybill 247247 A/C 0722515462",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Kathy Hostel",
+    "official_contacts": "0721990754",
+    "official_payments": "0721990754, Douglas Munge",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "M & M Ladies Hostel",
+    "official_contacts": "0722356852",
+    "official_payments": "0722356852 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Joyce Mbogo",
+    "official_contacts": "0722639416",
+    "official_payments": "0722639416 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Vivians Hostel",
+    "official_contacts": "0723670077",
+    "official_payments": "0723670077 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Angies Hostel",
+    "official_contacts": "0726451805",
+    "official_payments": "Equity Acc. 0600291364006",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Solid 4 (Gents)",
+    "official_contacts": "0720490033",
+    "official_payments": "508400-Acc. 10061301000042",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "b3a72898-7ca6-443f-8048-cb428493e2c8",
+      "title": "SOLID 4",
+      "slug": "solid-4-nyeri-view",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyeri View",
+      "price": 10000,
+      "is_active": true,
+      "landlord_phone": "0720490033",
+      "mpesa_details": null,
+      "agent_id": "fcc31392-8063-40c8-af06-24ff316fb140"
+    },
+    "rumia_agent": {
+      "id": "fcc31392-8063-40c8-af06-24ff316fb140",
+      "name": "Charles Kinyua",
+      "phone": "+254701136834",
+      "whatsapp": "+254701136834",
+      "verified": false,
+      "slug": "charles"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Selene Hostel",
+    "official_contacts": "0722632527",
+    "official_payments": "Biashara Sacco 0326-41-15664",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Florida Hostel",
+    "official_contacts": "0725744312",
+    "official_payments": "Equity 1150177484084",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Autum's Hostel Gents",
+    "official_contacts": "0721458070",
+    "official_payments": "Paybill 400300, Acc. 6432-08-23082",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Lush Corner",
+    "official_contacts": "0721426707",
+    "official_payments": "KCB 522522 Ac. 7570827",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Kings & Queens",
+    "official_contacts": "0746050532",
+    "official_payments": "0799536591 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Purple Gardens Hostel",
+    "official_contacts": "0728543703",
+    "official_payments": "Ac. 01101664957",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mid-black",
+    "official_contacts": "0728543703",
+    "official_payments": "Ac. 0110166490057",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "El Shaddai Hostel",
+    "official_contacts": "0721719939",
+    "official_payments": "Paybill 247247 A/c 719939",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Crystal Hostel",
+    "official_contacts": "0728543703",
+    "official_payments": "Acc. Equity 0110166490057",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Red Marple Court",
+    "official_contacts": "0700647172",
+    "official_payments": "0758028398 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Eagles Hostel",
+    "official_contacts": "0723165589, 0720500496",
+    "official_payments": "Acc. 0110100180262",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing",
+      "multiple_payment_methods_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Riverside Hostel",
+    "official_contacts": "0741134010",
+    "official_payments": "Paybill 247247 Acc. 0741134010",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Njetika Hostels",
+    "official_contacts": "0721270473",
+    "official_payments": "9417765",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Evergreen Hostel",
+    "official_contacts": "0791550984",
+    "official_payments": "Paybill 247247 Ac. 568317",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Uzima Hostel",
+    "official_contacts": "0780758544",
+    "official_payments": "Paybill 522533 Ac. 7739714",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "c9a0f862-9ddd-48a2-94f3-c2fe4165067e",
+      "title": "UZIMA HOSTELS ",
+      "slug": "uzima-hostels-nyeri-view",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyeri View",
+      "price": 8200,
+      "is_active": true,
+      "landlord_phone": " 0720321871",
+      "mpesa_details": null,
+      "agent_id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719"
+    },
+    "rumia_agent": {
+      "id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719",
+      "name": "James Mbugua",
+      "phone": "+254115463607",
+      "whatsapp": "0115463607",
+      "verified": false,
+      "slug": "james-mbugua"
+    },
+    "flags": []
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "St. Joseph Hostel",
+    "official_contacts": "0722771084",
+    "official_payments": "Paybill 400300-00754",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Alwake",
+    "official_contacts": "0722401961",
+    "official_payments": "0722401961 (Landlord)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Pride Hostel",
+    "official_contacts": "0740491208",
+    "official_payments": "Acc. Equity A/C 1150179545788",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Veterans Hostels",
+    "official_contacts": "0743906999, 0711602845",
+    "official_payments": "Paybill 247247, A/C 0420183069720",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing",
+      "multiple_payment_methods_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Blessed Anne",
+    "official_contacts": "0721452058",
+    "official_payments": "Paybill 247247 A/c 0721452058",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Flang Investment",
+    "official_contacts": "0722636816",
+    "official_payments": "0722636816 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Pauline Gakenia",
+    "official_contacts": "0721827777",
+    "official_payments": "0721827777 (Landlady)",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "2843d01f-190a-4ae5-a9f3-4bf3a3f7824f",
+      "title": "Mama wamboi apartments",
+      "slug": "mama-wamboi-apartments-kahawa-ridge",
+      "location": "",
+      "county": "nyeri",
+      "area": "Kahawa Ridge",
+      "price": 7000,
+      "is_active": true,
+      "landlord_phone": "0721827777",
+      "mpesa_details": null,
+      "agent_id": "22bfadfc-e5ca-4495-a49d-cb95cd205f0c"
+    },
+    "rumia_agent": {
+      "id": "22bfadfc-e5ca-4495-a49d-cb95cd205f0c",
+      "name": "David Obed",
+      "phone": "+254727350300",
+      "whatsapp": "+254727350300",
+      "verified": false,
+      "slug": null
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Charity Wachira",
+    "official_contacts": "0722623966",
+    "official_payments": "0722623966 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Mary W. Wamugunda",
+    "official_contacts": "0721433851",
+    "official_payments": "Paybill 100900 A/C 07002928",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Baru Hostel",
+    "official_contacts": "0728543703",
+    "official_payments": "Acc. Equity 0110166490057",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Forest View Hostel",
+    "official_contacts": "0720452702",
+    "official_payments": "Mpesa 0720452702",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Valley Creek Hostel",
+    "official_contacts": "0740671690",
+    "official_payments": "Paybill 972901",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "8c6c18ba-b4fb-483c-8159-cc39f56acf43",
+      "title": "VALLEY CREEK",
+      "slug": "valley-creek-embassy-area",
+      "location": "",
+      "county": "nyeri",
+      "area": "Embassy Area",
+      "price": 5500,
+      "is_active": true,
+      "landlord_phone": "0740671690",
+      "mpesa_details": null,
+      "agent_id": "fcc31392-8063-40c8-af06-24ff316fb140"
+    },
+    "rumia_agent": {
+      "id": "fcc31392-8063-40c8-af06-24ff316fb140",
+      "name": "Charles Kinyua",
+      "phone": "+254701136834",
+      "whatsapp": "+254701136834",
+      "verified": false,
+      "slug": "charles"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Dios Aumentara Place",
+    "official_contacts": "0797844116",
+    "official_payments": "0797844116 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Zion City Hostel",
+    "official_contacts": "0702276550",
+    "official_payments": "Till: 5644093",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "83b878d1-4add-4a3f-94d3-cfc76c89f97f",
+      "title": "ZION CITY",
+      "slug": "zion-city-embassy-area",
+      "location": "",
+      "county": "nyeri",
+      "area": "Embassy Area",
+      "price": 6000,
+      "is_active": true,
+      "landlord_phone": "0702276550",
+      "mpesa_details": null,
+      "agent_id": "fcc31392-8063-40c8-af06-24ff316fb140"
+    },
+    "rumia_agent": {
+      "id": "fcc31392-8063-40c8-af06-24ff316fb140",
+      "name": "Charles Kinyua",
+      "phone": "+254701136834",
+      "whatsapp": "+254701136834",
+      "verified": false,
+      "slug": "charles"
+    },
+    "flags": [
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Sunset Apartment",
+    "official_contacts": "0723447638",
+    "official_payments": "Paybill 400222 A/C 08126#",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Jowa Investment",
+    "official_contacts": "0724348119",
+    "official_payments": "Paybill 111999",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Baraka Hostels",
+    "official_contacts": "0113065235",
+    "official_payments": "Acc. 1150171385230 Equity",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "e4b43775-2077-476f-ac13-bc7bb23bd4f8",
+      "title": "BARAKA ",
+      "slug": "baraka-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 9300,
+      "is_active": true,
+      "landlord_phone": "0790396326",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": []
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Eunice Ladies Hostels",
+    "official_contacts": "0721322172",
+    "official_payments": "Till: 5415631",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Rosalia Wairimu",
+    "official_contacts": "0721645975",
+    "official_payments": "0721645975 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Jostey Hostel",
+    "official_contacts": "0748665756, 0725823237",
+    "official_payments": "Paybill 111999 A/C 01005150044482",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing",
+      "multiple_payment_methods_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Stacy's Hostels",
+    "official_contacts": "0781127803",
+    "official_payments": "0720994270 (Landlady)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Gateway Shelter",
+    "official_contacts": "0711486252",
+    "official_payments": "Paybill 4022985 Acc. 023008685582910",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "e30282e4-b852-45eb-bdfb-c2d378fb5a9c",
+      "title": "GATEWAY SHELTERS HOSTEL",
+      "slug": "gateway-shelters-hostels-embassy-area",
+      "location": "",
+      "county": "nyeri",
+      "area": "Embassy Area",
+      "price": 6000,
+      "is_active": true,
+      "landlord_phone": "+254745081015",
+      "mpesa_details": null,
+      "agent_id": "ff984b0d-6c13-484a-9638-a86edc754887"
+    },
+    "rumia_agent": {
+      "id": "ff984b0d-6c13-484a-9638-a86edc754887",
+      "name": "Victor Kyania",
+      "phone": "+254742692160",
+      "whatsapp": "+254742692160",
+      "verified": false,
+      "slug": "victor-kyania"
+    },
+    "flags": []
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Edgeview Heights",
+    "official_contacts": "0727650200, 0722357522",
+    "official_payments": "Paybill 303030 A/c 0303007253",
+    "verified_status": true,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": {
+      "id": "3fbae9b9-68bb-442b-882d-99382e23c6ca",
+      "title": "EDGE VIEW",
+      "slug": "edge-view-nyaribo",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyaribo",
+      "price": 6500,
+      "is_active": true,
+      "landlord_phone": "0727650200",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "multiple_payment_methods_detected",
+      "shared_contact_detected"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "New City",
+    "official_contacts": "0723212446",
+    "official_payments": "0723212446 (Landlord)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Yachonan",
+    "official_contacts": "0725311504",
+    "official_payments": "0725311504 (Landlord)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "dekut_official_record",
+    "official_hostel_name": "Kwa Josiah",
+    "official_contacts": "0720573323",
+    "official_payments": "0720573323 (Landlord)",
+    "verified_status": false,
+    "verification_source": "DeKUT Official Housing List",
+    "matched_rumia_listing": null,
+    "rumia_agent": null,
+    "flags": [
+      "official_record_no_listing"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "93c72b02-cbc2-41d7-9bd9-373f74cbcf8e",
+      "title": "Valley view Hostels ",
+      "slug": "specious-bedsitter-kahawa-ridge",
+      "location": "",
+      "county": "nyeri",
+      "area": "Kahawa Ridge",
+      "price": 6500,
+      "is_active": true,
+      "landlord_phone": null,
+      "mpesa_details": "Paybill provided once your a residence",
+      "agent_id": "22bfadfc-e5ca-4495-a49d-cb95cd205f0c"
+    },
+    "rumia_agent": {
+      "id": "22bfadfc-e5ca-4495-a49d-cb95cd205f0c",
+      "name": "David Obed",
+      "phone": "+254727350300",
+      "whatsapp": "+254727350300",
+      "verified": false,
+      "slug": null
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "8ae3e9a9-c8bd-4f38-ab09-56f9e3a159af",
+      "title": "OSERIAN ",
+      "slug": "oserian-nyaribo",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyaribo",
+      "price": 7000,
+      "is_active": true,
+      "landlord_phone": "+254114845619",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "3d77b69d-8314-4239-a542-f407e0a01f34",
+      "title": "KWA KIMANI",
+      "slug": "kwa-kimani-nyeri-view",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyeri View",
+      "price": 7500,
+      "is_active": true,
+      "landlord_phone": "+254114845619",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "e30d9b0d-d1f3-4fd1-8db0-6b9ff986b00b",
+      "title": "EXECUTIVE",
+      "slug": "executive-nyeri-view",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyeri View",
+      "price": 5000,
+      "is_active": true,
+      "landlord_phone": "+254 726 746030",
+      "mpesa_details": null,
+      "agent_id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae"
+    },
+    "rumia_agent": {
+      "id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae",
+      "name": "Simon Mwendwa",
+      "phone": "+254768712019",
+      "whatsapp": "+254768712019",
+      "verified": false,
+      "slug": "simon-mwendwa"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "42b6f872-493a-41ae-8d51-e8343471f457",
+      "title": "MAMA KEN",
+      "slug": "mama-ken-nyeri-view",
+      "location": "",
+      "county": "nyeri",
+      "area": "Nyeri View",
+      "price": 8000,
+      "is_active": true,
+      "landlord_phone": "+254 112 772353",
+      "mpesa_details": null,
+      "agent_id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae"
+    },
+    "rumia_agent": {
+      "id": "bb71d9d5-8314-4cc0-94ec-895fd58c2cae",
+      "name": "Simon Mwendwa",
+      "phone": "+254768712019",
+      "whatsapp": "+254768712019",
+      "verified": false,
+      "slug": "simon-mwendwa"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "5d47da48-e92f-4260-8846-6b59bc6a4621",
+      "title": "PENT-HOUSE  HOSTELS",
+      "slug": "amani-hostels--boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 8000,
+      "is_active": true,
+      "landlord_phone": "+254114845619",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "7ddc98a2-5590-4ffc-96ed-f9d378a48ef2",
+      "title": "THE LANDMARK HOSTEL ",
+      "slug": "the-landmark-hostel-near-gate-a",
+      "location": "",
+      "county": "nyeri",
+      "area": "Near Gate A",
+      "price": 7000,
+      "is_active": true,
+      "landlord_phone": "+254748126375",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "8288f3f6-54cc-41da-8a54-52925d12554f",
+      "title": "BLESSED COURT ",
+      "slug": "blessed-court-near-gate-a",
+      "location": "",
+      "county": "nyeri",
+      "area": "Near Gate A",
+      "price": 8500,
+      "is_active": true,
+      "landlord_phone": "+254748126375",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "cb76f93a-0f49-4086-a1be-c3c97d53161b",
+      "title": "New Sunrise",
+      "slug": "new-sunrise-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 10400,
+      "is_active": true,
+      "landlord_phone": "+254114845619",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "b0472853-9f7f-405c-bd6e-6c5db56cce52",
+      "title": "JUTIMAR",
+      "slug": "jutimar-embassy-area",
+      "location": "",
+      "county": "nyeri",
+      "area": "Embassy Area",
+      "price": 5000,
+      "is_active": true,
+      "landlord_phone": "+254115463607",
+      "mpesa_details": null,
+      "agent_id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719"
+    },
+    "rumia_agent": {
+      "id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719",
+      "name": "James Mbugua",
+      "phone": "+254115463607",
+      "whatsapp": "0115463607",
+      "verified": false,
+      "slug": "james-mbugua"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "42259c08-d7f7-493c-a023-c5767159b2e2",
+      "title": "JAMII ",
+      "slug": "jamii-embassy-area",
+      "location": "",
+      "county": "nyeri",
+      "area": "Embassy Area",
+      "price": 4500,
+      "is_active": true,
+      "landlord_phone": "+254724252773",
+      "mpesa_details": null,
+      "agent_id": "fcc31392-8063-40c8-af06-24ff316fb140"
+    },
+    "rumia_agent": {
+      "id": "fcc31392-8063-40c8-af06-24ff316fb140",
+      "name": "Charles Kinyua",
+      "phone": "+254701136834",
+      "whatsapp": "+254701136834",
+      "verified": false,
+      "slug": "charles"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "3dc1e1ea-d322-449c-9464-1df1baa846d4",
+      "title": "NYANGARI HOSTELS",
+      "slug": "nyangari-hostels-embassy-area",
+      "location": "",
+      "county": "nyeri",
+      "area": "Embassy Area",
+      "price": 4500,
+      "is_active": true,
+      "landlord_phone": "+254115463607",
+      "mpesa_details": null,
+      "agent_id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719"
+    },
+    "rumia_agent": {
+      "id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719",
+      "name": "James Mbugua",
+      "phone": "+254115463607",
+      "whatsapp": "0115463607",
+      "verified": false,
+      "slug": "james-mbugua"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "d9a2b4ff-0135-4a23-9c2a-74c0aa135372",
+      "title": "TAKIMU APARTMENT",
+      "slug": "takimu-apartment-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 7000,
+      "is_active": true,
+      "landlord_phone": "0718921088",
+      "mpesa_details": null,
+      "agent_id": "e83cddca-87a0-4f18-8b11-42e2243ee058"
+    },
+    "rumia_agent": {
+      "id": "e83cddca-87a0-4f18-8b11-42e2243ee058",
+      "name": "Paul Ogutu",
+      "phone": "+254114845619",
+      "whatsapp": "+254114845619",
+      "verified": false,
+      "slug": "paulkatam025"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "0229baaa-0463-4fc7-95af-b3fbe3ada9d6",
+      "title": "NEW TAMAAL HOSTEL ",
+      "slug": "new-tamaal-hostel-boma",
+      "location": "",
+      "county": "nyeri",
+      "area": "Boma",
+      "price": 10500,
+      "is_active": true,
+      "landlord_phone": "0726176330",
+      "mpesa_details": null,
+      "agent_id": "a12f9205-aa02-4ae3-8803-d687317bb682"
+    },
+    "rumia_agent": {
+      "id": "a12f9205-aa02-4ae3-8803-d687317bb682",
+      "name": "Gibson Mutunga",
+      "phone": "+254748126375",
+      "whatsapp": "+254748126375",
+      "verified": false,
+      "slug": "gibson-mutunga-2"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  },
+  {
+    "row_type": "rumia_listing_only",
+    "official_hostel_name": null,
+    "official_contacts": null,
+    "official_payments": null,
+    "verified_status": false,
+    "verification_source": "Rumia listing only",
+    "matched_rumia_listing": {
+      "id": "bb23b2b9-3e1f-438a-a525-e32b7ee6d885",
+      "title": "QUEENS AND KINGS HOSTELS ",
+      "slug": "queens-and-kings-hostels-kahawa-ridge",
+      "location": "",
+      "county": "nyeri",
+      "area": "Kahawa Ridge",
+      "price": 7500,
+      "is_active": true,
+      "landlord_phone": " 0723086341",
+      "mpesa_details": null,
+      "agent_id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719"
+    },
+    "rumia_agent": {
+      "id": "1c539754-d03e-48d6-aa8f-edd5fe2f6719",
+      "name": "James Mbugua",
+      "phone": "+254115463607",
+      "whatsapp": "0115463607",
+      "verified": false,
+      "slug": "james-mbugua"
+    },
+    "flags": [
+      "rumia_listing_no_official_match"
+    ]
+  }
+]

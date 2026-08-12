@@ -1,0 +1,3 @@
+ALTER TABLE agents
+  ADD COLUMN IF NOT EXISTS pochi_la_biashara_number TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS expected_name TEXT DEFAULT NULL;

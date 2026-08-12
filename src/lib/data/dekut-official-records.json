@@ -1,0 +1,560 @@
+[
+  {
+    "hostel_name": "Sunrise Hostel Block CD",
+    "zone": "MAIN",
+    "contacts": "0703753641",
+    "payments": "Till: 9383225"
+  },
+  {
+    "hostel_name": "Sunrise Hostel Block AB",
+    "zone": "MAIN",
+    "contacts": "0116891682",
+    "payments": "Paybill 100400, A/C Sun#(Room No.)"
+  },
+  {
+    "hostel_name": "Kimathi Students Centre",
+    "zone": "MAIN",
+    "contacts": "0100492929, 0707862475",
+    "payments": "Paybill 452452 A/C 852880; Paybill 111999 A/C 38972"
+  },
+  {
+    "hostel_name": "La Duvet Hostel",
+    "zone": "MAIN",
+    "contacts": "0718862632",
+    "payments": "Paybill 584850"
+  },
+  {
+    "hostel_name": "Maisha Hostels",
+    "zone": "MAIN",
+    "contacts": "0745409929",
+    "payments": "Paybill 400222"
+  },
+  {
+    "hostel_name": "Mimshack Students Residence",
+    "zone": "MAIN",
+    "contacts": "0724693216",
+    "payments": "Paybill 500006, A/No. BA100060490AP"
+  },
+  {
+    "hostel_name": "DE-LA-NOVA Apartment",
+    "zone": "MAIN",
+    "contacts": "0722305973",
+    "payments": "Paybill 522533 A/C 7887516"
+  },
+  {
+    "hostel_name": "TAKIMU Apartment",
+    "zone": "MAIN",
+    "contacts": "0718921088",
+    "payments": "Paybill 460871 A/C EA014"
+  },
+  {
+    "hostel_name": "Urban Suits",
+    "zone": "MAIN",
+    "contacts": "0718921088",
+    "payments": "Paybill 460871 A/C EA018"
+  },
+  {
+    "hostel_name": "Mimshack Students Residence",
+    "zone": "MAIN",
+    "contacts": "0724693216",
+    "payments": "Paybill 303030, Acc. 2033420091 ABSA"
+  },
+  {
+    "hostel_name": "Arch Bishop Kirima (Ladies Hostel)",
+    "zone": "MAIN",
+    "contacts": "0721611281",
+    "payments": "A/C 0110268693174; Paybill 247247; Acc. 288222 #Bed Code"
+  },
+  {
+    "hostel_name": "Grace Apartment",
+    "zone": "MAIN",
+    "contacts": "0795580924, 0753844727",
+    "payments": "A/C 0100561768001, Name: Cate Holdings"
+  },
+  {
+    "hostel_name": "Purple House",
+    "zone": "MAIN",
+    "contacts": "0141663686",
+    "payments": "Paybill 522533, Ac. 8022184"
+  },
+  {
+    "hostel_name": "Wisdom Suites Hostel",
+    "zone": "MAIN",
+    "contacts": "0722274497",
+    "payments": "Paybill 522522, Ac. 7982692"
+  },
+  {
+    "hostel_name": "Warmu Apartment",
+    "zone": "MAIN",
+    "contacts": "0722489642",
+    "payments": "Paybill 541900, Ac. B048799 #Rm.No."
+  },
+  {
+    "hostel_name": "Emma Apartment",
+    "zone": "MAIN",
+    "contacts": "0706409650",
+    "payments": "Paybill 4037293, A/C Room No."
+  },
+  {
+    "hostel_name": "Mt. Kenya Hostel",
+    "zone": "MAIN",
+    "contacts": "0726969255",
+    "payments": "Paybill 880100, Ac. 072121"
+  },
+  {
+    "hostel_name": "Achievers Hostel Ltd",
+    "zone": "MAIN",
+    "contacts": "0742964281",
+    "payments": "KCB 522522 Ac. 5975215; Equity 247247 Ac. 835300"
+  },
+  {
+    "hostel_name": "Mumford Hostel",
+    "zone": "MAIN",
+    "contacts": "0791039446",
+    "payments": "Equity 0270164893999"
+  },
+  {
+    "hostel_name": "Stepna Hostel",
+    "zone": "MAIN",
+    "contacts": "0723753475",
+    "payments": "Equity Acc. 0080195018500"
+  },
+  {
+    "hostel_name": "Ngepo Apartment",
+    "zone": "MAIN",
+    "contacts": "0701194407",
+    "payments": "247247 Ac. 399135"
+  },
+  {
+    "hostel_name": "Imani Insuit Hostel",
+    "zone": "MAIN",
+    "contacts": "0702727710, 0725509720",
+    "payments": "Paybill 222111, Acc 846451"
+  },
+  {
+    "hostel_name": "Elegant Hostel",
+    "zone": "MAIN",
+    "contacts": "0728543703",
+    "payments": "0110166490057 Equity Bank"
+  },
+  {
+    "hostel_name": "Stoneville Hostel",
+    "zone": "MAIN",
+    "contacts": "0728543703",
+    "payments": "0110166490057 Equity Bank"
+  },
+  {
+    "hostel_name": "Amazing Grace",
+    "zone": "MAIN",
+    "contacts": "0724072020",
+    "payments": "055000045413 Family Bank"
+  },
+  {
+    "hostel_name": "Tamaal Hostel A",
+    "zone": "MAIN",
+    "contacts": "0726176330",
+    "payments": "Paybill 247247 Ac. 758362"
+  },
+  {
+    "hostel_name": "Tamaal Hostel B",
+    "zone": "MAIN",
+    "contacts": "0726176330",
+    "payments": "Paybill 247247 Ac. 758362"
+  },
+  {
+    "hostel_name": "Lolan Hub Scholars",
+    "zone": "MAIN",
+    "contacts": "0722160189",
+    "payments": "Paybill 400200, Acc. 01148232809000"
+  },
+  {
+    "hostel_name": "Samrice Hostel",
+    "zone": "MAIN",
+    "contacts": "0722370937",
+    "payments": "Paybill 400200, Acc. 1774161#Name"
+  },
+  {
+    "hostel_name": "Der Comfort",
+    "zone": "MAIN",
+    "contacts": "0724686064",
+    "payments": "Till: 522522, Acc. 6017791 RM No."
+  },
+  {
+    "hostel_name": "Grand Hostel",
+    "zone": "MAIN",
+    "contacts": "0711728143",
+    "payments": "Paybill 247247 A/c 6020814"
+  },
+  {
+    "hostel_name": "Kens Hostel",
+    "zone": "MAIN",
+    "contacts": "0791863678",
+    "payments": "Paybill 522522, KCB Till 02081"
+  },
+  {
+    "hostel_name": "Popular Hostel",
+    "zone": "MAIN",
+    "contacts": "0721727254",
+    "payments": "055000023641 Family Bank"
+  },
+  {
+    "hostel_name": "Heaven on Earth",
+    "zone": "MAIN",
+    "contacts": "0728543703",
+    "payments": "Acc. 0110166490057 Family Bank"
+  },
+  {
+    "hostel_name": "Muruguru Hostel",
+    "zone": "MAIN",
+    "contacts": "0721300959",
+    "payments": "Acc. 1730174420929 Equity Bank"
+  },
+  {
+    "hostel_name": "Paradise Hostel",
+    "zone": "MAIN",
+    "contacts": "0710905822",
+    "payments": "Paybill 400222 Ac. 1062440#"
+  },
+  {
+    "hostel_name": "Chairmans Hostel",
+    "zone": "MAIN",
+    "contacts": "0720370925",
+    "payments": "Paybill 247247 Ac. 0720370925 (Landlord)"
+  },
+  {
+    "hostel_name": "Baraka Hostel",
+    "zone": "MAIN",
+    "contacts": "0790396326",
+    "payments": "247247 Acc. 453700#room No."
+  },
+  {
+    "hostel_name": "Allexandria",
+    "zone": "MAIN",
+    "contacts": "0707803616, 0714447933",
+    "payments": "ABSA Paybill 0707803616, Acc. 2035024320"
+  },
+  {
+    "hostel_name": "Pearls Gates",
+    "zone": "MAIN",
+    "contacts": "0721866056",
+    "payments": "Florence Kabui (Landlady)"
+  },
+  {
+    "hostel_name": "Paresi Hostels",
+    "zone": "MAIN",
+    "contacts": "0748879159",
+    "payments": "Paybill 625625 Acc. 0125712434100"
+  },
+  {
+    "hostel_name": "Shirikisho Hostel",
+    "zone": "MAIN",
+    "contacts": "0713889599",
+    "payments": "Acc. 01109379837900 Co-operative"
+  },
+  {
+    "hostel_name": "Ngamia",
+    "zone": "MAIN",
+    "contacts": "0729303782",
+    "payments": "Agatha Njeri (Landlord), 0721527355"
+  },
+  {
+    "hostel_name": "Mwalimu Hostel",
+    "zone": "MAIN",
+    "contacts": "0728675316 (Landlord)",
+    "payments": "Mpesa 0728675316, Francis Maina"
+  },
+  {
+    "hostel_name": "Carls Hostel",
+    "zone": "MAIN",
+    "contacts": "0726530269",
+    "payments": "Highrise Agent"
+  },
+  {
+    "hostel_name": "Glian Hostel",
+    "zone": "MAIN",
+    "contacts": "0726530269",
+    "payments": "Paybill 247247 A/C 0722515462"
+  },
+  {
+    "hostel_name": "Kathy Hostel",
+    "zone": "MAIN",
+    "contacts": "0721990754",
+    "payments": "0721990754, Douglas Munge"
+  },
+  {
+    "hostel_name": "M & M Ladies Hostel",
+    "zone": "MAIN",
+    "contacts": "0722356852",
+    "payments": "0722356852 (Landlady)"
+  },
+  {
+    "hostel_name": "Joyce Mbogo",
+    "zone": "MAIN",
+    "contacts": "0722639416",
+    "payments": "0722639416 (Landlady)"
+  },
+  {
+    "hostel_name": "Vivians Hostel",
+    "zone": "MAIN",
+    "contacts": "0723670077",
+    "payments": "0723670077 (Landlady)"
+  },
+  {
+    "hostel_name": "Angies Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0726451805",
+    "payments": "Equity Acc. 0600291364006"
+  },
+  {
+    "hostel_name": "Solid 4 (Gents)",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0720490033",
+    "payments": "508400-Acc. 10061301000042"
+  },
+  {
+    "hostel_name": "Selene Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0722632527",
+    "payments": "Biashara Sacco 0326-41-15664"
+  },
+  {
+    "hostel_name": "Florida Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0725744312",
+    "payments": "Equity 1150177484084"
+  },
+  {
+    "hostel_name": "Autum's Hostel Gents",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721458070",
+    "payments": "Paybill 400300, Acc. 6432-08-23082"
+  },
+  {
+    "hostel_name": "Lush Corner",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721426707",
+    "payments": "KCB 522522 Ac. 7570827"
+  },
+  {
+    "hostel_name": "Kings & Queens",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0746050532",
+    "payments": "0799536591 (Landlady)"
+  },
+  {
+    "hostel_name": "Purple Gardens Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0728543703",
+    "payments": "Ac. 01101664957"
+  },
+  {
+    "hostel_name": "Mid-black",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0728543703",
+    "payments": "Ac. 0110166490057"
+  },
+  {
+    "hostel_name": "El Shaddai Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721719939",
+    "payments": "Paybill 247247 A/c 719939"
+  },
+  {
+    "hostel_name": "Crystal Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0728543703",
+    "payments": "Acc. Equity 0110166490057"
+  },
+  {
+    "hostel_name": "Red Marple Court",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0700647172",
+    "payments": "0758028398 (Landlady)"
+  },
+  {
+    "hostel_name": "Eagles Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0723165589, 0720500496",
+    "payments": "Acc. 0110100180262"
+  },
+  {
+    "hostel_name": "Riverside Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0741134010",
+    "payments": "Paybill 247247 Acc. 0741134010"
+  },
+  {
+    "hostel_name": "Njetika Hostels",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721270473",
+    "payments": "9417765"
+  },
+  {
+    "hostel_name": "Evergreen Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0791550984",
+    "payments": "Paybill 247247 Ac. 568317"
+  },
+  {
+    "hostel_name": "Uzima Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0780758544",
+    "payments": "Paybill 522533 Ac. 7739714"
+  },
+  {
+    "hostel_name": "St. Joseph Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0722771084",
+    "payments": "Paybill 400300-00754"
+  },
+  {
+    "hostel_name": "Alwake",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0722401961",
+    "payments": "0722401961 (Landlord)"
+  },
+  {
+    "hostel_name": "Pride Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0740491208",
+    "payments": "Acc. Equity A/C 1150179545788"
+  },
+  {
+    "hostel_name": "Veterans Hostels",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0743906999, 0711602845",
+    "payments": "Paybill 247247, A/C 0420183069720"
+  },
+  {
+    "hostel_name": "Blessed Anne",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721452058",
+    "payments": "Paybill 247247 A/c 0721452058"
+  },
+  {
+    "hostel_name": "Flang Investment",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0722636816",
+    "payments": "0722636816 (Landlady)"
+  },
+  {
+    "hostel_name": "Pauline Gakenia",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721827777",
+    "payments": "0721827777 (Landlady)"
+  },
+  {
+    "hostel_name": "Charity Wachira",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0722623966",
+    "payments": "0722623966 (Landlady)"
+  },
+  {
+    "hostel_name": "Mary W. Wamugunda",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0721433851",
+    "payments": "Paybill 100900 A/C 07002928"
+  },
+  {
+    "hostel_name": "Baru Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0728543703",
+    "payments": "Acc. Equity 0110166490057"
+  },
+  {
+    "hostel_name": "Forest View Hostel",
+    "zone": "NYERI VIEW & KAHAWA RIDGE",
+    "contacts": "0720452702",
+    "payments": "Mpesa 0720452702"
+  },
+  {
+    "hostel_name": "Valley Creek Hostel",
+    "zone": "EMBASSY",
+    "contacts": "0740671690",
+    "payments": "Paybill 972901"
+  },
+  {
+    "hostel_name": "Dios Aumentara Place",
+    "zone": "EMBASSY",
+    "contacts": "0797844116",
+    "payments": "0797844116 (Landlady)"
+  },
+  {
+    "hostel_name": "Zion City Hostel",
+    "zone": "EMBASSY",
+    "contacts": "0702276550",
+    "payments": "Till: 5644093"
+  },
+  {
+    "hostel_name": "Sunset Apartment",
+    "zone": "EMBASSY",
+    "contacts": "0723447638",
+    "payments": "Paybill 400222 A/C 08126#"
+  },
+  {
+    "hostel_name": "Jowa Investment",
+    "zone": "EMBASSY",
+    "contacts": "0724348119",
+    "payments": "Paybill 111999"
+  },
+  {
+    "hostel_name": "Baraka Hostels",
+    "zone": "EMBASSY",
+    "contacts": "0113065235",
+    "payments": "Acc. 1150171385230 Equity"
+  },
+  {
+    "hostel_name": "Eunice Ladies Hostels",
+    "zone": "EMBASSY",
+    "contacts": "0721322172",
+    "payments": "Till: 5415631"
+  },
+  {
+    "hostel_name": "Rosalia Wairimu",
+    "zone": "EMBASSY",
+    "contacts": "0721645975",
+    "payments": "0721645975 (Landlady)"
+  },
+  {
+    "hostel_name": "Jostey Hostel",
+    "zone": "EMBASSY",
+    "contacts": "0748665756, 0725823237",
+    "payments": "Paybill 111999 A/C 01005150044482"
+  },
+  {
+    "hostel_name": "Stacy's Hostels",
+    "zone": "EMBASSY",
+    "contacts": "0781127803",
+    "payments": "0720994270 (Landlady)"
+  },
+  {
+    "hostel_name": "Gateway Shelter",
+    "zone": "EMBASSY",
+    "contacts": "0711486252",
+    "payments": "Paybill 4022985 Acc. 023008685582910"
+  },
+  {
+    "hostel_name": "Edgeview Heights",
+    "zone": "NYARIBO",
+    "contacts": "0727650200, 0722357522",
+    "payments": "Paybill 303030 A/c 0303007253"
+  },
+  {
+    "hostel_name": "New City",
+    "zone": "NYARIBO",
+    "contacts": "0723212446",
+    "payments": "0723212446 (Landlord)"
+  },
+  {
+    "hostel_name": "Yachonan",
+    "zone": "NYARIBO",
+    "contacts": "0725311504",
+    "payments": "0725311504 (Landlord)"
+  },
+  {
+    "hostel_name": "Kwa Josiah",
+    "zone": "NYARIBO",
+    "contacts": "0720573323",
+    "payments": "0720573323 (Landlord)"
+  }
+]
