@@ -78,7 +78,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
 
   const handleCardClick = (campus: Campus, isActive: boolean) => {
     if (isActive) {
-      const targetUrl = `/hostels/${campus.city.toLowerCase()}/${campus.slug}`;
+      const targetUrl = `/hostels`;
       router.prefetch(targetUrl);
       router.push(targetUrl);
     } else {
@@ -119,7 +119,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
 
             const imageSrc =
               campus.hero_image || preview.image || DEFAULT_CAMPUS_PICKER_IMAGE;
-            const targetUrl = `/hostels/${campus.city.toLowerCase()}/${campus.slug}`;
+            const targetUrl = `/hostels`;
             const shortName = campus.short_name ?? campus.name;
             const isNotified = notifiedCampuses[campus.slug];
 
