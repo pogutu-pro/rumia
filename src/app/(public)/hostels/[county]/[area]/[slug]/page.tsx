@@ -27,6 +27,7 @@ import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
 import { ListingDescription } from './listing-description';
+import { readCampusConsultationFee } from '@/lib/utils/consultation-fee';
 import {
   ListingViewCountsAllTime,
   ListingViewCountsLine,
@@ -69,7 +70,7 @@ const getListing = cache(async (slug: string) => {
       landlord_phone,
       listing_images ( id, r2_url, category, display_order, blur_data_url, width, height, format ),
       agents ( id, name, phone, whatsapp, slug ),
-      campuses ( consultation_fee )
+      campuses ( * )
     `,
     )
     .eq('slug', slug)
@@ -575,7 +576,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
                     landlordPhone={listing.landlord_phone}
                     paysCommission={listing.pays_commission ?? false}
-                    consultationFee={listing.campuses?.[0]?.consultation_fee ?? undefined}
+                    consultationFee={readCampusConsultationFee(listing.campuses)}
                   />
                 </div>
               </div>
@@ -762,7 +763,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
                 landlordPhone={listing.landlord_phone}
                 paysCommission={listing.pays_commission ?? false}
-                consultationFee={listing.campuses?.[0]?.consultation_fee ?? undefined}
+                consultationFee={readCampusConsultationFee(listing.campuses)}
               />
             </div>
         </div>

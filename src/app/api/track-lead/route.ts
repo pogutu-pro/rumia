@@ -10,6 +10,7 @@ import {
 } from '@/lib/utils/phone';
 import { getPostHogClient } from '@/lib/posthog-server';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { readCampusConsultationFee } from '@/lib/utils/consultation-fee';
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Fetch listing details to calculate commission and enforce contact rules
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('price, title, pays_commission, landlord_phone, room_type, area, slug, county, youtube_id, campus_id, campuses ( consultation_fee )')
+      .select('price, title, pays_commission, landlord_phone, room_type, area, slug, county, youtube_id, campus_id, campuses ( * )')
       .eq('id', listing_id)
       .single();
 
@@ -82,9 +83,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
     }
 
-    const consultationFee = listing.campuses?.[0]?.consultation_fee != null
-      ? Number(listing.campuses[0].consultation_fee)
-      : null;
+    const consultationFee = readCampusConsultationFee(listing.campuses);
 
     const paysCommission = listing.pays_commission === true;
     const feeAccepted = body.fee_accepted === true;
