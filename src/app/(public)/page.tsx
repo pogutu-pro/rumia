@@ -115,7 +115,7 @@ export default async function HomePage() {
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-            Browse verified student rooms across campuses in Kenya. Contact agents directly on WhatsApp with zero booking fees.
+            Browse verified student rooms near the Dedan Kimathi University of Technology campus in Nyeri. Contact agents directly on WhatsApp with zero booking fees.
           </p>
 
           {/* Search Bar Widget */}
