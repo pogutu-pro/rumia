@@ -111,20 +111,20 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
             <button
               type="button"
               onClick={handleCompare}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200 cursor-pointer border-2 ${
                 isSelected
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                  : 'bg-slate-900 text-white hover:bg-slate-700'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20'
+                  : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-sm'
               }`}
             >
               {isSelected ? (
                 <>
-                  <Check className="h-3.5 w-3.5" />
+                  <Check className="h-4 w-4" />
                   Added
                 </>
               ) : (
                 <>
-                  <GitCompareArrows className="h-3.5 w-3.5" />
+                  <GitCompareArrows className="h-4 w-4" />
                   Compare
                 </>
               )}

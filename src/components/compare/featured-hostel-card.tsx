@@ -211,14 +211,14 @@ export function FeaturedHostelCard({
               type="button"
               onClick={handleCompare}
               disabled={fetching}
-              className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-white transition-all duration-200 cursor-pointer hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200 cursor-pointer border-2 bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {selected ? (
-                <><Check className="h-3 w-3" /> Added</>
+                <><Check className="h-4 w-4" /> Added</>
               ) : fetching ? (
-                <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-white border-t-transparent" /> Adding…</span>
+                <span className="inline-flex items-center gap-2"><span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> Adding…</span>
               ) : (
-                <><GitCompareArrows className="h-3 w-3" /> Compare</>
+                <><GitCompareArrows className="h-4 w-4" /> Compare</>
               )}
             </button>
             <Link
