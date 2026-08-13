@@ -89,7 +89,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
   return (
     <section
       id="campuses"
-      className="py-10 sm:py-14 bg-slate-50/60 border-y border-slate-100"
+      className="py-10 sm:py-14 bg-slate-50"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header */}
