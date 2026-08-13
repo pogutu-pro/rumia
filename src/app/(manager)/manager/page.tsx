@@ -15,7 +15,6 @@ import {
   Wallet,
 } from 'lucide-react';
 import { RoleGuideBanner } from '@/components/dashboard/role-guide-banner';
-import { PaymentsCard } from './payments-card';
 import { PushNotificationsCard } from '@/components/notifications/push-notifications-card';
 
 export default async function ManagerDashboardPage() {
@@ -104,17 +103,6 @@ export default async function ManagerDashboardPage() {
   const totalAgentsCount = agentsCountRes.count ?? 0;
   const totalListingsCount = listingsCountRes.count ?? 0;
   const waitingHostelRequestsCount = hostelRequestsCountRes.count ?? 0;
-
-  // Fees for the campuses this manager is scoped to (all campuses for super
-  // admins). One lightweight query feeds the dashboard Payments & Fees card.
-  let feeCampusesQuery = supabase
-    .from('campuses')
-    .select('id, name, hostel_finding_fee, consultation_fee')
-    .order('name', { ascending: true });
-  if (!context.isSuperAdmin && allowedCampusIds.length > 0) {
-    feeCampusesQuery = feeCampusesQuery.in('id', allowedCampusIds);
-  }
-  const { data: feeCampuses } = await feeCampusesQuery;
 
   const quickActions = [
     {
@@ -280,12 +268,6 @@ export default async function ManagerDashboardPage() {
           </span>
         </Link>
       </div>
-
-      {/* Payments & Fees — hostel-finding + consultation fees in one card */}
-      <PaymentsCard
-        campuses={(feeCampuses || []) as any[]}
-        isSuperAdmin={context.isSuperAdmin}
-      />
 
       {/* Push notifications — surface silent alerts + link to settings */}
       <PushNotificationsCard />
