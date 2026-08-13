@@ -27,17 +27,20 @@ import {
   GENDER_OPTIONS,
   ROOM_TYPE_OPTIONS,
   FURNISHING_OPTIONS,
+  STAY_PREFERENCE_OPTIONS,
   getHostelRequestStatus,
   budgetLabel,
   genderLabel,
   roomTypeLabel,
   furnishingLabel,
+  stayPreferenceLabel,
 } from '@/lib/constants/hostel-requests';
 import type {
   HostelRequest,
   HostelRequestGender,
   HostelRequestRoomType,
   HostelRequestFurnishing,
+  HostelRequestStayPreference,
   CreateHostelRequestInput,
 } from '@/types';
 import { cn } from '@/lib/utils/cn';
@@ -61,6 +64,7 @@ interface EditDraft {
   gender: HostelRequestGender;
   room_type: HostelRequestRoomType;
   furnishing: HostelRequestFurnishing;
+  stay_preference: HostelRequestStayPreference;
   move_in_date: string;
   additional_requirements: string;
 }
@@ -92,6 +96,8 @@ export function FindMeAHostel({
   const [gender, setGender] = useState<HostelRequestGender>('no_preference');
   const [roomType, setRoomType] = useState<HostelRequestRoomType>('no_preference');
   const [furnishing, setFurnishing] = useState<HostelRequestFurnishing>('no_preference');
+  const [stayPreference, setStayPreference] =
+    useState<HostelRequestStayPreference>('no_preference');
   const [moveInDate, setMoveInDate] = useState<string>('');
   const [requirements, setRequirements] = useState<string>('');
 
@@ -139,6 +145,7 @@ export function FindMeAHostel({
               setGender(parsed.gender || 'no_preference');
               setRoomType(parsed.room_type || 'no_preference');
               setFurnishing(parsed.furnishing || 'no_preference');
+              setStayPreference(parsed.stay_preference || 'no_preference');
               setMoveInDate(parsed.move_in_date || '');
               setRequirements(parsed.additional_requirements || '');
             }
@@ -175,6 +182,7 @@ export function FindMeAHostel({
       gender: pending.gender || 'no_preference',
       room_type: pending.room_type || 'no_preference',
       furnishing: pending.furnishing || 'no_preference',
+      stay_preference: pending.stay_preference || 'no_preference',
       move_in_date: pending.move_in_date || null,
       additional_requirements: pending.additional_requirements || null,
     };
@@ -215,6 +223,7 @@ export function FindMeAHostel({
       setGender('no_preference');
       setRoomType('no_preference');
       setFurnishing('no_preference');
+      setStayPreference('no_preference');
       setMoveInDate('');
       setRequirements('');
       toast.success('Request submitted. A Rumia manager will contact you.');
@@ -252,6 +261,7 @@ export function FindMeAHostel({
             gender,
             room_type: roomType,
             furnishing,
+            stay_preference: stayPreference,
             move_in_date: moveInDate || null,
             additional_requirements: requirements.trim() || null,
           }),
@@ -270,6 +280,7 @@ export function FindMeAHostel({
       gender,
       room_type: roomType,
       furnishing,
+      stay_preference: stayPreference,
       move_in_date: moveInDate || null,
       additional_requirements: requirements.trim() || null,
     });
@@ -292,6 +303,7 @@ export function FindMeAHostel({
     setGender('no_preference');
     setRoomType('no_preference');
     setFurnishing('no_preference');
+    setStayPreference('no_preference');
     setMoveInDate('');
     setRequirements('');
 
@@ -307,6 +319,7 @@ export function FindMeAHostel({
     gender,
     roomType,
     furnishing,
+    stayPreference,
     moveInDate,
     requirements,
   ]);
@@ -351,6 +364,7 @@ export function FindMeAHostel({
       gender: r.gender,
       room_type: r.room_type,
       furnishing: r.furnishing,
+      stay_preference: r.stay_preference || 'no_preference',
       move_in_date: r.move_in_date || '',
       additional_requirements: r.additional_requirements || '',
     });
@@ -372,6 +386,7 @@ export function FindMeAHostel({
       gender: editing.gender,
       room_type: editing.room_type,
       furnishing: editing.furnishing,
+      stay_preference: editing.stay_preference,
       move_in_date: editing.move_in_date || null,
       additional_requirements:
         editing.additional_requirements.trim() || null,
@@ -474,6 +489,12 @@ export function FindMeAHostel({
             <span className="text-slate-500 shrink-0">Room type</span>
             <span className="font-semibold text-slate-900">
               {roomTypeLabel(request.room_type)}
+            </span>
+          </div>
+          <div className="flex items-start justify-between gap-4 py-1.5">
+            <span className="text-slate-500 shrink-0">Stay alone / sharing</span>
+            <span className="font-semibold text-slate-900">
+              {stayPreferenceLabel(request.stay_preference)}
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
@@ -656,6 +677,33 @@ export function FindMeAHostel({
             </button>
           ))}
         </div>
+        <p className="text-[11px] text-slate-400 mt-1">
+          Single room is a room without self-contained facilities; bedsitter is
+          self-contained; one bedroom is a separate bedroom.
+        </p>
+      </div>
+
+      {/* Stay alone or sharing */}
+      <div>
+        {fieldLabel('Stay alone or sharing')}
+        <div className="grid grid-cols-3 gap-2">
+          {STAY_PREFERENCE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() =>
+                setStayPreference(option.value as HostelRequestStayPreference)
+              }
+              className={chipClass(stayPreference === option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-slate-400 mt-1">
+          Let the manager know if you want the room to yourself or if you&apos;re
+          happy sharing a room with a roommate to cost-share.
+        </p>
       </div>
 
       {/* Furnishing */}
@@ -958,6 +1006,30 @@ export function FindMeAHostel({
                         })
                       }
                       className={chipClass(editing.room_type === option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                {fieldLabel('Stay alone or sharing')}
+                <div className="grid grid-cols-3 gap-2">
+                  {STAY_PREFERENCE_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() =>
+                        setEditing({
+                          ...editing,
+                          stay_preference:
+                            option.value as HostelRequestStayPreference,
+                        })
+                      }
+                      className={chipClass(
+                        editing.stay_preference === option.value,
+                      )}
                     >
                       {option.label}
                     </button>

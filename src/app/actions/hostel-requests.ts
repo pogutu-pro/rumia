@@ -29,8 +29,9 @@ const VALID_STATUSES: HostelRequestStatus[] = [
 ];
 
 const VALID_GENDERS = ['male', 'female', 'no_preference'];
-const VALID_ROOM_TYPES = ['single', 'shared', 'bedsitter', 'no_preference'];
+const VALID_ROOM_TYPES = ['single', 'shared', 'bedsitter', 'one_bedroom', 'no_preference'];
 const VALID_FURNISHINGS = ['furnished', 'unfurnished', 'no_preference'];
+const VALID_STAY_PREFERENCES = ['alone', 'sharing', 'no_preference'];
 
 function isValidEnum(value: string, allowed: string[], field: string): string | null {
   if (!allowed.includes(value)) {
@@ -73,6 +74,12 @@ export async function createHostelRequestAction(
   if (roomErr) return { success: false, error: roomErr };
   const furnishErr = isValidEnum(input.furnishing, VALID_FURNISHINGS, 'furnishing');
   if (furnishErr) return { success: false, error: furnishErr };
+  const stayErr = isValidEnum(
+    input.stay_preference ?? 'no_preference',
+    VALID_STAY_PREFERENCES,
+    'stay preference',
+  );
+  if (stayErr) return { success: false, error: stayErr };
 
   const zone = input.preferred_zone?.trim() || null;
 
@@ -111,6 +118,7 @@ export async function createHostelRequestAction(
       gender: input.gender,
       room_type: input.room_type,
       furnishing: input.furnishing,
+      stay_preference: input.stay_preference ?? 'no_preference',
       move_in_date: input.move_in_date || null,
       additional_requirements: input.additional_requirements?.trim() || null,
       fee,
@@ -246,6 +254,12 @@ export async function updateMyHostelRequestAction(
   if (roomErr) return { success: false, error: roomErr };
   const furnishErr = isValidEnum(input.furnishing, VALID_FURNISHINGS, 'furnishing');
   if (furnishErr) return { success: false, error: furnishErr };
+  const stayErr = isValidEnum(
+    input.stay_preference ?? 'no_preference',
+    VALID_STAY_PREFERENCES,
+    'stay preference',
+  );
+  if (stayErr) return { success: false, error: stayErr };
 
   const { data: request, error: fetchError } = await supabaseAdmin
     .from('hostel_requests')
@@ -279,6 +293,7 @@ export async function updateMyHostelRequestAction(
       gender: input.gender,
       room_type: input.room_type,
       furnishing: input.furnishing,
+      stay_preference: input.stay_preference ?? 'no_preference',
       move_in_date: input.move_in_date || null,
       additional_requirements: input.additional_requirements?.trim() || null,
       updated_at: new Date().toISOString(),

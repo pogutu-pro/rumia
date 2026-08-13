@@ -6,6 +6,7 @@ export const BUDGET_OPTIONS = [
   { value: '5000_7000', label: 'KSh 5,000 to 7,000' },
   { value: '7000_10000', label: 'KSh 7,000 to 10,000' },
   { value: 'above_10000', label: 'Above KSh 10,000' },
+  { value: 'any_amount', label: 'Any amount' },
 ] as const;
 
 export const GENDER_OPTIONS = [
@@ -15,10 +16,16 @@ export const GENDER_OPTIONS = [
 ] as const;
 
 export const ROOM_TYPE_OPTIONS = [
-  { value: 'single', label: 'Single' },
-  { value: 'shared', label: 'Shared' },
+  { value: 'single', label: 'Single room' },
   { value: 'bedsitter', label: 'Bedsitter' },
+  { value: 'one_bedroom', label: 'One bedroom' },
   { value: 'no_preference', label: 'Any' },
+] as const;
+
+export const STAY_PREFERENCE_OPTIONS = [
+  { value: 'alone', label: 'Alone' },
+  { value: 'sharing', label: 'Sharing (cost share)' },
+  { value: 'no_preference', label: 'No preference' },
 ] as const;
 
 export const FURNISHING_OPTIONS = [
@@ -94,11 +101,24 @@ export function genderLabel(value: string): string {
 export function roomTypeLabel(value: string): string {
   switch (value) {
     case 'single':
-      return 'Single';
+      return 'Single room';
     case 'shared':
       return 'Shared';
     case 'bedsitter':
       return 'Bedsitter';
+    case 'one_bedroom':
+      return 'One bedroom';
+    default:
+      return 'No preference';
+  }
+}
+
+export function stayPreferenceLabel(value: string): string {
+  switch (value) {
+    case 'alone':
+      return 'Alone';
+    case 'sharing':
+      return 'Sharing (cost share)';
     default:
       return 'No preference';
   }

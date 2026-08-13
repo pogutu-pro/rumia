@@ -9,6 +9,7 @@ describe('buildHostelRequestWhatsAppMessage', () => {
       gender: 'female',
       roomType: 'single',
       furnishing: 'furnished',
+      stayPreference: 'sharing',
       moveInDate: '2026-09-15',
       phone: '+254712345678',
       additionalRequirements: 'Wi-Fi and parking',
@@ -19,7 +20,8 @@ describe('buildHostelRequestWhatsAppMessage', () => {
     expect(message).toContain('Area/Zone: Boma');
     expect(message).toContain('Budget: KSh 3,000 to 5,000/month');
     expect(message).toContain('Gender: Female');
-    expect(message).toContain('Room Type: Single');
+    expect(message).toContain('Room Type: Single room');
+    expect(message).toContain('Stay Alone or Sharing: Sharing (cost share)');
     expect(message).toContain('Furnished: Furnished');
     expect(message).toContain('Move-in Date: 15 Sep 2026');
     expect(message).toContain('Phone: +254712345678');
@@ -63,6 +65,7 @@ describe('buildHostelRequestWhatsAppMessage', () => {
     expect(message).toContain('Budget: Above KSh 10,000/month');
     expect(message).toContain('Gender: No preference');
     expect(message).toContain('Room Type: No preference');
+    expect(message).toContain('Stay Alone or Sharing: No preference');
     expect(message).toContain('Move-in Date: Flexible');
     expect(message).toContain('Additional Requirements: None');
     expect(message).not.toContain('undefined');

@@ -383,10 +383,15 @@ export type HostelRequestRoomType =
   | 'single'
   | 'shared'
   | 'bedsitter'
+  | 'one_bedroom'
   | 'no_preference';
 export type HostelRequestFurnishing =
   | 'furnished'
   | 'unfurnished'
+  | 'no_preference';
+export type HostelRequestStayPreference =
+  | 'alone'
+  | 'sharing'
   | 'no_preference';
 
 export interface HostelRequest {
@@ -400,6 +405,7 @@ export interface HostelRequest {
   gender: HostelRequestGender;
   room_type: HostelRequestRoomType;
   furnishing: HostelRequestFurnishing;
+  stay_preference: HostelRequestStayPreference;
   move_in_date: string | null;
   additional_requirements: string | null;
   status: HostelRequestStatus;
@@ -419,6 +425,7 @@ export interface CreateHostelRequestInput {
   gender: HostelRequestGender;
   room_type: HostelRequestRoomType;
   furnishing: HostelRequestFurnishing;
+  stay_preference?: HostelRequestStayPreference;
   move_in_date?: string | null;
   additional_requirements?: string | null;
 }

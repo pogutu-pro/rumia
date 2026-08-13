@@ -12,6 +12,7 @@ import {
   MapPin,
   CalendarDays,
   MessageSquareText,
+  MessageCircle,
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -25,8 +26,10 @@ import {
   genderLabel,
   roomTypeLabel,
   furnishingLabel,
+  stayPreferenceLabel,
 } from '@/lib/constants/hostel-requests';
 import { buildHostelRequestWhatsAppMessage } from '@/lib/utils/hostel-request-message';
+import { buildWhatsAppUrl } from '@/lib/utils/phone';
 import type { HostelRequestWithCampus, HostelRequestStatus } from '@/types';
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/date';
@@ -44,6 +47,22 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
       <span className="text-sm font-semibold text-slate-900 text-right">{value}</span>
     </div>
   );
+}
+
+function messageForRequest(request: HostelRequestWithCampus): string {
+  return buildHostelRequestWhatsAppMessage({
+    studentName: request.student_name,
+    preferredZone: request.preferred_zone,
+    budgetRange: request.budget_range,
+    gender: request.gender,
+    roomType: request.room_type,
+    furnishing: request.furnishing,
+    stayPreference: request.stay_preference,
+    moveInDate: request.move_in_date,
+    phone: request.phone,
+    additionalRequirements: request.additional_requirements,
+    fee: request.fee,
+  });
 }
 
 export function HostelRequestsClient({
@@ -66,21 +85,7 @@ export function HostelRequestsClient({
   );
 
   const whatsappMessage = useMemo(
-    () =>
-      selected
-        ? buildHostelRequestWhatsAppMessage({
-            studentName: selected.student_name,
-            preferredZone: selected.preferred_zone,
-            budgetRange: selected.budget_range,
-            gender: selected.gender,
-            roomType: selected.room_type,
-            furnishing: selected.furnishing,
-            moveInDate: selected.move_in_date,
-            phone: selected.phone,
-            additionalRequirements: selected.additional_requirements,
-            fee: selected.fee,
-          })
-        : '',
+    () => (selected ? messageForRequest(selected) : ''),
     [selected],
   );
 
@@ -103,6 +108,17 @@ export function HostelRequestsClient({
       toast.success(`Status updated to "${getHostelRequestStatus(status).label}".`);
     },
     [],
+  );
+
+  const handleSendWhatsApp = useCallback(
+    (request: HostelRequestWithCampus) => {
+      const url = buildWhatsAppUrl(request.phone, messageForRequest(request));
+      window.open(url, '_blank', 'noopener,noreferrer');
+      if (request.status !== 'contacted') {
+        void handleStatusChange(request.id, 'contacted');
+      }
+    },
+    [handleStatusChange],
   );
 
   return (
@@ -230,6 +246,10 @@ export function HostelRequestsClient({
                       value={roomTypeLabel(request.room_type)}
                     />
                     <DetailRow
+                      label="Stay alone / sharing"
+                      value={stayPreferenceLabel(request.stay_preference)}
+                    />
+                    <DetailRow
                       label="Furnishing"
                       value={furnishingLabel(request.furnishing)}
                     />
@@ -277,12 +297,27 @@ export function HostelRequestsClient({
                       <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-[13px] text-slate-700 whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto">
                         {whatsappMessage}
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSendWhatsApp(request)}
+                        disabled={statusUpdating === request.id}
+                        className="w-full h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Send on WhatsApp
+                      </button>
                       <CopyButton
                         textToCopy={whatsappMessage}
                         label="Copy WhatsApp Message"
                         successMessage="WhatsApp message copied. Paste it to the student."
-                        className="w-full h-10 bg-emerald-600 hover:bg-emerald-700 border-transparent text-white font-bold [&>span]:text-white [&>svg]:text-white"
+                        className="w-full h-10 bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700 font-bold [&>span]:text-slate-700 [&>svg]:text-slate-500"
                       />
+                      <p className="text-[11px] text-slate-400">
+                        Send opens WhatsApp directly on the student&apos;s number
+                        ({request.phone}) with the message pre-filled — no need to
+                        save the number. The request is marked as Contacted
+                        automatically.
+                      </p>
                     </div>
 
                     {/* Status workflow */}

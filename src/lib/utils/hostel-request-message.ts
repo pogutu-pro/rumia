@@ -5,6 +5,7 @@ import {
   roomTypeLabel,
   furnishingLabel,
   budgetLabel,
+  stayPreferenceLabel,
 } from '@/lib/constants/hostel-requests';
 
 interface WhatsAppMessageParams {
@@ -14,6 +15,7 @@ interface WhatsAppMessageParams {
   gender: string;
   roomType: string;
   furnishing: string;
+  stayPreference?: string;
   moveInDate: string | null;
   phone: string;
   additionalRequirements: string | null;
@@ -54,6 +56,7 @@ export function buildHostelRequestWhatsAppMessage(
     `Budget: ${budgetLabel(input.budgetRange)}/month`,
     `Gender: ${genderLabel(input.gender)}`,
     `Room Type: ${roomTypeLabel(input.roomType)}`,
+    `Stay Alone or Sharing: ${stayPreferenceLabel(input.stayPreference ?? 'no_preference')}`,
     `Furnished: ${furnishingLabel(input.furnishing)}`,
     `Move-in Date: ${formatMoveInDate(input.moveInDate)}`,
     `Phone: ${input.phone}`,
