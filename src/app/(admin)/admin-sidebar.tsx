@@ -22,6 +22,7 @@ import {
   X,
   CalendarCheck,
   Settings,
+  Headset,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
@@ -37,6 +38,7 @@ const navLinks = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard, exact: true },
   { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, exact: false },
   { label: 'Agents', href: '/admin/agents', icon: Users, exact: false },
+  { label: 'Support', href: '/admin/support', icon: Headset, exact: false },
   { label: 'Users', href: '/admin/users', icon: UserCog, exact: false },
   { label: 'Campuses', href: '/admin/campuses', icon: Landmark, exact: false },
   { label: 'Regions', href: '/admin/regions', icon: Globe, exact: false },

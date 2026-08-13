@@ -780,6 +780,64 @@ export async function toggleAgentVerifiedAction(
 }
 
 /**
+ * Updates an agent's customer-support team settings.
+ * Controls whether the agent appears on the /verify (Hakikisha) page,
+ * their rank within the support section, and whether they are the
+ * platform owner (main support, unique hero card).
+ *
+ * is_owner is independent of `verified`: the owner can be main support
+ * even before official records are fully verified.
+ */
+export async function updateAgentSupportAction(
+  agentId: string,
+  fields: {
+    is_support?: boolean;
+    support_rank?: number;
+    is_owner?: boolean;
+  }
+): Promise<ActionResult> {
+  const user = await getAdminUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    // Setting a new owner clears the previous one (DB also enforces single-owner).
+    if (fields.is_owner) {
+      const { error: clearError } = await supabaseAdmin
+        .from('agents')
+        .update({ is_owner: false })
+        .eq('is_owner', true);
+      if (clearError) {
+        return { success: false, error: clearError.message };
+      }
+    }
+
+    const patch: Record<string, unknown> = {};
+    if (typeof fields.is_support === 'boolean') patch.is_support = fields.is_support;
+    if (typeof fields.support_rank === 'number') patch.support_rank = fields.support_rank;
+    if (typeof fields.is_owner === 'boolean') patch.is_owner = fields.is_owner;
+
+    const { error } = await supabaseAdmin
+      .from('agents')
+      .update(patch)
+      .eq('id', agentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/agents');
+    revalidatePath('/admin/support');
+    revalidatePath('/verify');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error';
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Auto-verifies an agent's contacts against DeKUT official records.
  * Returns the verification result without modifying the agent.
  */

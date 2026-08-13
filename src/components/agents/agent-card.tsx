@@ -22,6 +22,7 @@ interface AgentCardProps {
     whatsapp: string;
     portfolio_url?: string | null;
     is_featured?: boolean | null;
+    is_founder?: boolean | null;
     total_views?: number;
     pochi_la_biashara_number?: string | null;
     expected_name?: string | null;
@@ -182,18 +183,18 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
             </div>
 
             {/* Badges immediately below name */}
-            {(isFeatured || isVerified) && (
+            {(isFeatured || isVerified || !!agent.is_founder) && (
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {isFeatured && (
-                  <>
-                    <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
-                      <ShieldCheck className="h-2.5 w-2.5" aria-hidden="true" />
-                      Official
-                    </span>
-                    <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/70 text-amber-700 text-[9px] font-bold uppercase tracking-wider">
-                      Founder
-                    </span>
-                  </>
+                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
+                    <ShieldCheck className="h-2.5 w-2.5" aria-hidden="true" />
+                    Official
+                  </span>
+                )}
+                {!!agent.is_founder && (
+                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/70 text-amber-700 text-[9px] font-bold uppercase tracking-wider">
+                    Founder
+                  </span>
                 )}
                 {isVerified && !isFeatured && (
                   <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">

@@ -21,6 +21,7 @@ export default async function OverviewPage() {
     { count: campusCount },
     { count: regionCount },
     { count: managerCount },
+    { count: supportAgents },
   ] = await Promise.all([
     (supabase as any)
       .from('listings')
@@ -41,6 +42,10 @@ export default async function OverviewPage() {
     supabaseAdmin.from('campuses').select('id', { count: 'exact', head: true }),
     supabaseAdmin.from('regions').select('id', { count: 'exact', head: true }),
     supabaseAdmin.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'manager'),
+    (supabase as any)
+      .from('agents')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_support', true),
   ]);
 
   const pendingRows = (pendingCommissions ?? []) as Array<{ amount: number }>;
@@ -57,6 +62,7 @@ export default async function OverviewPage() {
     totalCampuses: campusCount ?? 0,
     totalRegions: regionCount ?? 0,
     totalManagers: managerCount ?? 0,
+    supportAgents: supportAgents ?? 0,
   };
 
   return <OverviewClient stats={stats} />;

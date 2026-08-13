@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { AgentGrid } from '@/components/agents/agent-grid';
+import { SupportTeamSection } from '@/components/agents/support-team-section';
 import { supabasePublic } from '@/lib/supabase/public';
 import { HakisaChecker } from '@/components/agents/hakisa-checker';
 import type { ListingMatchCandidate } from '@/lib/utils/dekut-verification';
@@ -24,11 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function VerifyPage() {
-  const [
-    { data: rawListings },
-    { data: agents },
-    { data: agentAnalytics },
-  ] = await Promise.all([
+  const [{ data: rawListings }, { data: agents }] = await Promise.all([
     supabasePublic
       .from('listings')
       .select(
@@ -39,8 +35,9 @@ export default async function VerifyPage() {
     supabasePublic
       .from('agents')
       .select('*')
-      .eq('status', 'active'),
-    supabasePublic.rpc('get_admin_agent_view_analytics'),
+      .eq('status', 'active')
+      .eq('is_support', true)
+      .order('support_rank'),
   ]);
 
   const rumiaListings: ListingMatchCandidate[] = (rawListings || []).map(
@@ -60,20 +57,7 @@ export default async function VerifyPage() {
     }),
   );
 
-  const viewRank: Record<string, number> = {};
-  for (const row of agentAnalytics || []) {
-    viewRank[String(row.agent_id)] = Number(row.all_time_count);
-  }
-
-  const activeAgents = (agents || [])
-    .filter((a: any) => a.status === 'active')
-    .map((a: any) => ({
-      ...a,
-      total_views: viewRank[String(a.id)] || 0,
-    }))
-    .sort(
-      (a: any, b: any) => b.total_views - a.total_views,
-    );
+  const activeAgents = (agents || []).filter((a: any) => a.status === 'active');
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] pb-[calc(4rem+env(safe-area-inset-bottom))]">
@@ -81,20 +65,8 @@ export default async function VerifyPage() {
         {/* Verification Checker */}
         <HakisaChecker rumiaListings={rumiaListings} />
 
-        {/* Hostel Agents (hidden for now) */}
-        {/* {activeAgents.length > 0 && (
-          <section className="mt-16 border-t border-[#1B1B18]/10 pt-10">
-            <h2 className="text-lg font-bold text-[#1B1B18]">
-              Hostel Agents
-            </h2>
-            <p className="mt-1 text-sm text-[#1B1B18]/50">
-              {activeAgents.length} agent{activeAgents.length !== 1 ? 's' : ''} helping students find home near DeKUT
-            </p>
-            <div className="mt-6">
-              <AgentGrid agents={activeAgents} />
-            </div>
-          </section>
-        )} */}
+        {/* Customer Support Team (admin-curated) */}
+        <SupportTeamSection agents={activeAgents} />
       </div>
     </div>
   );

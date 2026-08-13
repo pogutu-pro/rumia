@@ -24,6 +24,10 @@ export interface Agent {
   portfolio_url?: string | null;
   is_featured?: boolean | null;
   is_founder?: boolean | null;
+  // Customer-support team (shown on the Hakikisha page, admin-curated)
+  is_support?: boolean | null;
+  support_rank?: number | null;
+  is_owner?: boolean | null;
   status?: 'active' | 'suspended';
   slug?: string | null;
   user_id?: string | null;
@@ -136,6 +140,9 @@ export interface AdminAgent {
   user_id: string;
   is_featured?: boolean | null;
   is_founder?: boolean | null;
+  is_support?: boolean | null;
+  support_rank?: number | null;
+  is_owner?: boolean | null;
   campus_id?: string | null;
   // Computed fields (from joins/aggregations)
   active_listings_count?: number;

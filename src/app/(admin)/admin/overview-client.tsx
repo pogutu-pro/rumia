@@ -15,6 +15,7 @@ import {
   Landmark,
   Globe,
   ShieldCheck,
+  Headset,
 } from 'lucide-react';
 
 interface OverviewClientProps {
@@ -26,6 +27,7 @@ interface OverviewClientProps {
     totalCampuses?: number;
     totalRegions?: number;
     totalManagers?: number;
+    supportAgents?: number;
   };
 }
 
@@ -92,6 +94,15 @@ export function OverviewClient({ stats }: OverviewClientProps) {
       color: 'bg-violet-50 text-violet-600',
       hoverColor: 'group-hover:text-violet-600',
       badge: stats.totalManagers ? `${stats.totalManagers} Active` : undefined,
+    },
+    {
+      href: '/admin/support',
+      label: 'Customer Support',
+      description: 'Choose who answers students on Hakikisha and set the platform owner.',
+      icon: Headset,
+      color: 'bg-amber-50 text-amber-600',
+      hoverColor: 'group-hover:text-amber-700',
+      badge: stats.supportAgents ? `${stats.supportAgents} on page` : undefined,
     },
     {
       href: '/admin/listings',
