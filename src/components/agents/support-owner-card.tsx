@@ -41,21 +41,21 @@ export function SupportOwnerCard({ agent }: SupportOwnerCardProps) {
   const profileUrl = agent.slug ? `/agents/${agent.slug}` : null;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-6 sm:p-8">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5">
         <div className="relative shrink-0 self-center sm:self-auto">
           <UserAvatar
             name={agent.name}
             imageUrl={agent.profile_photo_url}
-            size="xl"
+            size="lg"
             className="ring-1 ring-slate-200"
           />
           <span
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white ring-1 ring-slate-200"
+            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white ring-1 ring-slate-200"
             title="Platform owner"
             aria-label="Platform owner"
           >
-            <Crown className="h-4 w-4 text-amber-600" aria-hidden="true" />
+            <Crown className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
           </span>
         </div>
 
@@ -64,15 +64,16 @@ export function SupportOwnerCard({ agent }: SupportOwnerCardProps) {
             <Crown className="h-3 w-3" />
             Platform Owner
           </span>
-          <h3 className="mt-2 text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h3 className="mt-1.5 text-lg font-bold text-slate-900 tracking-tight">
             {agent.name}
           </h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Rumia&apos;s main support — personally helping students verify before they pay.
-          </p>
-          {agent.bio && (
-            <p className="mt-2 text-sm text-slate-500 leading-relaxed max-w-xl line-clamp-2">
+          {agent.bio ? (
+            <p className="mt-1 text-sm text-slate-500 leading-relaxed line-clamp-1">
               {agent.bio}
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-slate-600">
+              Rumia&apos;s main support — personally helping students verify before they pay.
             </p>
           )}
         </div>
@@ -83,7 +84,7 @@ export function SupportOwnerCard({ agent }: SupportOwnerCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleClick}
-            className="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            className="inline-flex items-center justify-center gap-2 h-10 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             aria-label={`Contact ${agent.name}, platform owner, on WhatsApp`}
           >
             {isGating ? (
@@ -96,7 +97,7 @@ export function SupportOwnerCard({ agent }: SupportOwnerCardProps) {
           {profileUrl && (
             <Link
               href={profileUrl}
-              className="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               <UserRound className="h-4 w-4" />
               View Profile
