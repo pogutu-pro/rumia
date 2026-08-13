@@ -39,6 +39,7 @@ export default async function ManagerLayout({
   }
 
   let userName = user.email ?? '';
+  let hasAgentRecord = false;
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name')
@@ -49,6 +50,13 @@ export default async function ManagerLayout({
     userName = profile.full_name;
   }
 
+  const { data: agentRecord } = await (supabase as any)
+    .from('agents')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  hasAgentRecord = !!agentRecord;
+
   return (
     <div className="min-h-screen bg-white">
       <ManagerHeader
@@ -57,6 +65,7 @@ export default async function ManagerLayout({
         campusName={campusName}
         roleLabel={managerContext.role}
         isSuperAdmin={managerContext.isSuperAdmin}
+        hasAgentRecord={hasAgentRecord}
       />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
         {children}

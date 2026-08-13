@@ -8,8 +8,20 @@ import {
   Search,
   Users,
   ShieldAlert,
+  ShieldCheck,
   LayoutDashboard,
   User,
+  BarChart3,
+  UserCog,
+  Landmark,
+  Globe,
+  Building2,
+  CalendarCheck,
+  MousePointerClick,
+  DollarSign,
+  ArrowLeftRight,
+  MessageSquare,
+  Settings,
 } from 'lucide-react';
 import {
   DashboardSwitcher,
@@ -29,14 +41,30 @@ const mainNavLinks = [
   { href: '/agents', label: 'Agents', icon: Users },
 ];
 
+const sectionLinks: DashboardSwitcherLink[] = [
+  { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/admin/agents', label: 'Agents', icon: Users },
+  { href: '/admin/users', label: 'Users', icon: UserCog },
+  { href: '/admin/campuses', label: 'Campuses', icon: Landmark },
+  { href: '/admin/regions', label: 'Regions', icon: Globe },
+  { href: '/admin/managers', label: 'Managers', icon: ShieldCheck },
+  { href: '/admin/listings', label: 'Listings', icon: Building2 },
+  { href: '/admin/tours', label: 'Tours', icon: CalendarCheck },
+  { href: '/admin/leads', label: 'Leads', icon: MousePointerClick },
+  { href: '/admin/commissions', label: 'Commissions', icon: DollarSign },
+  { href: '/admin/transfers', label: 'Transfers', icon: ArrowLeftRight },
+  { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
+];
+
 export function AdminHeader({ userName, userEmail, isAdmin, hasAgent }: AdminHeaderProps) {
   const pathname = usePathname();
-
-  const displayName = userName || 'Admin';
 
   const dashboardLinks: DashboardSwitcherLink[] = [
     { href: '/admin', label: 'Admin', icon: ShieldAlert, show: true },
     { href: '/dashboard', label: 'Agent', icon: LayoutDashboard, show: hasAgent },
+    { href: '/manager', label: 'Manager', icon: ShieldCheck, show: true },
     { href: '/account', label: 'Student', icon: User, show: true },
   ];
 
@@ -82,8 +110,8 @@ export function AdminHeader({ userName, userEmail, isAdmin, hasAgent }: AdminHea
         </div>
       </header>
 
-      {/* Dashboard shortcuts — moved out of the header */}
-      <DashboardSwitcher links={dashboardLinks} />
+      {/* Dashboard shortcuts + mobile section icons */}
+      <DashboardSwitcher links={dashboardLinks} sectionLinks={sectionLinks} />
     </>
   );
 }

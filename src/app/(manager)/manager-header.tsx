@@ -2,14 +2,20 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   ShieldCheck,
+  ShieldAlert,
   LayoutDashboard,
   MapPin,
   User,
+  FileCheck2,
+  Users,
+  Building2,
+  MessageSquareText,
+  Megaphone,
+  Settings,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import {
   DashboardSwitcher,
@@ -22,6 +28,8 @@ interface ManagerHeaderProps {
   campusName: string;
   roleLabel: string;
   isSuperAdmin?: boolean;
+  /** Whether this user also has an agent record (they get the Agent switcher). */
+  hasAgentRecord?: boolean;
 }
 
 export function ManagerHeader({
@@ -30,36 +38,34 @@ export function ManagerHeader({
   campusName,
   roleLabel,
   isSuperAdmin,
+  hasAgentRecord = false,
 }: ManagerHeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const supabase = createClient();
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: 'local' });
-    router.push('/auth/login');
-    router.refresh();
-  };
 
   const dashboardLinks: DashboardSwitcherLink[] = [
-    { href: '/manager', label: 'Manager', icon: ShieldCheck },
-    { href: '/dashboard', label: 'Agent', icon: LayoutDashboard },
-    { href: '/account', label: 'Student', icon: User },
+    { href: '/manager', label: 'Manager', icon: ShieldCheck, show: true },
+    { href: '/dashboard', label: 'Agent', icon: LayoutDashboard, show: hasAgentRecord },
+    { href: '/account', label: 'Student', icon: User, show: true },
+    { href: '/admin', label: 'Admin', icon: ShieldAlert, show: !!isSuperAdmin },
   ];
 
-  const managerNavLinks = [
-    { href: '/manager', label: 'Overview', exact: true },
-    { href: '/manager/applications', label: 'Applications', exact: false },
-    { href: '/manager/agents', label: 'Agents', exact: false },
-    { href: '/manager/listings', label: 'Listings', exact: false },
-    { href: '/manager/requests', label: 'Hostel Requests', exact: false },
-    { href: '/manager/announcements', label: 'Announcements', exact: false },
-    { href: '/manager/zones', label: 'Zones', exact: false },
-    { href: '/manager/settings', label: 'Settings', exact: false },
+  const sectionLinks: DashboardSwitcherLink[] = [
+    { href: '/manager', label: 'Overview', icon: LayoutDashboard, exact: true },
+    { href: '/manager/applications', label: 'Applications', icon: FileCheck2 },
+    { href: '/manager/agents', label: 'Agents', icon: Users },
+    { href: '/manager/listings', label: 'Listings', icon: Building2 },
+    { href: '/manager/requests', label: 'Hostel Requests', icon: MessageSquareText },
+    { href: '/manager/announcements', label: 'Announcements', icon: Megaphone },
+    { href: '/manager/zones', label: 'Zones', icon: MapPin },
+    { href: '/manager/settings', label: 'Settings', icon: Settings },
   ];
 
   if (isSuperAdmin) {
-    managerNavLinks.push({ href: '/manager/staff', label: 'Staff', exact: false });
+    sectionLinks.push({
+      href: '/manager/staff',
+      label: 'Staff',
+      icon: ShieldCheck,
+    });
   }
 
   function isActive(href: string, exact?: boolean) {
@@ -98,14 +104,14 @@ export function ManagerHeader({
         </div>
       </header>
 
-      {/* Dashboard shortcuts — moved out of the header */}
-      <DashboardSwitcher links={dashboardLinks} />
+      {/* Dashboard shortcuts + mobile section icons */}
+      <DashboardSwitcher links={dashboardLinks} sectionLinks={sectionLinks} />
 
-      {/* Manager sub-navigation - horizontal scroll on desktop, icon row on mobile */}
-      <div className="border-b border-slate-100 bg-white">
+      {/* Manager sub-navigation — desktop only. Mobile uses the icon bar above. */}
+      <div className="border-b border-slate-100 bg-white hidden md:block">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="hidden md:flex items-center gap-1 overflow-x-auto scrollbar-hide py-2 -mx-1">
-            {managerNavLinks.map(({ href, label, exact }) => {
+          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2 -mx-1">
+            {sectionLinks.map(({ href, label, exact }) => {
               const active = isActive(href, exact);
               return (
                 <Link
@@ -115,26 +121,6 @@ export function ManagerHeader({
                     active
                       ? 'text-emerald-700 bg-emerald-50 font-semibold'
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-          {/* Mobile manager nav icons */}
-          <nav className="flex md:hidden items-center gap-0.5 overflow-x-auto py-2 -mx-1">
-            {managerNavLinks.map(({ href, label, exact }) => {
-              const active = isActive(href, exact);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg text-xs transition-colors shrink-0 ${
-                    active
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   {label}

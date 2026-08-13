@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
+import { createAppNotification } from './notifications';
 
 export interface SubmitAgentApplicationInput {
   campus_id: string;
@@ -138,17 +139,30 @@ export async function submitAgentApplicationAction(
 
   revalidatePath('/account');
 
-  // Notify campus manager(s) or admin if unmanaged
+  // Notify campus manager(s) or admin if unmanaged — in-app + push.
+  const title = 'New agent application';
+  const body = `${fullName} applied for ${hostelName}. Tap to review.`;
+  const url = '/manager/applications';
+
   import('@/lib/push').then(({ getManagerUserIdsForCampus, sendPushToUsers }) => {
     getManagerUserIdsForCampus(campusId).then((recipientIds) => {
-      if (recipientIds.length > 0) {
-        sendPushToUsers(recipientIds, {
-          title: 'New Agent Application Submitted',
-          body: `${fullName} applied for ${hostelName}.`,
-          url: '/manager/applications',
-          tag: `new-app-${newApp.id}`,
-        }).catch(() => {});
-      }
+      if (recipientIds.length === 0) return;
+      Promise.all(
+        recipientIds.map(async (recipientId) => {
+          await createAppNotification({
+            userId: recipientId,
+            title,
+            body,
+            url,
+          });
+        }),
+      ).catch(() => {});
+      sendPushToUsers(recipientIds, {
+        title,
+        body,
+        url,
+        tag: `new-app-${newApp.id}`,
+      }).catch(() => {});
     });
   });
 

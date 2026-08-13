@@ -1,6 +1,6 @@
 import { getManagerUser } from '@/app/actions/manager';
 import { createClient } from '@/lib/supabase/server';
-import { PaymentsClient } from './payments-client';
+import { PaymentsCard } from '../payments-card';
 
 export const metadata = {
   title: 'Payments & Fees - Manager',
@@ -45,11 +45,14 @@ export default async function ManagerPaymentsPage() {
           Payments & Fees
         </h1>
         <p className="text-sm text-slate-500">
-          Set hostel-finding and agent consultation fees for your campus.
+          Set the hostel-finding and agent consultation fees for your campus.
         </p>
       </div>
 
-      <PaymentsClient campuses={campuses} isSuperAdmin={manager.context.isSuperAdmin} />
+      <PaymentsCard
+        campuses={campuses as any[]}
+        isSuperAdmin={manager.context.isSuperAdmin}
+      />
     </div>
   );
 }

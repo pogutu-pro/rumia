@@ -78,6 +78,7 @@ export function HostelRequestsClient({
             moveInDate: selected.move_in_date,
             phone: selected.phone,
             additionalRequirements: selected.additional_requirements,
+            fee: selected.fee,
           })
         : '',
     [selected],

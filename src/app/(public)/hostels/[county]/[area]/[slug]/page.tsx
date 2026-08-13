@@ -32,6 +32,7 @@ import {
   ListingViewCountsAllTime,
   ListingViewCountsLine,
 } from './listing-view-counts';
+import { getListingViewCounts } from '@/lib/listing-views';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
 import { isFallbackCampus } from '@/lib/data/campuses';
@@ -157,6 +158,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const listing = await getListing(slug);
   if (!listing) notFound();
 
+  const initialViewCounts = await getListingViewCounts(listing.id);
+
   const images = (listing.listing_images || []).sort(
     (a: any, b: any) => a.display_order - b.display_order,
   );
@@ -266,6 +269,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <div className="pointer-events-auto flex items-center gap-2">
             <ListingViewCountsAllTime
               listingId={listing.id}
+              initialCounts={initialViewCounts}
               className="text-xs font-bold text-slate-500"
               iconSize={3}
             />
@@ -296,6 +300,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <div className="flex items-center gap-4">
             <ListingViewCountsAllTime
               listingId={listing.id}
+              initialCounts={initialViewCounts}
               className="text-sm font-bold text-slate-500 gap-1.5"
               iconSize={4}
             />
@@ -359,7 +364,10 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 </div>
               )}
 
-              <ListingViewCountsLine listingId={listing.id} />
+              <ListingViewCountsLine
+                listingId={listing.id}
+                initialCounts={initialViewCounts}
+              />
 
               <h2 className="flex items-center gap-1.5 text-slate-500 font-semibold text-sm">
                 <MapPin className="h-4 w-4 text-slate-400" />

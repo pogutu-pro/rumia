@@ -11,6 +11,12 @@ import {
   ShieldAlert,
   ShieldCheck,
   User,
+  CalendarCheck,
+  Building2,
+  MessageCircle,
+  BarChart3,
+  Wallet,
+  CreditCard,
 } from 'lucide-react';
 import {
   DashboardSwitcher,
@@ -30,9 +36,19 @@ const mainNavLinks = [
   { href: '/agents', label: 'Agents', icon: Users },
 ];
 
+const sectionLinks: DashboardSwitcherLink[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/tours', label: 'Tours', icon: CalendarCheck },
+  { href: '/dashboard/listings', label: 'My Listings', icon: Building2 },
+  { href: '/dashboard/leads', label: 'Leads', icon: MessageCircle },
+  { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard/earnings', label: 'Earnings', icon: Wallet },
+  { href: '/dashboard/payment', label: 'Payment', icon: CreditCard },
+  { href: '/dashboard/profile', label: 'Profile', icon: User },
+];
+
 export function AgentHeader({ agentName, userEmail, isAdmin, isManager }: AgentHeaderProps) {
   const pathname = usePathname();
-  const displayName = agentName || 'Agent';
 
   const dashboardLinks: DashboardSwitcherLink[] = [
     { href: '/dashboard', label: 'Agent', icon: LayoutDashboard, show: true },
@@ -83,8 +99,8 @@ export function AgentHeader({ agentName, userEmail, isAdmin, isManager }: AgentH
         </div>
       </header>
 
-      {/* Dashboard shortcuts — moved out of the header */}
-      <DashboardSwitcher links={dashboardLinks} />
+      {/* Dashboard shortcuts + mobile section icons */}
+      <DashboardSwitcher links={dashboardLinks} sectionLinks={sectionLinks} />
     </>
   );
 }

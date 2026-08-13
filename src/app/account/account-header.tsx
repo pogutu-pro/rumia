@@ -1,6 +1,14 @@
 'use client';
 
-import { ShieldAlert, LayoutDashboard, Home, Search, Users, User } from 'lucide-react';
+import {
+  ShieldAlert,
+  ShieldCheck,
+  LayoutDashboard,
+  Home,
+  Search,
+  Users,
+  User,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -14,6 +22,7 @@ interface AccountHeaderProps {
   avatarUrl: string | null;
   isAdmin: boolean;
   hasAgent: boolean;
+  isManager?: boolean;
 }
 
 export function AccountHeader({
@@ -22,6 +31,7 @@ export function AccountHeader({
   avatarUrl,
   isAdmin,
   hasAgent,
+  isManager = false,
 }: AccountHeaderProps) {
   const pathname = usePathname();
   const displayName = fullName || 'Student';
@@ -36,6 +46,7 @@ export function AccountHeader({
     { href: '/account', label: 'Student', icon: User, show: true },
     { href: '/dashboard', label: 'Agent', icon: LayoutDashboard, show: hasAgent },
     { href: '/admin', label: 'Admin', icon: ShieldAlert, show: isAdmin },
+    { href: '/manager', label: 'Manager', icon: ShieldCheck, show: isManager },
   ];
 
   return (
@@ -91,7 +102,7 @@ export function AccountHeader({
         </div>
       </header>
 
-      {/* Dashboard shortcuts — moved out of the header */}
+      {/* Dashboard shortcuts — icon bar on mobile, pills on desktop */}
       <DashboardSwitcher links={dashboardLinks} />
     </>
   );

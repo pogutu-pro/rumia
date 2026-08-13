@@ -371,6 +371,7 @@ export default function AccountPage() {
         email={profile.email}
         avatarUrl={profile.avatar_url}
         isAdmin={profile.role === 'admin'}
+        isManager={profile.role === 'manager' || profile.role === 'admin'}
         hasAgent={hasAgent}
       />
 

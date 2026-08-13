@@ -44,7 +44,7 @@ export async function getListingViewCounts(listingId: string): Promise<ListingVi
         apikey: supabaseAnonKey,
         Authorization: `Bearer ${supabaseAnonKey}`,
       },
-      next: { revalidate: 60 },
+      next: { revalidate: 86400 },
     });
 
     if (!response.ok) {
