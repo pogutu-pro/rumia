@@ -1,13 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { MessageCircle, ShieldCheck, ChevronRight, ExternalLink, Eye, Loader2 } from 'lucide-react';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils/cn';
 import { buildWhatsAppUrl, agentInquiryMessage } from '@/lib/utils/phone';
-import { getSession, signInWithGoogle } from '@/lib/supabase/auth';
+import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
 
 interface AgentCardProps {
   agent: {
@@ -50,70 +49,18 @@ function getDisplayUrl(url: string) {
   }
 }
 
-// ── Pending WhatsApp resume (mirrors the hostel contact flow) ────────────────
-const PENDING_AGENT_KEY = 'rumia_pending_agent_whatsapp';
-
-function savePendingAgentContact(agentId: string | number, whatsappUrl: string) {
-  try {
-    sessionStorage.setItem(
-      PENDING_AGENT_KEY,
-      JSON.stringify({ agentId: String(agentId), whatsappUrl }),
-    );
-  } catch {}
-}
-
-function consumePendingAgentContact() {
-  try {
-    const raw = sessionStorage.getItem(PENDING_AGENT_KEY);
-    if (!raw) return null;
-    sessionStorage.removeItem(PENDING_AGENT_KEY);
-    return JSON.parse(raw) as { agentId: string; whatsappUrl: string };
-  } catch {
-    return null;
-  }
-}
-
 export function AgentCard({ agent, showBio = true, className }: AgentCardProps) {
   const profileUrl = agent.slug ? `/agents/${agent.slug}` : '#';
   const isFeatured = !!agent.is_featured;
   const isVerified = !!agent.verified;
   const hasPortfolio = !!agent.portfolio_url;
   const whatsappUrl = getWhatsAppUrl(agent.whatsapp, agent.name, agent.pochi_la_biashara_number, agent.expected_name);
-  const [isGating, setIsGating] = useState(false);
 
-  // Resume flow if returning from OAuth redirect
-  useEffect(() => {
-    const pending = consumePendingAgentContact();
-    if (pending && pending.agentId === String(agent.id)) {
-      window.open(pending.whatsappUrl, '_blank', 'noopener,noreferrer');
-    }
-  }, [agent.id]);
-
-  const handleWhatsAppClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isGating) return;
-    setIsGating(true);
-
-    try {
-      const { session } = await getSession();
-      if (!session?.user) {
-        savePendingAgentContact(agent.id, whatsappUrl);
-        const { error } = await signInWithGoogle(window.location.pathname);
-        if (error) {
-          setIsGating(false);
-          return;
-        }
-        return; // OAuth redirect in progress; resume happens on mount
-      }
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    } catch {
-      setIsGating(false);
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    } finally {
-      setIsGating(false);
-    }
-  };
+  const { isGating, handleClick: handleWhatsAppClick } = useGatedWhatsApp({
+    storageKey: 'rumia_pending_agent_whatsapp',
+    contactId: agent.id,
+    whatsappUrl,
+  });
 
   return (
     <div
