@@ -149,7 +149,7 @@ export function PopularHostels({ listings }: { listings: PopularListing[] }) {
             Trending
           </div>
           <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-950">
-            Popular on Rumia
+            Rumia&apos;s Top 10
           </h2>
           <p className="text-slate-500 mt-2 font-medium">
             The most visited hostels by {campus.short_name ?? 'DeKUT'} students of all time.

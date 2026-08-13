@@ -4,6 +4,7 @@ import { supabasePublic } from '@/lib/supabase/public';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { JsonLd } from '@/components/seo/json-ld';
 import { CampusPickerCards } from '@/components/home/campus-picker-cards';
+import { PopularHostels } from '@/components/home/popular-hostels';
 import { FindMeAHostel } from '@/app/account/find-me-a-hostel';
 import { getCampusBySlug, getAllCampuses, isFallbackCampus } from '@/lib/data/campuses';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
@@ -68,6 +69,14 @@ export default async function HomePage() {
     .select('id', { count: 'exact', head: true })
     .eq('is_active', true);
 
+  // Top 10 most-visited hostels, scoped to the campus. The (INT, UUID)
+  // overload is used explicitly to avoid the ambiguous REST resolution.
+  const campusId = isFallbackCampus(campus) ? null : campus.id;
+  const { data: popularListings } = await supabasePublic.rpc(
+    'get_popular_listings',
+    { p_limit: 10, p_campus_id: campusId },
+  );
+
   const heroImage = campus.hero_image ?? '/dekut.jpeg';
 
   return (
@@ -109,7 +118,10 @@ export default async function HomePage() {
       {/* University Campus Picker Cards Section */}
       <CampusPickerCards campuses={campuses} />
 
-      {/* Find Me a Hostel — replaces Popular Hostels on the homepage */}
+      {/* Popular Hostels — top 10 most-visited listings */}
+      <PopularHostels listings={popularListings ?? []} />
+
+      {/* Find Me a Hostel */}
       <FindMeAHostel
         variant="home"
         campusId={isFallbackCampus(campus) ? null : campus.id}
