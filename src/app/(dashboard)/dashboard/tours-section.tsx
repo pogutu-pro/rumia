@@ -10,6 +10,7 @@ import {
   Sun,
   Sunset,
   Moon,
+  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -19,6 +20,7 @@ import {
   deleteTourBookingAction,
 } from '@/app/actions/tour-bookings';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
+import { buildWhatsAppUrl, tourConfirmationMessage } from '@/lib/utils/phone';
 import type { TourBookingWithJoins, TourStatus } from '@/types';
 
 interface ToursSectionProps {
@@ -54,6 +56,26 @@ const TIME_ICONS: Record<string, typeof Sun> = {
   afternoon: Sunset,
   evening: Moon,
 };
+
+/** Builds a WhatsApp deep-link that confirms the agent will be there. */
+function tourConfirmHref(b: TourBookingWithJoins): string {
+  const date = new Date(b.preferred_date + 'T00:00:00').toLocaleDateString(
+    'en-KE',
+    { weekday: 'short', month: 'short', day: 'numeric' },
+  );
+  const timeLabel =
+    b.preferred_time.charAt(0).toUpperCase() + b.preferred_time.slice(1);
+  const message = tourConfirmationMessage({
+    studentName: b.student_name,
+    agentName: b.agents?.name || 'your agent',
+    date,
+    timeLabel,
+    zone: b.zone,
+    listingTitle: b.listings?.title || undefined,
+    agentPhone: b.agents?.whatsapp || b.agents?.phone || undefined,
+  });
+  return buildWhatsAppUrl(b.phone, message);
+}
 
 type TourFilter = 'all' | 'upcoming' | 'completed' | 'cancelled';
 
@@ -272,6 +294,18 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
+                      {isActive && (
+                        <a
+                          href={tourConfirmHref(b)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Send the student a WhatsApp confirmation"
+                          className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          Confirm
+                        </a>
+                      )}
                       {STATUS_ACTIONS[b.status] && (
                         <Button
                           size="sm"
@@ -404,6 +438,18 @@ export function ToursSection({ bookings }: ToursSectionProps) {
               </div>
 
               <div className="flex items-center gap-2 pt-1">
+                {isActive && (
+                  <a
+                    href={tourConfirmHref(b)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Send the student a WhatsApp confirmation"
+                    className="inline-flex items-center justify-center gap-1 h-8 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                  >
+                    <MessageCircle className="h-3 w-3" />
+                    Confirm
+                  </a>
+                )}
                 {STATUS_ACTIONS[b.status] && (
                   <Button
                     size="sm"

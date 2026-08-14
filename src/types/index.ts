@@ -325,7 +325,12 @@ export interface TourBooking {
 
 export interface TourBookingWithJoins extends TourBooking {
   listings?: { id: string; title: string; area: string | null } | null;
-  agents?: { id: string; name: string } | null;
+  agents?: {
+    id: string;
+    name: string;
+    whatsapp?: string | null;
+    phone?: string | null;
+  } | null;
 }
 
 export interface CreateTourBookingInput {

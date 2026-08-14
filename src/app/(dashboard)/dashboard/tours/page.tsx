@@ -24,7 +24,7 @@ export default async function AgentToursPage() {
     .select(`
       *,
       listings(id, title, area),
-      agents(id, name)
+      agents(id, name, whatsapp, phone)
     `)
     .eq('agent_id', agent.id)
     .order('preferred_date', { ascending: true })

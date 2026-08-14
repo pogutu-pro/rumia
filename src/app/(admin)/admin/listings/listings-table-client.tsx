@@ -25,7 +25,7 @@ import {
   updateListingActiveAction,
   deleteListingAction,
   updateListingsOrderAction,
-  resetListingsOrderAction,
+  shuffleListingsOrderAction,
   toggleCommissionLockAction,
   setListingCommissionAction,
   updateListingOwnerPhoneAction,
@@ -638,20 +638,20 @@ export function ListingsTableClient({
     setHasOrderChanges(true);
   }
 
-  async function handleResetOrder() {
+  async function handleShuffleOrder() {
     if (
       !window.confirm(
-        'Reset all listings to newest-first ordering? This clears any custom order you have saved.',
+        'Shuffle all listings into a random order? This replaces the current order.',
       )
     ) {
       return;
     }
     setIsResettingOrder(true);
-    const result = await resetListingsOrderAction();
+    const result = await shuffleListingsOrderAction();
     setIsResettingOrder(false);
 
     if (result.success) {
-      toast.success('Listings reordered — newest first');
+      toast.success('Listings shuffled — random order');
       setIsReorderMode(false);
       setHasOrderChanges(false);
       router.refresh();
@@ -709,7 +709,7 @@ export function ListingsTableClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleResetOrder}
+            onClick={handleShuffleOrder}
             disabled={isResettingOrder}
             className="rounded-lg"
           >

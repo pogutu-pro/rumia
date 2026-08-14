@@ -36,6 +36,12 @@ interface BookTourFormProps {
   listingTitle: string;
   listingZone: string | null;
   agentId: string | number;
+  /**
+   * Full-search tour price for the selected zone, as configured by a campus
+   * manager in campus_zones. When provided it overrides the static pricing
+   * matrix so manager-added zones book at the correct price.
+   */
+  zoneFullSearchPrice?: number;
 }
 
 type FormStep = 'form' | 'confirmation';
@@ -118,6 +124,7 @@ export function BookTourForm({
   listingTitle,
   listingZone,
   agentId,
+  zoneFullSearchPrice,
 }: BookTourFormProps) {
   const isMobile = useIsMobile();
   const [mounted, setMounted] = useState(false);
@@ -143,10 +150,12 @@ export function BookTourForm({
   const zone = listingZone;
   const fromListing = !!listingId;
 
-  const price = useMemo(
-    () => getTourPrice(zone, tourType, fromListing),
-    [zone, tourType, fromListing],
-  );
+  const price = useMemo(() => {
+    if (tourType === 'full_search' && zoneFullSearchPrice != null) {
+      return zoneFullSearchPrice;
+    }
+    return getTourPrice(zone, tourType, fromListing);
+  }, [zone, tourType, fromListing, zoneFullSearchPrice]);
 
   useEffect(() => {
     setMounted(true);

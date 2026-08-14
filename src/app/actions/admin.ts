@@ -1016,23 +1016,23 @@ export async function updateListingsOrderAction(
 }
 
 /**
- * Resets all listings to the default newest-first ordering (created_at DESC)
- * via a single bulk UPDATE (reset_listing_order RPC). Any manual custom order
- * is cleared so freshly created listings automatically rise to the top again.
+ * Randomizes the listing order for the public /hostels page via the
+ * shuffle_listing_order RPC. Every listing gets a fresh random sort_position
+ * (1..N) so the line-up is a true shuffle, not newest-first.
  */
-export async function resetListingsOrderAction(): Promise<ActionResult> {
+export async function shuffleListingsOrderAction(): Promise<ActionResult> {
   const user = await getAdminUser();
   if (!user) {
     return { success: false, error: 'Unauthorized' };
   }
 
   try {
-    const { error } = await supabaseAdmin.rpc('reset_listing_order', {
+    const { error } = await supabaseAdmin.rpc('shuffle_listing_order', {
       p_admin_id: user.id,
     });
 
     if (error) {
-      return { success: false, error: `Failed to reset order: ${error.message}` };
+      return { success: false, error: `Failed to shuffle listings: ${error.message}` };
     }
 
     revalidatePath('/admin/listings');

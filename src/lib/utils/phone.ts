@@ -165,3 +165,31 @@ export function agentHostelInquiryMessage(params: {
   const fee = consultationFee ?? 50;
   return `Hello, I am interested in ${listingTitle} on Rumia and would like your professional guidance on whether it suits my budget and requirements, or if you can recommend better alternatives. Paid consultation fee: KES ${fee}. Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
 }
+
+/**
+ * WhatsApp message an agent sends to confirm an upcoming tour to a student.
+ * One-tap from the agent dashboard: opens WhatsApp pre-filled with the tour
+ * details so the agent can confirm "we will be there" with a single send.
+ */
+export function tourConfirmationMessage(params: {
+  studentName: string;
+  agentName: string;
+  date: string;
+  timeLabel: string;
+  zone?: string;
+  listingTitle?: string;
+  agentPhone?: string;
+}): string {
+  const { studentName, agentName, date, timeLabel, zone, listingTitle, agentPhone } =
+    params;
+  const destination = listingTitle ?? zone;
+  const when = `${date} (${timeLabel})`;
+  const base = `Hi ${studentName}, this is ${agentName} from Rumia.`;
+  const details = destination
+    ? `Your tour for ${when} in ${destination} is confirmed.`
+    : `Your tour for ${when} is confirmed.`;
+  const call = agentPhone
+    ? ` Please call us at ${agentPhone} on the day of your visit to let us know you're on your way.`
+    : '';
+  return `${base} ${details} We will be there to show you around.${call} See you then!`;
+}

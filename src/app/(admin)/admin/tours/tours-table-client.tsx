@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CalendarCheck, Clock, MapPin, Phone, AlertTriangle } from 'lucide-react';
+import { CalendarCheck, Clock, MapPin, Phone, AlertTriangle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { TourCountdown } from '@/components/tour-countdown';
 import { updateTourBookingStatusAction } from '@/app/actions/tour-bookings';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
+import { buildWhatsAppUrl, tourConfirmationMessage } from '@/lib/utils/phone';
 import type { TourBookingWithJoins, TourStatus } from '@/types';
 
 interface ToursTableClientProps {
@@ -35,6 +36,27 @@ const STATUS_OPTIONS: TourStatus[] = [
 ];
 
 const ACTIVE_STATUSES = new Set<TourStatus>(['pending_payment', 'confirmed', 'paid']);
+
+/** Builds a WhatsApp deep-link that confirms the agent will be there. */
+function tourConfirmHref(t: TourBookingWithJoins): string {
+  const date = new Date(t.preferred_date + 'T00:00:00').toLocaleDateString('en-KE', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+  const timeLabel =
+    t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1);
+  const message = tourConfirmationMessage({
+    studentName: t.student_name,
+    agentName: t.agents?.name || 'your agent',
+    date,
+    timeLabel,
+    zone: t.zone,
+    listingTitle: t.listings?.title || undefined,
+    agentPhone: t.agents?.whatsapp || t.agents?.phone || undefined,
+  });
+  return buildWhatsAppUrl(t.phone, message);
+}
 
 export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps) {
   const [statusFilter, setStatusFilter] = useState('');
@@ -248,21 +270,35 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                     />
                   </td>
                   <td className="px-5 py-4">
-                    <select
-                      value={t.status}
-                      disabled={isUpdating === t.id}
-                      onChange={(e) => {
-                        const val = e.target.value as TourStatus;
-                        if (val !== t.status) handleStatusUpdate(t.id, val);
-                      }}
-                      className="h-8 rounded-lg border border-gray-200 bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    >
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {s.replace('_', ' ')}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center gap-2">
+                      {ACTIVE_STATUSES.has(t.status) && (
+                        <a
+                          href={tourConfirmHref(t)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Send the student a WhatsApp confirmation"
+                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          Confirm
+                        </a>
+                      )}
+                      <select
+                        value={t.status}
+                        disabled={isUpdating === t.id}
+                        onChange={(e) => {
+                          const val = e.target.value as TourStatus;
+                          if (val !== t.status) handleStatusUpdate(t.id, val);
+                        }}
+                        className="h-8 rounded-lg border border-gray-200 bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        {STATUS_OPTIONS.map((s) => (
+                          <option key={s} value={s}>
+                            {s.replace('_', ' ')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -334,21 +370,35 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   </Link>
                 </p>
               )}
-              <select
-                value={t.status}
-                disabled={isUpdating === t.id}
-                onChange={(e) => {
-                  const val = e.target.value as TourStatus;
-                  if (val !== t.status) handleStatusUpdate(t.id, val);
-                }}
-                className="w-full h-9 rounded-lg border border-gray-200 bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s.replace('_', ' ')}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2">
+                {ACTIVE_STATUSES.has(t.status) && (
+                  <a
+                    href={tourConfirmHref(t)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Send the student a WhatsApp confirmation"
+                    className="inline-flex items-center justify-center gap-1 h-9 px-3 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors shrink-0"
+                  >
+                    <MessageCircle className="h-3 w-3" />
+                    Confirm
+                  </a>
+                )}
+                <select
+                  value={t.status}
+                  disabled={isUpdating === t.id}
+                  onChange={(e) => {
+                    const val = e.target.value as TourStatus;
+                    if (val !== t.status) handleStatusUpdate(t.id, val);
+                  }}
+                  className="w-full h-9 rounded-lg border border-gray-200 bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s.replace('_', ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           ))
         )}

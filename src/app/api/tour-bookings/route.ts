@@ -79,8 +79,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Compute price server-side (never trust client-sent price)
-    const amount = getTourPrice(zone, tour_type, !!from_listing);
+    // Compute price server-side (never trust client-sent price).
+    // Prefers the campus-manager-configured zone price from campus_zones so
+    // manager-added zones book at the correct amount.
+    const amount = await resolveTourAmount(zone, tour_type, !!from_listing);
     if (amount === null) {
       return NextResponse.json(
         { error: `No pricing configured for zone: ${zone}` },
@@ -244,4 +246,37 @@ export async function POST(request: NextRequest) {
 
 function studentNameTrimmed(name: string): string {
   return name.trim();
+}
+
+/**
+ * Resolves the tour amount for a booking.
+ *  - specific_hostel: flat KSh 500 (existing behavior).
+ *  - full_search: uses the campus-manager-configured `full_search_price` from
+ *    campus_zones when the zone is configured there; falls back to the static
+ *    pricing matrix otherwise.
+ */
+async function resolveTourAmount(
+  zone: string,
+  tourType: TourType,
+  fromListing: boolean,
+): Promise<number | null> {
+  if (tourType !== 'full_search') {
+    return getTourPrice(zone, tourType, fromListing);
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('campus_zones')
+      .select('full_search_price')
+      .eq('name', zone)
+      .maybeSingle();
+    if (data?.full_search_price != null) {
+      return data.full_search_price;
+    }
+  } catch {
+    // Fall through to the static matrix.
+  }
+
+  return getTourPrice(zone, tourType, fromListing);
 }

@@ -9,7 +9,7 @@ export default async function AdminToursPage() {
     .select(`
       *,
       listings(id, title, area),
-      agents(id, name)
+      agents(id, name, whatsapp, phone)
     `)
     .order('preferred_date', { ascending: true })
     .order('preferred_time', { ascending: true });

@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { ArrowLeft, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BookTourForm } from '@/app/(public)/listing/[id]/book-tour-form';
-import { AREA_OPTIONS } from '@/lib/constants/dekut-areas';
+import { useTourZones } from '@/hooks/use-tour-zones';
+import type { TourZoneOption } from '@/hooks/use-tour-zones';
 import { cn } from '@/lib/utils/cn';
 
 export default function BookTourPage() {
-  const [selectedZone, setSelectedZone] = useState<string | null>(null);
+  const { zones, loading } = useTourZones();
+  const [selectedZone, setSelectedZone] = useState<TourZoneOption | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
   if (formOpen && selectedZone) {
@@ -22,7 +24,8 @@ export default function BookTourPage() {
         }}
         listingId=""
         listingTitle=""
-        listingZone={selectedZone}
+        listingZone={selectedZone.value}
+        zoneFullSearchPrice={selectedZone.price}
         agentId=""
       />
     );
@@ -52,14 +55,21 @@ export default function BookTourPage() {
             <p className="text-sm font-bold text-slate-700 mb-3">
               Select your area
             </p>
+            {loading ? (
+              <div className="grid grid-cols-2 gap-3" aria-busy="true">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="skeleton h-20 rounded-xl" />
+                ))}
+              </div>
+            ) : (
             <div className="grid grid-cols-2 gap-3">
-              {AREA_OPTIONS.map((zone) => {
-                const isSelected = selectedZone === zone.value;
+              {zones.map((zone) => {
+                const isSelected = selectedZone?.value === zone.value;
                 return (
                   <button
                     key={zone.value}
                     type="button"
-                    onClick={() => setSelectedZone(zone.value)}
+                    onClick={() => setSelectedZone(zone)}
                     className={cn(
                       'relative flex flex-col items-start rounded-xl border-2 p-3.5 text-left transition-all duration-200',
                       isSelected
@@ -84,6 +94,7 @@ export default function BookTourPage() {
                 );
               })}
             </div>
+            )}
           </div>
 
           <Button
