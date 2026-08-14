@@ -994,9 +994,10 @@ export async function updateListingsOrderAction(
 
   try {
     const { error } = await supabaseAdmin.rpc('reorder_listings', {
-      p_positions: JSON.stringify(
-        updates.map((u) => ({ listing_id: u.id, new_position: u.sort_position })),
-      ),
+      p_positions: updates.map((u) => ({
+        listing_id: u.id,
+        new_position: u.sort_position,
+      })),
       p_admin_id: user.id,
     });
 

@@ -36,11 +36,12 @@ interface TourBookingWithListing extends TourBooking {
 }
 
 const TOUR_STATUS_VARIANT_MAP: Record<string, 'active' | 'pending' | 'rejected' | 'success' | 'draft' | 'info'> = {
-  pending_payment: 'pending',
+  'pending payment': 'pending',
   confirmed: 'info',
   paid: 'success',
+  messaged: 'success',
   completed: 'success',
-  no_show: 'rejected',
+  'no show': 'rejected',
   cancelled: 'rejected',
 };
 
@@ -366,7 +367,11 @@ function TourRow({
             )}
           </div>
           <StatusBadge
-            status={booking.status.replace(/_/g, ' ')}
+            status={
+              booking.status === 'contacted'
+                ? 'Messaged'
+                : booking.status.replace(/_/g, ' ')
+            }
             variantMap={TOUR_STATUS_VARIANT_MAP}
           />
         </div>

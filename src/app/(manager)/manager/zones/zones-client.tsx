@@ -206,7 +206,7 @@ export function ZonesClient({ campuses, isSuperAdmin, allZones }: ZonesClientPro
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Full Search Tour Price (KSh)</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Zone Tour Price (KSh)</label>
                 <input
                   type="number"
                   value={zoneForm.full_search_price}

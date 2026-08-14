@@ -870,7 +870,7 @@ export function SettingsClient({
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  Full Search Tour Price (KSh)
+                  Zone Tour Price (KSh)
                 </label>
                 <input
                   type="number"

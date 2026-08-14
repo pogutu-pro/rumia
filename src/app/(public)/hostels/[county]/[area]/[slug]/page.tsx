@@ -28,6 +28,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
 import { ListingDescription } from './listing-description';
 import { readCampusConsultationFee } from '@/lib/utils/consultation-fee';
+import { getZoneTourPrice } from '@/lib/utils/zone-tour-price';
 import {
   ListingViewCountsAllTime,
   ListingViewCountsLine,
@@ -157,6 +158,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const { county, area, slug } = await params;
   const listing = await getListing(slug);
   if (!listing) notFound();
+
+  const embeddedCampus = Array.isArray(listing.campuses)
+    ? listing.campuses[0]
+    : listing.campuses;
+  const zoneTourPrice = await getZoneTourPrice(
+    listing.area,
+    embeddedCampus?.id || null,
+  );
 
   const initialViewCounts = await getListingViewCounts(listing.id);
 
@@ -574,6 +583,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     listingTitle={listing.title}
                     listingZone={listing.area}
                     agentId={listing.agents?.id}
+                    zoneTourPrice={zoneTourPrice}
+                    listingCampusId={embeddedCampus?.id || null}
                   />
                 </div>
                 <div className="flex-1">
@@ -761,6 +772,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
               listingTitle={listing.title}
               listingZone={listing.area}
               agentId={listing.agents?.id}
+              zoneTourPrice={zoneTourPrice}
+              listingCampusId={embeddedCampus?.id || null}
             />
           </div>
             <div className="flex-1">

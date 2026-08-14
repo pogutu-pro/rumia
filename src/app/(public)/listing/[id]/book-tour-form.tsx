@@ -9,8 +9,7 @@ import {
   Clock,
   User,
   Phone,
-  Search,
-  Building2,
+  MapPin,
   ArrowLeft,
   Loader2,
   AlertCircle,
@@ -21,12 +20,11 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { getTourPrice, formatTourPrice } from '@/lib/constants/tour-pricing';
+import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/client';
-import { HostelPickerModal } from '@/components/tours/hostel-picker-modal';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
-import type { TourType, TourTimeWindow, TourBooking } from '@/types';
+import type { TourTimeWindow, TourBooking } from '@/types';
 import posthog from 'posthog-js';
 
 interface BookTourFormProps {
@@ -37,22 +35,18 @@ interface BookTourFormProps {
   listingZone: string | null;
   agentId: string | number;
   /**
-   * Full-search tour price for the selected zone, as configured by a campus
-   * manager in campus_zones. When provided it overrides the static pricing
-   * matrix so manager-added zones book at the correct price.
+   * Zone tour price for the listing's zone, as configured by a campus manager
+   * in campus_zones. When it is not provided the zone has no configured price,
+   * so the form shows "Pricing unavailable" and blocks submission.
    */
   zoneFullSearchPrice?: number;
+  /** UUID of the campus this zone belongs to (booked from a zone picker). */
+  campusId?: string;
+  /** Display name of the campus, e.g. "Dedan Kimathi University". */
+  campusName?: string;
 }
 
 type FormStep = 'form' | 'confirmation';
-
-interface SelectedHostel {
-  id: string;
-  title: string;
-  price: number;
-  location: string;
-  agent_name: string | null;
-}
 
 const TIME_OPTIONS: Array<{
   value: TourTimeWindow;
@@ -125,6 +119,8 @@ export function BookTourForm({
   listingZone,
   agentId,
   zoneFullSearchPrice,
+  campusId,
+  campusName,
 }: BookTourFormProps) {
   const isMobile = useIsMobile();
   const [mounted, setMounted] = useState(false);
@@ -133,7 +129,6 @@ export function BookTourForm({
   const [booking, setBooking] = useState<TourBooking | null>(null);
 
   // Form state
-  const [tourType, setTourType] = useState<TourType>('specific_hostel');
   const [preferredDate, setPreferredDate] = useState(getDefaultDate);
   const [preferredTime, setPreferredTime] = useState<TourTimeWindow>('morning');
   const [studentName, setStudentName] = useState('');
@@ -143,19 +138,13 @@ export function BookTourForm({
   const [linkedUserId, setLinkedUserId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Hostel picker state
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [selectedHostels, setSelectedHostels] = useState<SelectedHostel[]>([]);
-
   const zone = listingZone;
   const fromListing = !!listingId;
 
-  const price = useMemo(() => {
-    if (tourType === 'full_search' && zoneFullSearchPrice != null) {
-      return zoneFullSearchPrice;
-    }
-    return getTourPrice(zone, tourType, fromListing);
-  }, [zone, tourType, fromListing, zoneFullSearchPrice]);
+  const price = useMemo(
+    () => zoneFullSearchPrice ?? null,
+    [zoneFullSearchPrice],
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -199,7 +188,6 @@ export function BookTourForm({
   const resetForm = useCallback(() => {
     setStep('form');
     setBooking(null);
-    setTourType('specific_hostel');
     setPreferredDate(getDefaultDate());
     setPreferredTime('morning');
     setStudentName('');
@@ -208,35 +196,12 @@ export function BookTourForm({
     setPhoneAttempts(0);
     setLinkedUserId(null);
     setIsLoggedIn(false);
-    setSelectedHostels([]);
-    setPickerOpen(false);
   }, []);
 
   const handleClose = useCallback(() => {
     resetForm();
     onClose();
   }, [onClose, resetForm]);
-
-  // When user selects specific_hostel from /book-tour (not from listing), open picker
-  const handleTourTypeChange = useCallback(
-    (type: TourType) => {
-      setTourType(type);
-      if (type === 'specific_hostel' && !fromListing) {
-        setPickerOpen(true);
-      }
-    },
-    [fromListing],
-  );
-
-  const handleHostelsPicked = useCallback((hostels: SelectedHostel[]) => {
-    setSelectedHostels(hostels);
-    setPickerOpen(false);
-    if (hostels.length > 0) {
-      toast.success(
-        `${hostels.length} hostel${hostels.length > 1 ? 's' : ''} selected for tour`,
-      );
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,44 +229,24 @@ export function BookTourForm({
       return;
     }
 
-    // Validate hostel selection for zone-specific tours
-    if (
-      tourType === 'specific_hostel' &&
-      !fromListing &&
-      selectedHostels.length === 0
-    ) {
-      toast.error('Please select at least one hostel to tour');
-      setPickerOpen(true);
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      // For zone-specific tours, send the first selected listing as the primary
-      const primaryListingId =
-        tourType === 'specific_hostel' && !fromListing
-          ? selectedHostels[0]?.id || ''
-          : listingId;
-
       const response = await fetch('/api/tour-bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           student_name: studentName.trim(),
           phone: phone.trim(),
-          listing_id: primaryListingId,
+          listing_id: String(listingId),
           zone,
-          tour_type: tourType,
+          tour_type: 'full_search',
           preferred_date: preferredDate,
           preferred_time: preferredTime,
           agent_id: agentId,
           linked_user_id: linkedUserId,
           from_listing: fromListing,
-          selected_listing_ids:
-            tourType === 'specific_hostel' && !fromListing
-              ? selectedHostels.map((h) => h.id)
-              : undefined,
+          campus_id: campusId,
         }),
       });
 
@@ -315,7 +260,7 @@ export function BookTourForm({
       setStep('confirmation');
       posthog.capture('tour_booked', {
         listing_id: String(listingId),
-        tour_type: tourType,
+        tour_type: 'full_search',
         zone,
         preferred_time: preferredTime,
         from_listing: fromListing,
@@ -403,8 +348,6 @@ export function BookTourForm({
               <div className="px-5 pb-6 pt-2">
                 {step === 'form' ? (
                   <FormContent
-                    tourType={tourType}
-                    setTourType={handleTourTypeChange}
                     preferredDate={preferredDate}
                     setPreferredDate={setPreferredDate}
                     preferredTime={preferredTime}
@@ -418,11 +361,9 @@ export function BookTourForm({
                     price={price}
                     zone={zone}
                     listingTitle={listingTitle}
-                    isListingSpecific={fromListing}
+                    campusName={campusName}
                     isSubmitting={isSubmitting}
                     isLoggedIn={isLoggedIn}
-                    selectedHostels={selectedHostels}
-                    onOpenPicker={() => setPickerOpen(true)}
                     onSubmit={handleSubmit}
                     onClose={handleClose}
                   />
@@ -456,8 +397,6 @@ export function BookTourForm({
                 <div className="p-6">
                   {step === 'form' ? (
                     <FormContent
-                      tourType={tourType}
-                      setTourType={handleTourTypeChange}
                       preferredDate={preferredDate}
                       setPreferredDate={setPreferredDate}
                       preferredTime={preferredTime}
@@ -471,11 +410,9 @@ export function BookTourForm({
                       price={price}
                       zone={zone}
                       listingTitle={listingTitle}
-                      isListingSpecific={fromListing}
+                      campusName={campusName}
                       isSubmitting={isSubmitting}
                       isLoggedIn={isLoggedIn}
-                      selectedHostels={selectedHostels}
-                      onOpenPicker={() => setPickerOpen(true)}
                       onSubmit={handleSubmit}
                       onClose={handleClose}
                     />
@@ -492,16 +429,6 @@ export function BookTourForm({
               </motion.div>
             </div>
           )}
-
-          {/* Hostel Picker Modal */}
-          {zone && (
-            <HostelPickerModal
-              isOpen={pickerOpen}
-              onClose={() => setPickerOpen(false)}
-              onConfirm={handleHostelsPicked}
-              zone={zone}
-            />
-          )}
         </div>
       )}
     </AnimatePresence>,
@@ -512,8 +439,6 @@ export function BookTourForm({
 // ── Form Content ────────────────────────────────────────────
 
 interface FormContentProps {
-  tourType: TourType;
-  setTourType: (v: TourType) => void;
   preferredDate: string;
   setPreferredDate: (v: string) => void;
   preferredTime: TourTimeWindow;
@@ -527,18 +452,14 @@ interface FormContentProps {
   price: number | null;
   zone: string | null;
   listingTitle: string;
-  isListingSpecific: boolean;
+  campusName?: string;
   isSubmitting: boolean;
   isLoggedIn: boolean;
-  selectedHostels: SelectedHostel[];
-  onOpenPicker: () => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
 
 function FormContent({
-  tourType,
-  setTourType,
   preferredDate,
   setPreferredDate,
   preferredTime,
@@ -552,11 +473,9 @@ function FormContent({
   price,
   zone,
   listingTitle,
-  isListingSpecific,
+  campusName,
   isSubmitting,
   isLoggedIn,
-  selectedHostels,
-  onOpenPicker,
   onSubmit,
   onClose,
 }: FormContentProps) {
@@ -573,7 +492,11 @@ function FormContent({
         </button>
         <div>
           <h2 className="text-lg font-bold text-gray-900">Book a Tour</h2>
-          <p className="text-xs text-gray-500">Schedule your hostel visit</p>
+          <p className="text-xs text-gray-500">
+            {listingTitle
+              ? `Near ${listingTitle}`
+              : 'Reach your hostel without the guessing'}
+          </p>
         </div>
       </div>
 
@@ -606,125 +529,30 @@ function FormContent({
         {/* Tour Type */}
         <div>
           <Label className="text-sm font-semibold text-gray-700 mb-3 block">
-            Tour type
+            Zone tour
           </Label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setTourType('specific_hostel')}
-              className={cn(
-                'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
-                tourType === 'specific_hostel'
-                  ? 'border-slate-900 bg-slate-50 shadow-sm'
-                  : 'border-gray-200 hover:border-gray-300',
-              )}
-            >
-              <Building2
-                className={cn(
-                  'h-5 w-5',
-                  tourType === 'specific_hostel'
-                    ? 'text-slate-900'
-                    : 'text-gray-400',
-                )}
-              />
-              <span
-                className={cn(
-                  'text-sm font-semibold',
-                  tourType === 'specific_hostel'
-                    ? 'text-slate-900'
-                    : 'text-gray-600',
-                )}
-              >
-                Specific Hostel
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
+                <MapPin className="h-4 w-4" />
               </span>
-              {isListingSpecific ? (
-                <span className="text-[10px] font-medium text-gray-400 leading-tight text-center">
-                  {listingTitle.length > 30
-                    ? listingTitle.slice(0, 30) + '…'
-                    : listingTitle}
-                </span>
-              ) : (
-                <span className="text-[10px] font-medium text-emerald-600 leading-tight text-center font-bold">
-                  KSh 500 · Pick hostels
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => setTourType('full_search')}
-              className={cn(
-                'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
-                tourType === 'full_search'
-                  ? 'border-slate-900 bg-slate-50 shadow-sm'
-                  : 'border-gray-200 hover:border-gray-300',
-              )}
-            >
-              <Search
-                className={cn(
-                  'h-5 w-5',
-                  tourType === 'full_search'
-                    ? 'text-slate-900'
-                    : 'text-gray-400',
-                )}
-              />
-              <span
-                className={cn(
-                  'text-sm font-semibold',
-                  tourType === 'full_search'
-                    ? 'text-slate-900'
-                    : 'text-gray-600',
-                )}
-              >
-                Full Search
-              </span>
-              <span className="text-[10px] font-medium text-gray-400 leading-tight text-center">
-                Still deciding
-              </span>
-            </button>
+              <div>
+                <p className="text-sm font-bold text-slate-900">
+                  {campusName ? `${campusName} · ${zone}` : zone}
+                </p>
+                <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                  Per zone · any hostels in the area
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              {listingTitle
+                ? `You'll be guided through ${listingTitle} and other hostels in ${zone}. `
+                : `A verified agent takes you around several hostels in ${zone}. `}
+              The fee covers the whole zone, not a single hostel.
+            </p>
           </div>
         </div>
-
-        {/* Selected hostels summary (zone-specific tours) */}
-        {tourType === 'specific_hostel' && !isListingSpecific && (
-          <div>
-            {selectedHostels.length > 0 ? (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-emerald-800">
-                    {selectedHostels.length} hostel
-                    {selectedHostels.length > 1 ? 's' : ''} selected
-                  </p>
-                  <button
-                    type="button"
-                    onClick={onOpenPicker}
-                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
-                  >
-                    Change
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedHostels.map((h) => (
-                    <span
-                      key={h.id}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-emerald-200 text-[11px] font-medium text-emerald-700"
-                    >
-                      {h.title}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={onOpenPicker}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition-colors"
-              >
-                <Building2 className="h-4 w-4" />
-                Pick hostels to tour in {zone}
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Preferred Date */}
         <div className="space-y-2">
@@ -866,11 +694,7 @@ function FormContent({
                 Tour fee
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                {tourType === 'specific_hostel'
-                  ? isListingSpecific
-                    ? 'Direct booking'
-                    : `Pick hostels · ${zone}`
-                  : `Full Search · ${zone}`}
+                Zone tour · {zone}
               </p>
             </div>
             <p className="text-xl font-black text-slate-900">
@@ -942,7 +766,7 @@ function ConfirmationContent({
         : 'Evening';
 
   const tourTypeLabel =
-    booking.tour_type === 'specific_hostel' ? 'Specific Hostel' : 'Full Search';
+    booking.tour_type === 'specific_hostel' ? 'Hostel Tour' : 'Zone Tour';
 
   const dateStr = new Date(
     booking.preferred_date + 'T00:00:00',

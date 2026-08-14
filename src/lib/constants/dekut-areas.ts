@@ -47,40 +47,6 @@ export const DEKUT_AREAS: Record<string, AreaCoordinates> = {
   },
 };
 
-/**
- * Proximity description for each area — used in the book-tour location picker.
- * Avoids specific walking times so users don't think they can just walk instead of paying.
- */
-const AREA_PROXIMITY: Record<string, string> = {
-  Boma: 'Near campus',
-  'Near Gate A': 'Closest to campus',
-  'Near Gate B': 'Close to campus',
-  'Nyeri View': 'Near campus',
-  'Kahawa Ridge': 'A bit further',
-  Nyaribo: 'A bit further',
-  'Embassy Area': 'Farther out',
-};
-
-/**
- * Full-search tour price per zone — shown on the zone picker cards.
- */
-const AREA_PRICES: Record<string, number> = {
-  Boma: 600,
-  'Near Gate A': 600,
-  'Near Gate B': 600,
-  'Nyeri View': 1000,
-  'Kahawa Ridge': 1000,
-  Nyaribo: 1500,
-  'Embassy Area': 1500,
-};
-
-export const AREA_OPTIONS = Object.values(DEKUT_AREAS).map((area) => ({
-  value: area.name,
-  label: area.name,
-  proximity: AREA_PROXIMITY[area.name] || '',
-  price: AREA_PRICES[area.name] || 0,
-}));
-
 export const DISTANCE_CATEGORY_OPTIONS = [
   { value: 'walking-500m', label: 'Walking distance (under 500m)' },
   { value: '5-10min', label: '5–10 minute walk' },

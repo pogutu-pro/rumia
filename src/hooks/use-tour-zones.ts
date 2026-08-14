@@ -2,36 +2,46 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { AREA_OPTIONS } from '@/lib/constants/dekut-areas';
 
 export interface TourZoneOption {
   value: string;
   label: string;
   price: number;
+  campusId: string;
+  campusSlug: string;
+  campusName: string;
+}
+
+export interface CampusTourSection {
+  campusId: string;
+  campusSlug: string;
+  campusName: string;
+  zones: TourZoneOption[];
+}
+
+interface CampusRowPick {
+  id: string;
+  slug: string;
+  name: string;
 }
 
 interface CampusZoneRow {
+  campus_id: string;
   name: string;
   full_search_price: number;
 }
 
 /**
- * Fallback to the static DeKUT area list so the zone picker still renders
- * even if the database query fails or returns no rows (e.g. at build time).
- */
-const FALLBACK_ZONES: TourZoneOption[] = AREA_OPTIONS.map((z) => ({
-  value: z.value,
-  label: z.label,
-  price: z.price,
-}));
-
-/**
- * Loads the tour zones a campus manager has configured in `campus_zones`.
- * This is the single source of truth for which areas appear in the
- * "Book a Tour" zone picker (instead of the previously hardcoded list).
+ * Loads the tour zones campus managers have configured in `campus_zones`,
+ * grouped into a section per campus so students can pick their own university.
+ *
+ * Only campuses with an ACTIVE status are shown. Amounts always come from
+ * `campus_zones.full_search_price` — there is NO hardcoded price fallback, so
+ * a student can never be quoted an amount a campus manager didn't set. When no
+ * zones are configured the list stays empty and callers show an empty state.
  */
 export function useTourZones() {
-  const [zones, setZones] = useState<TourZoneOption[]>(FALLBACK_ZONES);
+  const [sections, setSections] = useState<CampusTourSection[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,24 +50,49 @@ export function useTourZones() {
     async function load() {
       try {
         const supabase = createClient();
-        const res = (await supabase
+        const campusRes = (await supabase
+          .from('campuses')
+          .select('id, slug, name')
+          .eq('status', 'active')
+          .order('slug', { ascending: true })) as {
+          data: CampusRowPick[] | null;
+        };
+
+        const campuses = campusRes.data ?? [];
+        if (cancelled || campuses.length === 0) return;
+
+        const zoneRes = (await supabase
           .from('campus_zones')
-          .select('name, full_search_price')
+          .select('campus_id, name, full_search_price')
+          .in('campus_id', campuses.map((c) => c.id))
           .order('name', { ascending: true })) as {
           data: CampusZoneRow[] | null;
         };
 
-        if (!cancelled && res.data && res.data.length > 0) {
-          setZones(
-            res.data.map((z) => ({
-              value: z.name,
-              label: z.name,
-              price: z.full_search_price,
-            })),
-          );
-        }
+        if (cancelled) return;
+        const rows = zoneRes.data ?? [];
+
+        setSections(
+          campuses
+            .map((c) => ({
+              campusId: c.id,
+              campusSlug: c.slug,
+              campusName: c.name,
+              zones: rows
+                .filter((z) => z.campus_id === c.id)
+                .map((z) => ({
+                  value: z.name,
+                  label: z.name,
+                  price: z.full_search_price,
+                  campusId: c.id,
+                  campusSlug: c.slug,
+                  campusName: c.name,
+                })),
+            }))
+            .filter((s) => s.zones.length > 0),
+        );
       } catch {
-        // Keep the static fallback list.
+        // Leave empty so no unconfigured price leaks to users.
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -69,5 +104,5 @@ export function useTourZones() {
     };
   }, []);
 
-  return { zones, loading };
+  return { sections, loading };
 }

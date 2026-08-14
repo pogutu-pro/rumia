@@ -6,19 +6,14 @@ import {
   Clock,
   MapPin,
   Phone,
-  Trash2,
   Sun,
   Sunset,
   Moon,
   MessageCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { TourCountdown } from '@/components/tour-countdown';
-import {
-  updateTourBookingStatusAction,
-  deleteTourBookingAction,
-} from '@/app/actions/tour-bookings';
+import { updateTourBookingStatusAction } from '@/app/actions/tour-bookings';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import { buildWhatsAppUrl, tourConfirmationMessage } from '@/lib/utils/phone';
 import type { TourBookingWithJoins, TourStatus } from '@/types';
@@ -27,27 +22,16 @@ interface ToursSectionProps {
   bookings: TourBookingWithJoins[];
 }
 
-const STATUS_ACTIONS: Partial<Record<TourStatus, TourStatus>> = {
-  pending_payment: 'confirmed',
-  confirmed: 'paid',
-  paid: 'completed',
-};
-
-const STATUS_ACTION_LABELS: Partial<Record<TourStatus, string>> = {
-  pending_payment: 'Confirm',
-  confirmed: 'Mark Paid',
-  paid: 'Mark Completed',
-};
-
 const TOUR_STATUS_VARIANT_MAP: Record<
   string,
   'active' | 'pending' | 'rejected' | 'success' | 'draft' | 'info'
 > = {
-  pending_payment: 'pending',
+  'pending payment': 'pending',
   confirmed: 'info',
   paid: 'success',
+  messaged: 'success',
   completed: 'success',
-  no_show: 'rejected',
+  'no show': 'rejected',
   cancelled: 'rejected',
 };
 
@@ -56,6 +40,12 @@ const TIME_ICONS: Record<string, typeof Sun> = {
   afternoon: Sunset,
   evening: Moon,
 };
+
+/** Display label for a booking status — contacted shows as "Messaged". */
+function tourStatusLabel(status: string): string {
+  if (status === 'contacted') return 'Messaged';
+  return status.replace(/_/g, ' ');
+}
 
 /** Builds a WhatsApp deep-link that confirms the agent will be there. */
 function tourConfirmHref(b: TourBookingWithJoins): string {
@@ -83,7 +73,6 @@ export function ToursSection({ bookings }: ToursSectionProps) {
   const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<TourFilter>('upcoming');
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [localBookings, setLocalBookings] = useState(bookings);
 
   const filteredBookings = useMemo(() => {
@@ -119,32 +108,23 @@ export function ToursSection({ bookings }: ToursSectionProps) {
     (b) => b.status === 'cancelled' || b.status === 'no_show',
   ).length;
 
-  function handleStatusUpdate(bookingId: string, newStatus: TourStatus) {
+  /** Opens WhatsApp with the pre-filled confirmation and marks as contacted. */
+  function handleMessage(b: TourBookingWithJoins) {
+    window.open(tourConfirmHref(b), '_blank', 'noopener,noreferrer');
+    if (b.status === 'contacted') return;
+
     setActionError(null);
     startTransition(async () => {
-      const result = await updateTourBookingStatusAction(bookingId, newStatus);
+      const result = await updateTourBookingStatusAction(b.id, 'contacted');
       if (result.success) {
         setLocalBookings((prev) =>
-          prev.map((b) =>
-            b.id === bookingId ? { ...b, status: newStatus } : b,
+          prev.map((x) =>
+            x.id === b.id ? { ...x, status: 'contacted' as TourStatus } : x,
           ),
         );
       } else {
         setActionError(result.error);
       }
-    });
-  }
-
-  function handleDelete(bookingId: string) {
-    setDeletingId(bookingId);
-    startTransition(async () => {
-      const result = await deleteTourBookingAction(bookingId);
-      if (result.success) {
-        setLocalBookings((prev) => prev.filter((b) => b.id !== bookingId));
-      } else {
-        setActionError(result.error);
-      }
-      setDeletingId(null);
     });
   }
 
@@ -214,7 +194,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              {['Student', 'Date & Time', 'Listing', 'Amount', 'Status', 'Actions'].map(
+              {['Student', 'Date & Time', 'Listing', 'Amount', 'Status', 'Contact'].map(
                 (h) => (
                   <th
                     key={h}
@@ -233,13 +213,12 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                 b.status !== 'completed' &&
                 b.status !== 'no_show';
               const isTerminal =
-                b.status === 'cancelled' ||
-                b.status === 'no_show';
+                b.status === 'cancelled' || b.status === 'no_show';
 
               return (
                 <tr
                   key={b.id}
-                  className="hover:bg-slate-50/60 transition-colors"
+                  className={isTerminal ? 'opacity-60' : 'hover:bg-slate-50/60 transition-colors'}
                 >
                   <td className="px-5 py-4">
                     <p className="text-sm font-bold text-slate-900">
@@ -281,83 +260,29 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                     )}
                   </td>
                   <td className="px-5 py-4 text-sm font-semibold text-slate-700">
-                    {b.listings?.title || 'Full Search'}
+                    {b.listings?.title || b.zone}
                   </td>
                   <td className="px-5 py-4 text-sm font-bold text-slate-900 tabular-nums">
                     {formatTourPrice(b.amount)}
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge
-                      status={b.status.replace('_', ' ')}
+                      status={tourStatusLabel(b.status)}
                       variantMap={TOUR_STATUS_VARIANT_MAP}
                     />
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      {isActive && (
-                        <a
-                          href={tourConfirmHref(b)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Send the student a WhatsApp confirmation"
-                          className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap"
-                        >
-                          <MessageCircle className="h-3 w-3" />
-                          Confirm
-                        </a>
-                      )}
-                      {STATUS_ACTIONS[b.status] && (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          disabled={isPending}
-                          onClick={() =>
-                            handleStatusUpdate(
-                              b.id,
-                              STATUS_ACTIONS[b.status]!,
-                            )
-                          }
-                          className="h-7 text-xs rounded-lg"
-                        >
-                          {STATUS_ACTION_LABELS[b.status]}
-                        </Button>
-                      )}
-                      {!isActive &&
-                        b.status !== 'completed' && (
-                          <button
-                            disabled={isPending || deletingId === b.id}
-                            onClick={() => handleDelete(b.id)}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-                            title="Delete from list"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        )}
-                      {b.status !== 'completed' &&
-                        b.status !== 'cancelled' &&
-                        b.status !== 'no_show' && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={isPending}
-                            onClick={() =>
-                              handleStatusUpdate(
-                                b.id,
-                                b.status === 'pending_payment' ||
-                                  b.status === 'confirmed'
-                                  ? 'no_show'
-                                  : 'cancelled',
-                              )
-                            }
-                            className="h-7 text-xs rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            {b.status === 'pending_payment' ||
-                            b.status === 'confirmed'
-                              ? 'No-show'
-                              : 'Cancel'}
-                          </Button>
-                        )}
-                    </div>
+                    {isActive && (
+                      <button
+                        type="button"
+                        onClick={() => handleMessage(b)}
+                        disabled={isPending}
+                        className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap disabled:opacity-50"
+                      >
+                        <MessageCircle className="h-3 w-3" />
+                        {b.status === 'contacted' ? 'Message again' : 'Message'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
@@ -394,7 +319,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                   </p>
                 </div>
                 <StatusBadge
-                  status={b.status.replace('_', ' ')}
+                  status={tourStatusLabel(b.status)}
                   variantMap={TOUR_STATUS_VARIANT_MAP}
                 />
               </div>
@@ -416,7 +341,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
                   <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                  {b.listings?.title || 'Full Search'}
+                  {b.listings?.title || b.zone}
                 </div>
                 <div className="font-bold text-slate-900 tabular-nums">
                   {formatTourPrice(b.amount)}
@@ -437,65 +362,17 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                {isActive && (
-                  <a
-                    href={tourConfirmHref(b)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Send the student a WhatsApp confirmation"
-                    className="inline-flex items-center justify-center gap-1 h-8 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                  >
-                    <MessageCircle className="h-3 w-3" />
-                    Confirm
-                  </a>
-                )}
-                {STATUS_ACTIONS[b.status] && (
-                  <Button
-                    size="sm"
-                    variant="default"
-                    disabled={isPending}
-                    onClick={() =>
-                      handleStatusUpdate(b.id, STATUS_ACTIONS[b.status]!)
-                    }
-                    className="h-8 text-xs rounded-lg flex-1"
-                  >
-                    {STATUS_ACTION_LABELS[b.status]}
-                  </Button>
-                )}
-                {isTerminal && (
-                  <button
-                    disabled={isPending || deletingId === b.id}
-                    onClick={() => handleDelete(b.id)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Delete
-                  </button>
-                )}
-                {!isTerminal && b.status !== 'completed' && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={isPending}
-                    onClick={() =>
-                      handleStatusUpdate(
-                        b.id,
-                        b.status === 'pending_payment' ||
-                          b.status === 'confirmed'
-                          ? 'no_show'
-                          : 'cancelled',
-                      )
-                    }
-                    className="h-8 text-xs rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    {b.status === 'pending_payment' ||
-                    b.status === 'confirmed'
-                      ? 'No-show'
-                      : 'Cancel'}
-                  </Button>
-                )}
-              </div>
+              {isActive && (
+                <button
+                  type="button"
+                  onClick={() => handleMessage(b)}
+                  disabled={isPending}
+                  className="flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                >
+                  <MessageCircle className="h-3 w-3" />
+                  {b.status === 'contacted' ? 'Message again' : 'Message'}
+                </button>
+              )}
             </div>
           );
         })}

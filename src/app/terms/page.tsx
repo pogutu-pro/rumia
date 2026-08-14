@@ -94,9 +94,8 @@ function buildSections(campus: { short_name: string | null; city: string | null 
       'Rumia offers a guided hostel tour service where a student agent accompanies you to visit hostels in person. Tours must be booked and paid for through the platform before the visit.',
     ],
     items: [
-      'Hostel tour (from a listing details page or the /book-tour page): KSh 500 flat — visit one or more hostels in the same area',
-      'Full search tour: pricing varies by zone (KSh 600 – KSh 1,500 depending on the area)',
-      'Tour fees are a flat rate and do not depend on how many hostels you choose to visit',
+      'Zone tour (from a listing details page or the /book-tour page): pricing varies by zone (KSh 600 – KSh 1,500 depending on the area) — you can visit one or more hostels in the same zone',
+      'The price is the same for the whole zone regardless of how many hostels you visit',
       'Tour bookings are confirmed only after payment. Cancellations must be made at least 24 hours before the scheduled tour',
       'Rumia is not responsible for the outcome of any tour — a tour does not guarantee a room will be available',
     ],

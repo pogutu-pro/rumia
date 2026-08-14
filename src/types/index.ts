@@ -302,6 +302,7 @@ export type TourStatus =
   | 'pending_payment'
   | 'confirmed'
   | 'paid'
+  | 'contacted'
   | 'completed'
   | 'no_show'
   | 'cancelled';

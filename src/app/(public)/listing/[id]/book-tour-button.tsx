@@ -10,6 +10,8 @@ interface BookTourButtonProps {
   listingTitle: string;
   listingZone: string | null;
   agentId: string | number;
+  zoneTourPrice?: number | null;
+  listingCampusId?: string | null;
 }
 
 export function BookTourButton({
@@ -17,6 +19,8 @@ export function BookTourButton({
   listingTitle,
   listingZone,
   agentId,
+  zoneTourPrice,
+  listingCampusId,
 }: BookTourButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -37,6 +41,8 @@ export function BookTourButton({
         listingTitle={listingTitle}
         listingZone={listingZone}
         agentId={agentId}
+        zoneFullSearchPrice={zoneTourPrice ?? undefined}
+        campusId={listingCampusId ?? undefined}
       />
     </>
   );

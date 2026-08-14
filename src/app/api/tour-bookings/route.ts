@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getTourPrice } from '@/lib/constants/tour-pricing';
+import { getZoneTourPrice } from '@/lib/utils/zone-tour-price';
 import { sendPushToUser } from '@/lib/push';
 import type { CreateTourBookingInput, TourType, TourTimeWindow } from '@/types';
 import { getPostHogClient } from '@/lib/posthog-server';
@@ -19,12 +19,13 @@ export async function POST(request: NextRequest) {
       agent_id,
       linked_user_id,
       from_listing,
-      selected_listing_ids,
+      campus_id,
     } = body as CreateTourBookingInput & {
       agent_id?: string;
       linked_user_id?: string;
       from_listing?: boolean;
       selected_listing_ids?: string[];
+      campus_id?: string;
     };
 
     // Validate required fields
@@ -69,20 +70,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate hostel selection for zone-specific tours
-    if (tour_type === 'specific_hostel' && !from_listing) {
-      if (!selected_listing_ids || selected_listing_ids.length === 0) {
-        return NextResponse.json(
-          { error: 'Please select at least one hostel to tour' },
-          { status: 400 },
-        );
-      }
-    }
-
     // Compute price server-side (never trust client-sent price).
-    // Prefers the campus-manager-configured zone price from campus_zones so
-    // manager-added zones book at the correct amount.
-    const amount = await resolveTourAmount(zone, tour_type, !!from_listing);
+    // Tours are per zone — the amount is the zone's configured tour price
+    // (campus_zones.full_search_price) on an active campus, regardless of
+    // hostel count.
+    const amount = await getZoneTourPrice(zone, campus_id);
     if (amount === null) {
       return NextResponse.json(
         { error: `No pricing configured for zone: ${zone}` },
@@ -174,17 +166,10 @@ export async function POST(request: NextRequest) {
             : preferred_time === 'afternoon'
               ? 'afternoon'
               : 'evening';
-        const hostelCount = selected_listing_ids?.length || 0;
-        const tourDescription =
-          tour_type === 'specific_hostel'
-            ? from_listing
-              ? 'hostel'
-              : `${hostelCount} hostel${hostelCount !== 1 ? 's' : ''}`
-            : 'area';
 
         sendPushToUser(agentProfile.user_id, {
           title: 'New tour booking',
-          body: `${studentNameTrimmed(student_name)} booked a ${tourDescription} tour for ${timeLabel} on ${preferred_date}`,
+          body: `${studentNameTrimmed(student_name)} booked a tour in ${zone} for ${timeLabel} on ${preferred_date}`,
           url: '/dashboard/tours',
           tag: 'new-tour-booking',
         }).catch(() => {});
@@ -195,7 +180,7 @@ export async function POST(request: NextRequest) {
     if (linked_user_id) {
       sendPushToUser(linked_user_id, {
         title: 'Tour booking received',
-        body: `Your ${tour_type === 'full_search' ? zone : 'hostel'} tour is booked for ${preferred_date}. An agent will confirm shortly.`,
+        body: `Your tour in ${zone} is booked for ${preferred_date}. An agent will confirm shortly.`,
         url: '/account?tab=tours',
         tag: `tour-confirm-${booking.id}`,
       }).catch(() => {});
@@ -207,7 +192,7 @@ export async function POST(request: NextRequest) {
         if (adminIds.length > 0) {
           sendPushToUsers(adminIds, {
             title: 'New tour booking',
-            body: `${studentNameTrimmed(student_name)} booked a ${tour_type} tour in ${zone}.`,
+            body: `${studentNameTrimmed(student_name)} booked a tour in ${zone}.`,
             url: '/admin/tours',
             tag: 'new-tour-admin',
           }).catch(() => {});
@@ -246,37 +231,4 @@ export async function POST(request: NextRequest) {
 
 function studentNameTrimmed(name: string): string {
   return name.trim();
-}
-
-/**
- * Resolves the tour amount for a booking.
- *  - specific_hostel: flat KSh 500 (existing behavior).
- *  - full_search: uses the campus-manager-configured `full_search_price` from
- *    campus_zones when the zone is configured there; falls back to the static
- *    pricing matrix otherwise.
- */
-async function resolveTourAmount(
-  zone: string,
-  tourType: TourType,
-  fromListing: boolean,
-): Promise<number | null> {
-  if (tourType !== 'full_search') {
-    return getTourPrice(zone, tourType, fromListing);
-  }
-
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from('campus_zones')
-      .select('full_search_price')
-      .eq('name', zone)
-      .maybeSingle();
-    if (data?.full_search_price != null) {
-      return data.full_search_price;
-    }
-  } catch {
-    // Fall through to the static matrix.
-  }
-
-  return getTourPrice(zone, tourType, fromListing);
 }

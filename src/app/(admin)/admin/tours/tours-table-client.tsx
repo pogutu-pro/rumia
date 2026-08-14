@@ -9,7 +9,7 @@ import { TourCountdown } from '@/components/tour-countdown';
 import { updateTourBookingStatusAction } from '@/app/actions/tour-bookings';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import { buildWhatsAppUrl, tourConfirmationMessage } from '@/lib/utils/phone';
-import type { TourBookingWithJoins, TourStatus } from '@/types';
+import type { TourBookingWithJoins } from '@/types';
 
 interface ToursTableClientProps {
   tours: TourBookingWithJoins[];
@@ -18,24 +18,24 @@ interface ToursTableClientProps {
 }
 
 const TOUR_STATUS_VARIANT_MAP: Record<string, 'active' | 'pending' | 'rejected' | 'success' | 'draft' | 'info'> = {
-  pending_payment: 'pending',
+  'pending payment': 'pending',
   confirmed: 'info',
   paid: 'success',
+  messaged: 'success',
   completed: 'success',
-  no_show: 'rejected',
+  'no show': 'rejected',
   cancelled: 'rejected',
 };
 
-const STATUS_OPTIONS: TourStatus[] = [
-  'pending_payment',
-  'confirmed',
-  'paid',
-  'completed',
-  'no_show',
-  'cancelled',
-];
+/** Display label for a booking status — contacted shows as "Messaged". */
+function tourStatusLabel(status: string): string {
+  if (status === 'contacted') return 'Messaged';
+  return status.replace(/_/g, ' ');
+}
 
-const ACTIVE_STATUSES = new Set<TourStatus>(['pending_payment', 'confirmed', 'paid']);
+function isActiveStatus(status: string): boolean {
+  return status !== 'cancelled' && status !== 'completed' && status !== 'no_show';
+}
 
 /** Builds a WhatsApp deep-link that confirms the agent will be there. */
 function tourConfirmHref(t: TourBookingWithJoins): string {
@@ -59,44 +59,47 @@ function tourConfirmHref(t: TourBookingWithJoins): string {
 }
 
 export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps) {
-  const [statusFilter, setStatusFilter] = useState('');
+  const [localTours, setLocalTours] = useState(tours);
   const [zoneFilter, setZoneFilter] = useState('');
   const [agentFilter, setAgentFilter] = useState('');
-  const [isUpdating, setIsUpdating] = useState<string | null>(null);
-  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [isMessaging, setIsMessaging] = useState<string | null>(null);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
-  const hasActiveFilters = statusFilter !== '' || zoneFilter !== '' || agentFilter !== '';
+  const hasActiveFilters = zoneFilter !== '' || agentFilter !== '';
 
   function clearFilters() {
-    setStatusFilter('');
     setZoneFilter('');
     setAgentFilter('');
   }
 
-  const filtered = tours.filter((t) => {
-    if (statusFilter && t.status !== statusFilter) return false;
+  const filtered = localTours.filter((t) => {
     if (zoneFilter && t.zone !== zoneFilter) return false;
     if (agentFilter && t.agent_id !== agentFilter) return false;
     return true;
   });
 
-  async function handleStatusUpdate(bookingId: string, newStatus: TourStatus) {
-    setUpdateError(null);
-    setIsUpdating(bookingId);
+  /** Opens WhatsApp with the pre-filled confirmation and marks as contacted. */
+  async function handleMessage(t: TourBookingWithJoins) {
+    window.open(tourConfirmHref(t), '_blank', 'noopener,noreferrer');
+    if (t.status === 'contacted') return;
+
+    setMessageError(null);
+    setIsMessaging(t.id);
     try {
-      const result = await updateTourBookingStatusAction(bookingId, newStatus);
-      if (!result.success) {
-        setUpdateError(result.error);
+      const result = await updateTourBookingStatusAction(t.id, 'contacted');
+      if (result.success) {
+        setLocalTours((prev) =>
+          prev.map((x) =>
+            x.id === t.id ? { ...x, status: 'contacted' as const } : x,
+          ),
+        );
+      } else {
+        setMessageError(result.error);
       }
     } finally {
-      setIsUpdating(null);
+      setIsMessaging(null);
     }
   }
-
-  const today = new Date().toISOString().split('T')[0];
-  const overdueBookings = tours.filter(
-    (t) => t.status === 'pending_payment' && t.preferred_date < today,
-  );
 
   return (
     <div>
@@ -105,32 +108,18 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
         Tour Bookings
       </h1>
       <p className="text-sm text-slate-500 mb-6">
-        {tours.length} booking{tours.length !== 1 ? 's' : ''} total
+        {localTours.length} booking{localTours.length !== 1 ? 's' : ''} total
       </p>
 
-      {overdueBookings.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-amber-800">
-              {overdueBookings.length} booking{overdueBookings.length !== 1 ? 's' : ''} stuck in Pending Payment past their scheduled date
-            </p>
-            <p className="text-xs text-amber-600 mt-0.5">
-              Review these bookings below — they may need follow-up.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {updateError && (
+      {messageError && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-red-800">Status update failed</p>
-            <p className="text-xs text-red-600 mt-0.5">{updateError}</p>
+            <p className="text-sm font-semibold text-red-800">Message failed</p>
+            <p className="text-xs text-red-600 mt-0.5">{messageError}</p>
           </div>
           <button
-            onClick={() => setUpdateError(null)}
+            onClick={() => setMessageError(null)}
             className="ml-auto text-red-400 hover:text-red-600 text-xs font-semibold cursor-pointer"
           >
             Dismiss
@@ -139,18 +128,6 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
       )}
 
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          <option value="">All Statuses</option>
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s.replace('_', ' ')}
-            </option>
-          ))}
-        </select>
         <select
           value={zoneFilter}
           onChange={(e) => setZoneFilter(e.target.value)}
@@ -186,7 +163,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-200/80 bg-slate-50">
-              {['Student', 'Date & Time', 'Zone', 'Type', 'Amount', 'Agent', 'Status', 'Actions'].map(
+              {['Student', 'Date & Time', 'Zone', 'Type', 'Amount', 'Agent', 'Status', 'Contact'].map(
                 (h) => (
                   <th
                     key={h}
@@ -209,11 +186,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
               filtered.map((t) => (
                 <tr
                   key={t.id}
-                  className={`hover:bg-slate-50 transition-colors ${
-                    t.status === 'pending_payment' && t.preferred_date < today
-                      ? 'bg-amber-50/50'
-                      : ''
-                  }`}
+                  className="hover:bg-slate-50 transition-colors"
                 >
                   <td className="px-5 py-4">
                     <p className="text-sm font-medium text-slate-900">{t.student_name}</p>
@@ -234,7 +207,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                       <Clock className="h-3 w-3" />
                       {t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1)}
                     </p>
-                    {ACTIVE_STATUSES.has(t.status) && (
+                    {isActiveStatus(t.status) && (
                       <div className="mt-1.5">
                         <TourCountdown
                           preferredDate={t.preferred_date}
@@ -246,7 +219,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   </td>
                   <td className="px-5 py-4 text-sm text-slate-600">{t.zone}</td>
                   <td className="px-5 py-4 text-sm text-slate-600">
-                    {t.tour_type === 'specific_hostel' ? 'Specific' : 'Full Search'}
+                    {t.tour_type === 'specific_hostel' ? 'Hostel' : 'Zone Tour'}
                   </td>
                   <td className="px-5 py-4 text-sm font-bold text-slate-900">
                     {formatTourPrice(t.amount)}
@@ -265,40 +238,22 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge
-                      status={t.status.replace('_', ' ')}
+                      status={tourStatusLabel(t.status)}
                       variantMap={TOUR_STATUS_VARIANT_MAP}
                     />
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      {ACTIVE_STATUSES.has(t.status) && (
-                        <a
-                          href={tourConfirmHref(t)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Send the student a WhatsApp confirmation"
-                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap"
-                        >
-                          <MessageCircle className="h-3 w-3" />
-                          Confirm
-                        </a>
-                      )}
-                      <select
-                        value={t.status}
-                        disabled={isUpdating === t.id}
-                        onChange={(e) => {
-                          const val = e.target.value as TourStatus;
-                          if (val !== t.status) handleStatusUpdate(t.id, val);
-                        }}
-                        className="h-8 rounded-lg border border-gray-200 bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    {isActiveStatus(t.status) && (
+                      <button
+                        type="button"
+                        onClick={() => handleMessage(t)}
+                        disabled={isMessaging === t.id}
+                        className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap disabled:opacity-50"
                       >
-                        {STATUS_OPTIONS.map((s) => (
-                          <option key={s} value={s}>
-                            {s.replace('_', ' ')}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                        <MessageCircle className="h-3 w-3" />
+                        {t.status === 'contacted' ? 'Message again' : 'Message'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -316,11 +271,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
           filtered.map((t) => (
             <div
               key={t.id}
-              className={`bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3 ${
-                t.status === 'pending_payment' && t.preferred_date < today
-                  ? 'border-l-4 border-l-amber-400'
-                  : ''
-              }`}
+              className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3"
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">
@@ -328,7 +279,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   <p className="text-xs text-slate-500 mt-0.5">{t.phone}</p>
                 </div>
                 <StatusBadge
-                  status={t.status.replace('_', ' ')}
+                  status={tourStatusLabel(t.status)}
                   variantMap={TOUR_STATUS_VARIANT_MAP}
                 />
               </div>
@@ -349,7 +300,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   {t.zone}
                 </div>
                 <div className="font-bold text-slate-900">{formatTourPrice(t.amount)}</div>
-                {ACTIVE_STATUSES.has(t.status) && (
+                {isActiveStatus(t.status) && (
                   <div className="col-span-2">
                     <TourCountdown
                       preferredDate={t.preferred_date}
@@ -370,35 +321,17 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   </Link>
                 </p>
               )}
-              <div className="flex items-center gap-2">
-                {ACTIVE_STATUSES.has(t.status) && (
-                  <a
-                    href={tourConfirmHref(t)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Send the student a WhatsApp confirmation"
-                    className="inline-flex items-center justify-center gap-1 h-9 px-3 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors shrink-0"
-                  >
-                    <MessageCircle className="h-3 w-3" />
-                    Confirm
-                  </a>
-                )}
-                <select
-                  value={t.status}
-                  disabled={isUpdating === t.id}
-                  onChange={(e) => {
-                    const val = e.target.value as TourStatus;
-                    if (val !== t.status) handleStatusUpdate(t.id, val);
-                  }}
-                  className="w-full h-9 rounded-lg border border-gray-200 bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              {isActiveStatus(t.status) && (
+                <button
+                  type="button"
+                  onClick={() => handleMessage(t)}
+                  disabled={isMessaging === t.id}
+                  className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50"
                 >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s.replace('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <MessageCircle className="h-3 w-3" />
+                  {t.status === 'contacted' ? 'Message again' : 'Message'}
+                </button>
+              )}
             </div>
           ))
         )}

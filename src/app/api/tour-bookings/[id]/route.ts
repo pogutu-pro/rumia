@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import type { TourStatus } from '@/types';
 
 const VALID_STATUS_TRANSITIONS: Record<TourStatus, TourStatus[]> = {
-  pending_payment: ['confirmed', 'paid', 'cancelled', 'no_show'],
-  confirmed: ['paid', 'cancelled', 'no_show'],
+  pending_payment: ['confirmed', 'paid', 'cancelled', 'no_show', 'contacted'],
+  confirmed: ['paid', 'cancelled', 'no_show', 'contacted'],
   paid: ['completed', 'cancelled'],
+  contacted: [],
   completed: [],
   no_show: [],
   cancelled: [],

@@ -8,9 +8,10 @@ import type { TourStatus } from '@/types';
 type ActionResult = { success: true } | { success: false; error: string };
 
 const VALID_STATUS_TRANSITIONS: Record<TourStatus, TourStatus[]> = {
-  pending_payment: ['confirmed', 'paid', 'cancelled', 'no_show'],
-  confirmed: ['paid', 'cancelled', 'no_show'],
+  pending_payment: ['confirmed', 'paid', 'cancelled', 'no_show', 'contacted'],
+  confirmed: ['paid', 'cancelled', 'no_show', 'contacted'],
   paid: ['completed', 'cancelled'],
+  contacted: [],
   completed: [],
   no_show: [],
   cancelled: [],
@@ -78,6 +79,7 @@ export async function updateTourBookingStatusAction(
       completed: 'completed',
       cancelled: 'cancelled',
       no_show: 'marked as no-show',
+      contacted: 'confirmed by your agent',
     };
     const label = statusLabels[status] || status.replace(/_/g, ' ');
     sendPushToUser(booking.linked_user_id, {

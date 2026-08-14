@@ -120,7 +120,7 @@ export default async function DashboardPage() {
     .from('tour_bookings')
     .select('*', { count: 'exact', head: true })
     .eq('agent_id', agent.id)
-    .in('status', ['pending_payment', 'confirmed']);
+    .in('status', ['pending_payment', 'confirmed', 'contacted']);
 
   const { data: paidTours } = await supabase
     .from('tour_bookings')
