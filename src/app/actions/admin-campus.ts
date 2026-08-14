@@ -33,7 +33,7 @@ export async function adminCreateCampusAction(data: { name: string; city: string
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
-    revalidateTag('campuses', 'page');
+    revalidateTag('campuses', 'max');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to create campus' };
@@ -54,7 +54,7 @@ export async function adminActivateCampusAction(campusId: string) {
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
-    revalidateTag('campuses', 'page');
+    revalidateTag('campuses', 'max');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to activate campus' };
@@ -75,7 +75,7 @@ export async function adminDeactivateCampusAction(campusId: string) {
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
-    revalidateTag('campuses', 'page');
+    revalidateTag('campuses', 'max');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to deactivate campus' };
@@ -96,7 +96,7 @@ export async function adminSuspendCampusAction(campusId: string) {
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
-    revalidateTag('campuses', 'page');
+    revalidateTag('campuses', 'max');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to suspend campus' };
@@ -120,7 +120,7 @@ export async function adminUpdateCampusAction(
 
     revalidatePath('/admin/campuses');
     revalidatePath('/');
-    revalidateTag('campuses', 'page');
+    revalidateTag('campuses', 'max');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to update campus' };

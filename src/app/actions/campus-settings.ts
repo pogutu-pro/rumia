@@ -131,7 +131,7 @@ export async function updateCampusSettingsAction(
   revalidatePath('/manager/settings');
   revalidatePath('/[campusSlug]', 'layout');
   revalidatePath('/');
-  revalidateTag('campuses', 'page');
+  revalidateTag('campuses', 'max');
 
   return { success: true };
 }
@@ -173,6 +173,6 @@ export async function createCampusAction(data: {
 
   revalidatePath('/manager/settings');
   revalidatePath('/');
-  revalidateTag('campuses', 'page');
+  revalidateTag('campuses', 'max');
   return { success: true };
 }
