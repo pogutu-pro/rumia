@@ -29,6 +29,14 @@ import type { SearchListing, CombinedFilters } from '@/lib/search/cascade-search
 
 export type Listing = SearchListing;
 
+// Generic soft placeholder for listings that have no blur_data_url — prevents
+// the grey flash when a card mounts before its image finishes loading.
+const FALLBACK_BLUR =
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDUwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQ1MCIgZmlsbD0iI2UyZThmMCIvPjwvc3ZnPg==';
+
+// Generic query patterns shown alongside dynamic hostel-name suggestions.
+const GENERIC_QUERY_PATTERNS = ['5k self contained', 'cheap ladies wifi'];
+
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ListingSkeleton() {
@@ -73,7 +81,21 @@ export default function HostelsSearch({
   const initialQuery = searchParams.get('q') ?? '';
   const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebounce(query, 200);
+  // URL sync is deferred to explicit commits so typing never triggers a
+  // router navigation per keystroke.
+  const [committedQuery, setCommittedQuery] = useState(initialQuery);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
+
+  // Dynamic suggestion chips — derived from the live listing payload so they
+  // always reflect hostels that actually exist (never hardcoded names).
+  const searchSuggestions = useMemo(() => {
+    const names = [...allListings]
+      .sort((a, b) => (a.sort_position ?? Number.MAX_SAFE_INTEGER) - (b.sort_position ?? Number.MAX_SAFE_INTEGER))
+      .slice(0, 3)
+      .map((l) => l.title.trim())
+      .filter(Boolean);
+    return [...new Set(names), ...GENERIC_QUERY_PATTERNS];
+  }, [allListings]);
 
   const {
     genders,
@@ -216,11 +238,13 @@ export default function HostelsSearch({
   const totalCountState = allFiltered.length;
 
   // ── URL sync ───────────────────────────────────────────────────────────────
+  // Runs on filter changes and committed queries (Enter / blur / clear) so the
+  // search box never triggers a navigation while the user is still typing.
 
   useEffect(() => {
     const filterParams = toParams();
-    const qParam = debouncedQuery
-      ? `q=${encodeURIComponent(debouncedQuery)}`
+    const qParam = committedQuery
+      ? `q=${encodeURIComponent(committedQuery)}`
       : '';
     const filterStr = filterParams.toString();
     const url =
@@ -228,11 +252,12 @@ export default function HostelsSearch({
         ? `${basePath}?${[qParam, filterStr].filter(Boolean).join('&')}`
         : basePath;
     router.replace(url, { scroll: false });
-  }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, basePath, router, toParams]);
+  }, [committedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, basePath, router, toParams]);
 
   const handleClearAll = useCallback(() => {
     reset();
     setQuery('');
+    setCommittedQuery('');
   }, [reset]);
 
   const handleMobileApply = useCallback(
@@ -290,19 +315,48 @@ export default function HostelsSearch({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder='e.g. "cheap ladies wifi gate A" or "Sunshine Hostels" or "5k self contained"'
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') setCommittedQuery(query);
+            }}
+            onBlur={() => setCommittedQuery(query)}
+            placeholder="Search by hostel name, area, or price"
             className="pl-12 h-13 text-base bg-white border-slate-200 focus-visible:ring-emerald-500 rounded-2xl shadow-sm"
           />
           {query && (
             <button
               type="button"
-              onClick={() => setQuery('')}
+              onClick={() => {
+                setQuery('');
+                setCommittedQuery('');
+              }}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
+
+        {/* Search guidance — shown until the user starts typing */}
+        {!query && searchSuggestions.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400">
+              Try:
+            </span>
+            {searchSuggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => {
+                  setQuery(suggestion);
+                  setCommittedQuery(suggestion);
+                }}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Filter toolbar */}
         <div className="mb-5 space-y-3">
@@ -537,8 +591,7 @@ export default function HostelsSearch({
               const imageUrl =
                 sorted[0]?.r2_url ??
                 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
-              const blurDataUrl = sorted[0]?.blur_data_url;
-              const href = item.slug
+              const blurDataUrl = sorted[0]?.blur_data_url;              const href = item.slug
                 ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
                 : `/listing/${item.id}`;
 
@@ -581,8 +634,8 @@ export default function HostelsSearch({
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        placeholder={blurDataUrl ? 'blur' : undefined}
-                        blurDataURL={blurDataUrl || undefined}
+                        placeholder="blur"
+                        blurDataURL={blurDataUrl || FALLBACK_BLUR}
                       />
 
                       {distanceBadge && (

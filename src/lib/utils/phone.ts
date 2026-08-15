@@ -134,6 +134,24 @@ export function agentInquiryMessage(params: {
 }
 
 /**
+ * WhatsApp message for the platform owner (main support).
+ * Focuses on reporting/solving issues; hostel consultation remains a paid service.
+ */
+export function ownerSupportMessage(params: {
+  ownerName: string;
+  whatsapp: string;
+  pochiLaBiasharaNumber?: string | null;
+  expectedName?: string | null;
+  consultationFee?: number | null;
+}): string {
+  const { ownerName, whatsapp, pochiLaBiasharaNumber, expectedName, consultationFee } = params;
+  const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
+  const paymentName = expectedName ?? ownerName;
+  const fee = consultationFee ?? 50;
+  return `Hello ${ownerName}, I need help with an issue on Rumia and would like to report it directly to you. Please help me resolve it. If I am instead looking for hostel information or a consultation, the paid consultation fee is KES ${fee} — payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm.`;
+}
+
+/**
  * WhatsApp message for a hostel-specific agent inquiry (listing page, Rumia Agent flow).
  * Uses Pochi payment details when both are set; falls back to the agent's
  * base WhatsApp number and the agent's display name otherwise.

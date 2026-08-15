@@ -23,13 +23,56 @@ interface SupportTeamAgent {
 
 export interface SupportTeamSectionProps {
   agents: SupportTeamAgent[];
+  ownerAtTop?: boolean;
+  teamOnly?: boolean;
 }
 
-export function SupportTeamSection({ agents }: SupportTeamSectionProps) {
+export function SupportTeamSection({ agents, ownerAtTop = false, teamOnly = false }: SupportTeamSectionProps) {
   if (agents.length === 0) return null;
 
   const owner = agents.find((a) => a.is_owner);
   const team = agents.filter((a) => !a.is_owner);
+
+  if (teamOnly) {
+    if (team.length === 0) return null;
+
+    return (
+      <section className="mt-16 border-t border-[#1B1B18]/10 pt-10">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-[#1B1B18]/70" />
+          <h2 className="text-lg font-bold text-[#1B1B18]">Customer Support Team</h2>
+        </div>
+        <p className="mt-1 text-sm text-[#1B1B18]/50">
+          Hand-picked helpers, also ready to assist with your verification questions.
+        </p>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {team.map((agent) => (
+            <AgentCard key={agent.id} agent={agent} showBio />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (ownerAtTop) {
+    if (!owner) return null;
+
+    return (
+      <section className="w-full max-w-lg mx-auto">
+        <div className="flex items-center gap-2">
+          <Headset className="h-5 w-5 text-[#1B1B18]/70" />
+          <h2 className="text-lg font-bold text-[#1B1B18]">Report an Issue or Get Help</h2>
+        </div>
+        <p className="mt-1 text-sm text-[#1B1B18]/50">
+          The platform owner is one WhatsApp message away. If something looks wrong or you&apos;re unsure,
+          reach out directly before paying.
+        </p>
+        <div className="mt-6">
+          <SupportOwnerCard agent={owner} />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-16 border-t border-[#1B1B18]/10 pt-10">

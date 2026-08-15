@@ -45,7 +45,7 @@ const AREA_KEYWORDS: [string[], string][] = [
   [['embassy', 'embassy area'], 'Embassy Area'],
   [['nyaribo'], 'Nyaribo'],
 ];
-const ROOM_TYPES: [string[], string][] = [
+export const ROOM_TYPES: [string[], string][] = [
   [['self contained', 'ensuite', 'self-contained'], 'self_contained'],
   [['bedsitter', 'bed sitter'], 'bedsitter'],
   [['single room', 'single'], 'single'],
