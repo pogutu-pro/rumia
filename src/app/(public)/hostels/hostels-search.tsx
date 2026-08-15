@@ -34,9 +34,6 @@ export type Listing = SearchListing;
 const FALLBACK_BLUR =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDUwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQ1MCIgZmlsbD0iI2UyZThmMCIvPjwvc3ZnPg==';
 
-// Generic query patterns shown alongside dynamic hostel-name suggestions.
-const GENERIC_QUERY_PATTERNS = ['5k self contained', 'cheap ladies wifi'];
-
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ListingSkeleton() {
@@ -85,17 +82,6 @@ export default function HostelsSearch({
   // router navigation per keystroke.
   const [committedQuery, setCommittedQuery] = useState(initialQuery);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
-
-  // Dynamic suggestion chips — derived from the live listing payload so they
-  // always reflect hostels that actually exist (never hardcoded names).
-  const searchSuggestions = useMemo(() => {
-    const names = [...allListings]
-      .sort((a, b) => (a.sort_position ?? Number.MAX_SAFE_INTEGER) - (b.sort_position ?? Number.MAX_SAFE_INTEGER))
-      .slice(0, 3)
-      .map((l) => l.title.trim())
-      .filter(Boolean);
-    return [...new Set(names), ...GENERIC_QUERY_PATTERNS];
-  }, [allListings]);
 
   const {
     genders,
@@ -289,25 +275,12 @@ export default function HostelsSearch({
     zones.length;
 
   const priceFilterActive = minPrice || maxPrice ? 1 : 0;
-  const distanceFilterActive = maxDistance || sortByNearest ? 1 : 0;
 
   const hasAnyFilters = activeFilterCount > 0 || debouncedQuery.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 py-6 lg:py-10">
+    <div className="min-h-screen bg-slate-50/50 pt-4 pb-8 lg:pt-6 lg:pb-10">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        {/* Header */}
-        {!hideHeader && (
-          <div className="mb-5">
-            <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
-              Student Hostels Near DeKUT
-            </h1>
-            <p className="text-slate-500 font-medium mt-1 text-sm lg:text-base">
-              Search by name, location, price, or amenities — handles typos too.
-            </p>
-          </div>
-        )}
-
         {/* Search Input */}
         <div className="relative mb-3">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
@@ -336,30 +309,8 @@ export default function HostelsSearch({
           )}
         </div>
 
-        {/* Search guidance — shown until the user starts typing */}
-        {!query && searchSuggestions.length > 0 && (
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">
-              Try:
-            </span>
-            {searchSuggestions.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => {
-                  setQuery(suggestion);
-                  setCommittedQuery(suggestion);
-                }}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Filter toolbar */}
-        <div className="mb-5 space-y-3">
+        <div className="mb-3 space-y-3">
           <div className="flex flex-nowrap items-center gap-3 overflow-x-auto scrollbar-none">
             {isDesktop ? (
               <Sheet
@@ -369,7 +320,7 @@ export default function HostelsSearch({
                 <SheetTrigger asChild>
                   <button
                     type="button"
-                    className="shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                    className="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
                   >
                     <SlidersHorizontal className="h-4 w-4" />
                     Filters
@@ -444,7 +395,7 @@ export default function HostelsSearch({
               trigger={
                 <button
                   type="button"
-                  className="shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
+                  className="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
                 >
                   <Tag className="h-4 w-4" />
                   Price
@@ -457,56 +408,13 @@ export default function HostelsSearch({
               }
             />
 
-            <FilterBottomSheet
-              currentFilters={{
-                genders,
-                amenities,
-                roomTypes,
-                minPrice,
-                maxPrice,
-                zones,
-                maxDistance,
-                sortByNearest,
-              }}
-              mode="distance"
-              onApply={(d) => {
-                setMaxDistance(d.maxDistance);
-                setSortByNearest(d.sortByNearest);
-              }}
-              trigger={
-                <button
-                  type="button"
-                  className="shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer bg-blue-500 text-white shadow-sm shadow-blue-200 hover:bg-blue-600"
-                >
-                  <MapPin className="h-4 w-4" />
-                  Distance
-                  {distanceFilterActive > 0 && (
-                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold">
-                      {distanceFilterActive}
-                    </span>
-                  )}
-                </button>
-              }
-            />
-
-            {isDesktop && (
-              <p className="text-sm text-slate-400 font-semibold">
-                {totalCountState}{' '}
-                {totalCountState === 1 ? 'hostel' : 'hostels'} found
-                {hasAnyFilters && (
-                  <span className="text-slate-300">
-                    {' '}·{' '}
-                    <button
-                      type="button"
-                      onClick={handleClearAll}
-                      className="text-rose-400 hover:text-rose-500 cursor-pointer"
-                    >
-                      Clear all
-                    </button>
-                  </span>
-                )}
-              </p>
-            )}
+            <Link
+              href={isLoggedIn ? '/account/book-tour' : '/book-tour'}
+              className="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              <CalendarCheck className="h-4 w-4" />
+              Book a Tour
+            </Link>
           </div>
 
           <ActiveFilterChips
@@ -537,9 +445,9 @@ export default function HostelsSearch({
           />
         </div>
 
-        {/* Mobile results count */}
-        {!isDesktop && (
-          <p className="text-sm text-slate-400 font-semibold mb-5 px-1">
+        {/* Results count */}
+        <div className="mb-5 px-1">
+          <p className="text-sm text-slate-400 font-semibold">
             {totalCountState}{' '}
             {totalCountState === 1 ? 'hostel' : 'hostels'} found
             {hasAnyFilters && (
@@ -555,30 +463,6 @@ export default function HostelsSearch({
               </span>
             )}
           </p>
-        )}
-
-        {/* Book a Tour CTA */}
-        <div className="mb-6 bg-white border border-slate-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
-              <CalendarCheck className="h-5 w-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900">
-                Not sure which one to pick?
-              </p>
-              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                See the hostels in person before you commit. A verified agent walks you there and handles everything.
-              </p>
-            </div>
-          </div>
-          <Link
-            href={isLoggedIn ? '/account/book-tour' : '/book-tour'}
-            className="shrink-0 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-colors"
-          >
-            <CalendarCheck className="h-4 w-4" />
-            Book a Tour
-          </Link>
         </div>
 
         {/* Listing Grid — all listings render in HTML for crawlers */}
