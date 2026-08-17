@@ -99,6 +99,9 @@ export function FindMeAHostel({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAccepted, setPaymentAccepted] = useState(false);
   const [pendingDraftInput, setPendingDraftInput] = useState<CreateHostelRequestInput | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Form state
   const [phone, setPhone] = useState<string>(studentPhone || '');
@@ -838,7 +841,7 @@ export function FindMeAHostel({
       </section>
 
       {/* Payment acceptance modal (only renders when logged-in user submits) */}
-      {createPortal(
+      {mounted && createPortal(
         showPaymentModal && (
           <div
             className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
@@ -1228,7 +1231,7 @@ export function FindMeAHostel({
       )}
 
       {/* Payment acceptance modal */}
-      {createPortal(
+      {mounted && createPortal(
         showPaymentModal && (
           <div
             className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
