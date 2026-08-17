@@ -46,22 +46,28 @@ const AREA_KEYWORDS: [string[], string][] = [
   [['nyaribo'], 'Nyaribo'],
 ];
 export const ROOM_TYPES: [string[], string][] = [
-  [['self contained', 'ensuite', 'self-contained'], 'self_contained'],
+  [['self contained', 'ensuite', 'self-contained', 'self contained bedsitter'], 'self_contained_bedsitter'],
   [['bedsitter', 'bed sitter'], 'bedsitter'],
   [['single room', 'single'], 'single'],
   [['double room', 'double'], 'double'],
+  [['1 bedroom', '1br', 'one bedroom'], 'one_bedroom'],
+  [['2 bedroom', '2br', 'two bedroom'], 'two_bedroom'],
+  [['3 bedroom', '3br', 'three bedroom'], 'three_bedroom'],
   [['shared'], 'shared'],
 ];
 const AMENITY_MAP: [string[], string][] = [
   [['wifi', 'internet', 'wi-fi', 'wify'], 'WiFi'],
   [['water'], 'Water'],
   [['electricity', 'power', 'stima'], 'Electricity'],
+  [['hot water', 'shower', 'geyser'], 'Hot Water'],
+  [['cooking gas', 'gas'], 'Cooking Gas'],
   [['parking', 'park'], 'Parking'],
   [['security', 'guard', 'cctv'], 'Security'],
   [['furnished', 'furniture'], 'Furnished'],
   [['washing', 'laundry'], 'Laundry Area'],
   [['kitchen'], 'Kitchen'],
   [['study', 'study area'], 'Study Area'],
+  [['balcony'], 'Balcony'],
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

@@ -27,6 +27,8 @@ export interface SearchListing {
   wifi_included?: boolean | null;
   water_included?: boolean | null;
   electricity_included?: boolean | null;
+  hot_water_included?: boolean | null;
+  cooking_gas_included?: boolean | null;
   security_type?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -76,7 +78,7 @@ interface ScoredResult {
 const LISTING_SELECT = `id, title, description, price, location, slug, county, area, gender, specific_location,
   price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
   amenities, room_type, room_type_enum, bathroom_type,
-  wifi_included, water_included, electricity_included, security_type,
+  wifi_included, water_included, electricity_included, hot_water_included, cooking_gas_included, security_type,
   latitude, longitude, proximity_description, created_at, sort_position,
   listing_images(r2_url, display_order, blur_data_url),
    listing_room_types(deposit, furnishing_items, room_type),
@@ -107,10 +109,21 @@ function applyStructuredFilters(
   if (filters.genders.length > 0) query = query.in('gender', filters.genders);
   if (filters.amenities.length > 0) {
     filters.amenities.forEach((a) => {
-      query = query.contains('amenities', [a]);
+      if (a === 'Hot Water') {
+        query = query.eq('hot_water_included', true);
+      } else if (a === 'Cooking Gas') {
+        query = query.eq('cooking_gas_included', true);
+      } else if (a === 'Water') {
+        query = query.eq('water_included', true);
+      } else if (a === 'Electricity') {
+        query = query.eq('electricity_included', true);
+      } else if (a === 'WiFi') {
+        query = query.eq('wifi_included', true);
+      } else {
+        query = query.contains('amenities', [a]);
+      }
     });
   }
-  if (filters.roomTypes.length > 0) query = query.in('room_type_enum', filters.roomTypes);
   if (filters.minPrice !== null) query = query.gte('price', filters.minPrice);
   if (filters.maxPrice !== null) query = query.lte('price', filters.maxPrice);
   if (filters.zones.length > 0) query = query.in('area', filters.zones);
@@ -130,9 +143,20 @@ function applyParsedFilters(
       .lte('price', parsed.exactPrice + 500);
   }
   if (parsed.gender) query = query.eq('gender', parsed.gender);
-  if (parsed.roomType) query = query.eq('room_type_enum', parsed.roomType);
   parsed.amenities.forEach((a) => {
-    query = query.contains('amenities', [a]);
+    if (a === 'Hot Water') {
+      query = query.eq('hot_water_included', true);
+    } else if (a === 'Cooking Gas') {
+      query = query.eq('cooking_gas_included', true);
+    } else if (a === 'Water') {
+      query = query.eq('water_included', true);
+    } else if (a === 'Electricity') {
+      query = query.eq('electricity_included', true);
+    } else if (a === 'WiFi') {
+      query = query.eq('wifi_included', true);
+    } else {
+      query = query.contains('amenities', [a]);
+    }
   });
   if (parsed.area) query = query.eq('area', parsed.area);
   if (parsed.proximityGate)

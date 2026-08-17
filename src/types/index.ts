@@ -70,6 +70,8 @@ export interface Listing {
   wifi_included?: boolean | null;
   water_included?: boolean | null;
   electricity_included?: boolean | null;
+  hot_water_included?: boolean | null;
+  cooking_gas_included?: boolean | null;
   security_type?: string | null;
   // Contact
   landlord_phone?: string | null;

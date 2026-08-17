@@ -34,7 +34,7 @@ function listingPayload(formData: any, agentId: string) {
     county: formData.county || 'nyeri',
     area: formData.area || 'dekut',
     description: formData.description,
-    price: parseFloat(formData.price_single || formData.price) || null,
+    price: parseFloat(formData.price_single || formData.price) || 0,
     location: formData.location,
     agent_id: agentId,
     youtube_id: formData.youtube_id || null,
@@ -49,6 +49,8 @@ function listingPayload(formData: any, agentId: string) {
     electricity_included: formData.electricity_included,
     water_included: formData.water_included,
     wifi_included: formData.wifi_included,
+    hot_water_included: formData.hot_water_included || false,
+    cooking_gas_included: formData.cooking_gas_included || false,
     latitude: nullableCoordinate(formData.latitude),
     longitude: nullableCoordinate(formData.longitude),
     gender: formData.gender || 'mixed',
@@ -129,23 +131,22 @@ async function replaceListingImages(
 
 function generateRoomTypeLabel(
   category?: string,
-  occupancy?: string,
+  occupancy?: string | number,
   floor?: string,
   size?: string,
 ): string {
   if (!category) return '';
 
   const categoryMap: Record<string, string> = {
+    single: 'Single Room',
+    double: 'Double Room',
     bedsitter: 'Bedsitter',
-    single_room: 'Single Room',
-    double_room: 'Double Room',
-    studio: 'Studio',
-  };
-
-  const occupancyMap: Record<string, string> = {
-    alone: '1 person',
-    sharing_2: 'Sharing',
-    sharing_3: 'Sharing',
+    self_contained_bedsitter: 'Self-Contained Bedsitter',
+    one_bedroom: '1 Bedroom',
+    two_bedroom: '2 Bedroom',
+    three_bedroom: '3 Bedroom',
+    shared: 'Shared Room',
+    other: 'Other',
   };
 
   let label = categoryMap[category] || category;
@@ -157,8 +158,12 @@ function generateRoomTypeLabel(
   if (size && size !== 'standard') {
     parts.push(size === 'smaller' ? 'Smaller' : 'Larger');
   }
-  if (occupancy) {
-    parts.push(occupancyMap[occupancy] || occupancy);
+
+  const numOccupancy = typeof occupancy === 'string' ? parseInt(occupancy, 10) : occupancy;
+  if (numOccupancy && numOccupancy === 1) {
+    parts.push('1 person');
+  } else if (numOccupancy && numOccupancy > 1) {
+    parts.push(`${numOccupancy} people sharing`);
   }
 
   if (parts.length > 0) {
@@ -213,7 +218,7 @@ async function replaceRoomTypes(
           ? rt.furnishing_items
           : null,
         category: rt.category || null,
-        occupancy: rt.occupancy || null,
+        occupancy: rt.occupancy != null ? String(rt.occupancy) : null,
         floor: rt.floor || null,
         size: rt.size || null,
       };

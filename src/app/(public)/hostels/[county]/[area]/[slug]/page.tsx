@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Eye,
   CheckCircle2,
-  Check,
   ShieldCheck,
   MessageCircle,
 } from 'lucide-react';
@@ -26,6 +25,7 @@ import { ShareListingButton } from '@/components/ui/share-listing-button';
 import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
+import { IncludedUtilities } from './included-utilities';
 import { ListingDescription } from './listing-description';
 import { readCampusConsultationFee } from '@/lib/utils/consultation-fee';
 import { getZoneTourPrice } from '@/lib/utils/zone-tour-price';
@@ -66,7 +66,7 @@ const getListing = cache(async (slug: string) => {
       `
       id, title, description, price, location, agent_id, youtube_id, is_youtube_shorts,
       is_active, amenities, rating, views, bathroom_type, distance_to_campus,
-      security_type, electricity_included, water_included, wifi_included,
+      security_type, electricity_included, water_included, wifi_included, hot_water_included, cooking_gas_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category, pays_commission,
       landlord_phone,
@@ -187,7 +187,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
     if (availableRooms.length === 0) return null;
 
     const shared = availableRooms.filter(
-      (rt) => rt.occupancy === 'sharing_2' || rt.occupancy === 'sharing_3',
+      (rt) => Number(rt.occupancy) > 1,
     );
     const pool = shared.length > 0 ? shared : availableRooms;
     return pool.reduce((best, rt) =>
@@ -408,6 +408,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
               bathroom={listing.bathroom_type}
               internet={listing.wifi_included}
               electricity={listing.electricity_included}
+              hotWater={!!listing.hot_water_included}
+              cookingGas={!!listing.cooking_gas_included}
               distance={listing.distance_to_campus}
               security={listing.security_type}
             />
@@ -425,42 +427,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
             <AmenitiesGrid amenities={listing.amenities || []} />
 
             <hr className="border-slate-100" />
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-slate-900">
-                Included in Rent
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {listing.water_included && (
-                  <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                      <Check className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-700">
-                      Water Included
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                    <Check className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-700">
-                    Security{' '}
-                    {listing.security_type || 'Available'}
-                  </span>
-                </div>
-                {listing.wifi_included && (
-                  <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-emerald-100 transition-colors shadow-2xs">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                      <Check className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-700">
-                      WiFi Included
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
+            <IncludedUtilities
+              waterIncluded={listing.water_included}
+              electricityIncluded={listing.electricity_included}
+              wifiIncluded={listing.wifi_included}
+              hotWaterIncluded={listing.hot_water_included}
+              cookingGasIncluded={listing.cooking_gas_included}
+              securityType={listing.security_type}
+            />
 
             {/* How to Pay Rent section - only if mpesa_details exist */}
             {listing.mpesa_details && (

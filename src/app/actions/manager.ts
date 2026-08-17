@@ -856,7 +856,7 @@ export async function updateListingByManagerAction(
           ? rt.furnishing_items
           : null,
         category: rt.category || null,
-        occupancy: rt.occupancy || null,
+        occupancy: rt.occupancy != null ? String(rt.occupancy) : null,
         floor: rt.floor || null,
         size: rt.size || null,
       }));

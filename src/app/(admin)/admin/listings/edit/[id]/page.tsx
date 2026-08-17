@@ -40,7 +40,7 @@ export default async function AdminEditListingPage({
     .select(
       `id, title, description, price, location, youtube_id, is_youtube_shorts, room_type,
       amenities, bathroom_type, distance_to_campus,
-      security_type, water_included, electricity_included, wifi_included,
+      security_type, water_included, electricity_included, wifi_included, hot_water_included, cooking_gas_included,
       latitude, longitude, gender, proximity_description, is_active,
       county, area,
       specific_location, price_single, price_sharing, mpesa_details, distance_category,

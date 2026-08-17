@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/use-debounce';
 import { createClient } from '@/lib/supabase/client';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -279,39 +278,40 @@ export default function HostelsSearch({
   const hasAnyFilters = activeFilterCount > 0 || debouncedQuery.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-4 pb-8 lg:pt-6 lg:pb-10">
+    <div className="min-h-screen bg-slate-50/50 pt-0 pb-8 lg:pb-10">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        {/* Search Input */}
-        <div className="relative mb-3">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-          <Input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') setCommittedQuery(query);
-            }}
-            onBlur={() => setCommittedQuery(query)}
-            placeholder="Search by hostel name, area, or price"
-            className="pl-12 h-13 text-base bg-white border-slate-200 focus-visible:ring-emerald-500 rounded-2xl shadow-sm"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => {
-                setQuery('');
-                setCommittedQuery('');
+        {/* Search zone — elevated container bridging navbar and content */}
+        <div className="bg-white rounded-2xl shadow-[0_1px_14px_rgba(0,0,0,0.06)] border border-slate-100 p-3 sm:p-4 mb-4">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') setCommittedQuery(query);
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+              onBlur={() => setCommittedQuery(query)}
+              placeholder="Search by name, area, or price"
+              className="w-full h-12 lg:h-[50px] pl-10 pr-10 bg-slate-100/60 border border-slate-200 rounded-xl text-[15px] font-medium text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition-all duration-200"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  setCommittedQuery('');
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
 
-        {/* Filter toolbar */}
-        <div className="mb-3 space-y-3">
-          <div className="flex flex-nowrap items-center gap-3 overflow-x-auto scrollbar-none">
+          {/* Controls row */}
+          <div className="flex flex-nowrap items-center gap-2 mt-3 overflow-x-auto scrollbar-none">
             {isDesktop ? (
               <Sheet
                 open={desktopFilterOpen}
@@ -320,12 +320,12 @@ export default function HostelsSearch({
                 <SheetTrigger asChild>
                   <button
                     type="button"
-                    className="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
                   >
-                    <SlidersHorizontal className="h-4 w-4" />
+                    <SlidersHorizontal className="h-3.5 w-3.5" />
                     Filters
                     {activeFilterCount > 0 && (
-                      <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold">
+                      <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold leading-none">
                         {activeFilterCount}
                       </span>
                     )}
@@ -376,6 +376,20 @@ export default function HostelsSearch({
                   sortByNearest,
                 }}
                 onApply={handleMobileApply}
+                trigger={
+                  <button
+                    type="button"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                  >
+                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold leading-none">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </button>
+                }
               />
             )}
 
@@ -395,12 +409,12 @@ export default function HostelsSearch({
               trigger={
                 <button
                   type="button"
-                  className="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
                 >
-                  <Tag className="h-4 w-4" />
+                  <Tag className="h-3.5 w-3.5" />
                   Price
                   {priceFilterActive > 0 && (
-                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold">
+                    <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold leading-none">
                       {priceFilterActive}
                     </span>
                   )}
@@ -410,43 +424,44 @@ export default function HostelsSearch({
 
             <Link
               href={isLoggedIn ? '/account/book-tour' : '/book-tour'}
-              className="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <CalendarCheck className="h-4 w-4" />
+              <CalendarCheck className="h-3.5 w-3.5" />
               Book a Tour
             </Link>
           </div>
-
-          <ActiveFilterChips
-            filters={{
-              genders,
-              amenities,
-              roomTypes,
-              minPrice,
-              maxPrice,
-              zones,
-              maxDistance,
-              sortByNearest,
-            }}
-            onRemoveGender={(v) =>
-              setGenders(genders.filter((g) => g !== v))
-            }
-            onRemoveAmenity={(v) =>
-              setAmenities(amenities.filter((a) => a !== v))
-            }
-            onRemoveRoomType={(v) =>
-              setRoomTypes(roomTypes.filter((r) => r !== v))
-            }
-            onRemovePrice={() => setPriceRange(null, null)}
-            onRemoveZone={(v) => setZones(zones.filter((z) => z !== v))}
-            onRemoveMaxDistance={() => setMaxDistance(null)}
-            onRemoveSortByNearest={() => setSortByNearest(false)}
-            onClearAll={handleClearAll}
-          />
         </div>
 
+        {/* Active filter chips */}
+        <ActiveFilterChips
+          filters={{
+            genders,
+            amenities,
+            roomTypes,
+            minPrice,
+            maxPrice,
+            zones,
+            maxDistance,
+            sortByNearest,
+          }}
+          onRemoveGender={(v) =>
+            setGenders(genders.filter((g) => g !== v))
+          }
+          onRemoveAmenity={(v) =>
+            setAmenities(amenities.filter((a) => a !== v))
+          }
+          onRemoveRoomType={(v) =>
+            setRoomTypes(roomTypes.filter((r) => r !== v))
+          }
+          onRemovePrice={() => setPriceRange(null, null)}
+          onRemoveZone={(v) => setZones(zones.filter((z) => z !== v))}
+          onRemoveMaxDistance={() => setMaxDistance(null)}
+          onRemoveSortByNearest={() => setSortByNearest(false)}
+          onClearAll={handleClearAll}
+        />
+
         {/* Results count */}
-        <div className="mb-5 px-1">
+        <div className="mb-5 mt-3 px-1">
           <p className="text-sm text-slate-400 font-semibold">
             {totalCountState}{' '}
             {totalCountState === 1 ? 'hostel' : 'hostels'} found

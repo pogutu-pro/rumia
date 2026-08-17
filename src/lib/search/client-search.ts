@@ -93,7 +93,12 @@ function matchesStructuredFilters(listing: SearchListing, filters: CombinedFilte
   if (filters.amenities.length > 0) {
     const listingAmenities = listing.amenities ?? [];
     for (const required of filters.amenities) {
-      if (!listingAmenities.includes(required)) return false;
+      if (required === 'Hot Water') { if (!listing.hot_water_included) return false; }
+      else if (required === 'Cooking Gas') { if (!listing.cooking_gas_included) return false; }
+      else if (required === 'Water') { if (!listing.water_included) return false; }
+      else if (required === 'Electricity') { if (!listing.electricity_included) return false; }
+      else if (required === 'WiFi') { if (!listing.wifi_included) return false; }
+      else { if (!listingAmenities.includes(required)) return false; }
     }
   }
 
@@ -133,7 +138,12 @@ function matchesParsedFilters(listing: SearchListing, parsed: ReturnType<typeof 
   if (parsed.amenities.length > 0) {
     const listingAmenities = listing.amenities ?? [];
     for (const a of parsed.amenities) {
-      if (!listingAmenities.includes(a)) return false;
+      if (a === 'Hot Water') { if (!listing.hot_water_included) return false; }
+      else if (a === 'Cooking Gas') { if (!listing.cooking_gas_included) return false; }
+      else if (a === 'Water') { if (!listing.water_included) return false; }
+      else if (a === 'Electricity') { if (!listing.electricity_included) return false; }
+      else if (a === 'WiFi') { if (!listing.wifi_included) return false; }
+      else { if (!listingAmenities.includes(a)) return false; }
     }
   }
 
