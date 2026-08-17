@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronDown,
   Loader2,
@@ -11,6 +12,7 @@ import {
   X,
   Pencil,
   Trash2,
+  CreditCard,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
@@ -28,6 +30,7 @@ import {
   ROOM_TYPE_OPTIONS,
   FURNISHING_OPTIONS,
   STAY_PREFERENCE_OPTIONS,
+  HOSTEL_REQUEST_FEE,
   getHostelRequestStatus,
   budgetLabel,
   genderLabel,
@@ -54,6 +57,7 @@ interface FindMeAHostelProps {
   studentPhone?: string | null;
   campusId?: string | null;
   campusName?: string | null;
+  campusFee?: number;
 }
 
 interface EditDraft {
@@ -74,6 +78,7 @@ export function FindMeAHostel({
   studentPhone = null,
   campusId = null,
   campusName = null,
+  campusFee: campusFeeProp,
 }: FindMeAHostelProps) {
   const isHome = variant === 'home';
   const [supabase] = useState(() => createClient());
@@ -83,11 +88,17 @@ export function FindMeAHostel({
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [justSubmitted, setJustSubmitted] = useState<HostelRequest | null>(null);
+  const [campusFee, setCampusFee] = useState<number | null>(campusFeeProp ?? null);
 
   // Pending draft left by the homepage guest flow: after Google sign-in the user
   // lands on the account page and this request is submitted automatically.
   const [draft, setDraft] = useState<CreateHostelRequestInput | null>(null);
   const draftHandled = useRef(false);
+
+  // Payment acceptance modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentAccepted, setPaymentAccepted] = useState(false);
+  const [pendingDraftInput, setPendingDraftInput] = useState<CreateHostelRequestInput | null>(null);
 
   // Form state
   const [phone, setPhone] = useState<string>(studentPhone || '');
@@ -112,7 +123,7 @@ export function FindMeAHostel({
 
     async function load() {
       setLoadingRequests(true);
-      const [zonesRes, reqs] = await Promise.all([
+      const [zonesRes, reqs, feeRes] = await Promise.all([
         hasCampus
           ? supabase
               .from('campus_zones')
@@ -123,12 +134,26 @@ export function FindMeAHostel({
         isHome
           ? Promise.resolve([] as HostelRequest[])
           : getMyHostelRequestsAction(),
+        !campusFeeProp && campusId
+          ? supabase
+              .from('campuses')
+              .select('hostel_finding_fee')
+              .eq('id', campusId)
+              .maybeSingle()
+          : Promise.resolve({ data: null as { hostel_finding_fee: number | null } | null }),
       ]);
       if (cancelled) return;
 
       const zoneData = zonesRes.data as Array<{ id: string; name: string }> | null;
       if (zoneData) setZones(zoneData);
       setRequests(reqs);
+
+      // Resolve the campus fee from DB if not provided as a prop.
+      if (!campusFeeProp && feeRes.data) {
+        setCampusFee(feeRes.data.hostel_finding_fee ?? HOSTEL_REQUEST_FEE);
+      } else if (!campusFeeProp) {
+        setCampusFee(HOSTEL_REQUEST_FEE);
+      }
 
       // Pick up a pending draft left by the homepage guest flow (account page
       // only) and pre-fill the form so the user sees exactly what they chose.
@@ -162,7 +187,7 @@ export function FindMeAHostel({
     return () => {
       cancelled = true;
     };
-  }, [hasCampus, campusId, supabase, isHome, studentPhone]);
+  }, [hasCampus, campusId, supabase, isHome, studentPhone, campusFeeProp]);
 
   // Auto-submit the pending draft once we know the user has a campus. For brand
   // new users the profile-completion modal blocks with empty campus; the moment
@@ -175,7 +200,10 @@ export function FindMeAHostel({
       return;
     }
 
-    const input: CreateHostelRequestInput = {
+    // Mark draft as handled so it only fires once, then show the payment
+    // acceptance modal instead of submitting directly.
+    draftHandled.current = true;
+    setPendingDraftInput({
       phone: pending.phone || '',
       preferred_zone: pending.preferred_zone || null,
       budget_range: pending.budget_range || '',
@@ -185,53 +213,9 @@ export function FindMeAHostel({
       stay_preference: pending.stay_preference || 'no_preference',
       move_in_date: pending.move_in_date || null,
       additional_requirements: pending.additional_requirements || null,
-    };
-
-    let cancelled = false;
-    async function run() {
-      draftHandled.current = true;
-      setSubmitting(true);
-      const res = await createHostelRequestAction(input);
-      if (cancelled) return;
-      setSubmitting(false);
-
-      if (!res.success) {
-        // A campus/profile error means the user still needs to complete their
-        // account — keep the draft so it submits right after. Anything else is
-        // a data problem; drop it so the user edits and resubmits normally.
-        toast.error(res.error);
-        const keepDraft =
-          /campus|profile|account/i.test(res.error) && !hasCampus;
-        if (keepDraft) {
-          // Allow the draft to retry once the profile is completed.
-          draftHandled.current = false;
-        } else {
-          sessionStorage.removeItem(PENDING_REQUEST_KEY);
-          setDraft(null);
-        }
-        return;
-      }
-
-      if (res.data) {
-        setJustSubmitted(res.data);
-        setRequests((prev) => [res.data as HostelRequest, ...prev]);
-      }
-      sessionStorage.removeItem(PENDING_REQUEST_KEY);
-      setDraft(null);
-      // Reset only the optional bits; keep phone/zone for a repeat request.
-      setBudget('');
-      setGender('no_preference');
-      setRoomType('no_preference');
-      setFurnishing('no_preference');
-      setStayPreference('no_preference');
-      setMoveInDate('');
-      setRequirements('');
-      toast.success('Request submitted. A Rumia manager will contact you.');
-    }
-    void run();
-    return () => {
-      cancelled = true;
-    };
+    });
+    setShowPaymentModal(true);
+    setPaymentAccepted(false);
   }, [draft, isHome, hasCampus, submitting]);
 
   const canSubmit = useMemo(() => {
@@ -240,18 +224,17 @@ export function FindMeAHostel({
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit || submitting) return;
-    setSubmitting(true);
 
     if (isHome) {
-      // Guest (or cold session): stash the draft, then go straight to Google's
-      // account chooser — never the login page. On return they land on the
-      // account page where the draft auto-submits.
+      // Guest (or cold session): save the draft and go to Google OAuth — the
+      // payment modal will appear on the account page after login.
       await supabase.auth.getSession();
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
       if (!user) {
+        setSubmitting(true);
         sessionStorage.setItem(
           PENDING_REQUEST_KEY,
           JSON.stringify({
@@ -272,10 +255,40 @@ export function FindMeAHostel({
       }
     }
 
-    const zone = preferredZone === '__none__' ? null : preferredZone;
-    const res = await createHostelRequestAction({
+    // Logged-in user (homepage or dashboard): show the payment acceptance modal.
+    setPendingDraftInput(null);
+    setShowPaymentModal(true);
+    setPaymentAccepted(false);
+  }, [
+    canSubmit,
+    submitting,
+    isHome,
+    supabase,
+    phone,
+    preferredZone,
+    budget,
+    gender,
+    roomType,
+    furnishing,
+    stayPreference,
+    moveInDate,
+    requirements,
+  ]);
+
+  const handlePaymentModalClose = useCallback(() => {
+    setShowPaymentModal(false);
+    setPaymentAccepted(false);
+  }, []);
+
+  const submitAfterPaymentAcceptance = useCallback(async () => {
+    setShowPaymentModal(false);
+    setSubmitting(true);
+
+    // Use the pending draft input (auto-submit from homepage OAuth flow) or
+    // build from the current form values (manual submit).
+    const input = pendingDraftInput ?? {
       phone,
-      preferred_zone: zone,
+      preferred_zone: preferredZone === '__none__' ? null : preferredZone,
       budget_range: budget,
       gender,
       room_type: roomType,
@@ -283,11 +296,18 @@ export function FindMeAHostel({
       stay_preference: stayPreference,
       move_in_date: moveInDate || null,
       additional_requirements: requirements.trim() || null,
-    });
+    };
+
+    const res = await createHostelRequestAction(input);
     setSubmitting(false);
 
     if (!res.success) {
       toast.error(res.error);
+      // If this was a draft auto-submit that failed due to campus/profile
+      // issues, keep the draft so it can retry.
+      if (pendingDraftInput && /campus|profile|account/i.test(res.error)) {
+        draftHandled.current = false;
+      }
       return;
     }
 
@@ -296,6 +316,7 @@ export function FindMeAHostel({
       setRequests((prev) => [res.data as HostelRequest, ...prev]);
     }
     sessionStorage.removeItem(PENDING_REQUEST_KEY);
+    setPendingDraftInput(null);
     setDraft(null);
 
     // Reset only the optional bits; keep phone/zone for a repeat request.
@@ -309,10 +330,7 @@ export function FindMeAHostel({
 
     toast.success('Request submitted. A Rumia manager will contact you.');
   }, [
-    canSubmit,
-    submitting,
-    isHome,
-    supabase,
+    pendingDraftInput,
     phone,
     preferredZone,
     budget,
@@ -781,6 +799,7 @@ export function FindMeAHostel({
   // Homepage variant: words on the left, form on the right.
   if (isHome) {
     return (
+      <>
       <section className="bg-white border-y border-slate-200/60 py-10 sm:py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
@@ -817,6 +836,106 @@ export function FindMeAHostel({
           </div>
         </div>
       </section>
+
+      {/* Payment acceptance modal (only renders when logged-in user submits) */}
+      {createPortal(
+        showPaymentModal && (
+          <div
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Accept payment"
+          >
+            <div
+              className="absolute inset-0 bg-slate-950/50"
+              onClick={handlePaymentModalClose}
+            />
+            <div className="relative w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                    <CreditCard className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      Accept Service Fee
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      You need to accept the fee before submitting
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handlePaymentModalClose}
+                  className="p-2 -mt-1 -mr-1 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Service fee</span>
+                  <span className="text-sm font-bold text-slate-900 tabular-nums">
+                    KSh {(campusFee ?? HOSTEL_REQUEST_FEE).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                  <span className="text-sm font-semibold text-slate-900">
+                    Amount to pay now (50%)
+                  </span>
+                  <span className="text-lg font-extrabold text-slate-900 tabular-nums">
+                    KSh {Math.ceil((campusFee ?? HOSTEL_REQUEST_FEE) / 2).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 leading-relaxed">
+                A Rumia manager will contact you on WhatsApp with payment
+                details after you submit.
+              </p>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={paymentAccepted}
+                  onChange={(e) => setPaymentAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                />
+                <span className="text-sm text-slate-700 leading-snug">
+                  I agree to pay half of the service fee (KSh{' '}
+                  {Math.ceil((campusFee ?? HOSTEL_REQUEST_FEE) / 2).toLocaleString()}) to confirm this
+                  request.
+                </span>
+              </label>
+
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  onClick={handlePaymentModalClose}
+                  className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitAfterPaymentAcceptance}
+                  disabled={!paymentAccepted || submitting}
+                  className="flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  {submitting ? 'Submitting…' : 'Accept & Submit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body,
+      )}
+      </>
     );
   }
 
@@ -1106,6 +1225,105 @@ export function FindMeAHostel({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Payment acceptance modal */}
+      {createPortal(
+        showPaymentModal && (
+          <div
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Accept payment"
+          >
+            <div
+              className="absolute inset-0 bg-slate-950/50"
+              onClick={handlePaymentModalClose}
+            />
+            <div className="relative w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                    <CreditCard className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      Accept Service Fee
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      You need to accept the fee before submitting
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handlePaymentModalClose}
+                  className="p-2 -mt-1 -mr-1 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Service fee</span>
+                  <span className="text-sm font-bold text-slate-900 tabular-nums">
+                    KSh {(campusFee ?? HOSTEL_REQUEST_FEE).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                  <span className="text-sm font-semibold text-slate-900">
+                    Amount to pay now (50%)
+                  </span>
+                  <span className="text-lg font-extrabold text-slate-900 tabular-nums">
+                    KSh {Math.ceil((campusFee ?? HOSTEL_REQUEST_FEE) / 2).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 leading-relaxed">
+                A Rumia manager will contact you on WhatsApp with payment
+                details after you submit.
+              </p>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={paymentAccepted}
+                  onChange={(e) => setPaymentAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                />
+                <span className="text-sm text-slate-700 leading-snug">
+                  I agree to pay half of the service fee (KSh{' '}
+                  {Math.ceil((campusFee ?? HOSTEL_REQUEST_FEE) / 2).toLocaleString()}) to confirm this
+                  request.
+                </span>
+              </label>
+
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  onClick={handlePaymentModalClose}
+                  className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitAfterPaymentAcceptance}
+                  disabled={!paymentAccepted || submitting}
+                  className="flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  {submitting ? 'Submitting…' : 'Accept & Submit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body,
       )}
     </section>
   );

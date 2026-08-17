@@ -6,6 +6,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { CampusPickerCards } from '@/components/home/campus-picker-cards';
 import { PopularHostels } from '@/components/home/popular-hostels';
 import { FindMeAHostel } from '@/app/account/find-me-a-hostel';
+import { HOSTEL_REQUEST_FEE } from '@/lib/constants/hostel-requests';
 import { getCampusBySlug, getAllCampuses, isFallbackCampus } from '@/lib/data/campuses';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
@@ -79,6 +80,18 @@ export default async function HomePage() {
 
   const heroImage = campus.hero_image ?? '/dekut.jpeg';
 
+  // Resolve the campus-specific hostel finding fee (falls back to default).
+  const campusFee =
+    !isFallbackCampus(campus)
+      ? (
+          await supabasePublic
+            .from('campuses')
+            .select('hostel_finding_fee')
+            .eq('id', campus.id)
+            .maybeSingle()
+        ).data?.hostel_finding_fee ?? HOSTEL_REQUEST_FEE
+      : HOSTEL_REQUEST_FEE;
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50">
       <JsonLd data={buildOrganizationSchema(campus)} />
@@ -127,6 +140,7 @@ export default async function HomePage() {
         campusId={isFallbackCampus(campus) ? null : campus.id}
         campusName={campus.name}
         studentPhone={null}
+        campusFee={campusFee}
       />
 
       {/* Early Access Banner */}
