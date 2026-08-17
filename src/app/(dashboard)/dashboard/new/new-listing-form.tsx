@@ -1037,6 +1037,11 @@ export function NewListingForm({
             </select>
           </div>
           <div className="space-y-2">
+            <Label htmlFor="distanceToCampus">Distance Description <span className="text-slate-400 font-normal">(optional)</span></Label>
+            <Input id="distanceToCampus" type="text" value={distanceToCampus} onChange={(e) => setDistanceToCampus(e.target.value)} placeholder="e.g. 5 minutes walk from DeKUT gate" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+            <p className="text-[11px] text-slate-400 font-medium">Shown below the listing title. e.g. "Near Main Gate" or "10 minutes walk from DeKUT"</p>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="securityType">Security</Label>
             <select id="securityType" value={securityType} onChange={(e) => setSecurityType(e.target.value)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
               <option value="">Select...</option>
