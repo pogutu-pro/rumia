@@ -27,6 +27,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { ListingViewTracker } from './listing-view-tracker';
 import { IncludedUtilities } from './included-utilities';
 import { ListingDescription } from './listing-description';
+import { ReviewsSection } from '@/components/reviews/reviews-section';
 import { readCampusConsultationFee } from '@/lib/utils/consultation-fee';
 import { getZoneTourPrice } from '@/lib/utils/zone-tour-price';
 import {
@@ -65,7 +66,7 @@ const getListing = cache(async (slug: string) => {
     .select(
       `
       id, title, description, price, location, agent_id, youtube_id, is_youtube_shorts,
-      is_active, amenities, rating, views, bathroom_type, distance_to_campus,
+      is_active, is_full, amenities, rating, views, bathroom_type, distance_to_campus,
       security_type, electricity_included, water_included, wifi_included, hot_water_included, cooking_gas_included,
       room_type, slug, county, area, updated_at, latitude, longitude,
       gender, specific_location, price_single, price_sharing, mpesa_details, distance_category, pays_commission,
@@ -95,7 +96,7 @@ async function getNearbyListings(listing: any) {
     .select(
       `
       id, title, description, price, location, slug, county, area,
-      room_type, distance_to_campus, created_at, sort_position,
+      room_type, distance_to_campus, created_at, sort_position, is_full,
       listing_images ( r2_url, display_order, blur_data_url ),
       agents ( name )
     `,
@@ -479,9 +480,17 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     Walkthrough video provided by the host.
                   </p>
                 </div>
-                <hr className="border-slate-100" />
               </>
             )}
+
+            <ReviewsSection
+              listingId={String(listing.id)}
+              listingUrl={canonicalUrl}
+              listingName={listing.title}
+              listingArea={listing.area}
+              listingImageUrl={images[0]?.r2_url}
+            />
+            <hr className="border-slate-100" />
 
             {/* LocationSection hidden per product decision; code preserved for future use */}
             {/* {hasCoordinates && (
@@ -570,6 +579,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     landlordPhone={listing.landlord_phone}
                     paysCommission={listing.pays_commission ?? false}
                     consultationFee={readCampusConsultationFee(listing.campuses)}
+                    isFull={listing.is_full ?? false}
                   />
                 </div>
               </div>
@@ -759,6 +769,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 landlordPhone={listing.landlord_phone}
                 paysCommission={listing.pays_commission ?? false}
                 consultationFee={readCampusConsultationFee(listing.campuses)}
+                isFull={listing.is_full ?? false}
               />
             </div>
         </div>

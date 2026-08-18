@@ -166,6 +166,8 @@ export interface Profile {
   home_campus_id?: string | null;
   home_campus_name?: string | null;
   managed_campus_id?: string | null;
+  school_verified?: boolean;
+  school_email?: string | null;
   created_at?: string;
   updated_at?: string;
   // Computed join fields
@@ -486,4 +488,108 @@ export interface VerificationRunResult {
   shared_contact_detected: boolean;
   manual_review_needed: boolean;
   official_record_no_listing: boolean;
+}
+
+// ── Reviews ──────────────────────────────────────────────────────────────
+
+export type ReviewStatus = 'published' | 'hidden' | 'flagged';
+
+export interface ReviewCategoryRatings {
+  cleanliness?: number | null;
+  security?: number | null;
+  water?: number | null;
+  wifi?: number | null;
+  facilities?: number | null;
+  location?: number | null;
+  management?: number | null;
+  value?: number | null;
+}
+
+export interface Review {
+  id: string;
+  listing_id: string;
+  user_id: string;
+  rating: number;
+  text: string | null;
+  author_name?: string | null;
+  author_avatar_url?: string | null;
+  school_verified_at_review_time: boolean;
+  status: ReviewStatus;
+  created_at: string;
+  updated_at: string;
+  // Category ratings (nullable columns on `reviews`)
+  rating_cleanliness?: number | null;
+  rating_security?: number | null;
+  rating_water?: number | null;
+  rating_wifi?: number | null;
+  rating_facilities?: number | null;
+  rating_location?: number | null;
+  rating_management?: number | null;
+  rating_value?: number | null;
+  // Join fields (populated by queries)
+  review_likes?: { id: string; user_id: string }[] | null;
+  review_replies?: ReviewReply[] | null;
+}
+
+export interface ReviewLike {
+  id: string;
+  review_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface ReviewReply {
+  id: string;
+  review_id: string;
+  user_id: string;
+  text: string;
+  author_name?: string | null;
+  author_avatar_url?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewModerationLog {
+  id: string;
+  review_id: string | null;
+  review_listing_id: string | null;
+  review_user_id: string | null;
+  actor_user_id: string;
+  action: 'status_change' | 'text_edit' | 'delete';
+  previous_status: string | null;
+  new_status: string | null;
+  previous_text: string | null;
+  new_text: string | null;
+  previous_rating: number | null;
+  new_rating: number | null;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface ReviewRatingDistribution {
+  rating: number;
+  count: number;
+}
+
+export interface ReviewCategorySummary {
+  key: string;
+  label: string;
+  /** Average for the category across published reviews that rated it. */
+  average: number | null;
+  /** Number of published reviews that rated this category. */
+  count: number;
+}
+
+export interface ReviewSummary {
+  average_rating: number;
+  total_reviews: number;
+  distribution: ReviewRatingDistribution[];
+  categories?: ReviewCategorySummary[];
+}
+
+export interface ReviewCategoryAvg {
+  key: string;
+  label: string;
+  average: number | null;
+  count: number;
 }

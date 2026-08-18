@@ -240,8 +240,7 @@ export async function updateListingActiveAction(
   }
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('listings')
       .update({ is_active: isActive })
       .eq('id', listingId);
@@ -252,6 +251,8 @@ export async function updateListingActiveAction(
 
     revalidatePath('/admin/listings');
     revalidatePath('/admin');
+    revalidatePath('/hostels');
+    revalidatePath('/');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error';
@@ -274,8 +275,7 @@ export async function toggleCommissionLockAction(
   }
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('listings')
       .update({ commission_locked_by_admin: locked })
       .eq('id', listingId);
@@ -308,8 +308,7 @@ export async function setListingCommissionAction(
   }
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('listings')
       .update({ pays_commission: paysCommission })
       .eq('id', listingId);
@@ -393,8 +392,7 @@ export async function deleteListingAction(
   }
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('listings')
       .delete()
       .eq('id', listingId);

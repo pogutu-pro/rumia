@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { MapPin, DollarSign, Eye, Edit, SwitchCamera, Loader2, CheckCircle2, XCircle, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { toggleListingActiveAction, toggleListingFullAction, toggleListingCommissionAction } from '@/app/actions/listings';
 
 interface Listing {
   id: string | number;
@@ -12,6 +12,7 @@ interface Listing {
   price: number;
   location: string;
   is_active: boolean;
+  is_full?: boolean;
   pays_commission?: boolean;
   commission_locked_by_admin?: boolean;
   listing_images: { r2_url: string }[];
@@ -25,26 +26,22 @@ interface ListingsListProps {
 export function ListingsList({ initialListings, leadsCountByListing }: ListingsListProps) {
   const [listings, setListings] = useState<Listing[]>(initialListings);
   const [togglingId, setTogglingId] = useState<string | number | null>(null);
+  const [togglingFullId, setTogglingFullId] = useState<string | number | null>(null);
   const [togglingCommissionId, setTogglingCommissionId] = useState<string | number | null>(null);
-  const supabase = createClient();
 
   const handleToggleActive = async (id: string | number, currentStatus: boolean) => {
     if (togglingId) return;
     setTogglingId(id);
 
     try {
-      const { error } = await supabase
-        .from('listings')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-
-      if (error) throw error;
+      const result = await toggleListingActiveAction(String(id));
+      if (result.error) throw new Error(result.error);
 
       setListings((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, is_active: !currentStatus } : item))
+        prev.map((item) => (item.id === id ? { ...item, is_active: result.isActive ?? !currentStatus } : item))
       );
       toast.success(
-        `Listing marked as ${!currentStatus ? 'Active' : 'Inactive'}`
+        `Listing marked as ${result.isActive ? 'Active' : 'Inactive'}`
       );
     } catch (error) {
       console.error('Error toggling listing status:', error);
@@ -54,23 +51,43 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
     }
   };
 
+  const handleToggleFull = async (id: string | number, currentFull: boolean) => {
+    if (togglingFullId) return;
+    setTogglingFullId(id);
+
+    try {
+      const result = await toggleListingFullAction(String(id));
+      if (result.error) throw new Error(result.error);
+
+      setListings((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, is_full: result.isFull ?? !currentFull } : item))
+      );
+      toast.success(
+        result.isFull
+          ? 'Hostel marked as fully occupied — visitors will be directed to you for recommendations'
+          : 'Hostel marked as having availability'
+      );
+    } catch (error) {
+      console.error('Error toggling full status:', error);
+      toast.error('Failed to update full status');
+    } finally {
+      setTogglingFullId(null);
+    }
+  };
+
   const handleToggleCommission = async (id: string | number, currentStatus: boolean, isLocked: boolean) => {
     if (togglingCommissionId || isLocked) return;
     setTogglingCommissionId(id);
 
     try {
-      const { error } = await supabase
-        .from('listings')
-        .update({ pays_commission: !currentStatus })
-        .eq('id', id);
-
-      if (error) throw error;
+      const result = await toggleListingCommissionAction(String(id));
+      if (result.error) throw new Error(result.error);
 
       setListings((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, pays_commission: !currentStatus } : item))
+        prev.map((item) => (item.id === id ? { ...item, pays_commission: result.paysCommission ?? !currentStatus } : item))
       );
       toast.success(
-        `Commission set to ${!currentStatus ? 'Pays Commission' : 'Consultation Fee'}`
+        `Commission set to ${result.paysCommission ? 'Pays Commission' : 'Consultation Fee'}`
       );
     } catch (error) {
       console.error('Error toggling commission status:', error);
@@ -112,7 +129,12 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                   />
                   
                   {/* Status Badge */}
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                    {item.is_full && item.is_active ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100 shadow-sm">
+                        Full
+                      </span>
+                    ) : null}
                     {item.is_active ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">
                         <CheckCircle2 className="h-3 w-3" />
@@ -189,23 +211,56 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                       </Link>
                     </div>
 
-                    <button
-                      onClick={() => handleToggleActive(item.id, item.is_active)}
-                      disabled={togglingId === item.id}
-                      className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                        item.is_active
-                          ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-100'
-                          : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100'
-                      } disabled:opacity-50`}
-                    >
-                      {togglingId === item.id ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : item.is_active ? (
-                        'Deactivate'
-                      ) : (
-                        'Activate'
+                    <div className="flex items-center gap-2">
+                      {item.is_active && (
+                        <button
+                          onClick={() => handleToggleFull(item.id, !!item.is_full)}
+                          disabled={togglingFullId === item.id}
+                          title={item.is_full ? 'Mark as having availability' : 'Mark as fully occupied'}
+                          className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                            item.is_full
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          } disabled:opacity-50`}
+                        >
+                          <span
+                            className={`relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ${
+                              item.is_full ? 'bg-amber-500' : 'bg-emerald-500'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                                item.is_full ? 'translate-x-3.5' : 'translate-x-0.5'
+                              }`}
+                            />
+                          </span>
+                          {togglingFullId === item.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : item.is_full ? (
+                            'Fully Occupied'
+                          ) : (
+                            'Available'
+                          )}
+                        </button>
                       )}
-                    </button>
+                      <button
+                        onClick={() => handleToggleActive(item.id, item.is_active)}
+                        disabled={togglingId === item.id}
+                        className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                          item.is_active
+                            ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-100'
+                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100'
+                        } disabled:opacity-50`}
+                      >
+                        {togglingId === item.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : item.is_active ? (
+                          'Deactivate'
+                        ) : (
+                          'Activate'
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

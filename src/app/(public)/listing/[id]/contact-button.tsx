@@ -13,6 +13,7 @@ interface ContactButtonProps {
   landlordPhone?: string | null;
   paysCommission: boolean;
   consultationFee?: number | null;
+  isFull?: boolean;
   className?: string;
   fullWidth?: boolean;
 }
@@ -25,6 +26,7 @@ export function ContactButton({
   landlordPhone,
   paysCommission,
   consultationFee,
+  isFull,
   className,
   fullWidth = true,
 }: ContactButtonProps) {
@@ -65,6 +67,7 @@ export function ContactButton({
         landlordPhone={landlordPhone}
         paysCommission={paysCommission}
         consultationFee={consultationFee}
+        isFull={isFull}
         resumedContactType={resumedType}
       />
     </>

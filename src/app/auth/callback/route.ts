@@ -164,10 +164,18 @@ export async function GET(request: NextRequest) {
         .maybeSingle();
 
       if (existingProfile) {
-        // Row exists — only sync email, never touch campus_id.
+        // Row exists — sync email and re-evaluate school verification on
+        // every login so account changes (e.g. new Google account) are
+        // picked up immediately.
+        const normalizedEmail = user.email ? String(user.email).toLowerCase() : null;
+        const isDkut = !!normalizedEmail && normalizedEmail.endsWith('@dkut.ac.ke');
         await supabaseAdmin
           .from('profiles')
-          .update({ email: user.email ? String(user.email).toLowerCase() : null })
+          .update({
+            email: normalizedEmail,
+            school_verified: isDkut,
+            school_email: isDkut ? normalizedEmail : null,
+          })
           .eq('id', user.id);
       } else {
         // New user — fetch campus so we can satisfy the NOT NULL constraint.
@@ -178,14 +186,18 @@ export async function GET(request: NextRequest) {
           .maybeSingle();
 
         if (defaultCampus?.id) {
+          const normalizedEmail = user.email ? String(user.email).toLowerCase() : null;
+          const isDkut = !!normalizedEmail && normalizedEmail.endsWith('@dkut.ac.ke');
           const { error: upsertError } = await supabaseAdmin
             .from('profiles')
             .upsert(
               {
                 id: user.id,
-                email: user.email ? String(user.email).toLowerCase() : null,
+                email: normalizedEmail,
                 campus_id: defaultCampus.id,
                 home_campus_id: defaultCampus.id,
+                school_verified: isDkut,
+                school_email: isDkut ? normalizedEmail : null,
               },
               { onConflict: 'id', ignoreDuplicates: true },
             );

@@ -28,7 +28,7 @@ export default async function AgentListingsPage() {
   const { data: listings } = await supabase
     .from('listings')
     .select(
-      `id, title, price, location, is_active, pays_commission,
+      `id, title, price, location, is_active, is_full, pays_commission,
        commission_locked_by_admin,
        listing_images(r2_url)`
     )

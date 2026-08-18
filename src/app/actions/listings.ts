@@ -659,3 +659,197 @@ async function autoVerifyListing(
     console.error('Auto-verification failed for listing:', listingId, err);
   }
 }
+
+/**
+ * Agent toggles is_active on their own listing.
+ * Revalidates public paths so the change is immediately reflected.
+ */
+export async function toggleListingActiveAction(
+  listingId: string,
+): Promise<{ success: boolean; error?: string; isActive?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: 'Unauthorized. Please log in.' };
+  }
+
+  const { data: agent, error: agentError } = await supabase
+    .from('agents')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (agentError || !agent) {
+    return { success: false, error: 'Agent profile not found.' };
+  }
+
+  const { data: listing, error: fetchError } = await supabase
+    .from('listings')
+    .select('id, is_active, slug, county, area')
+    .eq('id', listingId)
+    .eq('agent_id', agent.id)
+    .single();
+
+  if (fetchError || !listing) {
+    return { success: false, error: 'Listing not found or unauthorized.' };
+  }
+
+  const newStatus = !listing.is_active;
+  const { error: updateError } = await supabase
+    .from('listings')
+    .update({ is_active: newStatus })
+    .eq('id', listing.id);
+
+  if (updateError) {
+    return { success: false, error: updateError.message };
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/listings');
+  revalidatePath('/hostels');
+  revalidatePath('/');
+  const county = listing.county || 'nyeri';
+  const area = listing.area || 'dekut';
+  revalidatePath(`/hostels/${county}/${area}`);
+  if (listing.slug) {
+    revalidatePath(`/hostels/${county}/${area}/${listing.slug}`);
+    revalidatePath(`/listing/${listing.id}`);
+  }
+
+  return { success: true, isActive: newStatus };
+}
+
+/**
+ * Agent toggles is_full (currently occupied) on their own listing.
+ * When is_full is true, the hostel owner contact is hidden from public
+ * and visitors are directed to the agent for recommendations.
+ */
+export async function toggleListingFullAction(
+  listingId: string,
+): Promise<{ success: boolean; error?: string; isFull?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: 'Unauthorized. Please log in.' };
+  }
+
+  const { data: agent, error: agentError } = await supabase
+    .from('agents')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (agentError || !agent) {
+    return { success: false, error: 'Agent profile not found.' };
+  }
+
+  const { data: listing, error: fetchError } = await supabase
+    .from('listings')
+    .select('id, is_full, slug, county, area')
+    .eq('id', listingId)
+    .eq('agent_id', agent.id)
+    .single();
+
+  if (fetchError || !listing) {
+    return { success: false, error: 'Listing not found or unauthorized.' };
+  }
+
+  const newFull = !(listing as any).is_full;
+  const { error: updateError } = await supabase
+    .from('listings')
+    .update({ is_full: newFull } as any)
+    .eq('id', listing.id);
+
+  if (updateError) {
+    return { success: false, error: updateError.message };
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/listings');
+  revalidatePath('/hostels');
+  revalidatePath('/');
+  const county = listing.county || 'nyeri';
+  const area = listing.area || 'dekut';
+  revalidatePath(`/hostels/${county}/${area}`);
+  if (listing.slug) {
+    revalidatePath(`/hostels/${county}/${area}/${listing.slug}`);
+    revalidatePath(`/listing/${listing.id}`);
+  }
+
+  return { success: true, isFull: newFull };
+}
+
+/**
+ * Agent toggles pays_commission on their own listing (unless admin-locked).
+ * Revalidates the shared public surfaces so pricing/consultation changes apply.
+ */
+export async function toggleListingCommissionAction(
+  listingId: string,
+): Promise<{ success: boolean; error?: string; paysCommission?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: 'Unauthorized. Please log in.' };
+  }
+
+  const { data: agent, error: agentError } = await supabase
+    .from('agents')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (agentError || !agent) {
+    return { success: false, error: 'Agent profile not found.' };
+  }
+
+  const { data: listing, error: fetchError } = await supabase
+    .from('listings')
+    .select('id, pays_commission, commission_locked_by_admin, slug, county, area')
+    .eq('id', listingId)
+    .eq('agent_id', agent.id)
+    .single();
+
+  if (fetchError || !listing) {
+    return { success: false, error: 'Listing not found or unauthorized.' };
+  }
+
+  if (listing.commission_locked_by_admin) {
+    return { success: false, error: 'Commission setting is locked by an admin.' };
+  }
+
+  const newPaysCommission = !listing.pays_commission;
+  const { error: updateError } = await supabase
+    .from('listings')
+    .update({ pays_commission: newPaysCommission })
+    .eq('id', listing.id);
+
+  if (updateError) {
+    return { success: false, error: updateError.message };
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/listings');
+  revalidatePath('/hostels');
+  revalidatePath('/');
+  const county = listing.county || 'nyeri';
+  const area = listing.area || 'dekut';
+  revalidatePath(`/hostels/${county}/${area}`);
+  if (listing.slug) {
+    revalidatePath(`/hostels/${county}/${area}/${listing.slug}`);
+    revalidatePath(`/listing/${listing.id}`);
+  }
+
+  return { success: true, paysCommission: newPaysCommission };
+}

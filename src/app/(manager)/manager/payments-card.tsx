@@ -32,7 +32,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
     selected?.hostel_finding_fee ?? 100,
   );
   const [consultationFee, setConsultationFee] = useState<number>(
-    selected?.consultation_fee ?? 50,
+    selected?.consultation_fee ?? 0,
   );
   const [saving, setSaving] = useState(false);
 
@@ -45,7 +45,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
     const campus = campuses.find((c) => c.id === id);
     if (campus) {
       setHostelFee(campus.hostel_finding_fee ?? 100);
-      setConsultationFee(campus.consultation_fee ?? 50);
+      setConsultationFee(campus.consultation_fee ?? 0);
     }
   };
 

@@ -64,12 +64,24 @@ export async function POST(request: NextRequest) {
     // Fetch listing details to calculate commission and enforce contact rules
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('price, title, pays_commission, landlord_phone, room_type, area, slug, county, youtube_id, campus_id, campuses ( * )')
+      .select('price, title, pays_commission, landlord_phone, room_type, area, slug, county, youtube_id, campus_id, is_full, campuses ( * )')
       .eq('id', listing_id)
       .single();
 
     if (listingError || !listing) {
       return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+    }
+
+    // When the hostel is fully occupied, only the agent can be contacted —
+    // the owner can't take new bookings.
+    if (listing.is_full && resolvedContactType === 'hostel_owner') {
+      return NextResponse.json(
+        {
+          error: 'This hostel is currently fully occupied. Contact the Rumia agent for recommendations on other hostels.',
+          requiresAgent: true,
+        },
+        { status: 409 },
+      );
     }
 
     // Fetch agent to get WhatsApp, commission balance, and Pochi details

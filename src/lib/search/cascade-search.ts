@@ -35,6 +35,7 @@ export interface SearchListing {
   proximity_description?: string | null;
   created_at?: string;
   sort_position?: number | null;
+  is_full?: boolean | null;
   listing_images: {
     r2_url: string;
     display_order: number;

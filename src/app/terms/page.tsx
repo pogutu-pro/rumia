@@ -82,7 +82,7 @@ function buildSections(campus: { short_name: string | null; city: string | null 
     items: [
       'The commission split is 40% to Rumia, 60% to the agent, based on the agreed commission rate with the landlord.',
       'Rumia\'s 40% share is non-negotiable and forms the basis of our business model.',
-      'For non-commission hostels, a KES 50 consultation fee may apply when contacting a Rumia Agent. This fee is paid directly to the agent and is clearly disclosed before the contact is made.',
+      'For non-commission hostels, a consultation fee may apply when contacting a Rumia Agent (as set by the campus manager). This fee is paid directly to the agent and is clearly disclosed before the contact is made.',
       'Agents and landlords who attempt to circumvent this arrangement — for example by redirecting students off-platform to avoid commission attribution — are in breach of these terms and will be permanently removed from the platform.',
     ],
   },

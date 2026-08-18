@@ -129,8 +129,8 @@ export function agentInquiryMessage(params: {
   const { agentName, whatsapp, pochiLaBiasharaNumber, expectedName, consultationFee } = params;
   const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
   const paymentName = expectedName ?? agentName;
-  const fee = consultationFee ?? 50;
-  return `Hello ${agentName}, I am interested in a hostel and would like to request your professional consultation. Please advise on available options within my budget and preferred location. Paid consultation fee: KES ${fee}. Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
+  const feeText = consultationFee && consultationFee > 0 ? ` Paid consultation fee: KES ${consultationFee}.` : '';
+  return `Hello ${agentName}, I am interested in a hostel and would like to request your professional consultation. Please advise on available options within my budget and preferred location.${feeText} Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
 }
 
 /**
@@ -147,8 +147,8 @@ export function ownerSupportMessage(params: {
   const { ownerName, whatsapp, pochiLaBiasharaNumber, expectedName, consultationFee } = params;
   const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
   const paymentName = expectedName ?? ownerName;
-  const fee = consultationFee ?? 50;
-  return `Hello ${ownerName}, I need help with an issue on Rumia and would like to report it directly to you. Please help me resolve it. If I am instead looking for hostel information or a consultation, the paid consultation fee is KES ${fee} — payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm.`;
+  const feeText = consultationFee && consultationFee > 0 ? ` The paid consultation fee is KES ${consultationFee} —` : '';
+  return `Hello ${ownerName}, I need help with an issue on Rumia and would like to report it directly to you. Please help me resolve it.${feeText} Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm.`;
 }
 
 /**
@@ -180,8 +180,8 @@ export function agentHostelInquiryMessage(params: {
   } = params;
   const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
   const paymentName = expectedName ?? agentName;
-  const fee = consultationFee ?? 50;
-  return `Hello, I am interested in ${listingTitle} on Rumia and would like your professional guidance on whether it suits my budget and requirements, or if you can recommend better alternatives. Paid consultation fee: KES ${fee}. Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
+  const feeText = consultationFee && consultationFee > 0 ? ` Paid consultation fee: KES ${consultationFee}.` : '';
+  return `Hello, I am interested in ${listingTitle} on Rumia and would like your professional guidance on whether it suits my budget and requirements, or if you can recommend better alternatives.${feeText} Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
 }
 
 /**

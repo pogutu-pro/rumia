@@ -109,7 +109,7 @@ export default async function CampusLandingPage({ params }: PageProps) {
       `
       id, title, description, price, location, slug, county, area, gender, specific_location,
       price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
-      amenities, room_type, room_type_enum, bathroom_type,
+      amenities, room_type, room_type_enum, bathroom_type, is_full,
       wifi_included, water_included, electricity_included, security_type,
       latitude, longitude, created_at, sort_position,
       listing_images ( r2_url, display_order, blur_data_url ),
