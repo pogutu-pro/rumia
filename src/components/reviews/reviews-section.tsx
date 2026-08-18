@@ -325,7 +325,7 @@ export function ReviewsSection({
 
   return (
     <section className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <h2 className="text-xl font-bold text-slate-950">Student Reviews</h2>
         {listingUrl && listingName && (
           <button
@@ -375,7 +375,7 @@ export function ReviewsSection({
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-semibold transition-colors',
                       sort === value
-                        ? 'bg-slate-900 text-white'
+                        ? 'bg-slate-100 text-slate-800 ring-1 ring-slate-200'
                         : 'text-slate-500 hover:bg-slate-100',
                     )}
                   >
@@ -420,11 +420,11 @@ export function ReviewsSection({
       ) : (
         <>
           {/* Compact, intentional empty state */}
-          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-5 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50">
+          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 flex items-center gap-3 sm:gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
               <Star className="h-5 w-5 text-amber-500" />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0">
               <p className="text-sm font-bold text-slate-800">No reviews yet</p>
               <p className="mt-0.5 text-xs text-slate-500">
                 Be the first student to share your experience with this hostel.

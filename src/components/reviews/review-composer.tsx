@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PencilLine, ShieldCheck, ChevronDown, LogIn, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -58,7 +59,24 @@ export function ReviewComposer({
   const isEditing = !!existingReview;
   const overall = useMemo<number | null>(() => computeOverallRating(categories), [categories]);
   const hasRated = overall != null;
+  const allCategoriesRated = useMemo(
+    () => REVIEW_CATEGORIES.every((category) => typeof categories[category.key] === 'number'),
+    [categories],
+  );
   const hasTextBypassingVerification = isEditing && !!existingReview?.text;
+
+  // Fire the "overall rating" popup exactly once, when the last category is
+  // rated — avoids re-firing on every subsequent rating change.
+  const previousAllRated = useRef(allCategoriesRated);
+  useEffect(() => {
+    if (allCategoriesRated && !previousAllRated.current) {
+      toast.success(`Your overall rating is ${formatOverall(overall)}`, {
+        description: 'Based on all 8 category ratings.',
+      });
+    }
+    previousAllRated.current = allCategoriesRated;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allCategoriesRated]);
 
   // Persist the draft so switching pages (or a Google re-auth bounce) never
   // discards what the user typed. Rehydrate on mount if present.
@@ -266,64 +284,79 @@ export function ReviewComposer({
         </div>
       </div>
 
-      <p className="text-sm font-semibold text-slate-700">Rate your experience</p>
+      <p className="text-sm font-bold text-slate-800">Rate your experience</p>
+      <p className="mt-0.5 text-xs text-slate-500">
+        Tap a star to rate each aspect of your stay.
+        {!allCategoriesRated && ' Your overall rating appears once you rate all 8 categories.'}
+      </p>
 
-      {/* Category ratings grid */}
+      {/* Category ratings grid — 2 columns on desktop, 1 on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {REVIEW_CATEGORIES.map((category) => (
           <div
             key={category.key}
-            className="flex items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"
+            className="flex items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50/60 py-2 pl-3 pr-1.5"
           >
-            <div className="min-w-0">
-              <p className="truncate text-xs font-bold text-slate-700">
-                {category.label}
-              </p>
-              {typeof categories[category.key] === 'number' && (
-                <p className="text-[10px] font-semibold text-slate-400">
-                  {categories[category.key]} / 5
-                </p>
-              )}
-            </div>
+            <p className="min-w-0 truncate text-xs font-bold text-slate-700">
+              {category.label}
+            </p>
             <StarRatingInput
               value={categories[category.key] ?? 0}
               onChange={(v) => handleCategoryChange(category.key, v)}
-              size="sm"
+              size="md"
             />
           </div>
         ))}
       </div>
 
-      {/* Overall preview (derived from categories, not a second input) */}
-      <div className="flex items-center justify-between rounded-xl bg-slate-900 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl font-black text-white tabular-nums">
-            {hasRated ? formatOverall(overall) : '—'}
-          </span>
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={cn(
-                  'h-3.5 w-3.5',
-                  hasRated && star <= roundedToStars(overall)
-                    ? 'fill-amber-400 text-amber-400'
-                    : 'fill-slate-600 text-slate-600',
-                )}
-              />
-            ))}
-          </div>
-        </div>
-        <p className="text-[11px] font-semibold text-slate-300">
-          Overall rating
-        </p>
-      </div>
+      {/* Overall preview (derived from categories, not a second input).
+          Only rendered once the user has finished rating all 8 categories —
+          shown with a pop-in so completion feels rewarding without constant
+          re-renders of hidden content. */}
+      <AnimatePresence>
+        {allCategoriesRated && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl font-black text-slate-900 tabular-nums">
+                  {hasRated ? formatOverall(overall) : '—'}
+                </span>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={cn(
+                        'h-4 w-4',
+                        hasRated && star <= roundedToStars(overall)
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'fill-slate-200 text-slate-200',
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+              <p className="text-[11px] font-bold text-amber-800">
+                Overall rating
+              </p>
+            </div>
+            <p className="mt-1 text-[11px] text-amber-700/80">
+              Calculated from your category ratings above.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Written experience — always visible, no upfront gating */}
       <div className="space-y-2">
         <label
           htmlFor={`review-text-${listingId}`}
-          className="text-sm font-semibold text-slate-700"
+          className="text-sm font-bold text-slate-800"
         >
           Tell other students about your experience
         </label>
@@ -331,17 +364,17 @@ export function ReviewComposer({
           id={`review-text-${listingId}`}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write your experience here..."
+          placeholder="What stood out to you? How was your day-to-day stay?"
           maxLength={2000}
-          className="min-h-[110px]"
+          className="min-h-[120px] resize-y text-sm"
         />
-        <p className="flex items-center justify-between text-[11px] text-slate-400">
-          <span>
+        <p className="flex items-center justify-between gap-2 text-[11px] text-slate-400">
+          <span className="min-w-0">
             {!schoolVerified && (
               <>Written reviews are verified to help students trust experiences shared by other students.</>
             )}
           </span>
-          <span>{text.length}/2000</span>
+          <span className="shrink-0 tabular-nums">{text.length}/2000</span>
         </p>
       </div>
 

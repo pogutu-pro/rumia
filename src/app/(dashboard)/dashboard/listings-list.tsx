@@ -64,7 +64,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
       );
       toast.success(
         result.isFull
-          ? 'Hostel marked as fully occupied — visitors will be directed to you for recommendations'
+          ? 'Hostel marked as not available — visitors will be directed to you for recommendations'
           : 'Hostel marked as having availability'
       );
     } catch (error) {
@@ -216,7 +216,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                         <button
                           onClick={() => handleToggleFull(item.id, !!item.is_full)}
                           disabled={togglingFullId === item.id}
-                          title={item.is_full ? 'Mark as having availability' : 'Mark as fully occupied'}
+                          title={item.is_full ? 'Mark as having availability' : 'Mark as not available'}
                           className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                             item.is_full
                               ? 'bg-amber-50 text-amber-700 border-amber-200'
@@ -237,7 +237,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                           {togglingFullId === item.id ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
                           ) : item.is_full ? (
-                            'Fully Occupied'
+                            'Not Available'
                           ) : (
                             'Available'
                           )}

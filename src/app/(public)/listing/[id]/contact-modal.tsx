@@ -100,7 +100,7 @@ const mobileSheetVariants = {
 
 // ── Step types ────────────────────────────────────────────────────────────────
 
-type Step = 'choose' | 'phone' | 'fee' | 'redirecting';
+type Step = 'choose' | 'full' | 'phone' | 'fee' | 'redirecting';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -143,6 +143,12 @@ export function ContactModal({
   >(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Hostel became fully occupied between render and click (server said so).
+  // Reflect it locally so the choose step shows the "fully occupied" notice
+  // with a continue/cancel choice instead of the normal two-option grid.
+  const [fullLocked, setFullLocked] = useState(false);
+  const isFullEffective = isFull || fullLocked;
+
   // Phone capture state
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -172,6 +178,7 @@ export function ContactModal({
     setPhone('');
     setPhoneError('');
     setPhoneAttempts(0);
+    setFullLocked(false);
     onClose();
   }, [onClose]);
 
@@ -185,12 +192,13 @@ export function ContactModal({
     ) => {
       setIsLoading(true);
 
-      // Fully occupied hostels can't take new owner bookings — always route
-      // through the agent for recommendations.
-      if (isFull && type === 'hostel_owner') {
+      // Fully occupied hostels can't take new owner bookings — never open
+      // WhatsApp directly. Show the dedicated notice with continue/cancel.
+      if (isFullEffective && type === 'hostel_owner') {
         setIsLoading(false);
         setContactType('rumia_agent');
-        type = 'rumia_agent';
+        setStep('full');
+        return;
       }
 
       // For Rumia Agent on a non-commission hostel → show fee modal first
@@ -241,10 +249,12 @@ export function ContactModal({
 
         if (response.status === 409 && data.requiresAgent) {
           // Listing became fully occupied between render and this request —
-          // return to the choose step where only the agent can be contacted.
+          // show the fully occupied notice with continue/cancel instead of
+          // silently dropping the user back to the normal two-option grid.
           shouldClose = false;
           setIsLoading(false);
-          setStep('choose');
+          setFullLocked(true);
+          setStep('full');
           return;
         }
 
@@ -296,17 +306,7 @@ export function ContactModal({
         }
       }
     },
-    [
-      listingId,
-      agentId,
-      listingTitle,
-      agentPhone,
-      landlordPhone,
-      paysCommission,
-      consultationFee,
-      isFull,
-      handleClose,
-    ],
+    [listingId, agentId, listingTitle, agentPhone, landlordPhone, paysCommission, consultationFee, isFullEffective, handleClose],
   );
 
   // Ref always holds the latest continueToWhatsApp, avoiding stale closures
@@ -317,11 +317,12 @@ export function ContactModal({
   // ── Step 1: User picks a contact type ───────────────────────────────────────
   const handleContactTypeSelect = useCallback(
     async (type: 'hostel_owner' | 'rumia_agent') => {
-      // When the hostel is fully occupied, direct visitors to the agent for
-      // recommendations instead of the hostel owner.
-      if (isFull && type === 'hostel_owner') {
+      // When the hostel is fully occupied, show the notice with a
+      // continue/cancel choice instead of silently redirecting the user.
+      if (isFullEffective && type === 'hostel_owner') {
         setContactType('rumia_agent');
-        type = 'rumia_agent';
+        setStep('full');
+        return;
       }
 
       setContactType(type);
@@ -369,7 +370,7 @@ export function ContactModal({
         setIsLoading(false);
       }
     },
-    [listingId, listingTitle, agentId, agentPhone, paysCommission, isFull],
+    [listingId, listingTitle, agentId, agentPhone, paysCommission, isFullEffective],
   );
 
   // Handle seamless resumption after OAuth
@@ -457,7 +458,7 @@ export function ContactModal({
       savingPhone={savingPhone}
       paysCommission={paysCommission}
       consultationFee={consultationFee}
-      isFull={isFull}
+      isFull={isFullEffective}
       onChooseHostelOwner={() => handleContactTypeSelect('hostel_owner')}
       onChooseRumiaAgent={() => handleContactTypeSelect('rumia_agent')}
       onPhoneSubmit={handlePhoneSubmit}
@@ -676,6 +677,64 @@ function ModalContent({
     );
   }
 
+  // ── Fully occupied notice step ──
+  if (step === 'full') {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">
+              This hostel is fully occupied
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Rooms are all taken right now
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
+          <p className="text-sm text-amber-900 leading-relaxed">
+            This hostel is currently <span className="font-bold">fully occupied</span> — rooms are all taken.
+            The owner can&apos;t take new bookings right now. If you&apos;d like recommendations
+            for other available hostels, the Rumia agent can help — a consultation fee of
+            <span className="font-bold">{consultationFee && consultationFee > 0 ? `KES ${consultationFee}` : 'applies'}</span> is charged for this service.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="flex-1 h-12 rounded-xl border-slate-200 text-slate-700 font-semibold"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onChooseRumiaAgent}
+            disabled={isLoading}
+            className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl border-0 transition-all"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Opening…
+              </>
+            ) : (
+              'Continue with Agent'
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // ── Fee disclosure step ──
   if (step === 'fee') {
     return (
@@ -737,6 +796,65 @@ function ModalContent({
   }
 
   // ── Choose step (default) ──
+  // When the hostel is fully occupied, skip the two-option grid and show a
+  // clear notice with Continue (agent recommendations) / Cancel.
+  if (isFull) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">
+              This hostel is fully occupied
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Rooms are all taken right now
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
+          <p className="text-sm text-amber-900 leading-relaxed">
+            This hostel is currently <span className="font-bold">fully occupied</span> — rooms are all taken.
+            The owner can&apos;t take new bookings right now. If you&apos;d like recommendations
+            for other available hostels, the Rumia agent can help — a consultation fee of
+            <span className="font-bold">{consultationFee && consultationFee > 0 ? `KES ${consultationFee}` : 'applies'}</span> is charged for this service.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="flex-1 h-12 rounded-xl border-slate-200 text-slate-700 font-semibold"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onChooseRumiaAgent}
+            disabled={isLoading}
+            className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl border-0 transition-all"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Opening…
+              </>
+            ) : (
+              'Continue with Agent'
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -755,37 +873,20 @@ function ModalContent({
         </button>
       </div>
 
-      {isFull && (
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-5">
-          <p className="text-sm text-amber-900 leading-relaxed">
-            This hostel is currently <span className="font-bold">fully occupied</span> — rooms are all taken.
-            The owner can&apos;t take new bookings right now.{' '}
-            {consultationFee && consultationFee > 0 ? (
-              <>Contact the Rumia agent for recommendations on other hostels that fit your budget — a consultation fee of <span className="font-bold">KES {consultationFee}</span> applies.</>
-            ) : (
-              <>Contact the Rumia agent for recommendations on other hostels that fit your budget.</>
-            )}
-          </p>
-        </div>
-      )}
-
       <div className="grid grid-cols-2 gap-3">
         {/* Hostel Owner */}
         <button
           onClick={onChooseHostelOwner}
-          disabled={isFull || (isLoading && contactType === 'hostel_owner')}
+          disabled={isLoading && contactType === 'hostel_owner'}
           className={cn(
             'flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 text-left',
-            isFull
-              ? 'border-slate-100 bg-slate-50/60 opacity-60 cursor-not-allowed'
-              : 'border-slate-200 hover:border-slate-900 hover:bg-slate-50',
+            'border-slate-200 hover:border-slate-900 hover:bg-slate-50',
             'disabled:opacity-60 disabled:cursor-wait',
             isLoading &&
               contactType === 'hostel_owner' &&
               'border-slate-900 bg-slate-50',
           )}
           aria-label="Contact Hostel Owner"
-          title={isFull ? 'Hostel is fully occupied' : undefined}
         >
           {isLoading && contactType === 'hostel_owner' ? (
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
@@ -801,7 +902,7 @@ function ModalContent({
               Hostel Owner
             </p>
             <p className="text-[11px] text-slate-500 text-center mt-0.5 leading-snug">
-              {isFull ? 'Currently unavailable' : 'Speak directly with the landlord'}
+              Speak directly with the landlord
             </p>
           </div>
         </button>

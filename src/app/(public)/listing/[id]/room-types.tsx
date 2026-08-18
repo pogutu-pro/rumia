@@ -1,4 +1,4 @@
-import { BedDouble, CheckCircle2, Wallet, Sparkles } from 'lucide-react';
+import { BedDouble, Wallet, Sparkles } from 'lucide-react';
 
 interface RoomType {
   id: string;
@@ -50,9 +50,7 @@ export function RoomTypes({ roomTypes, fallbackPrice, startingPrice }: RoomTypes
               className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                 isStartingFrom
                   ? 'bg-white border-emerald-400 shadow-md ring-1 ring-emerald-100'
-                  : room.is_available
-                    ? 'bg-white border-slate-200 hover:border-emerald-400 hover:shadow-lg'
-                    : 'bg-slate-50 border-slate-100 opacity-70'
+                  : 'bg-white border-slate-200 hover:border-emerald-400 hover:shadow-lg'
               }`}
             >
               {/* Card Header */}
@@ -63,13 +61,6 @@ export function RoomTypes({ roomTypes, fallbackPrice, startingPrice }: RoomTypes
                       <BedDouble className="h-5 w-5 text-emerald-600 shrink-0" />
                       <span className="truncate">{room.room_type}</span>
                     </h3>
-                    {room.is_available ? (
-                      <p className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1 uppercase tracking-wider">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Available Now
-                      </p>
-                    ) : (
-                      <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Currently Full</p>
-                    )}
                   </div>
                   {isStartingFrom && (
                     <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-600 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
