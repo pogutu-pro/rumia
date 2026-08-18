@@ -706,10 +706,8 @@ function ModalContent({
 
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
           <p className="text-sm text-amber-900 leading-relaxed">
-            This hostel is currently <span className="font-bold">fully occupied</span> — rooms are all taken.
-            The owner can&apos;t take new bookings right now. If you&apos;d like recommendations
-            for other available hostels, the Rumia agent can help — a consultation fee of{' '}
-            <span className="font-bold">{feeDisplay}</span> is charged for this service.
+            This hostel is currently <span className="font-bold">full</span>. A Rumia agent can help you find available alternatives for a consultation fee of{' '}
+            <span className="font-bold">{feeDisplay}</span>.
           </p>
         </div>
 

@@ -202,6 +202,10 @@ export default async function ListingSlugPage({ params }: PageProps) {
     ? bestVariant.deposit
     : null;
   const moveInFrom = startingDeposit != null ? startingPrice + startingDeposit : null;
+  const isListingFull = Boolean(
+    listing.is_full ||
+      (roomTypes.length > 0 && availableRooms.length === 0),
+  );
 
   const shareText = [
     `${bestVariant?.room_type || listing.room_type || 'Student hostel'} from KES ${startingPrice.toLocaleString()}/month`,
@@ -579,7 +583,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     landlordPhone={listing.landlord_phone}
                     paysCommission={listing.pays_commission ?? false}
                     consultationFee={readCampusConsultationFee(listing.campuses)}
-                    isFull={listing.is_full ?? false}
+                    isFull={isListingFull}
                   />
                 </div>
               </div>
@@ -769,7 +773,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 landlordPhone={listing.landlord_phone}
                 paysCommission={listing.pays_commission ?? false}
                 consultationFee={readCampusConsultationFee(listing.campuses)}
-                isFull={listing.is_full ?? false}
+                isFull={isListingFull}
               />
             </div>
         </div>
