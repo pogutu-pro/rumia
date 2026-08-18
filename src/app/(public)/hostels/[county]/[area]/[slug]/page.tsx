@@ -188,7 +188,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
     if (availableRooms.length === 0) return null;
 
     const shared = availableRooms.filter(
-      (rt) => Number(rt.occupancy) > 1,
+      (rt) =>
+        Number(rt.occupancy) > 1 ||
+        rt.category === 'shared' ||
+        rt.room_type?.toLowerCase().includes('sharing') ||
+        rt.room_type?.toLowerCase().includes('shared'),
     );
     const pool = shared.length > 0 ? shared : availableRooms;
     return pool.reduce((best, rt) =>
@@ -197,7 +201,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
   }
 
   const bestVariant = pickBestVariant();
-  const startingPrice = bestVariant?.price ?? listing.price_single ?? listing.price ?? 0;
+  const startingPrice = bestVariant?.price ?? listing.price_sharing ?? listing.price_single ?? listing.price ?? 0;
   const startingDeposit = bestVariant?.deposit != null && bestVariant.deposit > 0
     ? bestVariant.deposit
     : null;

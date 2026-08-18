@@ -273,9 +273,9 @@ function generateRoomTypeLabel(
   if (size && size !== 'standard') {
     parts.push(size === 'smaller' ? 'Smaller' : 'Larger');
   }
-  if (occupancy === 1) {
+  if (occupancy === 1 && category !== 'shared' && category !== 'single') {
     parts.push('1 person');
-  } else if (occupancy > 1) {
+  } else if (occupancy && occupancy > 1) {
     parts.push(`${occupancy} people sharing`);
   }
 
@@ -761,9 +761,9 @@ export function NewListingForm({
       return;
     }
 
-    const validRoomTypes = roomTypes.filter((rt) => rt.category && rt.price);
+    const validRoomTypes = roomTypes.filter((rt) => (rt.category || rt.room_type) && rt.price);
     if (validRoomTypes.length === 0) {
-      toast.error('Please add at least one room type with a category and price');
+      toast.error('Please add at least one room type with a price');
       return;
     }
 
@@ -774,6 +774,33 @@ export function NewListingForm({
       const { createListingAction, updateListingAction } = await import('@/app/actions/listings');
 
       const firstRoom = validRoomTypes[0];
+
+      let derivedPriceSingle: number | null = null;
+      let derivedPriceSharing: number | null = null;
+
+      for (const rt of validRoomTypes) {
+        const p = Number(rt.price);
+        if (!p || p <= 0) continue;
+
+        const isSharing =
+          rt.category === 'shared' ||
+          Number(rt.occupancy) > 1 ||
+          rt.room_type?.toLowerCase().includes('sharing') ||
+          rt.room_type?.toLowerCase().includes('shared');
+
+        if (isSharing) {
+          if (derivedPriceSharing === null || p < derivedPriceSharing) {
+            derivedPriceSharing = p;
+          }
+        } else {
+          if (derivedPriceSingle === null || p < derivedPriceSingle) {
+            derivedPriceSingle = p;
+          }
+        }
+      }
+
+      const mainListingPrice =
+        derivedPriceSingle ?? derivedPriceSharing ?? (Number(firstRoom.price) || 0);
 
       const payload = {
         listing_id: initialListing?.id,
@@ -786,6 +813,7 @@ export function NewListingForm({
         is_youtube_shorts: isYoutubeShort,
         is_active: !asDraft,
         room_type: firstRoom.room_type,
+        price: mainListingPrice,
         amenities: amenities,
         bathroom_type: bathroomType,
         distance_to_campus: distanceToCampus,
@@ -802,8 +830,8 @@ export function NewListingForm({
         county: initialListing?.county || 'nyeri',
         area,
         specific_location: specificLocation,
-        price_single: Number(firstRoom.price) || null,
-        price_sharing: null,
+        price_single: derivedPriceSingle,
+        price_sharing: derivedPriceSharing,
         mpesa_details: mpesaDetails,
         distance_category: distanceCategory,
         landlord_phone: landlordPhone || null,
@@ -951,7 +979,18 @@ export function NewListingForm({
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs text-slate-400 font-bold uppercase">Room Type *</Label>
-                    <select value={rt.category} onChange={(e) => { updateRoomTypeField(idx, 'category', e.target.value); if (e.target.value) { const genLabel = generateRoomTypeLabel(e.target.value, rt.occupancy, rt.floor, rt.size); if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel); } }} className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <select value={rt.category} onChange={(e) => {
+                      const newCat = e.target.value;
+                      const targetOcc = (newCat === 'shared' && Number(rt.occupancy) <= 1) ? 2 : rt.occupancy;
+                      updateRoomTypeField(idx, 'category', newCat);
+                      if (targetOcc !== rt.occupancy) {
+                        updateRoomTypeField(idx, 'occupancy', targetOcc);
+                      }
+                      if (newCat) {
+                        const genLabel = generateRoomTypeLabel(newCat, targetOcc, rt.floor, rt.size);
+                        if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel);
+                      }
+                    }} className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
                       <option value="">Select...</option>
                       {CATEGORY_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
                     </select>

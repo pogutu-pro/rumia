@@ -1157,7 +1157,10 @@ export async function adminUpdateListingAction(
       county: formData.county || 'nyeri',
       area: formData.area || 'dekut',
       description: formData.description,
-      price: parseFloat(formData.price_single || formData.price) || null,
+      price:
+        typeof formData.price === 'number'
+          ? formData.price
+          : parseFloat(formData.price || formData.price_single || formData.price_sharing) || null,
       location: formData.location,
       agent_id: agentId,
       youtube_id: formData.youtube_id || null,
@@ -1178,12 +1181,12 @@ export async function adminUpdateListingAction(
       proximity_description: formData.proximity_description || '',
       specific_location: formData.specific_location || null,
       price_single:
-        formData.price_single && parseInt(formData.price_single) > 0
-          ? parseInt(formData.price_single)
+        formData.price_single && parseInt(String(formData.price_single)) > 0
+          ? parseInt(String(formData.price_single))
           : null,
       price_sharing:
-        formData.price_sharing && parseInt(formData.price_sharing) > 0
-          ? parseInt(formData.price_sharing)
+        formData.price_sharing && parseInt(String(formData.price_sharing)) > 0
+          ? parseInt(String(formData.price_sharing))
           : null,
       mpesa_details: formData.mpesa_details || null,
       distance_category: formData.distance_category || null,
