@@ -677,8 +677,13 @@ function ModalContent({
     );
   }
 
-  // ── Fully occupied notice step ──
-  if (step === 'full') {
+  // ── Fully occupied notice step (or choose step when hostel is full) ──
+  if (step === 'full' || (step === 'choose' && isFull)) {
+    const feeDisplay =
+      consultationFee && consultationFee > 0
+        ? `KES ${consultationFee.toLocaleString()}`
+        : 'KES 1,000';
+
     return (
       <div>
         <div className="flex items-center justify-between mb-5">
@@ -703,8 +708,8 @@ function ModalContent({
           <p className="text-sm text-amber-900 leading-relaxed">
             This hostel is currently <span className="font-bold">fully occupied</span> — rooms are all taken.
             The owner can&apos;t take new bookings right now. If you&apos;d like recommendations
-            for other available hostels, the Rumia agent can help — a consultation fee of
-            <span className="font-bold">{consultationFee && consultationFee > 0 ? `KES ${consultationFee}` : 'applies'}</span> is charged for this service.
+            for other available hostels, the Rumia agent can help — a consultation fee of{' '}
+            <span className="font-bold">{feeDisplay}</span> is charged for this service.
           </p>
         </div>
 
@@ -761,7 +766,7 @@ function ModalContent({
           <p className="text-sm text-amber-900 leading-relaxed">
             Get professional guidance from a verified Rumia agent to evaluate this property against your budget, location preferences, and requirements.
             {consultationFee && consultationFee > 0 ? (
-              <> A consultation fee of <span className="font-bold">KES {consultationFee}</span> applies, paid directly to the agent.</>
+              <> A consultation fee of <span className="font-bold">KES {consultationFee.toLocaleString()}</span> applies, paid directly to the agent.</>
             ) : (
               <> A consultation fee applies, paid directly to the agent.</>
             )}
@@ -788,66 +793,6 @@ function ModalContent({
               </>
             ) : (
               'Accept and Continue'
-            )}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Choose step (default) ──
-  // When the hostel is fully occupied, skip the two-option grid and show a
-  // clear notice with Continue (agent recommendations) / Cancel.
-  if (isFull) {
-    return (
-      <div>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">
-              This hostel is fully occupied
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Rooms are all taken right now
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
-
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
-          <p className="text-sm text-amber-900 leading-relaxed">
-            This hostel is currently <span className="font-bold">fully occupied</span> — rooms are all taken.
-            The owner can&apos;t take new bookings right now. If you&apos;d like recommendations
-            for other available hostels, the Rumia agent can help — a consultation fee of
-            <span className="font-bold">{consultationFee && consultationFee > 0 ? `KES ${consultationFee}` : 'applies'}</span> is charged for this service.
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 h-12 rounded-xl border-slate-200 text-slate-700 font-semibold"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={onChooseRumiaAgent}
-            disabled={isLoading}
-            className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl border-0 transition-all"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Opening…
-              </>
-            ) : (
-              'Continue with Agent'
             )}
           </Button>
         </div>
