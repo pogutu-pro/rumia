@@ -224,6 +224,7 @@ export async function POST(request: NextRequest) {
         pochiLaBiasharaNumber: agent.pochi_la_biashara_number,
         expectedName: agent.expected_name,
         consultationFee: consultationFee ?? undefined,
+        isFull: listing.is_full ?? false,
       });
     } else {
       // Legacy fallback: original message

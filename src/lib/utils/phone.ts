@@ -169,6 +169,7 @@ export function agentHostelInquiryMessage(params: {
   pochiLaBiasharaNumber?: string | null;
   expectedName?: string | null;
   consultationFee?: number | null;
+  isFull?: boolean;
 }): string {
   const {
     listingTitle,
@@ -177,11 +178,22 @@ export function agentHostelInquiryMessage(params: {
     pochiLaBiasharaNumber,
     expectedName,
     consultationFee,
+    isFull,
   } = params;
   const paymentNumber = pochiLaBiasharaNumber ?? whatsapp;
   const paymentName = expectedName ?? agentName;
-  const feeText = consultationFee && consultationFee > 0 ? ` Paid consultation fee: KES ${consultationFee}.` : '';
-  return `Hello, I am interested in ${listingTitle} on Rumia and would like your professional guidance on whether it suits my budget and requirements, or if you can recommend better alternatives.${feeText} Payment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
+  const feeText = consultationFee && consultationFee > 0 ? ` Paid consultation fee: KES ${consultationFee.toLocaleString()}.` : '';
+
+  if (isFull) {
+    const feeLine =
+      consultationFee && consultationFee > 0
+        ? `Consultation fee: KES ${consultationFee.toLocaleString()}. Payment to ${paymentNumber} (${paymentName}). I'll send the payment once you confirm.`
+        : `Payment to ${paymentNumber} (${paymentName}). I'll send the payment once you confirm.`;
+
+    return `Hello, I saw that ${listingTitle} is currently full on Rumia. Could you recommend other available hostels nearby within my budget?\n\n${feeLine}`;
+  }
+
+  return `Hello, I am interested in ${listingTitle} on Rumia and would like your professional guidance on whether it suits my budget and requirements, or if you can recommend better alternatives.\n\nPayment to ${paymentNumber} (${paymentName}). I will send payment once you confirm availability.`;
 }
 
 /**

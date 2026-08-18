@@ -295,6 +295,7 @@ export function ContactModal({
             agentName: 'your agent',
             whatsapp: fallbackPhone,
             consultationFee: consultationFee || undefined,
+            isFull: isFullEffective,
           });
         }
         window.open(buildWhatsAppUrl(fallbackPhone, msg), '_blank');
