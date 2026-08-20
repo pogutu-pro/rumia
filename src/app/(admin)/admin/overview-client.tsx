@@ -16,6 +16,7 @@ import {
   Globe,
   ShieldCheck,
   Headset,
+  Hotel,
 } from 'lucide-react';
 
 interface OverviewClientProps {
@@ -28,6 +29,7 @@ interface OverviewClientProps {
     totalRegions?: number;
     totalManagers?: number;
     supportAgents?: number;
+    totalHostels?: number;
   };
 }
 
@@ -120,6 +122,15 @@ export function OverviewClient({ stats }: OverviewClientProps) {
       icon: CalendarCheck,
       color: 'bg-rose-50 text-rose-600',
       hoverColor: 'group-hover:text-rose-600',
+    },
+    {
+      href: '/admin/official-hostels',
+      label: 'Hostels',
+      description: 'All agent-uploaded listings and official DeKUT housing records in one view.',
+      icon: Hotel,
+      color: 'bg-amber-50 text-amber-700',
+      hoverColor: 'group-hover:text-amber-700',
+      badge: stats.totalHostels ? `${stats.totalHostels} Total` : undefined,
     },
     {
       href: '/admin/leads',

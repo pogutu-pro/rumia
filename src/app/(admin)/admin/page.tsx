@@ -22,6 +22,7 @@ export default async function OverviewPage() {
     { count: regionCount },
     { count: managerCount },
     { count: supportAgents },
+    { count: officialHostels },
   ] = await Promise.all([
     (supabase as any)
       .from('listings')
@@ -46,6 +47,9 @@ export default async function OverviewPage() {
       .from('agents')
       .select('id', { count: 'exact', head: true })
       .eq('is_support', true),
+    (supabase as any)
+      .from('dekut_official_hostels')
+      .select('id', { count: 'exact', head: true }),
   ]);
 
   const pendingRows = (pendingCommissions ?? []) as Array<{ amount: number }>;
@@ -63,6 +67,7 @@ export default async function OverviewPage() {
     totalRegions: regionCount ?? 0,
     totalManagers: managerCount ?? 0,
     supportAgents: supportAgents ?? 0,
+    totalHostels: (officialHostels ?? 0) + (activeListings ?? 0),
   };
 
   return <OverviewClient stats={stats} />;

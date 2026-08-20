@@ -15,6 +15,7 @@ import {
   MessageSquareText,
   Megaphone,
   Settings,
+  Hotel,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import {
@@ -54,6 +55,7 @@ export function ManagerHeader({
     { href: '/manager/applications', label: 'Applications', icon: FileCheck2 },
     { href: '/manager/agents', label: 'Agents', icon: Users },
     { href: '/manager/listings', label: 'Listings', icon: Building2 },
+    { href: '/manager/hostels', label: 'Hostels', icon: Hotel },
     { href: '/manager/requests', label: 'Hostel Requests', icon: MessageSquareText },
     { href: '/manager/announcements', label: 'Announcements', icon: Megaphone },
     { href: '/manager/zones', label: 'Zones', icon: MapPin },

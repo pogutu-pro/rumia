@@ -8,6 +8,10 @@ import { cleanPhone, isValidKenyanPhone } from '@/lib/utils/phone';
 import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
 import { normalizeCampusAreaSelection } from '@/lib/utils/campus-zones';
 import { sendPushToUser } from '@/lib/push';
+import type {
+  OfficialHostel,
+  AgentListingHostel,
+} from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
 
 export type ManagerActionResult<T = undefined> =
   | { success: true; data?: T }
@@ -415,6 +419,97 @@ export async function getManagerListingsAction() {
 
   const { data } = await query;
   return data || [];
+}
+
+/**
+ * Fetches all hostels for the manager's campus: official DeKUT housing records
+ * plus every agent-uploaded listing (active and inactive) scoped to the campus.
+ * Uses the service-role client so managers see the full list; campus scoping is
+ * enforced in code via the manager context.
+ */
+export async function getManagerHostelsAction(): Promise<{
+  officialHostels: OfficialHostel[];
+  agentListings: AgentListingHostel[];
+} | null> {
+  const manager = await getManagerUser();
+  if (!manager) return null;
+
+  const { context } = manager;
+
+  const [{ data: officialHostels }, { data: listingsRaw }] = await Promise.all([
+    (supabaseAdmin as any)
+      .from('dekut_official_hostels')
+      .select('*')
+      .order('hostel_name', { ascending: true }),
+    (supabaseAdmin as any)
+      .from('listings')
+      .select(`
+        id, title, location, price, is_active, verified, is_full, created_at, landlord_phone,
+        mpesa_details, specific_location, county, area, slug,
+        agents ( id, name, phone, whatsapp, verified )
+      `)
+      .order('created_at', { ascending: false }),
+  ]);
+
+  let rawListings = listingsRaw || [];
+
+  if (!context.isSuperAdmin) {
+    let allowedCampusIds: string[] = [];
+    if (context.managedCampusId) {
+      allowedCampusIds = [context.managedCampusId];
+    } else if (context.managedRegionId) {
+      const { data: campuses } = await supabaseAdmin
+        .from('campuses')
+        .select('id')
+        .eq('region_id', context.managedRegionId);
+      if (campuses) {
+        allowedCampusIds = campuses.map((c: any) => c.id);
+      }
+    }
+    if (allowedCampusIds.length === 0) {
+      rawListings = [];
+    } else {
+      rawListings = rawListings.filter((l: any) =>
+        allowedCampusIds.includes(l.campus_id),
+      );
+    }
+  }
+
+  const agentListings = (rawListings as any[]).map(
+    (l: any): AgentListingHostel => ({
+    id: l.id,
+    title: l.title,
+    location: l.location || l.area || 'DeKUT',
+    price: l.price,
+    is_active: l.is_active,
+    verified:
+      l.verified ||
+      (Array.isArray(l.agents) ? l.agents[0]?.verified : l.agents?.verified) ||
+      false,
+    is_full: l.is_full ?? false,
+    created_at: l.created_at,
+    landlord_phone: l.landlord_phone || '',
+    mpesa_details: l.mpesa_details || '',
+    specific_location: l.specific_location || '',
+    county: l.county || 'nyeri',
+    area: l.area || 'dekut',
+    slug: l.slug,
+    agent_name: Array.isArray(l.agents)
+      ? l.agents[0]?.name || 'Agent'
+      : l.agents?.name || 'Agent',
+    agent_phone: Array.isArray(l.agents)
+      ? l.agents[0]?.phone || ''
+      : l.agents?.phone || '',
+    agent_whatsapp: Array.isArray(l.agents)
+      ? l.agents[0]?.whatsapp || ''
+      : l.agents?.whatsapp || '',
+  })
+);
+
+  return {
+    officialHostels: (officialHostels as OfficialHostel[]) || [],
+    agentListings,
+  };
 }
 
 /**

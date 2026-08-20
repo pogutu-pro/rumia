@@ -17,12 +17,14 @@ import {
   DollarSign,
   MessageSquare,
   ArrowLeftRight,
-  LogOut,
+LogOut,
   Menu,
   X,
   CalendarCheck,
   Settings,
   Headset,
+  Scale,
+  Hotel,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
@@ -44,11 +46,13 @@ const navLinks = [
   { label: 'Regions', href: '/admin/regions', icon: Globe, exact: false },
   { label: 'Managers', href: '/admin/managers', icon: ShieldCheck, exact: false },
   { label: 'Listings', href: '/admin/listings', icon: Building2, exact: false },
+  { label: 'Hostels', href: '/admin/official-hostels', icon: Hotel, exact: false },
   { label: 'Tours', href: '/admin/tours', icon: CalendarCheck, exact: false },
   { label: 'Leads', href: '/admin/leads', icon: MousePointerClick, exact: false },
   { label: 'Commissions', href: '/admin/commissions', icon: DollarSign, exact: false },
   { label: 'Transfers', href: '/admin/transfers', icon: ArrowLeftRight, exact: false },
   { label: 'Feedback', href: '/admin/feedback', icon: MessageSquare, exact: false },
+  { label: 'Legal', href: '/admin/legal', icon: Scale, exact: false },
   { label: 'Settings', href: '/admin/settings', icon: Settings, exact: false },
 ];
 

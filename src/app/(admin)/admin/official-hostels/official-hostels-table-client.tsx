@@ -61,12 +61,14 @@ export interface AgentListingHostel {
   agent_name: string;
   agent_phone?: string;
   agent_whatsapp?: string;
+  is_full?: boolean;
 }
 
 interface OfficialHostelsTableClientProps {
   officialHostels: OfficialHostel[];
   agentListings: AgentListingHostel[];
   isFromDb?: boolean;
+  readOnly?: boolean;
 }
 
 type TabType = 'all' | 'official' | 'agent';
@@ -76,6 +78,7 @@ export function OfficialHostelsTableClient({
   officialHostels: initialOfficial,
   agentListings: initialAgent,
   isFromDb = false,
+  readOnly = false,
 }: OfficialHostelsTableClientProps) {
   const router = useRouter();
   const [officialHostels, setOfficialHostels] = useState<OfficialHostel[]>(initialOfficial);
@@ -125,6 +128,8 @@ export function OfficialHostelsTableClient({
       slug: undefined as string | undefined,
       county: undefined as string | undefined,
       area: undefined as string | undefined,
+      onRumia: false,
+      isFull: undefined as boolean | undefined,
       rawOfficial: h as OfficialHostel | undefined,
       rawAgent: undefined as AgentListingHostel | undefined,
     })),
@@ -141,6 +146,8 @@ export function OfficialHostelsTableClient({
       slug: l.slug as string | undefined,
       county: l.county as string | undefined,
       area: l.area as string | undefined,
+      onRumia: true,
+      isFull: l.is_full ?? false,
       rawOfficial: undefined as OfficialHostel | undefined,
       rawAgent: l as AgentListingHostel | undefined,
     })),
@@ -164,6 +171,30 @@ export function OfficialHostelsTableClient({
 
     return matchesSearch && matchesZone;
   });
+
+  const renderAvailability = (item: (typeof combinedItems)[number]) => {
+    if (!item.onRumia) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-200">
+          Not on Rumia
+        </span>
+      );
+    }
+    if (item.isFull) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+          Fully Occupied
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        Available
+      </span>
+    );
+  };
 
   const handleOpenAdd = () => {
     setFormData({
@@ -276,29 +307,33 @@ export function OfficialHostelsTableClient({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {!isFromDb && (
-            <Button
-              onClick={handleSeed}
-              disabled={isSeeding}
-              variant="outline"
-              className="rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-            >
-              {isSeeding ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Database className="h-4 w-4 mr-2" />
+          {!readOnly && (
+            <>
+              {!isFromDb && (
+                <Button
+                  onClick={handleSeed}
+                  disabled={isSeeding}
+                  variant="outline"
+                  className="rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                >
+                  {isSeeding ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Database className="h-4 w-4 mr-2" />
+                  )}
+                  Sync 93 Records to DB
+                </Button>
               )}
-              Sync 93 Records to DB
-            </Button>
-          )}
 
-          <Button
-            onClick={handleOpenAdd}
-            className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Official Hostel
-          </Button>
+              <Button
+                onClick={handleOpenAdd}
+                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Official Hostel
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -479,19 +514,22 @@ export function OfficialHostelsTableClient({
               >
                 <div className="space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Building2 className="h-4 w-4 text-emerald-600 shrink-0" />
                       <h3 className="text-base font-bold text-slate-900 line-clamp-1">{item.name}</h3>
                     </div>
-                    {item.type === 'official' ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                        Official Record
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
-                        Agent Upload
-                      </span>
-                    )}
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      {item.type === 'official' ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          Official Record
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          Agent Upload
+                        </span>
+                      )}
+                      {renderAvailability(item)}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
@@ -521,7 +559,7 @@ export function OfficialHostelsTableClient({
                   <span className="text-slate-400 font-medium line-clamp-1">{item.source}</span>
 
                   <div className="flex items-center gap-2">
-                    {item.type === 'official' && item.rawOfficial && (
+                    {item.type === 'official' && item.rawOfficial && !readOnly && (
                       <>
                         <button
                           onClick={() => handleOpenEdit(item.rawOfficial!)}
@@ -580,6 +618,9 @@ export function OfficialHostelsTableClient({
                 <th className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3.5">
                   Payment Details (Paybill/Till)
                 </th>
+                <th className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3.5">
+                  Availability
+                </th>
                 <th className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3.5 text-right">
                   Actions
                 </th>
@@ -588,7 +629,7 @@ export function OfficialHostelsTableClient({
             <tbody className="divide-y divide-slate-100">
               {filteredCombined.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-400 text-sm">
+                  <td colSpan={7} className="text-center py-10 text-slate-400 text-sm">
                     No hostels match your query.
                   </td>
                 </tr>
@@ -632,9 +673,10 @@ export function OfficialHostelsTableClient({
                         <span>{item.payments || 'Not set'}</span>
                       </div>
                     </td>
+                    <td className="px-5 py-4">{renderAvailability(item)}</td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {item.type === 'official' && item.rawOfficial && (
+{item.type === 'official' && item.rawOfficial && !readOnly && (
                           <>
                             <button
                               onClick={() => handleOpenEdit(item.rawOfficial!)}

@@ -474,6 +474,34 @@ export interface PublicAnnouncement {
   type: AnnouncementType;
 }
 
+// ── Legal / Policies documents ───────────────────────────────────────────
+
+export type LegalDocumentType = 'terms' | 'privacy';
+
+export type LegalDocumentStatus = 'draft' | 'published';
+
+export interface LegalDocument {
+  id: string;
+  type: LegalDocumentType;
+  content: string;
+  draft_content: string | null;
+  status: LegalDocumentStatus;
+  effective_date: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+/** Columns exposed to the public legal pages (published rows only). */
+export interface PublicLegalDocument {
+  id: string;
+  content: string;
+  status: LegalDocumentStatus;
+  effective_date: string | null;
+  updated_at: string;
+}
+
 export interface VerificationRunResult {
   listing_id: string;
   listing_title: string;

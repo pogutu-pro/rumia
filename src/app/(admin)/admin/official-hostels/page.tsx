@@ -14,7 +14,7 @@ export default async function OfficialHostelsPage() {
       (supabase as any)
         .from('listings')
         .select(`
-          id, title, location, price, is_active, verified, created_at, landlord_phone, mpesa_details, specific_location, county, area, slug,
+          id, title, location, price, is_active, verified, is_full, created_at, landlord_phone, mpesa_details, specific_location, county, area, slug,
           agents ( id, name, phone, whatsapp, verified )
         `)
         .order('created_at', { ascending: false }),
@@ -42,6 +42,7 @@ export default async function OfficialHostelsPage() {
     price: l.price,
     is_active: l.is_active,
     verified: l.verified || (Array.isArray(l.agents) ? l.agents[0]?.verified : l.agents?.verified) || false,
+    is_full: l.is_full ?? false,
     created_at: l.created_at,
     landlord_phone: l.landlord_phone || '',
     mpesa_details: l.mpesa_details || '',

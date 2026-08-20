@@ -1,6 +1,8 @@
 import Link from 'next/link';
-import { getManagerUser } from '@/app/actions/manager';
+import { getManagerHostelsAction, getManagerUser } from '@/app/actions/manager';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { OfficialHostelsTableClient } from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
 import {
   FileCheck2,
   Users,
@@ -13,6 +15,7 @@ import {
   MessageSquareText,
   Megaphone,
   Wallet,
+  Hotel,
 } from 'lucide-react';
 import { RoleGuideBanner } from '@/components/dashboard/role-guide-banner';
 import { PushNotificationsCard } from '@/components/notifications/push-notifications-card';
@@ -52,6 +55,14 @@ export default async function ManagerDashboardPage() {
     .select('id', { count: 'exact', head: true })
     .eq('status', 'waiting');
 
+  let officialHostelsQuery = (supabaseAdmin as any)
+    .from('dekut_official_hostels')
+    .select('id', { count: 'exact', head: true });
+
+  let allListingsQuery = (supabaseAdmin as any)
+    .from('listings')
+    .select('id', { count: 'exact', head: true });
+
   if (!context.isSuperAdmin) {
     if (context.managedCampusId) {
       allowedCampusIds = [context.managedCampusId];
@@ -70,6 +81,7 @@ export default async function ManagerDashboardPage() {
       agentsQuery = agentsQuery.in('campus_id', allowedCampusIds);
       listingsQuery = listingsQuery.in('campus_id', allowedCampusIds);
       hostelRequestsQuery = hostelRequestsQuery.in('campus_id', allowedCampusIds);
+      allListingsQuery = allListingsQuery.in('campus_id', allowedCampusIds);
     } else {
       // If no campuses allowed, return zero for all
       return (
@@ -91,18 +103,27 @@ export default async function ManagerDashboardPage() {
     }
   }
 
-  const [appsCountRes, agentsCountRes, listingsCountRes, hostelRequestsCountRes] =
+  const [appsCountRes, agentsCountRes, listingsCountRes, hostelRequestsCountRes, officialHostelsCountRes, allListingsCountRes] =
     await Promise.all([
       pendingAppsQuery,
       agentsQuery,
       listingsQuery,
       hostelRequestsQuery,
+      officialHostelsQuery,
+      allListingsQuery,
     ]);
 
   const pendingAppsCount = appsCountRes.count ?? 0;
   const totalAgentsCount = agentsCountRes.count ?? 0;
   const totalListingsCount = listingsCountRes.count ?? 0;
   const waitingHostelRequestsCount = hostelRequestsCountRes.count ?? 0;
+  const officialHostelsCount = officialHostelsCountRes.count ?? 0;
+  const allCampusListingsCount = allListingsCountRes.count ?? 0;
+  const totalHostelsCount = officialHostelsCount + allCampusListingsCount;
+
+  const hostelsData = await getManagerHostelsAction();
+  const officialHostels = hostelsData?.officialHostels ?? [];
+  const agentHostels = hostelsData?.agentListings ?? [];
 
   const quickActions = [
     {
@@ -154,6 +175,15 @@ export default async function ManagerDashboardPage() {
       icon: MessageSquareText,
       badge: `${waitingHostelRequestsCount} Waiting`,
       color: 'bg-amber-50 text-amber-600',
+      hoverColor: 'group-hover:text-amber-700',
+    },
+    {
+      href: '/manager/hostels',
+      title: 'Hostels',
+      desc: 'View all campus agent-uploaded hostels and official housing records.',
+      icon: Hotel,
+      badge: `${totalHostelsCount} Total`,
+      color: 'bg-amber-50 text-amber-700',
       hoverColor: 'group-hover:text-amber-700',
     },
     {
@@ -319,6 +349,25 @@ export default async function ManagerDashboardPage() {
             ),
           )}
         </div>
+      </div>
+
+      {/* Hostels Directory — official DeKUT records + agent-uploaded listings for this campus */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+            Hostels & Official Housing Records
+          </h2>
+          <p className="text-sm text-slate-500">
+            Official DeKUT housing records alongside agent-uploaded hostels on
+            your campus.
+          </p>
+        </div>
+        <OfficialHostelsTableClient
+          officialHostels={officialHostels}
+          agentListings={agentHostels}
+          isFromDb={officialHostels.length > 0}
+          readOnly
+        />
       </div>
     </div>
   );

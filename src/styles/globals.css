@@ -292,6 +292,68 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors duration-200 bg-destructive/10 text-destructive;
   }
 
+  /*
+     LEGAL DOCUMENT PROSE (Terms & Conditions / Privacy Policy)
+     Styles the sanitized HTML emitted by the admin legal editor and rendered
+     on the public /terms and /policy pages.
+   */
+
+  .legal-document-prose {
+    @apply text-slate-700;
+  }
+
+  .legal-document-prose h2 {
+    @apply text-xl md:text-2xl font-bold text-slate-900 mb-4 mt-8;
+    text-wrap: balance;
+  }
+
+  .legal-document-prose h3 {
+    @apply text-lg font-bold text-slate-900 mb-3 mt-6;
+    text-wrap: balance;
+  }
+
+  .legal-document-prose h4 {
+    @apply text-base font-bold text-slate-900 mb-2 mt-4;
+  }
+
+  .legal-document-prose h2:first-child,
+  .legal-document-prose h3:first-child {
+    @apply mt-0;
+  }
+
+  .legal-document-prose p {
+    @apply my-3 leading-relaxed text-slate-700;
+  }
+
+  .legal-document-prose ul,
+  .legal-document-prose ol {
+    @apply my-3 space-y-2 pl-5 text-slate-700 leading-relaxed;
+  }
+
+  .legal-document-prose ul {
+    @apply list-disc;
+  }
+
+  .legal-document-prose ol {
+    @apply list-decimal;
+  }
+
+  .legal-document-prose a {
+    @apply font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-600;
+  }
+
+  .legal-document-prose strong {
+    @apply font-semibold text-slate-800;
+  }
+
+  .legal-document-prose blockquote {
+    @apply my-3 border-l-2 border-slate-200 pl-4 text-slate-600 leading-relaxed;
+  }
+
+  .legal-document-prose hr {
+    @apply my-6 border-slate-200;
+  }
+
 }
 
 @layer utilities {

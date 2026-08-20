@@ -22,6 +22,8 @@ import {
   ArrowLeftRight,
   MessageSquare,
   Settings,
+  Scale,
+  Hotel,
 } from 'lucide-react';
 import {
   DashboardSwitcher,
@@ -50,11 +52,13 @@ const sectionLinks: DashboardSwitcherLink[] = [
   { href: '/admin/regions', label: 'Regions', icon: Globe },
   { href: '/admin/managers', label: 'Managers', icon: ShieldCheck },
   { href: '/admin/listings', label: 'Listings', icon: Building2 },
+  { href: '/admin/official-hostels', label: 'Hostels', icon: Hotel },
   { href: '/admin/tours', label: 'Tours', icon: CalendarCheck },
   { href: '/admin/leads', label: 'Leads', icon: MousePointerClick },
   { href: '/admin/commissions', label: 'Commissions', icon: DollarSign },
   { href: '/admin/transfers', label: 'Transfers', icon: ArrowLeftRight },
   { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare },
+  { href: '/admin/legal', label: 'Legal', icon: Scale },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 

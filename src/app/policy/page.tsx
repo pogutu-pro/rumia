@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { format } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
 import { Footer } from '@/components/layouts/public-footer';
 import { getCampusBySlug } from '@/lib/data/campuses';
+import { getPublishedLegalDocument } from '@/lib/data/legal-documents';
+import { LegalDocumentBody } from '@/components/policies/legal-document-body';
+
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const campus = await getCampusBySlug('dekut');
@@ -15,138 +20,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function buildSections(campus: {
-  name: string | null;
-  short_name: string | null;
-  city: string | null;
-}) {
-  const name = campus.name ?? 'Dedan Kimathi University of Technology';
-  const shortName = campus.short_name ?? 'DeKUT';
-  const city = campus.city ?? 'Nyeri';
-
-  const sections = [
-  {
-    id: 'introduction',
-    title: '1. Introduction',
-    content:
-      `Rumia is a hostel discovery platform operated by Stratnovo, a technology company registered in Kenya. This Privacy Policy explains how we collect, use, and protect information when you use Rumia to find student accommodation near ${name} (${shortName}) in ${city}, Kenya. By using Rumia, you agree to the practices described in this policy.`,
-  },
-  {
-    id: 'information-we-collect',
-    title: '2. Information We Collect',
-    content: null,
-    subsections: [
-      {
-        subtitle: 'Information you provide:',
-        items: [
-          'Full name (from Google OAuth or manual input)',
-          'Email address',
-          'Phone number (required to contact agents or landlords via WhatsApp)',
-          'University and year of study',
-          'Tour booking preferences (hostel selection, preferred date and time)',
-        ],
-      },
-      {
-        subtitle: 'Information collected automatically:',
-        items: [
-          'Pages and listings you view',
-          'Search terms and filters used',
-          'Device type, browser, and approximate location',
-          'Time and frequency of visits',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'how-we-use',
-    title: '3. How We Use Your Information',
-    content: null,
-    items: [
-      'Display relevant hostel listings based on your search and location preferences',
-      'Connect you with student agents or landlords when you initiate contact through WhatsApp',
-      'Track contact leads for commission attribution and platform operations',
-      'Process and manage tour bookings',
-      'Send platform notifications and updates (WhatsApp or email)',
-      'Improve search results, listing quality, and platform performance',
-      'Detect and prevent fraudulent listings or abuse',
-    ],
-    note: 'We do not use your information for unrelated advertising.',
-  },
-  {
-    id: 'information-sharing',
-    title: '4. Information Sharing',
-    content: null,
-    items: [
-      'When you choose to contact an agent or landlord through Rumia, your name and phone number are shared with that party via WhatsApp so they can respond to your enquiry.',
-      'When you book a tour, your name, phone number, and tour preferences are shared with the assigned student agent.',
-      'We do not sell your personal data to third parties. We may share data with:',
-    ],
-    subList: [
-      'Infrastructure providers (secure servers for database hosting, Cloudflare for CDN and storage) under strict data processing terms',
-      'Analytics tools to understand platform usage in aggregate',
-      'Law enforcement if required by Kenyan law',
-    ],
-    note: 'WhatsApp communication happens outside Rumia\'s control. Once your phone number is shared with an agent or landlord via WhatsApp, Rumia cannot control how that party uses your information.',
-  },
-  {
-    id: 'data-security',
-    title: '5. Data Storage and Security',
-    content:
-      'Your data is stored on secure cloud infrastructure with industry-standard security measures including encryption at rest and in transit. Access to personal data is restricted to authorised Stratnovo personnel only. No system is completely secure. If you suspect unauthorised access to your account, contact us immediately.',
-  },
-  {
-    id: 'cookies',
-    title: '6. Cookies and Session Data',
-    content: null,
-    items: [
-      'Keeping you logged in (session cookies)',
-      'Storing your pending contact state during OAuth redirects (session storage, cleared after use)',
-      'Understanding how users navigate the platform (analytics)',
-    ],
-    note: 'You can disable cookies in your browser settings, though some features may not work correctly.',
-  },
-  {
-    id: 'your-rights',
-    title: '7. Your Rights',
-    content: null,
-    items: [
-      'Request a copy of the data we hold about you',
-      'Request correction of inaccurate data',
-      'Request deletion of your account and associated data',
-      'Opt out of non-essential data collection',
-    ],
-    note: 'To exercise any of these rights, email privacy@rumia.co.ke. We will respond within 14 days.',
-  },
-  {
-    id: 'age-policy',
-    title: "8. Children's Policy",
-    content:
-      'Rumia is intended for university students aged 18 and above. We do not knowingly collect data from minors. If you believe a minor has registered, contact us and we will remove their account.',
-  },
-  {
-    id: 'changes',
-    title: '9. Changes to This Policy',
-    content:
-      'We may update this Privacy Policy from time to time. When we do, we will update the "Last Updated" date at the top of this page. Continued use of Rumia after changes are posted constitutes your acceptance of the updated policy.',
-  },
-  {
-    id: 'contact',
-    title: '10. Contact',
-    content: null,
-    contact: true,
-    lines: [
-      'Email: privacy@rumia.co.ke',
-      `Company: Stratnovo, ${city}, Kenya`,
-    ],
-  },
-];
-
-  return sections;
+function formatLongDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return format(date, 'MMMM d, yyyy');
 }
 
 export default async function PrivacyPolicyPage() {
-  const campus = await getCampusBySlug('dekut');
-  const sections = buildSections(campus);
+  const doc = await getPublishedLegalDocument('privacy');
+  const lastUpdated = formatLongDate(doc?.updated_at);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -178,70 +61,25 @@ export default async function PrivacyPolicyPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-heading text-slate-900">
               Privacy Policy
             </h1>
-            <p className="mt-3 text-sm text-slate-500">
-              Effective Date: June 1, 2025 &middot; Last Updated: July 25, 2025
+            {doc ? (
+              <p className="mt-3 text-sm text-slate-500">
+                {doc.effective_date ? (
+                  <>
+                    Effective Date: {formatLongDate(doc.effective_date)} &middot;{' '}
+                  </>
+                ) : null}
+                Last Updated: {lastUpdated}
+              </p>
+            ) : null}
+          </div>
+
+          {doc ? (
+            <LegalDocumentBody html={doc.content} />
+          ) : (
+            <p className="text-slate-700 leading-relaxed">
+              The Privacy Policy is temporarily unavailable. Please check back shortly.
             </p>
-          </div>
-
-          <div className="space-y-10">
-            {sections.map((section) => (
-              <section key={section.id} id={section.id}>
-                <h2 className="text-xl md:text-2xl font-bold font-heading text-slate-900 mb-4">
-                  {section.title}
-                </h2>
-
-                {section.content && (
-                  <p className="text-slate-700 leading-relaxed">
-                    {section.content}
-                  </p>
-                )}
-
-                {section.items && (
-                  <ul className="mt-3 space-y-2 list-disc pl-5 text-slate-700 leading-relaxed">
-                    {section.items.map((item, i) => (
-                      <li key={i}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-
-                {section.subsections &&
-                  section.subsections.map((sub, i) => (
-                    <div key={i} className="mt-4">
-                      <p className="font-semibold text-slate-800">
-                        {sub.subtitle}
-                      </p>
-                      <ul className="mt-2 space-y-1.5 list-disc pl-5 text-slate-700 leading-relaxed">
-                        {sub.items.map((item, j) => (
-                          <li key={j}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-
-                {section.subList && (
-                  <ul className="mt-3 space-y-2 list-disc pl-5 text-slate-700 leading-relaxed">
-                    {section.subList.map((item, i) => (
-                      <li key={i}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-
-                {section.note && (
-                  <p className="mt-3 text-slate-600 leading-relaxed">
-                    {section.note}
-                  </p>
-                )}
-
-                {section.contact && (
-                  <div className="mt-3 space-y-1 text-slate-700 leading-relaxed">
-                    {section.lines.map((line, i) => (
-                      <p key={i}>{line}</p>
-                    ))}
-                  </div>
-                )}
-              </section>
-            ))}
-          </div>
+          )}
         </div>
       </main>
 
