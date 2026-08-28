@@ -36,7 +36,17 @@ class LeadService:
         )
         db.add(lead)
         await db.flush()
+
+        # Fire server-side analytics event (best-effort, non-blocking)
+        from app.core.integrations import posthog as ph
+        ph.track_lead_created(
+            user_id=user.id if user else lead.id,
+            listing_id=data.listing_id,
+            agent_id=str(listing.agent_id) if listing.agent_id else "",
+        )
+
         return lead
+
 
     @staticmethod
     async def list_leads(

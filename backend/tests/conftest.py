@@ -149,3 +149,30 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
         base_url="http://testserver",
     ) as ac:
         yield ac
+
+
+@pytest.fixture
+async def authed_client() -> AsyncGenerator[AsyncClient, None]:
+    """
+    Async HTTPX client with a mocked authenticated user injected.
+    Used by tests that call protected endpoints.
+    """
+    from app.core.security import AuthenticatedUser, get_current_user
+
+    mock_user = AuthenticatedUser(
+        id=str(uuid.uuid4()),
+        email="test@rumia.co.ke",
+        role="agent",
+    )
+
+    async def _mock_get_current_user():
+        return mock_user
+
+    app.dependency_overrides[get_current_user] = _mock_get_current_user
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://testserver",
+    ) as ac:
+        yield ac
+    app.dependency_overrides.pop(get_current_user, None)
+

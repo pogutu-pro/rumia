@@ -16,8 +16,12 @@ async def lifespan(app: FastAPI):
         version=settings.VERSION,
         environment=settings.ENVIRONMENT,
     )
+    # Start background maintenance cron jobs
+    from app.core.tasks.cron import start_cron_jobs
+    start_cron_jobs()
     yield
     logger.info("Shutting down Rumia FastAPI Backend")
+
 
 
 app = FastAPI(

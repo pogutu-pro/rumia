@@ -23,13 +23,32 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://rumia.co.ke",
+        "https://www.rumia.co.ke",
     ]
+
+    # Cloudflare R2
+    R2_ACCOUNT_ID: str = ""
+    R2_ACCESS_KEY_ID: str = ""
+    R2_SECRET_ACCESS_KEY: str = ""
+    R2_BUCKET_NAME: str = "rumia-uploads"
+    R2_PUBLIC_URL: str = "https://pub-35395ff8fc144313adfa903807f2a359.r2.dev"
+
+    # Web Push (VAPID)
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_SUBJECT: str = "mailto:support@rumia.co.ke"
+
+    # PostHog Telemetry
+    POSTHOG_PROJECT_TOKEN: str = ""
+    POSTHOG_HOST: str = "https://eu.i.posthog.com"
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
+        # Allow reading NEXT_PUBLIC_SUPABASE_URL → SUPABASE_URL via env aliases
     )
 
     @field_validator("DATABASE_URL", mode="before")
