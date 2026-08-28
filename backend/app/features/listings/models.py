@@ -8,6 +8,7 @@ from app.core.database import Base
 
 class Agent(Base):
     __tablename__ = "agents"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[str] = mapped_column(String, primary_key=True, server_default=func.gen_random_uuid())
     name: Mapped[str] = mapped_column(String, nullable=False)
