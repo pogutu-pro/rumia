@@ -1001,6 +1001,393 @@
         "title": "HealthCheckResponse",
         "type": "object"
       },
+      "HostelRequestCreate": {
+        "properties": {
+          "additional_requirements": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Additional Requirements"
+          },
+          "budget_range": {
+            "pattern": "below_3000|3000_5000|5000_7000|7000_10000|above_10000|any_amount",
+            "title": "Budget Range",
+            "type": "string"
+          },
+          "furnishing": {
+            "default": "no_preference",
+            "pattern": "furnished|unfurnished|no_preference",
+            "title": "Furnishing",
+            "type": "string"
+          },
+          "gender": {
+            "default": "no_preference",
+            "pattern": "male|female|no_preference",
+            "title": "Gender",
+            "type": "string"
+          },
+          "move_in_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Move In Date"
+          },
+          "phone": {
+            "maxLength": 20,
+            "minLength": 4,
+            "title": "Phone",
+            "type": "string"
+          },
+          "preferred_zone": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Zone"
+          },
+          "room_type": {
+            "default": "no_preference",
+            "pattern": "single|shared|bedsitter|one_bedroom|no_preference",
+            "title": "Room Type",
+            "type": "string"
+          },
+          "stay_preference": {
+            "default": "no_preference",
+            "pattern": "alone|sharing|no_preference",
+            "title": "Stay Preference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "budget_range"
+        ],
+        "title": "HostelRequestCreate",
+        "type": "object"
+      },
+      "HostelRequestFormConfig": {
+        "properties": {
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "campus_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Name"
+          },
+          "fee": {
+            "default": 100,
+            "title": "Fee",
+            "type": "integer"
+          },
+          "has_campus": {
+            "title": "Has Campus",
+            "type": "boolean"
+          },
+          "zones": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/HostelRequestZoneOption"
+            },
+            "title": "Zones",
+            "type": "array"
+          }
+        },
+        "required": [
+          "has_campus"
+        ],
+        "title": "HostelRequestFormConfig",
+        "type": "object"
+      },
+      "HostelRequestRead": {
+        "properties": {
+          "additional_requirements": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Additional Requirements"
+          },
+          "budget_range": {
+            "title": "Budget Range",
+            "type": "string"
+          },
+          "campus_id": {
+            "title": "Campus Id",
+            "type": "string"
+          },
+          "campus_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Name"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "fee": {
+            "title": "Fee",
+            "type": "number"
+          },
+          "furnishing": {
+            "title": "Furnishing",
+            "type": "string"
+          },
+          "gender": {
+            "title": "Gender",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "move_in_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Move In Date"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "preferred_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Zone"
+          },
+          "room_type": {
+            "title": "Room Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "stay_preference": {
+            "title": "Stay Preference",
+            "type": "string"
+          },
+          "student_name": {
+            "title": "Student Name",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "student_name",
+          "phone",
+          "campus_id",
+          "budget_range",
+          "gender",
+          "room_type",
+          "furnishing",
+          "stay_preference",
+          "status",
+          "fee",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "HostelRequestRead",
+        "type": "object"
+      },
+      "HostelRequestUpdate": {
+        "properties": {
+          "additional_requirements": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Additional Requirements"
+          },
+          "budget_range": {
+            "anyOf": [
+              {
+                "pattern": "below_3000|3000_5000|5000_7000|7000_10000|above_10000|any_amount",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Range"
+          },
+          "furnishing": {
+            "anyOf": [
+              {
+                "pattern": "furnished|unfurnished|no_preference",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Furnishing"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "pattern": "male|female|no_preference",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "move_in_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Move In Date"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "minLength": 4,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "preferred_zone": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Zone"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "pattern": "single|shared|bedsitter|one_bedroom|no_preference",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Type"
+          },
+          "stay_preference": {
+            "anyOf": [
+              {
+                "pattern": "alone|sharing|no_preference",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stay Preference"
+          }
+        },
+        "title": "HostelRequestUpdate",
+        "type": "object"
+      },
+      "HostelRequestZoneOption": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "HostelRequestZoneOption",
+        "type": "object"
+      },
       "ImageUploadRead": {
         "properties": {
           "created_at": {
@@ -6396,6 +6783,357 @@
         "summary": "Liveness Probe",
         "tags": [
           "Health Checks"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests": {
+      "post": {
+        "description": "Submit a 'Find Me a Hostel' request. Authenticated.",
+        "operationId": "create_hostel_request_api_v1_hostel_requests_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostelRequestCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostelRequestRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Hostel Request",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests/form-config": {
+      "get": {
+        "description": "Campus fee + preferred-area zones for the current student's profile campus.",
+        "operationId": "hostel_request_form_config_api_v1_hostel_requests_form_config_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostelRequestFormConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Hostel Request Form Config",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests/me": {
+      "get": {
+        "description": "Fetch the current student's hostel requests, newest first.",
+        "operationId": "list_my_hostel_requests_api_v1_hostel_requests_me_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HostelRequestRead"
+                  },
+                  "title": "Response List My Hostel Requests Api V1 Hostel Requests Me Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List My Hostel Requests",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests/{request_id}": {
+      "delete": {
+        "description": "Permanently delete own cancelled request. Authenticated owner.",
+        "operationId": "delete_hostel_request_api_v1_hostel_requests__request_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Hostel Request Api V1 Hostel Requests  Request Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Hostel Request",
+        "tags": [
+          "Hostel Requests"
+        ]
+      },
+      "patch": {
+        "description": "Update own waiting/contacted request. Authenticated owner.",
+        "operationId": "update_hostel_request_api_v1_hostel_requests__request_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostelRequestUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostelRequestRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Hostel Request",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests/{request_id}/cancel": {
+      "post": {
+        "description": "Cancel own waiting/contacted request. Authenticated owner.",
+        "operationId": "cancel_hostel_request_api_v1_hostel_requests__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostelRequestRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Hostel Request",
+        "tags": [
+          "Hostel Requests"
         ]
       }
     },
