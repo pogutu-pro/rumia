@@ -365,6 +365,7 @@ describe('dekut verification helpers', () => {
 
     expect(signals).toEqual([
       { kind: 'phone', value: '+254728543703' },
+      { kind: 'payment', value: '6000' },
       { kind: 'payment', value: '247247' },
     ]);
   });
