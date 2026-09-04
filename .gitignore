@@ -46,7 +46,6 @@ cypress/screenshots/
 # Python
 __pycache__/
 *.py[cod]
-backend/openapi.json
 .venv/
 venv/
 
