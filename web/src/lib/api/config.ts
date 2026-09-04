@@ -22,7 +22,10 @@ export async function fetchPublicApi<T>(
   if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
-  const response = await fetch(getApiUrl(path), { ...options, headers, cache: options.cache || 'no-store' });
+  // Do NOT set cache: 'no-store' — it forces revalidate: 0 and conflicts with
+  // ISR pages that declare `export const revalidate = N`. Let the page's own
+  // revalidation strategy control caching.
+  const response = await fetch(getApiUrl(path), { ...options, headers });
   if (!response.ok) {
     const text = await response.text();
     let errorData: ParseData = text as any;
