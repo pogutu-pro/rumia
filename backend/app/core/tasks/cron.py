@@ -8,8 +8,10 @@ logger = logging.getLogger(__name__)
 
 async def archive_expired_announcements() -> None:
     """
-    Mark expired announcements as inactive.
-    Runs on startup and periodically to keep the announcements feed clean.
+    Remove expired announcements from the feed.
+    The announcements table has no `is_active` column; the read path filters by
+    `expires_at > now()`, so old rows are simply deleted to keep the table clean.
+    Runs on startup and periodically.
     """
     try:
         from app.core.database import async_session_factory
@@ -18,18 +20,16 @@ async def archive_expired_announcements() -> None:
         async with async_session_factory() as session:
             result = await session.execute(
                 text("""
-                    UPDATE announcements
-                    SET is_active = false
+                    DELETE FROM announcements
                     WHERE expires_at IS NOT NULL
                       AND expires_at < now()
-                      AND is_active = true
                     RETURNING id
                 """)
             )
-            archived = result.rowcount
+            deleted = result.rowcount
             await session.commit()
-            if archived:
-                logger.info("Archived %d expired announcements", archived)
+            if deleted:
+                logger.info("Deleted %d expired announcements", deleted)
     except Exception as exc:
         logger.error("archive_expired_announcements failed: %s", exc)
 

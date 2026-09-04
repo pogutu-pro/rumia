@@ -1,4 +1,4 @@
-import { api, serverApi } from './index';
+import { api, serverApi, fetchPublicApi } from './index';
 import type { Listing } from '@/types';
 
 export interface PaginatedResponse<T> {
@@ -38,7 +38,8 @@ export const listingsApi = {
   },
 
   /**
-   * Fetches the listings feed (server-side, for Next.js Server Components)
+   * Fetches the listings feed (server-side, public data - for Next.js Server Components)
+   * Uses a cookie-free fetch so pages can remain static/ISR.
    */
   getFeedServer: (params?: ListingsFeedParams) => {
     const searchParams = new URLSearchParams();
@@ -51,8 +52,7 @@ export const listingsApi = {
     if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
     if (params?.sort) searchParams.set('sort', params.sort);
 
-    // Used in RSC or API routes
-    return serverApi.get<PaginatedResponse<Listing>>(`/listings?${searchParams.toString()}`);
+    return fetchPublicApi<PaginatedResponse<Listing>>(`/listings?${searchParams.toString()}`);
   },
 
   /**
@@ -63,10 +63,11 @@ export const listingsApi = {
   },
 
   /**
-   * Fetch a single listing by ID (server-side)
+   * Fetch a single listing by ID/slug (server-side, public data)
+   * Uses a cookie-free fetch so pages can remain static/ISR.
    */
   getByIdServer: (id: string) => {
-    return serverApi.get<Listing>(`/listings/${id}`);
+    return fetchPublicApi<Listing>(`/listings/${id}`);
   },
 
   /**

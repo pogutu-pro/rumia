@@ -1,4 +1,4 @@
-import { api, serverApi } from './index';
+import { api, fetchPublicApi } from './index';
 import type { Listing } from '@/types';
 import type { PaginatedResponse } from './listings';
 
@@ -32,7 +32,8 @@ export const searchApi = {
   },
 
   /**
-   * Perform a text/filter search across listings (server-side)
+   * Perform a text/filter search across listings (server-side, public data)
+   * Uses a cookie-free fetch so pages can remain static/ISR.
    */
   searchServer: (params?: SearchParams) => {
     const searchParams = new URLSearchParams();
@@ -45,6 +46,6 @@ export const searchApi = {
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
 
-    return serverApi.get<PaginatedResponse<Listing>>(`/search?${searchParams.toString()}`);
+    return fetchPublicApi<PaginatedResponse<Listing>>(`/search?${searchParams.toString()}`);
   },
 };
