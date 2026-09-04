@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, get_current_user, require_roles
 from app.features.analytics.schemas import (
     AgentListingViewEntry,
@@ -23,7 +24,9 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
     summary="Track Listing View",
     description="Record a listing page view event (public endpoint). Passes ip_hash for deduplication.",
 )
+@limiter.limit("60/minute")
 async def track_listing_view(
+    request: Request,
     payload: TrackViewRequest,
     db: AsyncSession = Depends(get_db_session),
 ) -> TrackViewResponse:

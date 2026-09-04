@@ -21,6 +21,11 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
+    connect_args={
+        "statement_cache_size": 0,
+        "max_cached_statement_lifetime": 0,
+        "command_timeout": 30,
+    },
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -30,6 +35,9 @@ AsyncSessionLocal = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
+
+# Background workers/cron use this factory outside request dependencies.
+async_session_factory = AsyncSessionLocal
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:

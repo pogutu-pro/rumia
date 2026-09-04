@@ -25,9 +25,11 @@ pnpm-debug.log*
 # Environment files
 .env
 .env.local
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
+*.env.production
 # Allow example environment file
 !.env.example
 
@@ -41,6 +43,12 @@ cypress/videos/
 cypress/screenshots/
 .nyc_output/
 
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
 # Editor directories and files
 .vscode
 .idea
@@ -51,3 +59,9 @@ cypress/screenshots/
 # OS Files
 Thumbs.db
 Desktop.ini
+
+# Secrets & credentials — never commit
+*.key
+*.key.pub
+*.pem
+*.pdf

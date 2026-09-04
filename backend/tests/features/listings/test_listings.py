@@ -1,7 +1,8 @@
 import pytest
 from httpx import AsyncClient
+from unittest.mock import AsyncMock, patch
 
-from app.core.security import AuthenticatedUser, get_current_user
+from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user
 from app.main import app
 
 
@@ -32,6 +33,62 @@ async def test_listings_feed_with_filters(client: AsyncClient):
     assert response.status_code == 200
     data = response.json()
     assert "items" in data
+
+
+@pytest.mark.asyncio
+async def test_listings_feed_marks_saved_for_authenticated_user(client: AsyncClient):
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-1", slug="listing-one")
+    app.dependency_overrides[get_optional_current_user] = lambda: _make_student_user()
+    try:
+        with (
+            patch(
+                "app.features.listings.service.ListingService.get_listings_feed",
+                new_callable=AsyncMock,
+                return_value=([listing], 1, {"listing-1": 12}),
+            ),
+            patch(
+                "app.features.profiles.service.ProfileService.get_saved_listing_ids",
+                new_callable=AsyncMock,
+                return_value={"listing-1"},
+            ),
+        ):
+            response = await client.get("/api/v1/listings?page=1&limit=10")
+
+        assert response.status_code == 200
+        item = response.json()["items"][0]
+        assert item["is_saved"] is True
+        assert item["views"] == 12
+    finally:
+        app.dependency_overrides.pop(get_optional_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_listing_detail_marks_saved_for_authenticated_user(client: AsyncClient):
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-1", slug="listing-one")
+    app.dependency_overrides[get_optional_current_user] = lambda: _make_student_user()
+    try:
+        with (
+            patch(
+                "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+                new_callable=AsyncMock,
+                return_value=listing,
+            ),
+            patch(
+                "app.features.profiles.service.ProfileService.get_saved_listing_ids",
+                new_callable=AsyncMock,
+                return_value={"listing-1"},
+            ),
+        ):
+            response = await client.get("/api/v1/listings/listing-one")
+
+        assert response.status_code == 200
+        assert response.json()["is_saved"] is True
+    finally:
+        app.dependency_overrides.pop(get_optional_current_user, None)
 
 
 @pytest.mark.asyncio
@@ -120,5 +177,4 @@ async def test_toggle_listing_full(client: AsyncClient):
         assert data["is_full"] is True
     finally:
         app.dependency_overrides.pop(get_current_user, None)
-
 

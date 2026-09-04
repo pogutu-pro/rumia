@@ -1,0 +1,142 @@
+name: CI (Automated Testing & Build Verification)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-backend:
+    name: Backend Pytest & Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Astral uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: 'latest'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          uv sync --frozen || uv sync
+
+      - name: Verify OpenAPI Contract Snapshot
+        run: |
+          cd backend
+          uv run python scripts/export_openapi.py
+          git diff --exit-code -- openapi.json
+
+      - name: Run Backend Pytest Suite
+        run: |
+          cd backend
+          uv run pytest tests/ -v
+
+  test-frontend:
+    name: Frontend TypeScript & Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'web/pnpm-lock.yaml'
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd web
+          pnpm install --frozen-lockfile
+
+      - name: Run TypeScript Typecheck
+        run: |
+          cd web
+          npx tsc --noEmit
+
+      - name: Build Next.js Production App
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://rumia.co.ke/api/v1
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: placeholder
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: placeholder
+          NEXT_PUBLIC_POSTHOG_HOST: https://placeholder.posthog.com
+          NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: placeholder
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: placeholder
+          VAPID_PRIVATE_KEY: placeholder
+          SKIP_ENV_VALIDATION: 'true'
+        run: |
+          cd web
+          pnpm build
+
+  test-mobile:
+    name: Mobile TypeScript & Contract Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'mobile/pnpm-lock.yaml'
+
+      - name: Install Mobile Dependencies
+        run: |
+          cd mobile
+          pnpm install --frozen-lockfile
+
+      - name: Verify OpenAPI Generated Types
+        run: |
+          cd mobile
+          pnpm run generate:api
+          git diff --exit-code lib/api/types.ts
+
+      - name: Run Mobile TypeScript Typecheck
+        run: |
+          cd mobile
+          pnpm exec tsc --noEmit
+
+      - name: Run Mobile Lint
+        run: |
+          cd mobile
+          pnpm lint
+
+  docker-build-test:
+    name: Docker Multi-Stage Build Verification
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, test-mobile]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Test Docker Compose Build
+        run: |
+          docker compose build

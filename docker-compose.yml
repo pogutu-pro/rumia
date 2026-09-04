@@ -1,0 +1,95 @@
+services:
+  # ──────────────────────────────────────
+  # APPLICATION SERVICES
+  # ──────────────────────────────────────
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        # Internal service URL: server components reach FastAPI over the docker
+        # network (no public hairpin round-trip). Browser never sees this URL.
+        - NEXT_PUBLIC_API_BASE_URL=http://backend:8000/api/v1
+    container_name: rumia_web
+    restart: always
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      # Runtime server secrets (R2, VAPID, service role). Build-time NEXT_PUBLIC_*
+      # come from the same file via Next's dotenv loader during pnpm build.
+      - ./web/.env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000/api/v1
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    networks:
+      - rumia-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rumia_backend
+    restart: always
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - ENVIRONMENT=production
+    networks:
+      - rumia-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    container_name: rumia_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      web:
+        condition: service_started
+      backend:
+        condition: service_healthy
+    networks:
+      - rumia-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  certbot:
+    image: certbot/certbot
+    container_name: rumia_certbot
+    restart: always
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+networks:
+  rumia-network:
+    driver: bridge

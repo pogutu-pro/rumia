@@ -39,7 +39,8 @@ app.include_router(sec_test_router)
 
 
 def create_test_token(user_id: str, email: str = "user@example.com", role: str = "authenticated", expires_in: int = 3600, secret: str = None) -> str:
-    secret = secret or settings.SUPABASE_JWT_SECRET or "dev-secret-do-not-use-in-prod-1234567890"
+    secret = secret or settings.SUPABASE_JWT_SECRET
+    assert secret, "SUPABASE_JWT_SECRET must be set for token fixtures (see tests/conftest.py)"
     payload = {
         "sub": user_id,
         "email": email,

@@ -10,6 +10,7 @@ class AgentRead(BaseModel):
     whatsapp: str
     status: str
     campus_id: Optional[str] = None
+    slug: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -18,6 +19,11 @@ class ListingImageRead(BaseModel):
     id: str
     r2_url: str
     display_order: int
+    category: Optional[str] = None
+    blur_data_url: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    format: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -25,6 +31,11 @@ class ListingImageRead(BaseModel):
 class ListingImageCreate(BaseModel):
     r2_url: str
     display_order: int = 0
+    category: Optional[str] = None
+    blur_data_url: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    format: Optional[str] = None
 
 
 class ListingRoomTypeRead(BaseModel):
@@ -32,6 +43,12 @@ class ListingRoomTypeRead(BaseModel):
     room_type: str
     price: float
     is_available: bool
+    deposit: Optional[float] = None
+    furnishing_items: Optional[List[str]] = None
+    category: Optional[str] = None
+    occupancy: Optional[str] = None
+    floor: Optional[str] = None
+    size: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -40,6 +57,12 @@ class ListingRoomTypeCreate(BaseModel):
     room_type: str
     price: float
     is_available: bool = True
+    deposit: Optional[float] = None
+    furnishing_items: List[str] = []
+    category: Optional[str] = None
+    occupancy: Optional[str] = None
+    floor: Optional[str] = None
+    size: Optional[str] = None
 
 
 class ListingRead(BaseModel):
@@ -52,22 +75,36 @@ class ListingRead(BaseModel):
     county: Optional[str] = None
     area: Optional[str] = None
     specific_location: Optional[str] = None
+    landlord_phone: Optional[str] = None
+    youtube_id: Optional[str] = None
+    is_youtube_shorts: bool = False
     is_full: bool = False
+    sort_position: Optional[int] = None
     rating: float = 0.0
     views: int = 0
     bathroom_type: Optional[str] = None
     distance_to_campus: Optional[str] = None
+    distance_category: Optional[str] = None
     security_type: Optional[str] = None
     electricity_included: bool = False
     water_included: bool = False
     wifi_included: bool = False
-    amenities: List[str] = []
+    hot_water_included: bool = False
+    cooking_gas_included: bool = False
+    room_type: Optional[str] = None
+    gender: Optional[str] = None
+    price_single: Optional[float] = None
+    price_sharing: Optional[float] = None
+    pays_commission: bool = False
+    amenities: Optional[List[str]] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     campus_id: Optional[str] = None
     zone_id: Optional[str] = None
     is_active: bool = True
+    is_saved: bool = False
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     agent: Optional[AgentRead] = None
     images: List[ListingImageRead] = []
@@ -86,19 +123,32 @@ class ListingCreate(BaseModel):
     specific_location: Optional[str] = None
     landlord_phone: Optional[str] = None
     youtube_id: Optional[str] = None
+    is_youtube_shorts: bool = False
     bathroom_type: Optional[str] = "Shared"
     distance_to_campus: Optional[str] = None
+    distance_category: Optional[str] = None
     security_type: Optional[str] = None
     electricity_included: bool = False
     water_included: bool = False
     wifi_included: bool = False
+    hot_water_included: bool = False
+    cooking_gas_included: bool = False
+    room_type: Optional[str] = None
+    gender: Optional[str] = "mixed"
+    price_single: Optional[float] = None
+    price_sharing: Optional[float] = None
+    pays_commission: bool = False
     amenities: List[str] = []
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     campus_id: Optional[str] = None
     zone_id: Optional[str] = None
     room_types: List[ListingRoomTypeCreate] = []
+    images: List[ListingImageCreate] = []
+    # Legacy field — still accepted for backward compat but images takes priority
     image_urls: List[str] = []
+    # Agent WhatsApp override (updated on agent row during create/update)
+    agent_whatsapp: Optional[str] = None
 
 
 class ListingUpdate(BaseModel):
@@ -111,20 +161,43 @@ class ListingUpdate(BaseModel):
     specific_location: Optional[str] = None
     landlord_phone: Optional[str] = None
     youtube_id: Optional[str] = None
+    is_youtube_shorts: Optional[bool] = None
     is_full: Optional[bool] = None
     is_active: Optional[bool] = None
     bathroom_type: Optional[str] = None
     distance_to_campus: Optional[str] = None
+    distance_category: Optional[str] = None
     security_type: Optional[str] = None
     electricity_included: Optional[bool] = None
     water_included: Optional[bool] = None
     wifi_included: Optional[bool] = None
+    hot_water_included: Optional[bool] = None
+    cooking_gas_included: Optional[bool] = None
+    room_type: Optional[str] = None
+    gender: Optional[str] = None
+    price_single: Optional[float] = None
+    price_sharing: Optional[float] = None
+    pays_commission: Optional[bool] = None
     amenities: Optional[List[str]] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     campus_id: Optional[str] = None
     zone_id: Optional[str] = None
+    # When provided, replaces all existing images
+    images: Optional[List[ListingImageCreate]] = None
+    # When provided, replaces all existing room types
+    room_types: Optional[List[ListingRoomTypeCreate]] = None
+    # Agent WhatsApp override
+    agent_whatsapp: Optional[str] = None
 
 
 class ListingToggleFull(BaseModel):
     is_full: bool
+
+
+class ListingToggleActive(BaseModel):
+    is_active: bool
+
+
+class ListingToggleCommission(BaseModel):
+    pays_commission: bool
