@@ -24,10 +24,37 @@ COPY . .
 # (We pass these in via docker-compose build args or environment)
 # Override API base URL so server components call the backend via the
 # internal docker network (http://backend:8000) instead of looping out
-# through the public domain. Next.js respects existing process env vars
-# over .env.production dotfile values, so the ARG wins at build time.
+# through the public domain.
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
+# Optional public build-time env vars. Values come from docker compose build
+# args (themselves interpolated from shell/env or web/.env.production).
+# Only var entries that are non-empty are appended to the in-image
+# .env.production so Next.js can read them at build time. Empty args are
+# skipped so they never shadow the real dotenv file values on the VPS.
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+ARG NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID
+ARG NEXT_PUBLIC_POSTHOG_HOST
+ARG NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+ARG NEXT_PUBLIC_SENTRY_DSN
+RUN set -e; for v in \
+      NEXT_PUBLIC_SUPABASE_URL \
+      NEXT_PUBLIC_SUPABASE_ANON_KEY \
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID \
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY \
+      NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID \
+      NEXT_PUBLIC_POSTHOG_HOST \
+      NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN \
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY \
+      NEXT_PUBLIC_SENTRY_DSN; do \
+        val="$(printenv "$v" || true)"; \
+        if [ -n "$val" ]; then echo "$v=$val" >> .env.production; fi; \
+    done
 RUN pnpm build
 
 # Production image, copy all the files and run next
