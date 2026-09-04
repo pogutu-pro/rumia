@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
-import { Analytics } from '@vercel/analytics/next';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
 import { NavigationProvider } from '@/context/NavigationContext';
@@ -110,7 +109,6 @@ export default function RootLayout({
         </Providers>
         <ServiceWorkerRegister />
         <InstallBanner />
-        <Analytics />
         <Script
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon='{"token": "2bc8ed7166524484a89c065d7cf3ba79"}'

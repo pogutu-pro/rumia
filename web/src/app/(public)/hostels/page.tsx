@@ -9,8 +9,10 @@ import { getActiveAnnouncements } from '@/lib/data/announcements';
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
 
 // Search is client-side over a single filtered snapshot; ISR keeps this
-// expensive joined query from re-running on every list visit.
-export const revalidate = 86400;
+// expensive joined query from re-running on every list visit. If a build-time
+// prerender ever fails to reach the API, 300s lets the page self-heal quickly
+// instead of caching an empty snapshot for a full day.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Student Hostels Near DeKUT Nyeri — Search & Filter',

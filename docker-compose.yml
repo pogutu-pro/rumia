@@ -8,9 +8,11 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        # Internal service URL: server components reach FastAPI over the docker
-        # network (no public hairpin round-trip). Browser never sees this URL.
-        - NEXT_PUBLIC_API_BASE_URL=http://backend:8000/api/v1
+        # Public URL used at BUILD time: ISR pages prerender during `next build`
+        # and the container build network cannot resolve "backend", so they must
+        # fetch through the public domain. The runtime override below
+        # (environment:) points the running server at the internal docker URL.
+        - NEXT_PUBLIC_API_BASE_URL=https://rumiamanage.com/api/v1
         # Public env vars must be present at build time. Values come from the
         # shell environment / .env.production via docker compose automatically.
         - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
