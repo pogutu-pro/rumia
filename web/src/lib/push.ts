@@ -6,7 +6,12 @@ const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const VAPID_CONTACT = "mailto:hello@rumiamanage.com";
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webPush.setVapidDetails(VAPID_CONTACT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  try {
+    webPush.setVapidDetails(VAPID_CONTACT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  } catch (err) {
+    // Invalid/placeholder keys (e.g. in CI) must not break module load or the build.
+    console.warn("Failed to configure web-push VAPID details:", err);
+  }
 }
 
 export interface PushPayload {

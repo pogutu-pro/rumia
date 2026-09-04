@@ -504,6 +504,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hostel-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Hostel Request
+         * @description Submit a 'Find Me a Hostel' request. Authenticated.
+         */
+        post: operations["create_hostel_request_api_v1_hostel_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hostel-requests/form-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hostel Request Form Config
+         * @description Campus fee + preferred-area zones for the current student's profile campus.
+         */
+        get: operations["hostel_request_form_config_api_v1_hostel_requests_form_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hostel-requests/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List My Hostel Requests
+         * @description Fetch the current student's hostel requests, newest first.
+         */
+        get: operations["list_my_hostel_requests_api_v1_hostel_requests_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hostel-requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Hostel Request
+         * @description Permanently delete own cancelled request. Authenticated owner.
+         */
+        delete: operations["delete_hostel_request_api_v1_hostel_requests__request_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Hostel Request
+         * @description Update own waiting/contacted request. Authenticated owner.
+         */
+        patch: operations["update_hostel_request_api_v1_hostel_requests__request_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/hostel-requests/{request_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Hostel Request
+         * @description Cancel own waiting/contacted request. Authenticated owner.
+         */
+        post: operations["cancel_hostel_request_api_v1_hostel_requests__request_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/images/upload-url": {
         parameters: {
             query?: never;
@@ -1750,6 +1854,131 @@ export interface components {
              * @example 1.0.0
              */
             version: string;
+        };
+        /** HostelRequestCreate */
+        HostelRequestCreate: {
+            /** Additional Requirements */
+            additional_requirements?: string | null;
+            /** Budget Range */
+            budget_range: string;
+            /**
+             * Furnishing
+             * @default no_preference
+             */
+            furnishing: string;
+            /**
+             * Gender
+             * @default no_preference
+             */
+            gender: string;
+            /** Move In Date */
+            move_in_date?: string | null;
+            /** Phone */
+            phone: string;
+            /** Preferred Zone */
+            preferred_zone?: string | null;
+            /**
+             * Room Type
+             * @default no_preference
+             */
+            room_type: string;
+            /**
+             * Stay Preference
+             * @default no_preference
+             */
+            stay_preference: string;
+        };
+        /** HostelRequestFormConfig */
+        HostelRequestFormConfig: {
+            /** Campus Id */
+            campus_id?: string | null;
+            /** Campus Name */
+            campus_name?: string | null;
+            /**
+             * Fee
+             * @default 100
+             */
+            fee: number;
+            /** Has Campus */
+            has_campus: boolean;
+            /**
+             * Zones
+             * @default []
+             */
+            zones: components["schemas"]["HostelRequestZoneOption"][];
+        };
+        /** HostelRequestRead */
+        HostelRequestRead: {
+            /** Additional Requirements */
+            additional_requirements?: string | null;
+            /** Budget Range */
+            budget_range: string;
+            /** Campus Id */
+            campus_id: string;
+            /** Campus Name */
+            campus_name?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Fee */
+            fee: number;
+            /** Furnishing */
+            furnishing: string;
+            /** Gender */
+            gender: string;
+            /** Id */
+            id: string;
+            /** Move In Date */
+            move_in_date?: string | null;
+            /** Phone */
+            phone: string;
+            /** Preferred Zone */
+            preferred_zone?: string | null;
+            /** Room Type */
+            room_type: string;
+            /** Status */
+            status: string;
+            /** Stay Preference */
+            stay_preference: string;
+            /** Student Name */
+            student_name: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** User Id */
+            user_id: string;
+        };
+        /** HostelRequestUpdate */
+        HostelRequestUpdate: {
+            /** Additional Requirements */
+            additional_requirements?: string | null;
+            /** Budget Range */
+            budget_range?: string | null;
+            /** Furnishing */
+            furnishing?: string | null;
+            /** Gender */
+            gender?: string | null;
+            /** Move In Date */
+            move_in_date?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Preferred Zone */
+            preferred_zone?: string | null;
+            /** Room Type */
+            room_type?: string | null;
+            /** Stay Preference */
+            stay_preference?: string | null;
+        };
+        /** HostelRequestZoneOption */
+        HostelRequestZoneOption: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** ImageUploadRead */
         ImageUploadRead: {
@@ -3988,6 +4217,208 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LivenessCheckResponse"];
+                };
+            };
+        };
+    };
+    create_hostel_request_api_v1_hostel_requests_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostelRequestCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostelRequestRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hostel_request_form_config_api_v1_hostel_requests_form_config_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostelRequestFormConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_my_hostel_requests_api_v1_hostel_requests_me_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostelRequestRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_hostel_request_api_v1_hostel_requests__request_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_hostel_request_api_v1_hostel_requests__request_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostelRequestUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostelRequestRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_hostel_request_api_v1_hostel_requests__request_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostelRequestRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
