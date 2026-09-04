@@ -135,21 +135,20 @@ const withSerwist = withSerwistInit({
   additionalPrecacheEntries: [],
 });
 
-export default withSentryConfig(withSerwist(nextConfig), {
-  // Sentry organization and project (set these in CI or .env)
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
+// Only wrap with Sentry config if auth token is present — avoids build failures
+// when Sentry is not yet configured on the server.
+const sentryEnabled = !!process.env.SENTRY_AUTH_TOKEN;
 
-  // Suppress Sentry CLI output during build
-  silent: !process.env.CI,
-
-  // Upload source maps in production only
-  sourcemaps: {
-    disable: process.env.NODE_ENV !== 'production',
-  },
-
-  // Don't open Sentry browser in wizard mode
-  telemetry: false,
-});
+export default sentryEnabled
+  ? withSentryConfig(withSerwist(nextConfig), {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      silent: !process.env.CI,
+      sourcemaps: {
+        disable: process.env.NODE_ENV !== 'production',
+      },
+      telemetry: false,
+    })
+  : withSerwist(nextConfig);
 
