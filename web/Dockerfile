@@ -33,6 +33,10 @@ ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 # Only var entries that are non-empty are appended to the in-image
 # .env.production so Next.js can read them at build time. Empty args are
 # skipped so they never shadow the real dotenv file values on the VPS.
+# Server-only secret used by some modules (e.g. supabaseAdmin) at build-time
+# page-data collection. Passed purely as a build arg; NOT baked via ENV into the
+# final image. Placed on the dotenv file so Next reads it only while it exists.
+ARG SUPABASE_SERVICE_ROLE_KEY
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
@@ -43,6 +47,7 @@ ARG NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ARG NEXT_PUBLIC_SENTRY_DSN
 RUN set -e; for v in \
+      SUPABASE_SERVICE_ROLE_KEY \
       NEXT_PUBLIC_SUPABASE_URL \
       NEXT_PUBLIC_SUPABASE_ANON_KEY \
       NEXT_PUBLIC_GOOGLE_CLIENT_ID \
