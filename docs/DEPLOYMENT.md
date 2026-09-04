@@ -35,7 +35,7 @@ git checkout main && git pull --rebase
 ```
 
 > **Important:** pause/disable Vercel auto-deploys on the same GitHub repo before merging.
-> The current domain (`rumia.co.ke`) still points at Vercel; until DNS is re-pointed (§"DNS
+> The current domain (`rumiamanage.com`) still points at Vercel; until DNS is re-pointed (§"DNS
 > A-Records"), merging the new tree will make Vercel try to build it without the new secrets.
 
 ### How the web talks to the backend (internal network URL)
@@ -106,10 +106,10 @@ By default, Oracle Cloud blocks incoming HTTP/HTTPS connections at the network l
 
 ## 🌐 Step 3: Configure Domain DNS A-Records
 
-Point your registered domain (`rumia.co.ke`) to your Oracle VPS Public IP:
+Point your registered domain (`rumiamanage.com`) to your Oracle VPS Public IP:
 
 1. Log into your domain registrar dashboard (e.g. Hostinger, Cloudflare, Sasahost).
-2. Go to **DNS Management** for `rumia.co.ke`.
+2. Go to **DNS Management** for `rumiamanage.com`.
 3. Add the following records:
 
 | Type | Name | Value / Target | TTL |
@@ -122,7 +122,7 @@ Point your registered domain (`rumia.co.ke`) to your Oracle VPS Public IP:
 > If you proxy through Cloudflare (orange cloud): set SSL/TLS mode to **Full** — the VPS
 > nginx terminates Let's Encrypt TLS on 443, so Cloudflare must connect to 443, not 80.
 > Grey-cloud (DNS-only) also works and exposes the origin IP.
-> Sweep after changing: `dig +short rumia.co.ke www.rumia.co.ke`.
+> Sweep after changing: `dig +short rumiamanage.com www.rumiamanage.com`.
 
 ---
 
@@ -213,15 +213,15 @@ R2_ACCOUNT_ID=<YOUR_R2_ACCOUNT_ID>
 R2_ACCESS_KEY_ID=<YOUR_R2_KEY>
 R2_SECRET_ACCESS_KEY=<YOUR_R2_SECRET>
 R2_BUCKET_NAME=<YOUR_R2_BUCKET_NAME>
-R2_PUBLIC_URL=https://images.rumia.co.ke
-VAPID_PUBLIC_KEY=<...>  VAPID_PRIVATE_KEY=<...>  VAPID_SUBJECT=mailto:support@rumia.co.ke
+R2_PUBLIC_URL=https://images.rumiamanage.com
+VAPID_PUBLIC_KEY=<...>  VAPID_PRIVATE_KEY=<...>  VAPID_SUBJECT=mailto:support@rumiamanage.com
 POSTHOG_PROJECT_TOKEN=<...>  POSTHOG_HOST=https://eu.i.posthog.com
 # optional: SENTRY_DSN=
 ```
 
 **`web/.env.production`** (injected by compose at build — `NEXT_PUBLIC_*` — and at runtime)
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://rumia.co.ke/api/v1   # used only as dotenv fallback; compose overrides with internal URL
+NEXT_PUBLIC_API_BASE_URL=https://rumiamanage.com/api/v1   # used only as dotenv fallback; compose overrides with internal URL
 NEXT_PUBLIC_SUPABASE_URL=https://<YOUR_PROJECT_REF>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
 SUPABASE_SERVICE_ROLE_KEY=<YOUR_SERVICE_ROLE_KEY>
@@ -248,7 +248,7 @@ chmod +x scripts/init-letsencrypt.sh
 
 This script will:
 1. Generate temporary SSL keys to allow Nginx to start.
-2. Request official multi-domain SSL certificates for `rumia.co.ke` and `www.rumia.co.ke` from Let's Encrypt.
+2. Request official multi-domain SSL certificates for `rumiamanage.com` and `www.rumiamanage.com` from Let's Encrypt.
 3. Automatically load the production certificates into Nginx.
 
 ---
@@ -355,13 +355,13 @@ rumia_web        web        Up             127.0.0.1:3000->3000/tcp
 ```
 
 Test public endpoints:
-- **Frontend App**: `https://rumia.co.ke`
-- **Web container liveness**: `https://rumia.co.ke/healthz` → `{"status":"ok"}`
-- **API Health Check**: `https://rumia.co.ke/api/v1/health/liveness` → `{"status":"ok"}`
-- **Swagger API Docs**: `https://rumia.co.ke/docs`
-- **Campuses**: `https://rumia.co.ke/api/v1/campuses`
-- **Search**: `curl 'https://rumia.co.ke/api/v1/search?q=kimathi'`
-- **Top-10 real view counts**: `curl 'https://rumia.co.ke/api/v1/listings?sort=views&limit=10'`
+- **Frontend App**: `https://rumiamanage.com`
+- **Web container liveness**: `https://rumiamanage.com/healthz` → `{"status":"ok"}`
+- **API Health Check**: `https://rumiamanage.com/api/v1/health/liveness` → `{"status":"ok"}`
+- **Swagger API Docs**: `https://rumiamanage.com/docs`
+- **Campuses**: `https://rumiamanage.com/api/v1/campuses`
+- **Search**: `curl 'https://rumiamanage.com/api/v1/search?q=kimathi'`
+- **Top-10 real view counts**: `curl 'https://rumiamanage.com/api/v1/listings?sort=views&limit=10'`
 - **Auth workflow**: register/login on the site (Supabase cookie session)
 - **Image upload**: submit a listing with a photo >1 MB (validates the nginx `30m` body limit and R2 flow)
 

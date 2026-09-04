@@ -12,7 +12,7 @@ import type { Campus } from '@/types';
 
 export const revalidate = 86400;
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
 
 interface PageProps {
   params: Promise<{ county: string; area: string }>;

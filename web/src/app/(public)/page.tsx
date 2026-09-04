@@ -15,7 +15,7 @@ import type { Campus } from '@/types';
 
 export const revalidate = 86400;
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
 
 export async function generateMetadata(): Promise<Metadata> {
   const campus = await getCampusBySlug('dekut');

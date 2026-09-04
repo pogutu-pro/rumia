@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { supabasePublic } from '@/lib/supabase/public';
 import { getAllCampuses } from '@/lib/data/campuses';
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
 
 export const revalidate = 86400;
 

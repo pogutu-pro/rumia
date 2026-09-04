@@ -71,7 +71,7 @@ jobs:
 
       - name: Build Next.js Production App
         env:
-          NEXT_PUBLIC_API_BASE_URL: https://rumia.co.ke/api/v1
+          NEXT_PUBLIC_API_BASE_URL: https://rumiamanage.com/api/v1
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
           SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key

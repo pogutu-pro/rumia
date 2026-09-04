@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://rumia.co.ke",
-        "https://www.rumia.co.ke",
+        "https://rumiamanage.com",
+        "https://www.rumiamanage.com",
     ]
 
     # Cloudflare R2
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # Web Push (VAPID)
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""
-    VAPID_SUBJECT: str = "mailto:support@rumia.co.ke"
+    VAPID_SUBJECT: str = "mailto:support@rumiamanage.com"
 
     # Rate limiting (per-IP, app-level). Sensitive routes apply stricter limits.
     RATE_LIMIT_ENABLED: bool = True

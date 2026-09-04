@@ -8,7 +8,7 @@ import { searchApi } from '@/lib/api/search';
 
 export const revalidate = 0;
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
 
 export const metadata: Metadata = {
   title: 'Browse Student Hostels Near DeKUT',

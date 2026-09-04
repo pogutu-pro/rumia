@@ -114,7 +114,7 @@ export async function createAgentAction(
   try {
     // Derive email from phone: strip non-alphanumeric chars, append domain
     const sanitizedPhone = data.phone.replace(/[^a-zA-Z0-9]/g, '');
-    const derivedEmail = `${sanitizedPhone}@agents.rumia.co.ke`;
+    const derivedEmail = `${sanitizedPhone}@agents.rumiamanage.com`;
 
     // Generate a random password using crypto.randomUUID
     const password = crypto.randomUUID();

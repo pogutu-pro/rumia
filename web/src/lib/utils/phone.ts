@@ -108,7 +108,7 @@ export function hostelOwnerMessage(params: HostelOwnerMessageParams): string {
   let message = parts.join(' ');
 
   if (slug && zone) {
-    message = `${message}\n\nListing: rumia.co.ke/hostels/${county}/${zone}/${slug}`;
+    message = `${message}\n\nListing: rumiamanage.com/hostels/${county}/${zone}/${slug}`;
   }
 
   return message;

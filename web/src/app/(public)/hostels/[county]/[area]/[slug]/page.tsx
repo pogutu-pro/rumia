@@ -121,7 +121,7 @@ export async function generateMetadata({
       0,
       155,
     );
-  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
   const firstImage = listing.listing_images?.[0]?.r2_url;
 
@@ -164,7 +164,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const images = (listing.listing_images || []).sort(
     (a: any, b: any) => a.display_order - b.display_order,
   );
-  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
   const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
   const agentSlug = listing.agents?.slug;
   const nearbyListings = await getNearbyListings(listing);

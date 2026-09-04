@@ -31,7 +31,7 @@ Independent re-verification of the repository (not inherited from prior plans). 
 | 16 | Error envelope `{error:{code,message,details}}`; web `client.ts` still parses `.detail || .message` (mismatch, unchanged) | CONFIRMED |
 | 17 | **`web/.env.production` is untracked and NOT covered by `.gitignore`** — contains live secrets (service-role key, R2 keys, Google secret, VAPID private, Sentry auth token). High leak risk on first commit | NEW / CRITICAL |
 | 18 | nginx now rate-limits `/api/v1/` at 30 r/s (burst 20) | NEW |
-| 19 | docker-compose binds web/backend to 127.0.0.1; adds build-arg `NEXT_PUBLIC_API_BASE_URL=https://rumia.co.ke/api/v1` | NEW |
+| 19 | docker-compose binds web/backend to 127.0.0.1; adds build-arg `NEXT_PUBLIC_API_BASE_URL=https://rumiamanage.com/api/v1` | NEW |
 
 ---
 
@@ -231,7 +231,7 @@ Para table in §4 is the full capability matrix — the **V1 gating requirements
 |---|---|---|---|
 | Development | local `uvicorn` + local Supabase/DB | Expo dev build → `EXPO_PUBLIC_API_BASE_URL=http://<LAN>:8000/api/v1` | `next dev` with `NEXT_PUBLIC_API_BASE_URL` local |
 | Staging | same production backend (owner decision 2026-08-29: no separate staging infra) | EAS `preview` → prod API | n/a |
-| Production | VPS behind nginx TLS, `https://rumia.co.ke/api/v1` | EAS `production`, prod URL | same prod API |
+| Production | VPS behind nginx TLS, `https://rumiamanage.com/api/v1` | EAS `production`, prod URL | same prod API |
 
 `EXPO_PUBLIC_API_BASE_URL` per EAS profile. Public keys only in env; no runtime secrets.
 
@@ -267,7 +267,7 @@ Dev: Expo Go/dev-client on physical Android + emulator. Builds: `eas build -p an
 0.6 Student "my tours" list.
 0.7 Shared/app-level rate limits on sensitive routes.
 0.8 Export contract: OpenAPI snapshot; add mobile drift job to CI; standardize `RETRY-AFTER`, error codes.
-0.9 TLS: provision certs (`scripts/init-letsencrypt.sh`), verify `https://rumia.co.ke/api/v1/health`.
+0.9 TLS: provision certs (`scripts/init-letsencrypt.sh`), verify `https://rumiamanage.com/api/v1/health`.
 0.10 **[Security]** gitignore `web/.env.production` before anything is committed.
 **Files/Areas:** `backend/app/features/{profiles,listings,notifications,tours,leads}/`, `supabase/migrations/`, `.github/workflows/ci.yml`, `.gitignore`, `nginx/`, `scripts/`.
 **Testing:** new pytest per endpoint incl. ownership/campus authz matrix; cargo-cult n/a — full suite 77+ must stay green.
@@ -397,7 +397,7 @@ Parallel-safe: Phase 1 scaffold, design system, lib/api client, CI mobile jobs, 
 
 ## 16. Unresolved / Requires Verification
 - **Android applicationId + Play brand — OWNER, currently TBD-before-EAS.** Plan proceeds through Phase 0 without it; Phase 1 (`eas.json` + `app.config.ts` android.package) and Phase 6 (Play credentials/listing) block on owner supplying `applicationId` (e.g. `ke.co.rumia.app`), package/display name, and Play Console org. Recorded as an open input, not a risk.
-- ~~API subdomain~~ **RESOLVED (2026-08-29): reuse `https://rumia.co.ke/api/v1`** for V1 — nginx already proxies and rate-limits `/api/v1/` (30 r/s burst 20); no new DNS/TLS. `api.rumia.co.ke` deferred until V2 if needed.
+- ~~API subdomain~~ **RESOLVED (2026-08-29): reuse `https://rumiamanage.com/api/v1`** for V1 — nginx already proxies and rate-limits `/api/v1/` (30 r/s burst 20); no new DNS/TLS. `api.rumiamanage.com` deferred until V2 if needed.
 - ~~Staging backend/database~~ **RESOLVED (2026-08-29): use existing production backend for development.** Phase 0 must close auth/read-paths (0.1 saved, 0.3 JWT secret) before any device hits it. No staging infra work.
 - ~~Push event scope~~ **RESOLVED (2026-08-29): push notifies Listings + Reviews + Messages only.** Phase 0.2 migration + `worker.py` dispatch model exactly these categories; tour/leads events excluded until later.
 - ~~Retire Vercel references~~ **RESOLVED (2026-08-29): yes, clean them out.** Remove/reconcile Vercel assumptions in `docs/internal/fast.md` §8 and any stale CI/docs mentions; Vercel is obsolete per DEPLOYMENT.md (Oracle VPS). Performed during Phase 0 docs reconciliation, since this audit is planning-only.
