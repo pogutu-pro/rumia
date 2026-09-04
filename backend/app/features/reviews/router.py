@@ -1,9 +1,10 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, get_current_user, require_roles
 from app.features.reviews.schemas import (
     ReviewCreate,
@@ -77,7 +78,9 @@ async def get_review(review_id: str, db: AsyncSession = Depends(get_db_session))
     summary="Create Review",
     description="Submit a new review for a hostel. Authenticated users.",
 )
+@limiter.limit("10/minute")
 async def create_review(
+    request: Request,
     data: ReviewCreate,
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),

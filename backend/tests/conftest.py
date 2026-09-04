@@ -9,6 +9,7 @@ Key design:
 """
 from __future__ import annotations
 
+import os
 import uuid
 from datetime import datetime, timezone
 from typing import AsyncGenerator
@@ -16,6 +17,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+
+# Ensure a valid JWT secret exists before app.settings is instantiated, so tests
+# never exercise the (removed) hardcoded dev fallback. Prod must always set the
+# real secret via backend/.env or the environment.
+os.environ.setdefault("SUPABASE_JWT_SECRET", "ci-test-only-jwt-secret-9f8a7e6d5c4b")
 
 from app.core.database import get_db_session
 from app.main import app
@@ -56,6 +62,9 @@ class MockResult:
         m.all.return_value = self._items
         m.one_or_none.return_value = self._single
         return m
+
+    def fetchall(self):
+        return self._items
 
 
 # ── Mock domain factories ─────────────────────────────────────────────────────
@@ -99,6 +108,20 @@ def _make_mock_listing(**kwargs):
     listing.zone_id = kwargs.get("zone_id", None)
     listing.is_active = bool(kwargs.get("is_active", True))
     listing.created_at = datetime.now(timezone.utc)
+    listing.updated_at = None
+    listing.landlord_phone = None
+    listing.youtube_id = None
+    listing.is_youtube_shorts = False
+    listing.distance_category = None
+    listing.hot_water_included = False
+    listing.cooking_gas_included = False
+    listing.room_type = None
+    listing.gender = "mixed"
+    listing.price_single = None
+    listing.price_sharing = None
+    listing.pays_commission = False
+    listing.sort_order = None
+    listing.sort_position = None
     listing.agent = agent
     listing.images = []
     listing.room_types = []

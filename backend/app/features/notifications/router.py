@@ -1,13 +1,52 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, get_current_user
-from app.features.notifications.schemas import AppNotificationRead, PushSubscriptionCreate, PushUnsubscribeRequest
+from app.features.notifications.schemas import (
+    AppNotificationRead,
+    DeviceTokenActionResponse,
+    DeviceTokenRegisterRequest,
+    PushSubscriptionCreate,
+    PushUnsubscribeRequest,
+)
 from app.features.notifications.service import NotificationService
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
+
+
+@router.post(
+    "/devices",
+    response_model=DeviceTokenActionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Register Device Token",
+    description="Register device push token for mobile/FCM notifications. Authenticated.",
+)
+@limiter.limit("30/minute")
+async def register_device_token(
+    request: Request,
+    data: DeviceTokenRegisterRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> DeviceTokenActionResponse:
+    return await NotificationService.register_device_token(db, user, data)
+
+
+@router.delete(
+    "/devices/{token}",
+    response_model=DeviceTokenActionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Unregister Device Token",
+    description="Unregister/deactivate device token on sign-out. Authenticated.",
+)
+async def unregister_device_token(
+    token: str,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> DeviceTokenActionResponse:
+    return await NotificationService.unregister_device_token(db, user, token)
 
 
 @router.post(
@@ -83,3 +122,4 @@ async def mark_all_read(
 ) -> dict:
     await NotificationService.mark_all_read(db, user)
     return {"message": "All notifications marked as read"}
+

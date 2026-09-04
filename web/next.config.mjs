@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import withSerwistInit from "@serwist/next";
+import { withSentryConfig } from '@sentry/nextjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -134,4 +135,21 @@ const withSerwist = withSerwistInit({
   additionalPrecacheEntries: [],
 });
 
-export default withSerwist(nextConfig);
+export default withSentryConfig(withSerwist(nextConfig), {
+  // Sentry organization and project (set these in CI or .env)
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Suppress Sentry CLI output during build
+  silent: !process.env.CI,
+
+  // Upload source maps in production only
+  sourcemaps: {
+    disable: process.env.NODE_ENV !== 'production',
+  },
+
+  // Don't open Sentry browser in wizard mode
+  telemetry: false,
+});
+

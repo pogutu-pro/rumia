@@ -4,8 +4,15 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Heart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { apiClient } from '@/lib/api/client';
 import { cn } from '@/lib/utils/cn';
 import posthog from 'posthog-js';
+
+interface SavedActionResponse {
+  message: string;
+  is_saved: boolean;
+  listing_id: string;
+}
 
 interface SaveButtonProps {
   listingId: string;
@@ -30,16 +37,15 @@ export function SaveButton({
       } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      const { data } = await supabase
-        .from('saved_hostels')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('listing_id', listingId)
-        .maybeSingle();
-
-      setIsSaved(!!data);
+      try {
+        const res = await apiClient<SavedActionResponse>(
+          `/profiles/me/saved/${listingId}`,
+        );
+        setIsSaved(res.is_saved);
+      } catch {
+        // Treated as not saved when the request fails.
+      }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingId]);
 
   const handleToggle = useCallback(async () => {
@@ -53,34 +59,22 @@ export function SaveButton({
     }
 
     setIsLoading(true);
+    const previous = isSaved;
 
     try {
-      if (isSaved) {
-        const { error } = await supabase
-          .from('saved_hostels')
-          .delete()
-          .eq('user_id', session.user.id)
-          .eq('listing_id', listingId);
-
-        if (error) throw error;
-        setIsSaved(false);
-        posthog.capture('hostel_unsaved', { listing_id: listingId });
-      } else {
-        const { error } = await supabase
-          .from('saved_hostels')
-          .insert({ user_id: session.user.id, listing_id: listingId });
-
-        if (error) throw error;
-        setIsSaved(true);
-        posthog.capture('hostel_saved', { listing_id: listingId });
-      }
+      await apiClient<SavedActionResponse>(`/profiles/me/saved/${listingId}`, {
+        method: isSaved ? 'DELETE' : 'POST',
+      });
+      setIsSaved(!previous);
+      posthog.capture(previous ? 'hostel_unsaved' : 'hostel_saved', {
+        listing_id: listingId,
+      });
     } catch {
-      setIsSaved(isSaved);
+      setIsSaved(previous);
     } finally {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listingId, isSaved]);
+  }, [listingId, isSaved, router, supabase]);
 
   if (variant === 'icon') {
     return (

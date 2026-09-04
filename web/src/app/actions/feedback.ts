@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { feedbackApi } from '@/lib/api/feedback';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -8,32 +8,13 @@ export async function submitFeedbackAction(
   category: string,
   message: string,
 ): Promise<ActionResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { success: false, error: 'You must be signed in to submit feedback.' };
-  }
-
   try {
-    const { error } = await supabase.from('feedback').insert({
-      user_id: user.id,
-      user_email: user.email,
-      user_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-      category,
-      message,
+    await feedbackApi.submitServer({
+      content: `[Category: ${category}] ${message}`,
     });
 
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
     return { success: true };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unexpected error';
-    return { success: false, error: message };
+  } catch (err: any) {
+    return { success: false, error: err.message || err.data?.detail || 'Failed to submit feedback.' };
   }
 }

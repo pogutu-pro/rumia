@@ -1,9 +1,10 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, decode_jwt_token, get_current_user, require_roles
 from app.features.leads.schemas import CommissionRead, LeadRead, LeadTrackRequest
 from app.features.leads.service import LeadService
@@ -18,7 +19,9 @@ router = APIRouter(prefix="/leads", tags=["Leads"])
     summary="Track Lead Click",
     description="Record a WhatsApp inquiry click. Public (optional auth).",
 )
+@limiter.limit("10/minute")
 async def track_lead(
+    request: Request,
     data: LeadTrackRequest,
     authorization: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db_session),

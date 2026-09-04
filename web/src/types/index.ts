@@ -73,17 +73,23 @@ export interface Listing {
   hot_water_included?: boolean | null;
   cooking_gas_included?: boolean | null;
   security_type?: string | null;
+  // Meta
+  is_full?: boolean | null;
+  sort_order?: number | null;
+  sort_position?: number | null;
+  county?: string | null;
+  slug?: string | null;
+  campus_id?: string | null;
+  zone_id?: string | null;
+  
+  // FastAPI API relations
+  agent?: any;
+  images?: any[];
+  room_types?: any[];
   // Contact
   landlord_phone?: string | null;
-  // Campus scoping
-  campus_id?: string | null;
-  // SEO
-  slug?: string | null;
-  county?: string | null;
   // Search
   proximity_description?: string | null;
-  // Admin ordering
-  sort_position?: number | null;
   // DeKUT verification
   verified?: boolean | null;
   verified_source?: string | null;

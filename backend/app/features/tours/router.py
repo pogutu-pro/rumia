@@ -1,9 +1,10 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, Query, status
+from fastapi import APIRouter, Depends, Header, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, decode_jwt_token, get_current_user
 from app.features.tours.schemas import TourBookingCreate, TourBookingRead, TourBookingUpdateStatus
 from app.features.tours.service import TourService
@@ -18,7 +19,9 @@ router = APIRouter(prefix="/tours", tags=["Tours"])
     summary="Create Tour Booking",
     description="Book a hostel tour. Public (optional auth).",
 )
+@limiter.limit("10/minute")
 async def create_booking(
+    request: Request,
     data: TourBookingCreate,
     authorization: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db_session),
@@ -37,6 +40,23 @@ async def create_booking(
 
 
 @router.get(
+    "/me",
+    response_model=PaginatedResponse[TourBookingRead],
+    status_code=status.HTTP_200_OK,
+    summary="List My Tour Bookings",
+    description="Fetch tour bookings linked to current student user. Authenticated.",
+)
+async def list_my_tours(
+    pagination: PaginationParams = Depends(),
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> PaginatedResponse[TourBookingRead]:
+    items, total = await TourService.list_my_tours(db, user, pagination=pagination)
+    validated = [TourBookingRead.model_validate(b) for b in items]
+    return PaginatedResponse.create(items=validated, total=total, page=pagination.page, limit=pagination.limit)
+
+
+@router.get(
     "",
     response_model=PaginatedResponse[TourBookingRead],
     status_code=status.HTTP_200_OK,
@@ -52,6 +72,7 @@ async def list_bookings(
     items, total = await TourService.list_bookings(db, user, status_filter=status_filter, pagination=pagination)
     validated = [TourBookingRead.model_validate(b) for b in items]
     return PaginatedResponse.create(items=validated, total=total, page=pagination.page, limit=pagination.limit)
+
 
 
 @router.get(

@@ -1,35 +1,33 @@
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import { supabasePublic } from '@/lib/supabase/public';
-import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { Campus } from '@/types';
 import { DEKUT_CAMPUS_FALLBACK } from '@/lib/data/campus-fallback';
+import { getApiUrl } from '@/lib/api/config';
 
 export { DEKUT_CAMPUS_FALLBACK };
 
-// The fallback id is the string sentinel 'dekut' (not a real UUID). A campus
-// resolved from the DB always carries a UUID, so this distinguishes a live row
-// from the fallback and lets callers skip campus-scoped queries until the
-// campuses migration has actually been applied.
 export function isFallbackCampus(campus: Campus): boolean {
   return campus.id === DEKUT_CAMPUS_FALLBACK.id;
 }
 
-const CAMPUS_CACHE_REVALIDATE = 86400;
+const CAMPUS_CACHE_REVALIDATE = 300;
+
+async function publicFetch<T>(path: string): Promise<T | null> {
+  const res = await fetch(getApiUrl(path), { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error(`API request failed: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as T;
+}
 
 async function fetchCampusBySlug(slug: string): Promise<Campus> {
-  const { data } = await supabasePublic
-    .from('campuses')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'active')
-    .single();
-
-  if (!data) {
+  try {
+    const campus = await publicFetch<Campus>(`/campuses/${slug}`);
+    return campus || DEKUT_CAMPUS_FALLBACK;
+  } catch (error) {
+    console.error(`Failed to fetch campus by slug (${slug}):`, error);
     return DEKUT_CAMPUS_FALLBACK;
   }
-
-  return data as Campus;
 }
 
 export const getCampusBySlug = cache(
@@ -40,18 +38,18 @@ export const getCampusBySlug = cache(
 );
 
 async function fetchCampusById(id: string): Promise<Campus> {
-  const { data } = await supabasePublic
-    .from('campuses')
-    .select('*')
-    .eq('id', id)
-    .eq('status', 'active')
-    .single();
-
-  if (!data) {
+  // We don't have a direct getById in the new API, but we can list all and find it,
+  // or use the backend (which normally searches by id or slug).
+  // Actually, getBySlugServer on FastAPI backend supports either ID or Slug if implemented right.
+  // Wait, the campus router only says /{slug}. Let's just fetch all and find it, it's cached anyway.
+  try {
+    const campuses = await publicFetch<Campus[]>('/campuses');
+    const campus = campuses?.find((c) => c.id === id);
+    return campus || DEKUT_CAMPUS_FALLBACK;
+  } catch (error) {
+    console.error(`Failed to fetch campus by id (${id}):`, error);
     return DEKUT_CAMPUS_FALLBACK;
   }
-
-  return data as Campus;
 }
 
 export const getCampusById = cache(
@@ -68,17 +66,16 @@ export const getCampusById = cache(
 );
 
 async function fetchAllCampuses(): Promise<Campus[]> {
-  const { data } = await supabasePublic
-    .from('campuses')
-    .select('*')
-    .neq('status', 'suspended')
-    .order('slug', { ascending: true });
-
-  if (!data || data.length === 0) {
+  try {
+    const campuses = await publicFetch<Campus[]>('/campuses');
+    if (!campuses || campuses.length === 0) {
+      return [DEKUT_CAMPUS_FALLBACK];
+    }
+    return campuses;
+  } catch (error) {
+    console.error('Failed to fetch all campuses:', error);
     return [DEKUT_CAMPUS_FALLBACK];
   }
-
-  return data as Campus[];
 }
 
 export const getAllCampuses = cache(
@@ -88,19 +85,16 @@ export const getAllCampuses = cache(
   }),
 );
 
-// Cookie-free variant for use in generateStaticParams (runs at build time without
-// an HTTP request context). Uses the service-role admin client so no cookies() call
-// is made, which would throw "cookies() was called in a static context".
 export async function getAllCampusesStatic(): Promise<Campus[]> {
-  const { data } = await supabaseAdmin
-    .from('campuses')
-    .select('*')
-    .neq('status', 'suspended')
-    .order('slug', { ascending: true });
-
-  if (!data || data.length === 0) {
+  try {
+    // Static fetch uses the cookie-free public API (campuses is public, no auth needed).
+    const campuses = await publicFetch<Campus[]>('/campuses');
+    if (!campuses || campuses.length === 0) {
+      return [DEKUT_CAMPUS_FALLBACK];
+    }
+    return campuses;
+  } catch (error) {
     return [DEKUT_CAMPUS_FALLBACK];
   }
-
-  return data as Campus[];
 }
+

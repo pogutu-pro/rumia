@@ -1,29 +1,16 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
-import { isAdminUser } from '@/lib/utils/admin';
-import { removeManagerRoleAction } from './staff';
+import { adminApi } from '@/lib/api/admin';
 import { revalidatePath } from 'next/cache';
 
-async function getAdminUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const isAdmin = await isAdminUser(supabase, user.id);
-  return isAdmin ? user : null;
-}
-
 export async function adminRemoveManagerAction(userId: string) {
-  const admin = await getAdminUser();
-  if (!admin) {
-    return { success: false, error: 'Unauthorized' };
-  }
-
-  const res = await removeManagerRoleAction(userId);
-  if (res.success) {
+  try {
+    await adminApi.removeManagerServer(userId);
     revalidatePath('/admin/managers');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || err.data?.detail || 'Failed to remove manager' };
   }
-  return res;
 }
 
 export async function adminRevalidateManagersAction() {

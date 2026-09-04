@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
+import { apiClient } from '@/lib/api/client';
 import {
   Heart,
   MapPin,
@@ -27,7 +27,7 @@ import { useCompareStore, type CompareSelection } from '@/stores/compare-store';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 
 interface SavedListing {
-  id: string; // saved_hostels table row id
+  id: string; // listing id (FastAPI /profiles/me/saved is authoritative)
   listing_id: string;
   created_at: string;
   listings: {
@@ -52,6 +52,77 @@ interface SavedListing {
     amenities?: string[] | null;
     listing_images: { r2_url: string; display_order: number; blur_data_url?: string }[];
   } | null;
+}
+
+interface ApiSavedImage {
+  r2_url: string;
+  display_order: number;
+  blur_data_url?: string | null;
+}
+
+// Shape of a listing as returned by GET /profiles/me/saved (ListingRead).
+interface ApiSavedListing {
+  id: string;
+  title: string;
+  price: number;
+  price_single?: number | null;
+  price_sharing?: number | null;
+  location: string;
+  slug?: string | null;
+  county?: string | null;
+  area?: string | null;
+  room_type?: string | null;
+  bathroom_type?: string | null;
+  distance_category?: string | null;
+  distance_to_campus?: string | null;
+  gender?: string | null;
+  wifi_included?: boolean;
+  water_included?: boolean;
+  electricity_included?: boolean;
+  security_type?: string | null;
+  amenities?: string[] | null;
+  images: ApiSavedImage[];
+  created_at: string;
+}
+
+interface ApiSavedResponse {
+  items: ApiSavedListing[];
+  total: number;
+}
+
+function toSavedListing(l: ApiSavedListing): SavedListing {
+  const listing: SavedListing['listings'] = {
+    id: l.id,
+    title: l.title,
+    price: l.price,
+    price_single: l.price_single,
+    price_sharing: l.price_sharing,
+    location: l.location,
+    slug: l.slug ?? '',
+    county: l.county ?? '',
+    area: l.area ?? '',
+    room_type: l.room_type,
+    bathroom_type: l.bathroom_type,
+    distance_category: l.distance_category,
+    distance_to_campus: l.distance_to_campus,
+    gender: l.gender,
+    wifi_included: l.wifi_included,
+    water_included: l.water_included,
+    electricity_included: l.electricity_included,
+    security_type: l.security_type,
+    amenities: l.amenities,
+    listing_images: l.images.map((img) => ({
+      r2_url: img.r2_url,
+      display_order: img.display_order,
+      blur_data_url: img.blur_data_url ?? undefined,
+    })),
+  };
+  return {
+    id: l.id,
+    listing_id: l.id,
+    created_at: l.created_at,
+    listings: listing,
+  };
 }
 
 interface AccountSavedTabProps {
@@ -83,30 +154,10 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
     let cancelled = false;
 
     async function fetchSaved() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user || cancelled) {
-        setLoading(false);
-        return;
-      }
-
-      const { data } = await supabase
-        .from('saved_hostels')
-        .select(
-          `id, listing_id, created_at,
-           listings(id, title, price, price_single, price_sharing, location, slug, county, area,
-             room_type, bathroom_type, distance_category, distance_to_campus, gender,
-             wifi_included, water_included, electricity_included, security_type, amenities,
-             listing_images(r2_url, display_order, blur_data_url))`,
-        )
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (!cancelled && data) {
-        const validData = (data as unknown as SavedListing[]).filter((item) => item.listings);
+      try {
+        const res = await apiClient<ApiSavedResponse>('/profiles/me/saved?limit=100');
+        if (cancelled) return;
+        const validData = res.items.map(toSavedListing).filter((item) => item.listings);
         setSaved(validData);
 
         // Pre-populate selections for compare store from saved listings if available
@@ -143,6 +194,8 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
         if (selectedIds.length > 0) {
           loadFromIds(selectedIds, remoteSelections);
         }
+      } catch {
+        // Error fetching saved hostels — leave the tab empty.
       }
       setLoading(false);
     }
@@ -153,12 +206,15 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
     };
   }, []);
 
-  async function handleUnsave(savedId: string, listingId: string) {
-    setRemovingId(savedId);
-    const supabase = createClient();
-    await supabase.from('saved_hostels').delete().eq('id', savedId);
-    setSaved((prev) => prev.filter((s) => s.id !== savedId));
-    removeSelection(listingId);
+  async function handleUnsave(_savedId: string, listingId: string) {
+    setRemovingId(listingId);
+    try {
+      await apiClient(`/profiles/me/saved/${listingId}`, { method: 'DELETE' });
+      setSaved((prev) => prev.filter((s) => s.listing_id !== listingId));
+      removeSelection(listingId);
+    } catch {
+      // Failed to unsave remotely — keep the item.
+    }
     setRemovingId(null);
   }
 

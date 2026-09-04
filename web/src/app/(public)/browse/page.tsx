@@ -4,7 +4,7 @@ import { Search, MapPin, DollarSign, ArrowRight, SlidersHorizontal, Eye } from '
 import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabasePublic } from '@/lib/supabase/public';
+import { searchApi } from '@/lib/api/search';
 
 export const revalidate = 0;
 
@@ -28,56 +28,27 @@ interface PageProps {
 export default async function BrowsePage({ searchParams }: PageProps) {
   const { search, minPrice, maxPrice } = await searchParams;
 
-  let dbQuery = supabasePublic
-    .from('listings')
-    .select(`
-      id,
-      title,
-      description,
-      price,
-      location,
-      agent_id,
-      is_active,
-      slug,
-      county,
-      area,
-      created_at,
-      sort_position,
-      listing_images (
-        r2_url,
-        display_order
-      ),
-      agents (
-        name
-      )
-    `)
-    .eq('is_active', true);
+  const minVal = minPrice ? parseFloat(minPrice) : undefined;
+  const maxVal = maxPrice ? parseFloat(maxPrice) : undefined;
 
-  if (search) {
-    dbQuery = dbQuery.or(`location.ilike.%${search}%,title.ilike.%${search}%`);
+  let listings: any[] = [];
+  try {
+    const feed = await searchApi.searchServer({
+      q: search,
+      min_price: minVal && !isNaN(minVal) ? minVal : undefined,
+      max_price: maxVal && !isNaN(maxVal) ? maxVal : undefined,
+      limit: 100,
+    });
+    
+    listings = feed.items.map((item: any) => ({
+      ...item,
+      listing_images: item.images,
+      agents: item.agent,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch browse listings:', error);
   }
 
-  if (minPrice) {
-    const minVal = parseFloat(minPrice);
-    if (!isNaN(minVal)) {
-      dbQuery = dbQuery.gte('price', minVal);
-    }
-  }
-
-  if (maxPrice) {
-    const maxVal = parseFloat(maxPrice);
-    if (!isNaN(maxVal)) {
-      dbQuery = dbQuery.lte('price', maxVal);
-    }
-  }
-
-  // Order: pinned listings first (sort_position), then newest created_at DESC
-  dbQuery = dbQuery
-    .order('sort_position', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false });
-
-  const { data: listingsData } = await dbQuery;
-  let listings = (listingsData || []) as any[];
 
 
 

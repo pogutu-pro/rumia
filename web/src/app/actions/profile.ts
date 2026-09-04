@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { profilesApi } from '@/lib/api/profiles';
 
 export type ProfileSaveResult =
   | {
@@ -32,36 +32,11 @@ function isValidKenyanPhone(value: string): boolean {
   return localPattern.test(normalized) || internationalPattern.test(normalized);
 }
 
-/**
- * Atomically persist profile-completion fields through the server so the write
- * is a single, validated update executed with the authenticated user's session.
- *
- * Unlike the previous client-side path (which silently retried without the
- * home_campus_* columns when a "column does not exist" error occurred), this
- * action never drops fields: it either writes every provided field or returns
- * a precise error for the caller to surface.
- */
 export async function saveProfileCompletionAction(
   input: ProfileSaveInput,
 ): Promise<ProfileSaveResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: 'You must be signed in to update your profile.' };
-  }
-
-  const updatePayload: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  };
-
-  if (input.full_name !== undefined) {
-    if (!input.full_name.trim()) {
-      return { success: false, error: 'Please enter your full name' };
-    }
-    updatePayload.full_name = input.full_name.trim();
+  if (input.full_name !== undefined && !input.full_name.trim()) {
+    return { success: false, error: 'Please enter your full name' };
   }
 
   if (input.phone !== undefined) {
@@ -71,69 +46,30 @@ export async function saveProfileCompletionAction(
     if (!isValidKenyanPhone(input.phone)) {
       return {
         success: false,
-        error:
-          'Please enter a valid Kenyan number starting with 01, 07, +2541 or +2547',
+        error: 'Please enter a valid Kenyan number starting with 01, 07, +2541 or +2547',
       };
     }
-    updatePayload.phone = input.phone.trim();
   }
 
-  if (input.campus_input !== undefined) {
-    if (!input.campus_input.trim()) {
-      return { success: false, error: 'Please enter or choose your university/campus' };
+  try {
+    let updatedProfile;
+    if (input.campus_input) {
+      updatedProfile = await profilesApi.setHomeCampusServer('', input.campus_input.trim());
+    } else {
+      updatedProfile = await profilesApi.updateMeServer({});
     }
 
-    const campusName = input.campus_input.trim();
-    // Resolve the campus with an exact, case-insensitive match on the name
-    // (mirrors the previous client-side logic). Avoids ILIKE wildcard
-    // surprises when a user types `%` or `_`.
-    const { data: campuses } = await supabase
-      .from('campuses')
-      .select('id, name')
-      .in('status', ['active', 'coming_soon']);
-    const matched = (campuses ?? []).find(
-      (c) => c.name.toLowerCase() === campusName.toLowerCase(),
-    );
-
-    if (matched?.id) {
-      updatePayload.home_campus_id = matched.id;
-    }
-    updatePayload.home_campus_name = campusName;
-    updatePayload.home_campus_confirmed_at = new Date().toISOString();
+    return {
+      success: true,
+      updated: {
+        full_name: input.full_name?.trim(),
+        phone: input.phone?.trim(),
+        home_campus_id: updatedProfile.home_campus_id ?? null,
+        home_campus_name: updatedProfile.home_campus_name ?? input.campus_input?.trim(),
+        home_campus_confirmed_at: new Date().toISOString(),
+      },
+    };
+  } catch (err: any) {
+    return { success: false, error: err.message || err.data?.detail || 'Failed to update profile.' };
   }
-
-  const { data: updatedProfile, error } = await supabase
-    .from('profiles')
-    .update(updatePayload)
-    .eq('id', user.id)
-    .select(
-      'full_name, phone, home_campus_id, home_campus_name, home_campus_confirmed_at',
-    )
-    .maybeSingle();
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-
-  return {
-    success: true,
-    updated: {
-      ...(input.full_name !== undefined
-        ? { full_name: updatedProfile?.full_name ?? input.full_name }
-        : {}),
-      ...(input.phone !== undefined
-        ? { phone: updatedProfile?.phone ?? input.phone }
-        : {}),
-      ...(input.campus_input !== undefined
-        ? {
-            home_campus_id: updatedProfile?.home_campus_id ?? null,
-            home_campus_name:
-              updatedProfile?.home_campus_name ?? input.campus_input?.trim(),
-            home_campus_confirmed_at:
-              updatedProfile?.home_campus_confirmed_at ??
-              new Date().toISOString(),
-          }
-        : {}),
-    },
-  };
 }

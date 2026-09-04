@@ -161,7 +161,7 @@ class ReviewService:
         log = ReviewModerationLog(
             id=str(uuid.uuid4()),
             review_id=review_id,
-            moderator_id=user.id,
+            actor_user_id=user.id,
             action=action.action,
             note=action.note,
         )

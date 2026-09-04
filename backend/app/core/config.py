@@ -39,9 +39,21 @@ class Settings(BaseSettings):
     VAPID_PRIVATE_KEY: str = ""
     VAPID_SUBJECT: str = "mailto:support@rumia.co.ke"
 
+    # Rate limiting (per-IP, app-level). Sensitive routes apply stricter limits.
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_DEFAULT: str = "300/minute"
+
+    # Expo Push (optional bearer token when EAS push security is enabled)
+    EXPO_PUSH_ACCESS_TOKEN: str = ""
+
     # PostHog Telemetry
     POSTHOG_PROJECT_TOKEN: str = ""
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
+
+    # Sentry Error Tracking
+    SENTRY_DSN: str = ""
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.2  # 20% of transactions for performance tracking
+    SENTRY_PROFILES_SAMPLE_RATE: float = 0.1  # 10% of transactions for profiling
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -61,6 +73,13 @@ class Settings(BaseSettings):
             return v.replace("postgres://", "postgresql+asyncpg://", 1)
         if v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
             return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
+
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, v):
+        if isinstance(v, str):
+            return v.lower() not in ("false", "0", "no", "release", "")
         return v
 
 

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { signInWithGoogle } from '@/lib/supabase/auth';
+import { apiClient } from '@/lib/api/client';
 import posthog from 'posthog-js';
 import { AccountHeader } from './account-header';
 import type { AccountTab } from './account-tabs';
@@ -151,15 +152,19 @@ export default function AccountPage() {
           .eq('user_id', user.id)
           .maybeSingle(),
         getMyAgentApplicationsAction(),
-        supabase
-          .from('saved_hostels')
-          .select(
-            `id, listing_id, created_at,
-             listings(id, title, price, location, slug, county, area,
-               listing_images(r2_url, display_order))`,
-          )
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
+        apiClient<{
+          items: {
+            id: string;
+            title: string;
+            price: number;
+            location: string;
+            slug: string | null;
+            county: string | null;
+            area: string | null;
+            images: { r2_url: string; display_order: number }[];
+          }[];
+          total: number;
+        }>('/profiles/me/saved?limit=5'),
         supabase
           .from('tour_bookings')
           .select(
@@ -192,9 +197,27 @@ export default function AccountPage() {
           (appsRes as any[])?.some((app) => app.status === 'pending') ?? false,
         );
 
-        if (savedRes.data) {
-          setSavedCount(savedRes.data.length);
-          setSavedPreview(savedRes.data as unknown as OverviewSavedItem[]);
+        if (savedRes && savedRes.total > 0) {
+          setSavedCount(savedRes.total);
+          setSavedPreview(
+            (savedRes as { items: any[] }).items.map((l) => ({
+              id: l.id,
+              listing_id: l.id,
+              listings: {
+                id: l.id,
+                title: l.title,
+                price: l.price,
+                location: l.location,
+                slug: l.slug,
+                county: l.county,
+                area: l.area,
+                listing_images: l.images?.map((img: { r2_url: string; display_order: number }) => ({
+                  r2_url: img.r2_url,
+                  display_order: img.display_order,
+                })),
+              },
+            })) as OverviewSavedItem[],
+          );
         }
 
         if (toursRes.data) {

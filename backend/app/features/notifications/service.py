@@ -6,8 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundException
 from app.core.security import AuthenticatedUser
-from app.features.notifications.models import AppNotification, PushSubscription
-from app.features.notifications.schemas import PushSubscriptionCreate
+from app.features.notifications.models import AppNotification, DeviceToken, PushSubscription
+from app.features.notifications.schemas import (
+    DeviceTokenActionResponse,
+    DeviceTokenRegisterRequest,
+    PushSubscriptionCreate,
+)
 
 
 class NotificationService:
@@ -20,6 +24,7 @@ class NotificationService:
             existing.user_id = user.id
             existing.p256dh = data.p256dh
             existing.auth = data.auth
+            existing.is_active = True
             existing.last_used_at = now
             await db.flush()
             return existing
@@ -30,6 +35,7 @@ class NotificationService:
             endpoint=data.endpoint,
             p256dh=data.p256dh,
             auth=data.auth,
+            is_active=True,
             created_at=now,
             last_used_at=now,
         )
@@ -44,6 +50,57 @@ class NotificationService:
         if sub:
             await db.delete(sub)
             await db.flush()
+
+    @staticmethod
+    async def register_device_token(
+        db: AsyncSession, user: AuthenticatedUser, data: DeviceTokenRegisterRequest
+    ) -> DeviceTokenActionResponse:
+        res = await db.execute(select(DeviceToken).where(DeviceToken.token == data.token))
+        existing = res.scalar_one_or_none()
+        now = datetime.now(timezone.utc)
+        if existing:
+            existing.user_id = user.id
+            existing.platform = data.platform
+            existing.is_active = True
+            existing.updated_at = now
+            await db.flush()
+            return DeviceTokenActionResponse(
+                message="Device token updated successfully", token=data.token, is_active=True
+            )
+
+        token_obj = DeviceToken(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
+            token=data.token,
+            platform=data.platform,
+            is_active=True,
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(token_obj)
+        await db.flush()
+        return DeviceTokenActionResponse(
+            message="Device token registered successfully", token=data.token, is_active=True
+        )
+
+    @staticmethod
+    async def unregister_device_token(
+        db: AsyncSession, user: AuthenticatedUser, token: str
+    ) -> DeviceTokenActionResponse:
+        res = await db.execute(
+            select(DeviceToken).where(
+                DeviceToken.token == token, DeviceToken.user_id == user.id
+            )
+        )
+        existing = res.scalar_one_or_none()
+        if existing:
+            existing.is_active = False
+            existing.updated_at = datetime.now(timezone.utc)
+            await db.flush()
+
+        return DeviceTokenActionResponse(
+            message="Device token unregistered successfully", token=token, is_active=False
+        )
 
     @staticmethod
     async def list_notifications(db: AsyncSession, user: AuthenticatedUser, limit: int = 50) -> List[AppNotification]:

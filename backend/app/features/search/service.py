@@ -56,7 +56,7 @@ class SearchService:
         total = total_result.scalar_one()
 
         # Apply ordering and pagination
-        stmt = stmt.order_by(Listing.sort_order.asc().nulls_last(), Listing.created_at.desc())
+        stmt = stmt.order_by(Listing.sort_position.asc().nulls_last(), Listing.created_at.desc())
         stmt = stmt.offset(pagination.offset).limit(pagination.limit)
 
         result = await db.execute(stmt)

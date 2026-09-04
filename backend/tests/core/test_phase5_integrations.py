@@ -1,6 +1,6 @@
 """Phase 5 tests — Cloudflare R2 storage, WhatsApp builder, and PostHog dispatcher."""
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import AsyncMock, patch, MagicMock
 
 
 # ── R2 Storage ───────────────────────────────────────────────────────────────
@@ -124,6 +124,227 @@ class TestWhatsAppBuilder:
         )
         # Cleaned phone should appear without spaces/dashes/+
         assert "https://wa.me/254712345678" in url
+
+
+# ── Expo Push Integration ────────────────────────────────────────────────────
+
+class _MockExpoResponse:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self._payload
+
+
+class _MockExpoClient:
+    def __init__(self, calls, payload):
+        self.calls = calls
+        self.payload = payload
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return None
+
+    async def post(self, url, json, headers):
+        self.calls.append({"url": url, "json": json, "headers": headers})
+        return _MockExpoResponse(self.payload)
+
+
+class TestExpoPushService:
+    def test_token_detection(self):
+        from app.core.integrations.expo_push import ExpoPushService
+
+        assert ExpoPushService.is_expo_push_token("ExpoPushToken[abc]")
+        assert ExpoPushService.is_expo_push_token("ExponentPushToken[abc]")
+        assert not ExpoPushService.is_expo_push_token("native-fcm-token")
+
+    async def test_send_push_delivered(self):
+        from app.core.integrations.expo_push import ExpoPushService
+
+        calls = []
+        with patch(
+            "httpx.AsyncClient",
+            side_effect=lambda *args, **kwargs: _MockExpoClient(
+                calls,
+                {"data": {"status": "ok", "id": "ticket-1"}},
+            ),
+        ):
+            status = await ExpoPushService.send_push(
+                token="ExpoPushToken[abc]",
+                title="Hello",
+                body="World",
+                data={"url": "/notifications"},
+            )
+
+        assert status == "delivered"
+        assert calls[0]["url"] == ExpoPushService.SEND_URL
+        assert calls[0]["json"]["to"] == "ExpoPushToken[abc]"
+
+    async def test_send_push_marks_unregistered_devices_stale(self):
+        from app.core.integrations.expo_push import ExpoPushService
+
+        calls = []
+        with patch(
+            "httpx.AsyncClient",
+            side_effect=lambda *args, **kwargs: _MockExpoClient(
+                calls,
+                {
+                    "data": {
+                        "status": "error",
+                        "details": {"error": "DeviceNotRegistered"},
+                    },
+                },
+            ),
+        ):
+            status = await ExpoPushService.send_push(
+                token="ExponentPushToken[abc]",
+                title="Hello",
+                body="World",
+            )
+
+        assert status == "stale"
+
+    async def test_send_push_skips_non_expo_tokens(self):
+        from app.core.integrations.expo_push import ExpoPushService
+
+        with patch("httpx.AsyncClient") as client_mock:
+            status = await ExpoPushService.send_push(
+                token="native-fcm-token",
+                title="Hello",
+                body="World",
+            )
+
+        assert status == "skipped"
+        client_mock.assert_not_called()
+
+
+# ── Background Push Worker ───────────────────────────────────────────────────
+
+class _MockFetchAllResult:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def fetchall(self):
+        return self.rows
+
+
+class _MockWorkerSession:
+    def __init__(self, results=None):
+        self.results = list(results or [])
+        self.executions = []
+        self.commit = AsyncMock(return_value=None)
+
+    async def execute(self, stmt, params=None):
+        self.executions.append({"stmt": str(stmt), "params": params or {}})
+        if self.results and "SELECT" in str(stmt):
+            return self.results.pop(0)
+        return _MockFetchAllResult([])
+
+
+class _MockSessionContext:
+    def __init__(self, session):
+        self.session = session
+
+    async def __aenter__(self):
+        return self.session
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return None
+
+
+class _MockSessionFactory:
+    def __init__(self, sessions):
+        self.sessions = list(sessions)
+
+    def __call__(self):
+        return _MockSessionContext(self.sessions.pop(0))
+
+
+class TestPushWorker:
+    async def test_dispatches_to_web_and_mobile_tokens_and_deactivates_stale(self):
+        from types import SimpleNamespace
+
+        from app.core.tasks.worker import send_push_to_user
+
+        web_row = SimpleNamespace(id="web-1", endpoint="https://push.example", p256dh="p", auth="a")
+        device_row = SimpleNamespace(id="device-1", token="ExpoPushToken[abc]")
+        read_session = _MockWorkerSession(
+            results=[
+                _MockFetchAllResult([web_row]),
+                _MockFetchAllResult([device_row]),
+            ]
+        )
+        write_session = _MockWorkerSession()
+        session_factory = _MockSessionFactory([read_session, write_session])
+
+        with (
+            patch("app.core.database.async_session_factory", session_factory),
+            patch(
+                "app.core.integrations.webpush.WebPushService.send_push_status",
+                return_value="stale",
+            ) as web_push_mock,
+            patch(
+                "app.core.integrations.expo_push.ExpoPushService.send_push",
+                new=AsyncMock(return_value="stale"),
+            ) as expo_push_mock,
+        ):
+            await send_push_to_user(
+                user_id="student-1",
+                title="New message",
+                message="You have an update",
+                data={"url": "/notifications"},
+            )
+
+        assert len(read_session.executions) == 3
+        insert_stmt = str(read_session.executions[0]["stmt"])
+        assert "INSERT INTO app_notifications" in insert_stmt
+        assert read_session.executions[0]["params"] == {
+            "user_id": "student-1",
+            "title": "New message",
+            "message": "You have an update",
+            "type": "info",
+        }
+        web_push_mock.assert_called_once()
+        expo_push_mock.assert_awaited_once()
+        assert [execution["params"]["id"] for execution in write_session.executions] == [
+            "web-1",
+            "device-1",
+        ]
+        write_session.commit.assert_awaited_once()
+
+    async def test_in_app_notification_uses_data_type_and_prunes_when_no_channels(self):
+        from app.core.tasks.worker import send_push_to_user
+
+        read_session = _MockWorkerSession()
+        write_session = _MockWorkerSession()
+        session_factory = _MockSessionFactory([read_session, write_session])
+
+        with (
+            patch("app.core.database.async_session_factory", session_factory),
+            patch(
+                "app.core.integrations.webpush.WebPushService.send_push_status",
+                return_value="stale",
+            ),
+            patch(
+                "app.core.integrations.expo_push.ExpoPushService.send_push",
+                new=AsyncMock(return_value="stale"),
+            ) as expo_push_mock,
+        ):
+            await send_push_to_user(
+                user_id="student-2",
+                title="New review",
+                message="Someone reviewed your hostel",
+                data={"type": "review", "listing_id": "listing-9"},
+            )
+
+        assert read_session.executions[0]["params"]["type"] == "review"
+        assert len(read_session.executions) == 3
+        expo_push_mock.assert_not_awaited()
 
 
 # ── PostHog Integration ──────────────────────────────────────────────────────

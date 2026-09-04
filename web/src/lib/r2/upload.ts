@@ -37,28 +37,6 @@ export async function processAndUploadImage(
   return res.json();
 }
 
-export async function uploadToR2(file: File): Promise<string> {
-  const res = await fetch('/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename: file.name, contentType: file.type }),
-  });
-
-  if (!res.ok) throw new Error('Failed to get upload URL');
-
-  const { uploadUrl, key } = await res.json();
-
-  const upload = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
-  });
-
-  if (!upload.ok) throw new Error('Failed to upload file');
-
-  return `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`;
-}
-
 async function compressForUpload(file: File): Promise<CompressedImage> {
   try {
     return await compressImage(file);

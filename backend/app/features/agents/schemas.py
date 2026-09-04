@@ -14,9 +14,9 @@ class AgentRead(BaseModel):
     portfolio_url: Optional[str] = None
     is_featured: bool = False
     is_founder: bool = False
-    is_support_team: bool = False
+    is_support: bool = False
     bio: Optional[str] = None
-    profile_image_url: Optional[str] = None
+    profile_photo_url: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -28,7 +28,7 @@ class AgentUpdate(BaseModel):
     whatsapp: Optional[str] = None
     bio: Optional[str] = None
     portfolio_url: Optional[str] = None
-    profile_image_url: Optional[str] = None
+    profile_photo_url: Optional[str] = None
 
 
 class AgentApplicationCreate(BaseModel):

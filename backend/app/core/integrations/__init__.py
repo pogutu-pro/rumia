@@ -1,1 +1,1 @@
-"""External integrations core module for Web Push, WhatsApp, and PostHog."""
+"""External integrations core module for push, WhatsApp, and telemetry."""

@@ -7,12 +7,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
+from app.features.agents.models import AgentProfile
 from app.features.listings.models import Listing
 from app.features.leads.models import Commission, Lead
 from app.features.leads.schemas import LeadTrackRequest
 
 
 class LeadService:
+    @staticmethod
+    async def _get_agent_ids_for_user(db: AsyncSession, user: AuthenticatedUser) -> List[str]:
+        agent_ids = [user.id]
+        res = await db.execute(select(AgentProfile.id).where(AgentProfile.user_id == user.id))
+        agent_pk = res.scalar_one_or_none()
+        if agent_pk and agent_pk not in agent_ids:
+            agent_ids.append(agent_pk)
+        return agent_ids
+
     @staticmethod
     async def track_lead(
         db: AsyncSession,
@@ -47,7 +57,6 @@ class LeadService:
 
         return lead
 
-
     @staticmethod
     async def list_leads(
         db: AsyncSession,
@@ -59,7 +68,8 @@ class LeadService:
 
         stmt = select(Lead)
         if not user.is_admin:
-            stmt = stmt.where(Lead.agent_id == user.id)
+            agent_ids = await LeadService._get_agent_ids_for_user(db, user)
+            stmt = stmt.where(Lead.agent_id.in_(agent_ids))
 
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_res = await db.execute(count_stmt)
@@ -80,7 +90,8 @@ class LeadService:
 
         stmt = select(Commission)
         if not user.is_admin:
-            stmt = stmt.where(Commission.agent_id == user.id)
+            agent_ids = await LeadService._get_agent_ids_for_user(db, user)
+            stmt = stmt.where(Commission.agent_id.in_(agent_ids))
 
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_res = await db.execute(count_stmt)
@@ -89,6 +100,7 @@ class LeadService:
         stmt = stmt.order_by(Commission.created_at.desc()).offset(pagination.offset).limit(pagination.limit)
         res = await db.execute(stmt)
         return list(res.scalars().all()), total
+
 
     @staticmethod
     async def pay_commission(

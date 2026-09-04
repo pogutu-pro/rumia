@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { supabasePublic } from '@/lib/supabase/public';
+import { listingsApi } from '@/lib/api/listings';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -37,80 +37,71 @@ import {
 import { getListingViewCounts } from '@/lib/listing-views';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
-import { isFallbackCampus } from '@/lib/data/campuses';
+import { getCampusById, isFallbackCampus } from '@/lib/data/campuses';
 import type { Campus } from '@/types';
 
-export const revalidate = 86400;
+export const revalidate = 300;
 
 interface PageProps {
   params: Promise<{ county: string; area: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const { data: listings } = await supabasePublic
-    .from('listings')
-    .select('county, area, slug')
-    .eq('is_active', true)
-    .not('slug', 'is', null);
-
-  return (listings || []).map((l: any) => ({
-    county: l.county || 'nyeri',
-    area: l.area || 'dekut',
-    slug: l.slug,
-  }));
+  try {
+    const feed = await listingsApi.getFeedServer({ limit: 1000, is_active: true });
+    return (feed.items || []).filter(l => l.slug).map((l: any) => ({
+      county: l.county || 'nyeri',
+      area: l.area || 'dekut',
+      slug: l.slug,
+    }));
+  } catch (error) {
+    return [];
+  }
 }
 
 const getListing = cache(async (slug: string) => {
-  const { data, error } = await supabasePublic
-    .from('listings')
-    .select(
-      `
-      id, title, description, price, location, agent_id, youtube_id, is_youtube_shorts,
-      is_active, is_full, amenities, rating, views, bathroom_type, distance_to_campus,
-      security_type, electricity_included, water_included, wifi_included, hot_water_included, cooking_gas_included,
-      room_type, slug, county, area, updated_at, latitude, longitude,
-      gender, specific_location, price_single, price_sharing, mpesa_details, distance_category, pays_commission,
-      landlord_phone,
-      listing_images ( id, r2_url, category, display_order, blur_data_url, width, height, format ),
-      agents ( id, name, phone, whatsapp, slug ),
-      campuses ( * )
-    `,
-    )
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single();
+  try {
+    const listing = await listingsApi.getByIdServer(slug);
+    if (!listing || !listing.is_active) return null;
 
-  if (error || !data) return null;
+    // Fetch the full campus object for the frontend to use
+    let campusesData = null;
+    if (listing.campus_id) {
+      campusesData = await getCampusById(listing.campus_id);
+    }
 
-  const { data: roomTypes } = await supabasePublic
-    .from('listing_room_types')
-    .select('id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size')
-    .eq('listing_id', data.id);
-
-  return { ...data, listing_room_types: roomTypes || [] } as any;
+    return {
+      ...listing,
+      listing_images: listing.images,
+      agents: listing.agent,
+      listing_room_types: listing.room_types,
+      campuses: campusesData,
+    } as any;
+  } catch (error) {
+    return null;
+  }
 });
 
 async function getNearbyListings(listing: any) {
-  const { data, error } = await supabasePublic
-    .from('listings')
-    .select(
-      `
-      id, title, description, price, location, slug, county, area,
-      room_type, distance_to_campus, created_at, sort_position, is_full,
-      listing_images ( r2_url, display_order, blur_data_url ),
-      agents ( name )
-    `,
-    )
-    .eq('is_active', true)
-    .eq('county', listing.county || 'nyeri')
-    .eq('area', listing.area || 'dekut')
-    .neq('id', listing.id)
-    .order('sort_position', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false })
-    .limit(4);
-
-  if (error || !data) return [];
-  return data as any[];
+  try {
+    const feed = await listingsApi.getFeedServer({
+      county: listing.county || 'nyeri',
+      area: listing.area || 'dekut',
+      is_active: true,
+      limit: 5,
+    });
+    
+    return feed.items
+      .filter((l: any) => l.id !== listing.id)
+      .slice(0, 4)
+      .map((l: any) => ({
+        ...l,
+        listing_images: l.images,
+        agents: l.agent,
+      }));
+  } catch (error) {
+    return [];
+  }
 }
 
 export async function generateMetadata({

@@ -11,11 +11,11 @@
 
 ## 1. Current Status
 
-- **Current phase:** Phase 4 (Core Product Migration) — **IN PROGRESS**.
-- **Current domain:** Domain 1 — Campuses, Zones, and Listings READ APIs.
-- **Migration %:** 40% (Phases 1, 2 & 3 complete; Phase 4 in progress).
-- **Last completed milestone:** Phase 3 complete (Supabase JWT verification, `get_current_user`, role/campus authorization matrix, 11/11 backend pytest cases green, 12/12 frontend Jest suites green).
-- **Immediate next action:** Implementing `app/features/campuses/`, `app/features/zones/`, and `app/features/listings/` feature slices with SQLAlchemy models, Pydantic schemas, service logic, and FastAPI REST endpoints.
+- **Current phase:** Phase 6 (VPS Production Infrastructure) — **CODE COMPLETE, deployment pending user** (Oracle VPS wiring + DNS/CDN switchover).
+- **Current domain:** n/a — all 18 domains migrated (code-level); live-verified on the READ path.
+- **Migration %:** 65% (Phases 1–5 complete; Phase 6 code complete w/ `docs/DEPLOYMENT.md` runbook; Phases 7–8 pending live backend + cleanup of Supabase-direct write paths).
+- **Last completed milestone:** 2026-08-29 — live frontend↔backend integration verified + full deploy-materials pass: web Dockerfile build-arg→internal API URL, compose `env_file`/healthchecks/depends_on, nginx `client_max_body_size`, `/api/healthz`, SW-freshness script moved into web build context, ISR revalidate windows tightened (campuses/details 300 s), `docs/DEPLOYMENT.md` written, `main` vs `migration/fastapi` branch contract documented. **Frontend prod build green (`next build --webpack` + sw freshness), backend 91/91 pytest green.**
+- **Immediate next action:** user pushes `migration/fastapi` → merges to `main` → CI → CD deploys docker stack to Oracle VPS → re-point DNS/CDN (`docs/DEPLOYMENT.md` Step 3) → run verification checklist (Step 9).
 
 ---
 
@@ -73,6 +73,8 @@ Division of ownership (locked):
 7. **Oracle VPS footprint (minimal):** Nginx+TLS, FastAPI/Uvicorn, optional worker, **Redis optional/start-off**. VPS is stateless; DB/Auth/R2/secrets/backups stay in managed services.
 8. **Strangler, feature-flag-gated, single-writer-per-domain, shadow reads, canary + rollback** — production never depends on a big-bang switch.
 9. **No payment gateway exists today** (money is bookkeeping: commissions, fees, tour amounts). Do not invent one during migration.
+10. **Next.js SSR/ISR stays (DECIDED 2026-08-29)** — the web keeps server components, ISR/SEO, Supabase cookie sessions, and server actions. Re-confirmed against the locked §2 ownership table. FastAPI READ parity is verified live (listings feed, search, campuses, zones, views, pagination), but the `src/app/api/*` handlers are **business logic, not thin proxies** (R2 presign + Sharp processing, WhatsApp/push fan-out, tour state machine, rate limiting, admin guards) and are retained until Phase 8 cleanup. Versioned as such:
+    - **Removed as redundant:** `POST /api/upload` (P1 liability — route handler + dead `uploadToR2()` in `src/lib/r2/upload.ts`). The MIME-unsafe unvalidated upload URL path is gone; `/api/upload-url` + `/api/images/process` remain the only upload flow.
 
 ---
 
@@ -84,10 +86,10 @@ Division of ownership (locked):
 | 2 — Testing & FastAPI Foundation          | **COMPLETE**   | Vertical slice structure, `uv` tooling, config, DB pooler, health slice, pytest suite (3/3 pass), Dockerfile |
 | 3 — Auth, Database & Core API Contract    | **COMPLETE**   | Supabase JWT verification, role/campus guards, current-user dependency, pagination, security test matrix (11/11 pass) |
 | 4 — Core Product Migration                | **COMPLETE**   | All 18 domains migrated to FastAPI vertical slices (63/63 pytest cases green, 143/143 Jest green) |
-| 5 — Files, Background Jobs & Integrations | NOT STARTED     | R2 direct uploads, jobs (worker only if needed), integrations                                   |
-| 6 — Oracle VPS Production Infrastructure  | NOT STARTED     | Deploy fastAPI to VPS reproducibly                                                              |
-| 7 — Production Cutover & Mobile           | NOT STARTED     | Gradual rollout; mobile consumes same API                                                       |
-| 8 — Cleanup & Post-Migration Hardening    | NOT STARTED     | Remove obsolete Next backend paths only after verified                                          |
+| 5 — Files, Background Jobs & Integrations | **COMPLETE (code)** | R2 direct uploads, cron jobs, push/PostHog/Sentry wiring; deploy-time integration pending live VPS verify |
+| 6 — Oracle VPS Production Infrastructure  | **CODE COMPLETE** | Docker multi-stage build (web internal-URL arg, backend gunicorn+healthcheck), compose env_file + healthchecks, nginx TLS/proxy/body-limit, certbot renewal, `scripts/deploy.sh`, CD workflow, `docs/DEPLOYMENT.md` runbook. Deployment = user action (secrets, DNS, cert issuance) |
+| 7 — Production Cutover & Mobile           | NOT STARTED     | Gradual rollout; mobile consumes same API (only after Phases 4–6 verified live) |
+| 8 — Cleanup & Post-Migration Hardening    | IN PROGRESS     | P1 `/api/upload` killed (2026-08-29); retain business-logic `app/api/*` until write-path parity verified |
 
 ---
 
@@ -228,6 +230,23 @@ Current deployment config: no `vercel.json`, no Dockerfile, no terraform, no CI 
   - Implemented ownership verification guard (`check_ownership`).
   - Implemented standardized API pagination parameters & response contracts (`app/core/pagination.py`).
   - Built security test matrix (`tests/core/test_security.py`) verifying unauthenticated (401), invalid signature (401), expired token (401), role permissions (403), ownership checks, and current-user extraction. **11/11 backend tests pass 100% green**.
+- **2026-08-29 — Frontend↔Backend live integration + Phase 8 cleanup start:**
+  - **Decision logged (§3.10):** keep Next.js SSR/ISR + server actions + Supabase cookie auth; do NOT remove web server-side logic during the migration.
+  - Removed vulnerable `POST /api/upload` (P1) + dead `uploadToR2()`; `/api/upload-url` + `/api/images/process` remain.
+  - FastAPI hardening for Supabase pooler: `connect_args={"statement_cache_size": 0, "max_cached_statement_lifetime": 0}` (`app/core/database.py`) — fixes intermittent `DuplicatePreparedStatementError` under concurrency (verified 30/30 concurrent 200s).
+  - Real view counts on the public listings feed: `GET /api/v1/listings?sort=views` aggregates `listing_views` (read-only; DB data untouched); `ListingsRead.views` now reflects live counts. Homepage "Rumia's Top 10" is genuinely most-visited.
+  - Pagination cap raised `le=100` → `le=1000` (`app/core/pagination.py`) so `/hostels` (limit=1000) no longer 422s.
+  - URL-slug detail lookup fixed: `get_listing_by_id_or_slug` only coerces to UUID when the input parses as one (was 500 on non-UUID slugs).
+  - Web fixes: single body-read error path in `lib/api/client.ts` + `lib/api/server.ts` (was "Body has already been read"); cookie-free public fetch for `unstable_cache` campus fetchers (was "cookies() inside cache scope"); served `public/favicon.ico` (was 404).
+- **2026-08-29 — Deploy-materials pass (Phase 6 code complete):**
+  - Audited every deploy-critical file against the docker stack; verified production ground truth locally (`next build` green + `check-sw-freshness` OK, `backend` 91/91 pytest, `.next/standalone` produced).
+  - `web/Dockerfile`: `ARG NEXT_PUBLIC_API_BASE_URL` → `ENV` before build so compose injects the **internal** `http://backend:8000/api/v1` (no public hairpin for SSR; verified no client component ever calls the API URL).
+  - `web/scripts/check-sw-freshness.mjs` moved from repo root into the web build context (root copy broke docker builds: `COPY . .` context did not include it).
+  - `docker-compose.yml`: web gets `env_file: ./web/.env.production` (runtime R2/VAPID/service-role secrets it previously lacked — build-time `NEXT_PUBLIC_*` come from the same file via Next dotenv), web healthcheck, `nginx depends_on backend: service_healthy`.
+  - `nginx/nginx.conf`: added `client_max_body_size 30m` (listing image processing posts full bytes through the web container).
+  - New `web/src/app/api/healthz/route.ts` (dynamic, zero-dep health endpoint for container healthchecks).
+  - Tightened ISR staleness so a backend-down docker build can't wedge empty/fallback data for 24 h: `campuses.ts` revalidate 86400→300, listing-detail `revalidate` 86400→300 (pages stay `ƒ` Dynamic, self-heal within 5 min; CDN provides long-term caching).
+  - `docs/DEPLOYMENT.md` created — full VPS runbook: branch contract (legacy `main` vs `migration/fastapi`), VPS prereqs, env-file provisioning via scp (gitignored secrets), GitHub CD secrets, DNS/CDN switchover from Vercel, certbot issuance, post-deploy checklist, rollback, troubleshooting.
 
 ---
 
@@ -258,14 +277,13 @@ Current deployment config: no `vercel.json`, no Dockerfile, no terraform, no CI 
 
 ## 15. AI Handoff Notes
 
-- **Last completed:** Phase 3 (Auth, Database & Core API Contract). Built JWT token decoder, `get_current_user`, `require_roles`, `check_campus_scope`, `check_ownership`, standardized pagination response envelope, security test matrix (11/11 tests pass green).
-- **Files created/modified:** `backend/app/core/security.py`, `backend/app/core/pagination.py`, `backend/tests/core/test_security.py`, `fast.md`.
-- **Currently working on:** Ready for Phase 4 (Core Product Migration — Domain 1: Listings/Campuses/Zones READ APIs).
-- **Next AI — inspect first:** `fast.md` (§1/§2/§3/§5/§6), `backend/app/core/security.py`, `backend/app/core/pagination.py`.
-- **Must NOT change:** production DB schema, `.env.local` secrets, Supabase Auth flow, existing Server Actions/Route Handlers in `src/app/`. Do NOT create Alembic migrations during transition (Supabase CLI is sole DDL authority).
+- **Last completed:** 2026-08-29 — Phase 6 deploy-materials pass (code complete): docker stack audited & fixed (web env injection, internal API URL, SW script moved into build context, nginx body limit, healthchecks, ISR staleness windows), `docs/DEPLOYMENT.md` written, frontend prod build + backend 91/91 green. See §12.
+- **Files created/modified (2026-08-29):** `docs/DEPLOYMENT.md`, `web/Dockerfile`, `web/scripts/check-sw-freshness.mjs` (moved from root), `docker-compose.yml`, `nginx/nginx.conf`, `web/src/app/api/healthz/route.ts`, `web/src/lib/data/campuses.ts` (+revalidate), `.../hostels/[county]/[area]/[slug]/page.tsx` (+revalidate), `docs/internal/fast.md`. Earlier: `fast.md`; backend `app/core/{database,pagination,config}.py`, `app/features/listings/{schemas,service,router}.py`, `app/features/analytics/models.py`; web `src/lib/api/{client,server}.ts`, `src/lib/data/campuses.ts`, `src/lib/api/listings.ts`, `src/app/(public)/page.tsx`; deleted `src/app/api/upload/route.ts` + `uploadToR2`; added `web/public/favicon.ico`.
+- **Next AI — inspect first:** `docs/DEPLOYMENT.md`, `fast.md` (§1/§2/§3.10/§5/§6/§10), `backend/app/core/database.py`, `backend/app/core/security.py`, `backend/app/features/listings/service.py`.
+- **Must NOT change:** production DB schema, `.env.local`/`.env.production`/`backend/.env` secrets (gitignored, provisioned on VPS), Supabase Auth flow, existing Server Actions/Route Handlers in `src/app/` (retained per §3.10). Do NOT create Alembic migrations during transition (Supabase CLI is sole DDL authority).
 - **Tests to run before continuing:**
-  - Frontend: `pnpm test` (12 suites, 143 tests pass).
-  - Backend: `cd backend && ./.venv/bin/pytest` (11/11 tests pass).
+  - Frontend: `cd web && pnpm typecheck && pnpm build` (green as of 2026-08-29).
+  - Backend: `cd backend && ./.venv/bin/pytest` (91/91 green).
 
 ---
 
@@ -275,7 +293,7 @@ Do NOT carry these into FastAPI. Fix first (each is low-risk, independent of mig
 
 | #         | Liability (code-verified)                                                                                | Suggested fix                                                                                  |
 | --------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| P1 (HIGH) | `POST /api/upload` — no MIME/size validation, unsanitized filename, arbitrary Content-Type               | Kill; keep `/api/upload-url`                                                                   |
+| P1 (HIGH) | `POST /api/upload` — no MIME/size validation, unsanitized filename, arbitrary Content-Type               | **RESOLVED 2026-08-29** — handler + dead `uploadToR2()` removed; only `/api/upload-url` + `/api/images/process` remain |
 | P2 (HIGH) | No image deletion / orphan cleanup (`deleteFile` unused); R2 + `image_uploads` accumulate                | Add delete flow + nightly orphan sweep                                                         |
 | P3 (HIGH) | Production logger is a no-op; rows use `console.error`; no audit trail                                   | Real structured JSON logger + request IDs + Sentry; audit calls for moderation/transfers/roles |
 | P4 (MED)  | In-memory unbounded rate limiter                                                                         | Redis/shared bounded when >1 worker                                                            |

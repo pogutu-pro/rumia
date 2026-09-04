@@ -7,6 +7,9 @@ class ProfileRead(BaseModel):
     id: str
     email: Optional[str] = None
     role: str = "student"
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
     campus_id: Optional[str] = None
     home_campus_id: Optional[str] = None
     managed_campus_id: Optional[str] = None
@@ -14,11 +17,15 @@ class ProfileRead(BaseModel):
     home_campus_name: Optional[str] = None
     home_campus_confirmed: bool = False
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
     home_campus_id: Optional[str] = None
     home_campus_name: Optional[str] = None
     home_campus_confirmed: Optional[bool] = None
@@ -27,3 +34,10 @@ class ProfileUpdate(BaseModel):
 class SetHomeCampusRequest(BaseModel):
     campus_id: str
     campus_name: str
+
+
+class SavedHostelActionResponse(BaseModel):
+    message: str
+    is_saved: bool
+    listing_id: str
+

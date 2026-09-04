@@ -46,8 +46,9 @@ def decode_jwt_token(token: str) -> TokenData:
     """Decode and validate a Supabase HS256 JWT access token."""
     secret = settings.SUPABASE_JWT_SECRET
     if not secret:
-        # Fallback secret for development/testing
-        secret = "dev-secret-do-not-use-in-prod-1234567890"
+        raise UnauthorizedException(
+            "Server authentication is not configured (SUPABASE_JWT_SECRET missing)"
+        )
 
     try:
         payload = jwt.decode(
@@ -75,21 +76,20 @@ def decode_jwt_token(token: str) -> TokenData:
         raise UnauthorizedException(f"Invalid authentication token: {str(e)}")
 
 
-async def get_current_user(
-    authorization: Optional[str] = Header(None),
-    db: AsyncSession = Depends(get_db_session),
-) -> AuthenticatedUser:
-    """FastAPI Dependency: Extract Bearer JWT and return verified AuthenticatedUser."""
+def _extract_bearer_token(authorization: Optional[str]) -> Optional[str]:
     if not authorization:
-        raise UnauthorizedException("Authorization header missing")
+        return None
 
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
         raise UnauthorizedException("Invalid Authorization header format. Expected 'Bearer <token>'")
+    return parts[1]
 
-    token = parts[1]
-    token_data = decode_jwt_token(token)
 
+async def _resolve_authenticated_user(
+    db: AsyncSession,
+    token_data: TokenData,
+) -> AuthenticatedUser:
     # Query DB profiles for canonical user role & campus/region scope
     try:
         result = await db.execute(
@@ -118,6 +118,32 @@ async def get_current_user(
         email=token_data.email,
         role="student",
     )
+
+
+async def get_current_user(
+    authorization: Optional[str] = Header(None),
+    db: AsyncSession = Depends(get_db_session),
+) -> AuthenticatedUser:
+    """FastAPI Dependency: Extract Bearer JWT and return verified AuthenticatedUser."""
+    token = _extract_bearer_token(authorization)
+    if not token:
+        raise UnauthorizedException("Authorization header missing")
+
+    token_data = decode_jwt_token(token)
+    return await _resolve_authenticated_user(db, token_data)
+
+
+async def get_optional_current_user(
+    authorization: Optional[str] = Header(None),
+    db: AsyncSession = Depends(get_db_session),
+) -> Optional[AuthenticatedUser]:
+    """Resolve an authenticated user when a bearer token is present; allow anonymous reads."""
+    token = _extract_bearer_token(authorization)
+    if not token:
+        return None
+
+    token_data = decode_jwt_token(token)
+    return await _resolve_authenticated_user(db, token_data)
 
 
 def require_roles(*allowed_roles: str) -> Callable:

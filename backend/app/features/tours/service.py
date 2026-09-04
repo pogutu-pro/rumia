@@ -7,11 +7,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
+from app.features.agents.models import AgentProfile
 from app.features.tours.models import TourBooking
 from app.features.tours.schemas import TourBookingCreate, TourBookingUpdateStatus
 
 
 class TourService:
+    @staticmethod
+    async def _get_agent_ids_for_user(db: AsyncSession, user: AuthenticatedUser) -> List[str]:
+        agent_ids = [user.id]
+        res = await db.execute(select(AgentProfile.id).where(AgentProfile.user_id == user.id))
+        agent_pk = res.scalar_one_or_none()
+        if agent_pk and agent_pk not in agent_ids:
+            agent_ids.append(agent_pk)
+        return agent_ids
+
     @staticmethod
     async def create_booking(
         db: AsyncSession,
@@ -51,11 +61,30 @@ class TourService:
 
         stmt = select(TourBooking)
         if not user.is_admin:
-            stmt = stmt.where(TourBooking.agent_id == user.id)
+            agent_ids = await TourService._get_agent_ids_for_user(db, user)
+            stmt = stmt.where(TourBooking.agent_id.in_(agent_ids))
 
         if status_filter:
             stmt = stmt.where(TourBooking.status == status_filter)
 
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_res = await db.execute(count_stmt)
+        total = total_res.scalar_one()
+
+        stmt = stmt.order_by(TourBooking.created_at.desc()).offset(pagination.offset).limit(pagination.limit)
+        res = await db.execute(stmt)
+        return list(res.scalars().all()), total
+
+    @staticmethod
+    async def list_my_tours(
+        db: AsyncSession,
+        user: AuthenticatedUser,
+        pagination: Optional[PaginationParams] = None,
+    ) -> Tuple[List[TourBooking], int]:
+        if pagination is None:
+            pagination = PaginationParams(page=1, limit=20)
+
+        stmt = select(TourBooking).where(TourBooking.linked_user_id == user.id)
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_res = await db.execute(count_stmt)
         total = total_res.scalar_one()
@@ -71,7 +100,8 @@ class TourService:
         if not booking:
             raise NotFoundException(f"Booking with id '{booking_id}' not found")
 
-        if not user.is_admin and booking.agent_id != user.id and booking.linked_user_id != user.id:
+        agent_ids = await TourService._get_agent_ids_for_user(db, user)
+        if not user.is_admin and booking.agent_id not in agent_ids and booking.linked_user_id != user.id:
             raise ForbiddenException("Not authorized to view this booking")
 
         return booking
@@ -88,7 +118,8 @@ class TourService:
         if not booking:
             raise NotFoundException(f"Booking with id '{booking_id}' not found")
 
-        if not user.is_admin and booking.agent_id != user.id:
+        agent_ids = await TourService._get_agent_ids_for_user(db, user)
+        if not user.is_admin and booking.agent_id not in agent_ids:
             raise ForbiddenException("Not authorized to update this booking")
 
         booking.status = data.status

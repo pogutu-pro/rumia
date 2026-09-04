@@ -45,8 +45,8 @@ class AgentService:
             agent.bio = data.bio
         if data.portfolio_url is not None:
             agent.portfolio_url = data.portfolio_url
-        if data.profile_image_url is not None:
-            agent.profile_image_url = data.profile_image_url
+        if data.profile_photo_url is not None:
+            agent.profile_photo_url = data.profile_photo_url
 
         await db.flush()
         return agent

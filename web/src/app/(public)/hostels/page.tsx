@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { supabasePublic } from '@/lib/supabase/public';
+import { listingsApi } from '@/lib/api/listings';
 import HostelsSearch, { type Listing } from './hostels-search';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
 import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
@@ -28,22 +28,22 @@ export const metadata: Metadata = {
 };
 
 async function getAllActiveListings(): Promise<Listing[]> {
-  const { data } = await supabasePublic
-    .from('listings')
-    .select(
-      `id, title, description, price, location, slug, county, area, gender, specific_location,
-       price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
-       amenities, room_type, room_type_enum, bathroom_type, is_full,
-       wifi_included, water_included, electricity_included, security_type,
-       latitude, longitude, proximity_description, created_at, sort_position,
-       listing_images(r2_url, display_order, blur_data_url),
-       agents(name, phone, whatsapp)`,
-    )
-    .eq('is_active', true)
-    .order('sort_position', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false });
-
-  return (data as unknown as Listing[]) || [];
+  try {
+    const feed = await listingsApi.getFeedServer({
+      limit: 1000,
+      is_active: true,
+    });
+    
+    // Map FastAPI response keys to the legacy Supabase keys expected by HostelsSearch
+    return feed.items.map((item: any) => ({
+      ...item,
+      listing_images: item.images,
+      agents: item.agent,
+    })) as unknown as Listing[];
+  } catch (error) {
+    console.error('Failed to fetch active listings:', error);
+    return [];
+  }
 }
 
 export default async function HostelsPage() {
@@ -69,3 +69,4 @@ export default async function HostelsPage() {
     </Suspense>
   );
 }
+

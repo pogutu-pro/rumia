@@ -1,24 +1,25 @@
-#!/bin/bash
-# Phase 6: Oracle VPS Deployment Script
+#!/usr/bin/env bash
+
+# ==============================================================================
+# Production Deployment Script for Rumia Platform on Oracle VPS
+# ==============================================================================
 
 set -e
 
-echo "🚀 Starting Rumia Production Deployment on Oracle VPS..."
+echo "=== [1/5] Pulling latest code changes from repository ==="
+git pull origin main || git pull origin master
 
-# 1. Pull latest code
-echo "📦 Pulling latest changes from Git..."
-git pull origin main
+echo "=== [2/5] Building production Docker container images ==="
+docker compose build --pull
 
-# 2. Rebuild images securely
-echo "🏗️ Building Docker images..."
-docker-compose build
+echo "=== [3/5] Starting containers in detached mode ==="
+docker compose up -d
 
-# 3. Bring up containers with minimal downtime
-echo "🔄 Restarting services..."
-docker-compose up -d --remove-orphans
+echo "=== [4/5] Running container health checks ==="
+sleep 5
+docker compose ps
 
-# 4. Clean up unused images
-echo "🧹 Pruning old Docker images to save VPS disk space..."
-docker image prune -f
+echo "=== [5/5] Reloading Nginx reverse proxy ==="
+docker compose exec nginx nginx -s reload || true
 
-echo "✅ Deployment successful. Application running on ports 80/443."
+echo "=== Rumia Production Deployment Successful! ==="

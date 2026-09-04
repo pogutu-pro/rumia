@@ -23,3 +23,15 @@ class AppNotificationRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceTokenRegisterRequest(BaseModel):
+    token: str
+    platform: str = "android"
+
+
+class DeviceTokenActionResponse(BaseModel):
+    message: str
+    token: str
+    is_active: bool
+

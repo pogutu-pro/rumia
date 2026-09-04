@@ -15,6 +15,7 @@ class PushSubscription(Base):
     endpoint: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     p256dh: Mapped[str] = mapped_column(String, nullable=False)
     auth: Mapped[str] = mapped_column(String, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     last_used_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
@@ -29,3 +30,16 @@ class AppNotification(Base):
     type: Mapped[str] = mapped_column(String, default="info", nullable=False)
     read: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class DeviceToken(Base):
+    __tablename__ = "device_tokens"
+    __table_args__ = {"extend_existing": True}
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    platform: Mapped[str] = mapped_column(String, default="android", nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

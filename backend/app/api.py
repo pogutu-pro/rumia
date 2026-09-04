@@ -6,6 +6,7 @@ from app.features.announcements import announcements_router
 from app.features.campuses import campuses_router
 from app.features.feedback import feedback_router
 from app.features.health import health_router
+from app.features.hostel_requests import hostel_requests_router
 from app.features.images import images_router
 from app.features.leads import leads_router
 from app.features.legal import legal_router
@@ -25,6 +26,7 @@ api_router.include_router(health_router)
 api_router.include_router(analytics_router)
 api_router.include_router(campuses_router)
 api_router.include_router(zones_router)
+api_router.include_router(hostel_requests_router)
 api_router.include_router(listings_router)
 api_router.include_router(regions_router)
 api_router.include_router(search_router)

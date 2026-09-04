@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { Metadata } from 'next';
-import { supabasePublic } from '@/lib/supabase/public';
+import { listingsApi } from '@/lib/api/listings';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
+
 import { JsonLd } from '@/components/seo/json-ld';
 import { CampusPickerCards } from '@/components/home/campus-picker-cards';
 import { PopularHostels } from '@/components/home/popular-hostels';
@@ -65,34 +66,43 @@ export default async function HomePage() {
     isFallbackCampus(campus) ? null : campus.id,
   );
 
-  const { count: totalActiveListings } = await supabasePublic
-    .from('listings')
-    .select('id', { count: 'exact', head: true })
-    .eq('is_active', true);
+  // Fetch top 10 listings + total count from FastAPI (with graceful fallback if backend is starting up)
+  let feed: { items: any[]; total: number; page: number; limit: number } = { items: [], total: 0, page: 1, limit: 10 };
+  try {
+    feed = await listingsApi.getFeedServer({
+      campus_slug: isFallbackCampus(campus) ? undefined : campus.slug,
+      limit: 10,
+      is_active: true,
+      sort: 'views',
+    });
+  } catch (err) {
+    console.error('Failed to fetch listings feed from FastAPI backend:', err);
+  }
 
-  // Top 10 most-visited hostels, scoped to the campus. The (INT, UUID)
-  // overload is used explicitly to avoid the ambiguous REST resolution.
-  const campusId = isFallbackCampus(campus) ? null : campus.id;
-  const { data: popularListings } = await supabasePublic.rpc(
-    'get_popular_listings',
-    { p_limit: 10, p_campus_id: campusId },
-  );
+  const popularListings = feed.items.map((item: any) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    price: item.price,
+    location: item.location,
+    slug: item.slug,
+    county: item.county,
+    area: item.area,
+    view_count: item.views,
+    agent_name: item.agent?.name || null,
+    r2_url: item.images?.[0]?.r2_url || null,
+    blur_data_url: item.images?.[0]?.blur_data_url || null,
+  }));
+
+  const totalActiveListings = feed.total;
+
 
   const heroImage = campus.hero_image ?? '/dekut.jpeg';
 
-  // Resolve the campus-specific hostel finding fee (falls back to default).
-  const campusFee =
-    !isFallbackCampus(campus)
-      ? (
-          await supabasePublic
-            .from('campuses')
-            .select('hostel_finding_fee')
-            .eq('id', campus.id)
-            .maybeSingle()
-        ).data?.hostel_finding_fee ?? HOSTEL_REQUEST_FEE
-      : HOSTEL_REQUEST_FEE;
+  const campusFee = campus.hostel_finding_fee ?? HOSTEL_REQUEST_FEE;
 
   return (
+
     <div className="flex flex-col min-h-screen bg-slate-50/50">
       <JsonLd data={buildOrganizationSchema(campus)} />
 

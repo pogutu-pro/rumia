@@ -1,9 +1,10 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, decode_jwt_token, require_roles
 from app.features.feedback.schemas import FeedbackCreate, FeedbackRead
 from app.features.feedback.service import FeedbackService
@@ -18,7 +19,9 @@ router = APIRouter(prefix="/feedback", tags=["Feedback"])
     summary="Submit Feedback",
     description="Submit user feedback/suggestion. Optional auth.",
 )
+@limiter.limit("10/minute")
 async def submit_feedback(
+    request: Request,
     data: FeedbackCreate,
     authorization: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db_session),

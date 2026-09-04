@@ -2,6 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Optional
 from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, SmallInteger, String, Text, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -10,9 +11,9 @@ from app.core.database import Base
 class Review(Base):
     __tablename__ = "reviews"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    listing_id: Mapped[str] = mapped_column(String, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False)
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    listing_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("listings.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     rating: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     stay_start: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
@@ -43,9 +44,9 @@ class ReviewLike(Base):
     __tablename__ = "review_likes"
     __table_args__ = (UniqueConstraint("review_id", "user_id", name="uq_review_likes_review_user"),)
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    review_id: Mapped[str] = mapped_column(String, ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    review_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     review: Mapped[Review] = relationship("Review", back_populates="likes")
@@ -54,9 +55,9 @@ class ReviewLike(Base):
 class ReviewReply(Base):
     __tablename__ = "review_replies"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    review_id: Mapped[str] = mapped_column(String, ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    review_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     author_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     author_avatar_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -69,9 +70,9 @@ class ReviewReply(Base):
 class ReviewModerationLog(Base):
     __tablename__ = "review_moderation_log"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    review_id: Mapped[str] = mapped_column(String, ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
-    moderator_id: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    review_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
+    actor_user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     action: Mapped[str] = mapped_column(String, nullable=False)
     note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

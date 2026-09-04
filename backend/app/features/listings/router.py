@@ -5,14 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.core.errors import NotFoundException
 from app.core.pagination import PaginatedResponse, PaginationParams
-from app.core.security import AuthenticatedUser, require_roles
+from app.core.security import AuthenticatedUser, get_optional_current_user, require_roles
 from app.features.listings.schemas import (
     ListingCreate,
     ListingRead,
+    ListingToggleActive,
+    ListingToggleCommission,
     ListingToggleFull,
     ListingUpdate,
 )
 from app.features.listings.service import ListingService
+from app.features.profiles.service import ProfileService
 
 router = APIRouter(prefix="/listings", tags=["Listings"])
 
@@ -33,10 +36,12 @@ async def get_listings(
     county: Optional[str] = Query(None, description="Filter by county name"),
     min_price: Optional[float] = Query(None, ge=0, description="Minimum price filter"),
     max_price: Optional[float] = Query(None, ge=0, description="Maximum price filter"),
+    sort: Optional[str] = Query(None, description="Sort mode: 'views' ranks by most-visited, otherwise curated sort_position order"),
     pagination: PaginationParams = Depends(),
+    user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> PaginatedResponse[ListingRead]:
-    listings, total = await ListingService.get_listings_feed(
+    listings, total, view_counts = await ListingService.get_listings_feed(
         db=db,
         pagination=pagination,
         campus_slug=campus_slug,
@@ -47,9 +52,21 @@ async def get_listings(
         county=county,
         min_price=min_price,
         max_price=max_price,
+        sort=sort,
     )
+    saved_ids = (
+        await ProfileService.get_saved_listing_ids(db, user, [str(item.id) for item in listings])
+        if user
+        else set()
+    )
+    items: list[ListingRead] = []
+    for item in listings:
+        read = ListingRead.model_validate(item)
+        read.views = view_counts.get(str(item.id), item.views)
+        read.is_saved = str(item.id) in saved_ids
+        items.append(read)
     return PaginatedResponse.create(
-        items=[ListingRead.model_validate(item) for item in listings],
+        items=items,
         total=total,
         page=pagination.page,
         limit=pagination.limit,
@@ -65,12 +82,17 @@ async def get_listings(
 )
 async def get_listing(
     id_or_slug: str,
+    user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> ListingRead:
     listing = await ListingService.get_listing_by_id_or_slug(db, id_or_slug=id_or_slug)
     if not listing:
         raise NotFoundException(f"Listing '{id_or_slug}' not found")
-    return ListingRead.model_validate(listing)
+    read = ListingRead.model_validate(listing)
+    if user:
+        saved_ids = await ProfileService.get_saved_listing_ids(db, user, [str(listing.id)])
+        read.is_saved = str(listing.id) in saved_ids
+    return read
 
 
 @router.post(
@@ -121,6 +143,44 @@ async def toggle_listing_full(
 ) -> ListingRead:
     listing = await ListingService.toggle_listing_full(
         db=db, listing_id=listing_id, user=user, is_full=payload.is_full
+    )
+    return ListingRead.model_validate(listing)
+
+
+@router.patch(
+    "/{listing_id}/toggle-active",
+    response_model=ListingRead,
+    status_code=status.HTTP_200_OK,
+    summary="Toggle Listing Active Status",
+    description="Toggle whether a listing is active/visible (Listing owner or Admin required).",
+)
+async def toggle_listing_active(
+    listing_id: str,
+    payload: ListingToggleActive,
+    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    db: AsyncSession = Depends(get_db_session),
+) -> ListingRead:
+    listing = await ListingService.toggle_listing_active(
+        db=db, listing_id=listing_id, user=user, is_active=payload.is_active
+    )
+    return ListingRead.model_validate(listing)
+
+
+@router.patch(
+    "/{listing_id}/toggle-commission",
+    response_model=ListingRead,
+    status_code=status.HTTP_200_OK,
+    summary="Toggle Commission Payment",
+    description="Toggle whether the listing pays commission (Listing owner or Admin required).",
+)
+async def toggle_listing_commission(
+    listing_id: str,
+    payload: ListingToggleCommission,
+    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    db: AsyncSession = Depends(get_db_session),
+) -> ListingRead:
+    listing = await ListingService.toggle_listing_commission(
+        db=db, listing_id=listing_id, user=user, pays_commission=payload.pays_commission
     )
     return ListingRead.model_validate(listing)
 

@@ -22,6 +22,12 @@ COPY . .
 
 # Environment variables must be present at build time
 # (We pass these in via docker-compose build args or environment)
+# Override API base URL so server components call the backend via the
+# internal docker network (http://backend:8000) instead of looping out
+# through the public domain. Next.js respects existing process env vars
+# over .env.production dotfile values, so the ARG wins at build time.
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 RUN pnpm build
 
 # Production image, copy all the files and run next
