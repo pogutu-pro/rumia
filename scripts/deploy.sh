@@ -50,7 +50,11 @@ else
   echo "⚠ Backend health check failed — check logs: docker compose logs backend"
 fi
 
-echo "=== [5/5] Reloading Nginx reverse proxy ==="
-docker compose exec nginx nginx -s reload || true
+echo "=== [5/5] Restarting Nginx reverse proxy ==="
+# Must RESTART (not just `nginx -s reload`): nginx.conf is a file-style bind
+# mount, and `git reset --hard` replaces the file with a new inode, so the
+# running container keeps pointing at the old inode and a reload re-reads
+# stale config. Restarting re-establishes the mount against the current file.
+docker compose restart nginx
 
 echo "=== Rumia Production Deployment Successful! ==="
