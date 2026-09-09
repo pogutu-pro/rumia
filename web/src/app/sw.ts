@@ -150,14 +150,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. Navigation requests — always network, fall back to offline page on failure.
+  // 4. Navigation requests — use navigation preload when the browser offers
+  //    it, else network, falling back to the offline page. Consuming
+  //    preloadResponse avoids the "navigation preload request was cancelled
+  //    before preloadResponse settled" warning when respondWith() returns
+  //    without ever awaiting it.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cache = await caches.open(OFFLINE_CACHE);
-        return (await cache.match(OFFLINE_URL)) ??
-          new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/html' } });
-      }),
+      (async () => {
+        const preloadResponse = event.preloadResponse
+          ? await event.preloadResponse.catch(() => null)
+          : null;
+        if (preloadResponse instanceof Response) return preloadResponse;
+        try {
+          return await fetch(request);
+        } catch {
+          const cache = await caches.open(OFFLINE_CACHE);
+          return (await cache.match(OFFLINE_URL)) ??
+            new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/html' } });
+        }
+      })(),
     );
     return;
   }

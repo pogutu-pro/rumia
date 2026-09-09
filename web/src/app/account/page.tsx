@@ -151,7 +151,10 @@ export default function AccountPage() {
           .select('id')
           .eq('user_id', user.id)
           .maybeSingle(),
-        getMyAgentApplicationsAction(),
+        getMyAgentApplicationsAction().catch(() => [] as unknown[]),
+        // A 401 here (backend failing to validate the Supabase session token)
+        // must never reject the whole Promise.all — otherwise setLoading(false)
+        // is skipped and the page hangs on the loading skeleton forever.
         apiClient<{
           items: {
             id: string;
@@ -164,7 +167,7 @@ export default function AccountPage() {
             images: { r2_url: string; display_order: number }[];
           }[];
           total: number;
-        }>('/profiles/me/wishlist?limit=5'),
+        }>('/profiles/me/wishlist?limit=5').catch(() => null),
         supabase
           .from('tour_bookings')
           .select(
@@ -271,7 +274,12 @@ export default function AccountPage() {
       }
     }
 
-    loadCritical();
+    loadCritical().catch((e) => {
+      // Last-resort guard: never leave the spinner/skeleton stuck on an
+      // unexpected rejection from the critical-path loader.
+      console.error('[account] loadCritical failed', e);
+      if (!cancelled) setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
