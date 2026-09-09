@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Phone, Loader2, Check } from 'lucide-react';
@@ -90,7 +90,12 @@ export function ProfileCompletionModal({
   onSuccess,
 }: ProfileCompletionModalProps) {
   const isMobile = useIsMobile();
-  const [mounted, setMounted] = useState(false);
+  // Returns true only after hydration, so the modal never mismatches SSR.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [fullName, setFullName] = useState(currentName || '');
   const [phone, setPhone] = useState(currentPhone || '');
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -98,20 +103,27 @@ export function ProfileCompletionModal({
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    // Prefill campus input: prefer the user's stored campus name (e.g. a
-    // university they typed that isn't in the registry), else resolve the id.
+  // Prefill campus input: prefer the user's stored campus name (e.g. a
+  // university they typed that isn't in the registry), else resolve the id.
+  // Sync when the props change — derived-state adjustment during render.
+  const [prevCampusId, setPrevCampusId] = useState(currentCampusId);
+  const [prevCampusName, setPrevCampusName] = useState(currentCampusName);
+  const [prevCampusList, setPrevCampusList] = useState(campuses);
+  if (
+    currentCampusId !== prevCampusId ||
+    currentCampusName !== prevCampusName ||
+    campuses !== prevCampusList
+  ) {
+    setPrevCampusId(currentCampusId);
+    setPrevCampusName(currentCampusName);
+    setPrevCampusList(campuses);
     if (currentCampusName) {
       setCampusInput(currentCampusName);
     } else if (currentCampusId) {
       const matched = campuses.find((c) => c.id === currentCampusId);
       setCampusInput(matched ? matched.name : String(currentCampusId));
     }
-  }, [currentCampusId, currentCampusName, campuses]);
+  }
 
   useEffect(() => {
     if (isOpen) {

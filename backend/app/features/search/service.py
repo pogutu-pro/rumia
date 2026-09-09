@@ -16,6 +16,7 @@ class SearchService:
         campus_slug: Optional[str] = None,
         zone_slug: Optional[str] = None,
         area: Optional[str] = None,
+        property_type: Optional[str] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
         pagination: Optional[PaginationParams] = None,
@@ -32,6 +33,9 @@ class SearchService:
 
         if area:
             stmt = stmt.where(Listing.area.ilike(f"%{area}%"))
+
+        if property_type:
+            stmt = stmt.where(Listing.property_type == property_type)
 
         if min_price is not None:
             stmt = stmt.where(Listing.price >= min_price)

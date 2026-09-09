@@ -89,10 +89,10 @@ export function NotificationBell({ initialCount = 0 }: NotificationBellProps) {
   };
 
   const handleItemClick = async (notification: AppNotification) => {
-    if (!notification.is_read) {
+    if (!notification.read) {
       setUnreadCount((c) => Math.max(0, c - 1));
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n)),
+        prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
       );
       await markNotificationReadAction(notification.id);
     }
@@ -148,14 +148,14 @@ export function NotificationBell({ initialCount = 0 }: NotificationBellProps) {
                   onClick={() => handleItemClick(notification)}
                   className={cn(
                     'w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0',
-                    !notification.is_read && 'bg-amber-50/40',
+                    !notification.read && 'bg-amber-50/40',
                   )}
                 >
                   <div className="flex items-start gap-2.5">
                     <div
                       className={cn(
                         'w-2 h-2 rounded-full mt-1.5 shrink-0',
-                        notification.is_read ? 'bg-transparent' : 'bg-amber-500',
+                        notification.read ? 'bg-transparent' : 'bg-amber-500',
                       )}
                     />
                     <div className="min-w-0 flex-1">

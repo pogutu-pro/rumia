@@ -19,6 +19,94 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   }
 }
 
+interface ListingCardData {
+  shortName: string;
+  city: string;
+  title: string;
+  price: string;
+  location: string;
+  coverDataUrl: string | null;
+}
+
+function renderListingCard({
+  shortName,
+  city,
+  title,
+  price,
+  location,
+  coverDataUrl,
+}: ListingCardData) {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          fontFamily: 'sans-serif',
+          position: 'relative',
+          backgroundColor: '#0f172a',
+        }}
+      >
+        {coverDataUrl && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={coverDataUrl}
+            alt=""
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
+          />
+        )}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
+          }}
+        />
+        <div style={{ position: 'relative', padding: '32px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ fontSize: '13px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            {`Student Hostel · ${location}`}
+          </div>
+          <div style={{ fontSize: '36px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '600px' }}>
+            {title}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+            {price && (
+              <div style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
+            )}
+            <div style={{ fontSize: '15px', color: '#94a3b8', fontWeight: 600 }}>Near {shortName} · {city}</div>
+          </div>
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: '28px',
+            right: '32px',
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: '10px',
+            padding: '8px 16px',
+            fontSize: '18px',
+            fontWeight: 900,
+            color: '#0f172a',
+            letterSpacing: '-0.5px',
+          }}
+        >
+          RUMIA
+        </div>
+      </div>
+    ),
+    {
+      width: 800,
+      height: 420,
+      headers: {
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      },
+    }
+  );
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -50,74 +138,14 @@ export async function GET(request: Request) {
     const coverUrl = images[0]?.r2_url ?? null;
     const coverDataUrl = coverUrl ? await fetchImageAsDataUrl(coverUrl) : null;
 
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            fontFamily: 'sans-serif',
-            position: 'relative',
-            backgroundColor: '#0f172a',
-          }}
-        >
-          {coverDataUrl && (
-            <img
-              src={coverDataUrl}
-              alt=""
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
-            />
-          )}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
-            }}
-          />
-          <div style={{ position: 'relative', padding: '32px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '2px' }}>
-              {`Student Hostel · ${location}`}
-            </div>
-            <div style={{ fontSize: '36px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '600px' }}>
-              {title}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
-              {price && (
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
-              )}
-              <div style={{ fontSize: '15px', color: '#94a3b8', fontWeight: 600 }}>Near {shortName} · {city}</div>
-            </div>
-          </div>
-          <div
-            style={{
-              position: 'absolute',
-              top: '28px',
-              right: '32px',
-              background: 'rgba(255,255,255,0.95)',
-              borderRadius: '10px',
-              padding: '8px 16px',
-              fontSize: '18px',
-              fontWeight: 900,
-              color: '#0f172a',
-              letterSpacing: '-0.5px',
-            }}
-          >
-            RUMIA
-          </div>
-        </div>
-      ),
-      {
-        width: 800,
-        height: 420,
-        headers: {
-          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
-        },
-      }
-    );
+    return renderListingCard({
+      shortName,
+      city,
+      title,
+      price,
+      location,
+      coverDataUrl,
+    });
   } catch {
     return fallbackImage();
   }

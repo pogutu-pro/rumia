@@ -17,9 +17,11 @@ class AppNotificationRead(BaseModel):
     id: str
     user_id: str
     title: str
-    message: str
-    type: str
-    read: bool
+    body: str
+    message: str = ""
+    url: Optional[str] = None
+    type: str = "info"
+    read: bool = False
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -35,3 +37,25 @@ class DeviceTokenActionResponse(BaseModel):
     token: str
     is_active: bool
 
+
+class NotificationPreferenceRead(BaseModel):
+    wishlist_push_enabled: bool = True
+    wishlist_email_enabled: bool = True
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class NotificationPreferenceUpdate(BaseModel):
+    wishlist_push_enabled: Optional[bool] = None
+    wishlist_email_enabled: Optional[bool] = None
+
+
+class NotificationPreferenceActionResponse(BaseModel):
+    message: str
+    wishlist_push_enabled: bool
+    wishlist_email_enabled: bool
+
+
+class UnreadCountResponse(BaseModel):
+    count: int

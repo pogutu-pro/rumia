@@ -68,6 +68,7 @@ export function RumiaLogoLabel3D({
     let camera: any;
     let renderer: any;
     let textMesh: any;
+    const container = containerRef.current;
 
     async function loadThreeJS() {
       try {
@@ -186,8 +187,8 @@ export function RumiaLogoLabel3D({
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
-      if (renderer && containerRef.current?.contains(renderer.domElement)) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (renderer && container?.contains(renderer.domElement)) {
+        container?.removeChild(renderer.domElement);
         renderer.dispose();
       }
       if (scene) {

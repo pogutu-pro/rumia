@@ -154,7 +154,7 @@ export default function NotFound() {
             <p className="text-center text-xs text-muted-foreground">
               Need help?{' '}
               <a
-                href="mailto:support@rumi.app"
+                href="mailto:contact@rumia.co.ke"
                 className="font-medium text-primary hover:underline"
               >
                 Contact our support team

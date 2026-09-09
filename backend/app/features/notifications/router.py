@@ -9,8 +9,12 @@ from app.features.notifications.schemas import (
     AppNotificationRead,
     DeviceTokenActionResponse,
     DeviceTokenRegisterRequest,
+    NotificationPreferenceActionResponse,
+    NotificationPreferenceRead,
+    NotificationPreferenceUpdate,
     PushSubscriptionCreate,
     PushUnsubscribeRequest,
+    UnreadCountResponse,
 )
 from app.features.notifications.service import NotificationService
 
@@ -77,6 +81,51 @@ async def unsubscribe_push(
 ) -> dict:
     await NotificationService.unsubscribe_push(db, user, data.endpoint)
     return {"message": "Successfully unsubscribed"}
+
+
+@router.get(
+    "/unread-count",
+    response_model=UnreadCountResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Unread Notification Count",
+    description="Count of unread in-app notifications for the current user. Authenticated.",
+)
+async def unread_count(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> UnreadCountResponse:
+    count = await NotificationService.unread_count(db, user)
+    return UnreadCountResponse(count=count)
+
+
+@router.get(
+    "/preferences",
+    response_model=NotificationPreferenceRead,
+    status_code=status.HTTP_200_OK,
+    summary="Get Notification Preferences",
+    description="Fetch current user's notification channel preferences. Authenticated.",
+)
+async def get_preferences(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> NotificationPreferenceRead:
+    pref = await NotificationService.list_preferences(db, user)
+    return NotificationPreferenceRead.model_validate(pref)
+
+
+@router.patch(
+    "/preferences",
+    response_model=NotificationPreferenceActionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update Notification Preferences",
+    description="Update channel opt-ins (email/push) for wishlist notifications. Authenticated.",
+)
+async def update_preferences(
+    data: NotificationPreferenceUpdate,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> NotificationPreferenceActionResponse:
+    return await NotificationService.update_preferences(db, user, data)
 
 
 @router.get(

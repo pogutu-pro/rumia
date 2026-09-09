@@ -8,7 +8,7 @@ import { apiClient } from '@/lib/api/client';
 import { cn } from '@/lib/utils/cn';
 import posthog from 'posthog-js';
 
-interface SavedActionResponse {
+interface WishlistActionResponse {
   message: string;
   is_saved: boolean;
   listing_id: string;
@@ -27,6 +27,7 @@ export function SaveButton({
 }: SaveButtonProps) {
   const router = useRouter();
   const supabase = createClient();
+  const { auth } = supabase;
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,19 +35,19 @@ export function SaveButton({
     (async () => {
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await auth.getSession();
       if (!session?.user) return;
 
       try {
-        const res = await apiClient<SavedActionResponse>(
-          `/profiles/me/saved/${listingId}`,
+        const res = await apiClient<WishlistActionResponse>(
+          `/profiles/me/wishlist/${listingId}`,
         );
         setIsSaved(res.is_saved);
       } catch {
-        // Treated as not saved when the request fails.
+        // Treated as not in wishlist when the request fails.
       }
     })();
-  }, [listingId]);
+  }, [listingId, auth]);
 
   const handleToggle = useCallback(async () => {
     const {
@@ -62,11 +63,11 @@ export function SaveButton({
     const previous = isSaved;
 
     try {
-      await apiClient<SavedActionResponse>(`/profiles/me/saved/${listingId}`, {
+      await apiClient<WishlistActionResponse>(`/profiles/me/wishlist/${listingId}`, {
         method: isSaved ? 'DELETE' : 'POST',
       });
       setIsSaved(!previous);
-      posthog.capture(previous ? 'hostel_unsaved' : 'hostel_saved', {
+      posthog.capture(previous ? 'hostel_unwishlisted' : 'hostel_wishlisted', {
         listing_id: listingId,
       });
     } catch {
@@ -89,7 +90,7 @@ export function SaveButton({
             : 'text-slate-700 hover:text-slate-950',
           className,
         )}
-        aria-label={isSaved ? 'Remove from saved' : 'Save hostel'}
+        aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
       >
         <Heart
           className={`h-5 w-5 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
@@ -110,12 +111,12 @@ export function SaveButton({
           : 'text-slate-600 hover:text-slate-900',
         className,
       )}
-      aria-label={isSaved ? 'Remove from saved' : 'Save hostel'}
+      aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
     >
       <Heart
         className={`h-4 w-4 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
       />
-      {isSaved ? 'Saved' : 'Save'}
+      {isSaved ? 'In wishlist' : 'Save'}
     </button>
   );
 }

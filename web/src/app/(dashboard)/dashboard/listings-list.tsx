@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { MapPin, DollarSign, Eye, Edit, SwitchCamera, Loader2, CheckCircle2, XCircle, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { toggleListingActiveAction, toggleListingFullAction, toggleListingCommissionAction } from '@/app/actions/listings';
 
 interface Listing {
@@ -122,10 +123,12 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                 className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col"
               >
                 <div className="relative aspect-4/3 bg-slate-100 overflow-hidden">
-                  <img
+                  <Image
                     src={imageUrl}
                     alt={item.title}
-                    className="object-cover w-full h-full"
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover"
                   />
                   
                   {/* Status Badge */}

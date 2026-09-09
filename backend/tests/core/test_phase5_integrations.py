@@ -300,21 +300,36 @@ class TestPushWorker:
                 data={"url": "/notifications"},
             )
 
-        assert len(read_session.executions) == 3
+        assert len(read_session.executions) == 5
         insert_stmt = str(read_session.executions[0]["stmt"])
         assert "INSERT INTO app_notifications" in insert_stmt
         assert read_session.executions[0]["params"] == {
             "user_id": "student-1",
             "title": "New message",
             "message": "You have an update",
+            "url": "/notifications",
             "type": "info",
         }
+        # push_deliveries queue rows recorded for each token (dedup by idempotency_key)
+        queue_stmts = [str(e["stmt"]) for e in read_session.executions]
+        assert sum("INSERT INTO push_deliveries" in s for s in queue_stmts) == 2
+        queue_params = [e["params"] for e in read_session.executions if "push_deliveries" in str(e["stmt"])]
+        assert {p["token_id"] for p in queue_params} == {"web-1", "device-1"}
+        assert all(p["key"].startswith("push:") for p in queue_params)
         web_push_mock.assert_called_once()
         expo_push_mock.assert_awaited_once()
-        assert [execution["params"]["id"] for execution in write_session.executions] == [
-            "web-1",
-            "device-1",
+        # Single write session: status updates + stale-token pruning, one commit.
+        write_stmts = [str(e["stmt"]) for e in write_session.executions]
+        status_keys = [
+            e["params"]["key"]
+            for e in write_session.executions
+            if "UPDATE push_deliveries" in str(e["stmt"])
         ]
+        assert len(status_keys) == 2
+        assert status_keys[0].startswith("push:web:web-1")
+        assert status_keys[1].startswith("push:expo:device-1")
+        assert sum("UPDATE push_subscriptions" in s for s in write_stmts) == 1
+        assert sum("UPDATE device_tokens" in s for s in write_stmts) == 1
         write_session.commit.assert_awaited_once()
 
     async def test_in_app_notification_uses_data_type_and_prunes_when_no_channels(self):

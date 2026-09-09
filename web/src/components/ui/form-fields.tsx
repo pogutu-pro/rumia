@@ -123,7 +123,8 @@ interface FormFieldProps extends Omit<React.ComponentPropsWithoutRef<typeof Inpu
 
 const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
   ({ label, error: errorMessage, description, hint, className, id, ...props }, ref) => {
-    const fieldId = id || React.useId();
+    const generatedId = React.useId();
+    const fieldId = id || generatedId;
     const errorId = errorMessage ? `${fieldId}-error` : undefined;
     const fieldDescription = description || hint;
     const descriptionId = fieldDescription
@@ -187,7 +188,8 @@ const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldProps>(
     },
     ref,
   ) => {
-    const fieldId = id || React.useId();
+    const generatedId = React.useId();
+    const fieldId = id || generatedId;
     const errorId = errorMessage ? `${fieldId}-error` : undefined;
     const descriptionId = description ? `${fieldId}-description` : undefined;
 

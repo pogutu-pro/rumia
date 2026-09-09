@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -108,6 +109,7 @@ interface InitialListingData {
   id: string;
   title: string;
   description?: string | null;
+  property_type?: 'hostel' | 'apartment' | 'short_stay' | string | null;
   price: number | string;
   location: string;
   youtube_id?: string | null;
@@ -365,10 +367,12 @@ function SortableImageCard({
       style={style}
       className={`relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs ${isDragging ? 'opacity-50 ring-2 ring-emerald-500' : ''}`}
     >
-      <img
+      <Image
         src={img.url}
         alt={`Listing upload ${idx + 1}`}
-        className="absolute inset-0 object-cover w-full h-full"
+        fill
+        sizes="200px"
+        className="object-cover"
       />
 
       {/* Cover badge - top left */}
@@ -499,6 +503,11 @@ export function NewListingForm({
   const isEditing = mode === 'edit' && !!initialListing;
 
   const [title, setTitle] = useState(initialListing?.title || '');
+  const [propertyType, setPropertyType] = useState<'hostel' | 'apartment' | 'short_stay'>(
+    ['apartment', 'short_stay', 'hostel'].includes(initialListing?.property_type ?? '')
+      ? (initialListing?.property_type as 'hostel' | 'apartment' | 'short_stay')
+      : 'hostel',
+  );
   const [description, setDescription] = useState(initialListing?.description || '');
   const [location, setLocation] = useState(initialListing?.location || '');
   const [youtubeId, setYoutubeId] = useState(initialListing?.youtube_id || '');
@@ -805,6 +814,7 @@ export function NewListingForm({
       const payload = {
         listing_id: initialListing?.id,
         title,
+        property_type: propertyType,
         description,
         location,
         agent_id: agentId,
@@ -873,12 +883,20 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Basic Information</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">What kind of hostel is this?</p>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">What kind of property is this?</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="title">Listing Title *</Label>
             <Input id="title" type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Spacious 1-Bedroom Hostel Near JKUAT" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+          </div>
+          <div className="sm:col-span-2 space-y-2">
+            <Label htmlFor="propertyType">Property Type *</Label>
+            <select id="propertyType" value={propertyType} onChange={(e) => setPropertyType(e.target.value as any)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+              <option value="hostel">Hostel — long-stay student rooms (monthly)</option>
+              <option value="apartment">Apartment — self-contained monthly rental</option>
+              <option value="short_stay">Short stay — nightly-priced stays</option>
+            </select>
           </div>
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="gender">Who Can Stay? *</Label>
@@ -1078,7 +1096,7 @@ export function NewListingForm({
           <div className="space-y-2">
             <Label htmlFor="distanceToCampus">Distance Description <span className="text-slate-400 font-normal">(optional)</span></Label>
             <Input id="distanceToCampus" type="text" value={distanceToCampus} onChange={(e) => setDistanceToCampus(e.target.value)} placeholder="e.g. 5 minutes walk from DeKUT gate" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-            <p className="text-[11px] text-slate-400 font-medium">Shown below the listing title. e.g. "Near Main Gate" or "10 minutes walk from DeKUT"</p>
+            <p className="text-[11px] text-slate-400 font-medium">Shown below the listing title. e.g. “Near Main Gate” or “10 minutes walk from DeKUT”</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="securityType">Security</Label>
@@ -1166,7 +1184,7 @@ export function NewListingForm({
             <Label htmlFor="landlordPhone">Hostel Owner Phone <span className="text-slate-400 font-normal">(optional)</span></Label>
             <Input id="landlordPhone" type="tel" value={landlordPhone} onChange={(e) => { const val = e.target.value; setLandlordPhone(val); if (val.trim().length >= 9) { setLandlordPhoneError(isValidKenyanPhone(val) ? '' : 'Please enter a valid Kenyan number'); } else { setLandlordPhoneError(''); } }} placeholder="e.g. 0712 345 678" className={cn('h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm', landlordPhoneError && 'border-rose-400 focus-visible:ring-rose-400')} />
             {landlordPhoneError && (<p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium"><AlertCircle className="h-3.5 w-3.5 shrink-0" />{landlordPhoneError}</p>)}
-            <p className="text-[11px] text-slate-400 font-medium">When a student chooses "Hostel Owner", they contact this number directly. Falls back to your number if empty.</p>
+            <p className="text-[11px] text-slate-400 font-medium">When a student chooses “Hostel Owner”, they contact this number directly. Falls back to your number if empty.</p>
           </div>
         </div>
       </div>

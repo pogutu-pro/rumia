@@ -1016,6 +1016,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Notification Preferences
+         * @description Fetch current user's notification channel preferences. Authenticated.
+         */
+        get: operations["get_preferences_api_v1_notifications_preferences_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Notification Preferences
+         * @description Update channel opt-ins (email/push) for wishlist notifications. Authenticated.
+         */
+        patch: operations["update_preferences_api_v1_notifications_preferences_patch"];
+        trace?: never;
+    };
     "/api/v1/notifications/push/subscribe": {
         parameters: {
             query?: never;
@@ -1074,6 +1098,26 @@ export interface paths {
          * @description Mark all notifications for current user as read. Authenticated.
          */
         patch: operations["mark_all_read_api_v1_notifications_read_all_patch"];
+        trace?: never;
+    };
+    "/api/v1/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Unread Notification Count
+         * @description Count of unread in-app notifications for the current user. Authenticated.
+         */
+        get: operations["unread_count_api_v1_notifications_unread_count_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/notifications/{notification_id}/read": {
@@ -1148,8 +1192,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Saved Hostels
-         * @description Retrieve user's saved hostels. Authenticated.
+         * Get Saved Hostels (deprecated)
+         * @deprecated
+         * @description Alias of GET /profiles/me/wishlist. Deprecated; will be removed. Authenticated.
          */
         get: operations["get_saved_hostels_api_v1_profiles_me_saved_get"];
         put?: never;
@@ -1168,21 +1213,72 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Check Saved State
-         * @description Check whether the current user has saved a hostel. Authenticated.
+         * Check Saved State (deprecated)
+         * @deprecated
+         * @description Alias of GET /profiles/me/wishlist/{listing_id}. Deprecated. Authenticated.
          */
         get: operations["get_saved_state_api_v1_profiles_me_saved__listing_id__get"];
         put?: never;
         /**
-         * Save Hostel
-         * @description Save a hostel to current user's favorites. Authenticated.
+         * Save Hostel (deprecated)
+         * @deprecated
+         * @description Alias of POST /profiles/me/wishlist/{listing_id}. Deprecated. Authenticated.
          */
         post: operations["save_hostel_api_v1_profiles_me_saved__listing_id__post"];
         /**
-         * Unsave Hostel
-         * @description Remove a hostel from current user's favorites. Authenticated.
+         * Unsave Hostel (deprecated)
+         * @deprecated
+         * @description Alias of DELETE /profiles/me/wishlist/{listing_id}. Deprecated. Authenticated.
          */
         delete: operations["unsave_hostel_api_v1_profiles_me_saved__listing_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/me/wishlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Wishlist
+         * @description Retrieve current user's wishlisted hostels. Authenticated.
+         */
+        get: operations["get_wishlist_api_v1_profiles_me_wishlist_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/me/wishlist/{listing_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check Wishlist State
+         * @description Check whether the current user has wishlisted a hostel. Authenticated.
+         */
+        get: operations["get_wishlist_state_api_v1_profiles_me_wishlist__listing_id__get"];
+        put?: never;
+        /**
+         * Wishlist Hostel
+         * @description Add a hostel to the current user's wishlist. Authenticated.
+         */
+        post: operations["wishlist_hostel_api_v1_profiles_me_wishlist__listing_id__post"];
+        /**
+         * Remove From Wishlist
+         * @description Remove a hostel from the current user's wishlist. Authenticated.
+         */
+        delete: operations["unwishlist_hostel_api_v1_profiles_me_wishlist__listing_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1634,6 +1730,8 @@ export interface components {
         };
         /** AppNotificationRead */
         AppNotificationRead: {
+            /** Body */
+            body: string;
             /**
              * Created At
              * Format: date-time
@@ -1641,14 +1739,25 @@ export interface components {
             created_at: string;
             /** Id */
             id: string;
-            /** Message */
+            /**
+             * Message
+             * @default
+             */
             message: string;
-            /** Read */
+            /**
+             * Read
+             * @default false
+             */
             read: boolean;
             /** Title */
             title: string;
-            /** Type */
+            /**
+             * Type
+             * @default info
+             */
             type: string;
+            /** Url */
+            url?: string | null;
             /** User Id */
             user_id: string;
         };
@@ -2553,6 +2662,37 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** NotificationPreferenceActionResponse */
+        NotificationPreferenceActionResponse: {
+            /** Message */
+            message: string;
+            /** Wishlist Email Enabled */
+            wishlist_email_enabled: boolean;
+            /** Wishlist Push Enabled */
+            wishlist_push_enabled: boolean;
+        };
+        /** NotificationPreferenceRead */
+        NotificationPreferenceRead: {
+            /** Updated At */
+            updated_at?: string | null;
+            /**
+             * Wishlist Email Enabled
+             * @default true
+             */
+            wishlist_email_enabled: boolean;
+            /**
+             * Wishlist Push Enabled
+             * @default true
+             */
+            wishlist_push_enabled: boolean;
+        };
+        /** NotificationPreferenceUpdate */
+        NotificationPreferenceUpdate: {
+            /** Wishlist Email Enabled */
+            wishlist_email_enabled?: boolean | null;
+            /** Wishlist Push Enabled */
+            wishlist_push_enabled?: boolean | null;
+        };
         /** PaginatedResponse[AgentApplicationRead] */
         PaginatedResponse_AgentApplicationRead_: {
             /** Items */
@@ -3141,6 +3281,11 @@ export interface components {
             /** Reason */
             reason?: string | null;
         };
+        /** UnreadCountResponse */
+        UnreadCountResponse: {
+            /** Count */
+            count: number;
+        };
         /** UploadUrlRequest */
         UploadUrlRequest: {
             /**
@@ -3201,6 +3346,15 @@ export interface components {
             today_count: number;
             /** Week Count */
             week_count: number;
+        };
+        /** WishlistActionResponse */
+        WishlistActionResponse: {
+            /** Is Saved */
+            is_saved: boolean;
+            /** Listing Id */
+            listing_id: string;
+            /** Message */
+            message: string;
         };
         /** AgentRead */
         app__features__agents__schemas__AgentRead: {
@@ -5172,6 +5326,72 @@ export interface operations {
             };
         };
     };
+    get_preferences_api_v1_notifications_preferences_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPreferenceRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_preferences_api_v1_notifications_preferences_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationPreferenceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPreferenceActionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     subscribe_push_api_v1_notifications_push_subscribe_post: {
         parameters: {
             query?: never;
@@ -5266,6 +5486,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unread_count_api_v1_notifications_unread_count_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadCountResponse"];
                 };
             };
             /** @description Validation Error */
@@ -5535,6 +5786,141 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SavedHostelActionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_wishlist_api_v1_profiles_me_wishlist_get: {
+        parameters: {
+            query?: {
+                /** @description Page number (1-indexed) */
+                page?: number;
+                /** @description Items per page (max 1000) */
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_ListingRead_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_wishlist_state_api_v1_profiles_me_wishlist__listing_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WishlistActionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    wishlist_hostel_api_v1_profiles_me_wishlist__listing_id__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WishlistActionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unwishlist_hostel_api_v1_profiles_me_wishlist__listing_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WishlistActionResponse"];
                 };
             };
             /** @description Validation Error */

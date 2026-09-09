@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { User, Phone, Mail, GraduationCap, Check, LogOut, Loader2, Lock, CheckCircle2, MapPin } from 'lucide-react-native';
+import { User, Phone, Mail, GraduationCap, Check, LogOut, Loader2, Lock, CheckCircle2, MapPin, Heart, ShieldCheck, KeyRound, Bell, ChevronRight } from 'lucide-react-native';
 import { apiFetch } from '../../lib/api/client';
 import type { Campus, Profile, ProfileUpdate } from '../../lib/api/schema';
 import { fetchCampuses } from '../../lib/api/campuses';
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-    Alert.alert('Leave Rumia?', 'You will need to sign in again to access your saved hostels and tour bookings.', [
+    Alert.alert('Leave Rumia?', 'You will need to sign in again to access your wishlist and tour bookings.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Log Out',
@@ -143,6 +143,40 @@ export default function ProfileScreen() {
             </View>
           ) : null}
         </View>
+      </View>
+
+      {/* Shortcuts (mirrors web Account hub: wishlist + verify + tools) */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Quick Links</Text>
+        <Text style={styles.cardSubtitle}>Wishlist, verification tools, and more.</Text>
+        <Pressable style={styles.shortcutRow} onPress={() => router.push('/saved')}>
+          <View style={styles.shortcutIcon}>
+            <Heart size={16} color={palette.rose[500]} />
+          </View>
+          <Text style={styles.shortcutLabel}>Wishlist</Text>
+          <ChevronRight size={16} color={palette.slate[400]} />
+        </Pressable>
+        <Pressable style={styles.shortcutRow} onPress={() => router.push('/verify')}>
+          <View style={styles.shortcutIcon}>
+            <ShieldCheck size={16} color={palette.emerald[600]} />
+          </View>
+          <Text style={styles.shortcutLabel}>Verify a Hostel</Text>
+          <ChevronRight size={16} color={palette.slate[400]} />
+        </Pressable>
+        <Pressable style={styles.shortcutRow} onPress={() => router.push('/find-me-a-hostel')}>
+          <View style={styles.shortcutIcon}>
+            <KeyRound size={16} color={palette.amber[600]} />
+          </View>
+          <Text style={styles.shortcutLabel}>Find Me a Hostel</Text>
+          <ChevronRight size={16} color={palette.slate[400]} />
+        </Pressable>
+        <Pressable style={[styles.shortcutRow, styles.shortcutRowLast]} onPress={() => router.push('/notifications')}>
+          <View style={styles.shortcutIcon}>
+            <Bell size={16} color={palette.slate[500]} />
+          </View>
+          <Text style={styles.shortcutLabel}>Notifications</Text>
+          <ChevronRight size={16} color={palette.slate[400]} />
+        </Pressable>
       </View>
 
       {/* Profile Details */}
@@ -200,7 +234,7 @@ export default function ProfileScreen() {
       ) : (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Personal Information</Text>
-          <Text style={styles.cardSubtitle}>Sign in to update your profile, save hostels and book tours.</Text>
+          <Text style={styles.cardSubtitle}>Sign in to update your profile, build your wishlist and book tours.</Text>
           <Pressable
             style={({ pressed }) => [styles.signInButton, pressed && styles.buttonDisabled]}
             onPress={() => router.push('/(auth)/login')}
@@ -331,6 +365,24 @@ const styles = StyleSheet.create({
   },
   cardTitle: { color: palette.slate[900], fontSize: 14, fontWeight: '700' },
   cardSubtitle: { color: palette.slate[500], fontSize: 12, marginTop: 3, marginBottom: 14 },
+  shortcutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.slate[100],
+  },
+  shortcutRowLast: { borderBottomWidth: 0, paddingBottom: 0 },
+  shortcutIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: palette.slate[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shortcutLabel: { flex: 1, color: palette.slate[700], fontSize: 14, fontWeight: '600' },
   inputLabel: {
     color: palette.slate[700],
     fontSize: 12,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 
 const STORAGE_KEY = "rumia_swipe_hint_shown";
@@ -9,6 +9,14 @@ export function GestureTutorial() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
+
+  const dismiss = useCallback(() => {
+    setFading(true);
+    setTimeout(() => {
+      setVisible(false);
+      localStorage.setItem(STORAGE_KEY, "true");
+    }, 400);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -23,15 +31,7 @@ export function GestureTutorial() {
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
     };
-  }, []);
-
-  const dismiss = () => {
-    setFading(true);
-    setTimeout(() => {
-      setVisible(false);
-      localStorage.setItem(STORAGE_KEY, "true");
-    }, 400);
-  };
+  }, [pathname, dismiss]);
 
   if (!visible) return null;
 

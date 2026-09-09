@@ -87,6 +87,7 @@ def _make_mock_listing(**kwargs):
     listing.title = kwargs.get("title", "Test Hostel")
     listing.slug = kwargs.get("slug", "test-hostel")
     listing.description = "A great hostel"
+    listing.property_type = kwargs.get("property_type", "hostel")
     listing.price = float(kwargs.get("price", 6500))
     listing.location = "Near Gate A"
     listing.county = "nyeri"

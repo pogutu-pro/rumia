@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/currency';
@@ -30,13 +30,18 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
   const [localMax, setLocalMax] = useState(maxPrice ?? MAX_PRICE);
   const [minInput, setMinInput] = useState(String(minPrice ?? ''));
   const [maxInput, setMaxInput] = useState(String(maxPrice ?? ''));
+  const [prevMin, setPrevMin] = useState(minPrice ?? MIN_PRICE);
+  const [prevMax, setPrevMax] = useState(maxPrice ?? MAX_PRICE);
 
-  useEffect(() => {
+  // Sync when the parent updates the committed price range.
+  if ((minPrice ?? MIN_PRICE) !== prevMin || (maxPrice ?? MAX_PRICE) !== prevMax) {
+    setPrevMin(minPrice ?? MIN_PRICE);
+    setPrevMax(maxPrice ?? MAX_PRICE);
     setLocalMin(minPrice ?? MIN_PRICE);
     setLocalMax(maxPrice ?? MAX_PRICE);
     setMinInput(minPrice ? String(minPrice) : '');
     setMaxInput(maxPrice ? String(maxPrice) : '');
-  }, [minPrice, maxPrice]);
+  }
 
   const commitRange = useCallback(
     (min: number, max: number) => {

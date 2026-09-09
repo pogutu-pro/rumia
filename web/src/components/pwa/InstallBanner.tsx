@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Download, X, Share } from "lucide-react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 export function InstallBanner() {
-  const [mounted, setMounted] = useState(false);
+  // Returns true only after hydration, so createPortal never runs on the server.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const { shouldShow, isIOS, handleInstall, handleDismiss } = usePWAInstall();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted || !shouldShow) return null;
 

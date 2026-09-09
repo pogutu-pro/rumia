@@ -37,13 +37,13 @@ export function DynamicDatePicker({
   const [isOpen, setIsOpen] = React.useState(false);
   const [viewDate, setViewDate] = React.useState<Date>(safeValue || new Date());
 
-  // Reset mode to day when opening
-  React.useEffect(() => {
-    if (isOpen) {
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
       setMode('day');
       if (safeValue) setViewDate(safeValue);
     }
-  }, [isOpen, safeValue]);
+    setIsOpen(open);
+  };
 
   const handleDaySelect = (day: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
@@ -89,7 +89,7 @@ export function DynamicDatePicker({
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

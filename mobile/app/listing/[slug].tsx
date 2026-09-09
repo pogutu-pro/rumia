@@ -90,13 +90,13 @@ export default function ListingDetailScreen() {
     mutationFn: async () => {
       if (!listing) return;
       if (listing.is_saved) {
-        return apiFetch(`/profiles/me/saved/${listing.id}`, { method: 'DELETE' });
+        return apiFetch(`/profiles/me/wishlist/${listing.id}`, { method: 'DELETE' });
       }
-      return apiFetch(`/profiles/me/saved/${listing.id}`, { method: 'POST' });
+      return apiFetch(`/profiles/me/wishlist/${listing.id}`, { method: 'POST' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['listing', slug] });
-      queryClient.invalidateQueries({ queryKey: ['saved-hostels'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     },
   });
 

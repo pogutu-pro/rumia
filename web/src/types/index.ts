@@ -1,5 +1,8 @@
 // Standard Types for Rumia Marketplace
 
+/** First-class Rumia property classifications (Home explore categories). */
+export type PropertyType = 'hostel' | 'apartment' | 'short_stay';
+
 export interface Agent {
   id: string | number;
   name: string;
@@ -75,8 +78,11 @@ export interface Listing {
   security_type?: string | null;
   // Meta
   is_full?: boolean | null;
+  property_type?: PropertyType;
   sort_order?: number | null;
   sort_position?: number | null;
+  rating?: number | null;
+  views?: number | null;
   county?: string | null;
   slug?: string | null;
   campus_id?: string | null;
@@ -451,8 +457,10 @@ export interface AppNotification {
   user_id: string;
   title: string;
   body: string;
+  message: string;
   url: string | null;
-  is_read: boolean;
+  type: string;
+  read: boolean;
   created_at: string;
 }
 

@@ -12,6 +12,7 @@ from app.features.leads import leads_router
 from app.features.legal import legal_router
 from app.features.listings import listings_router
 from app.features.notifications import notifications_router
+from app.features.notifications.webhooks import router as webhooks_router
 from app.features.profiles import profiles_router
 from app.features.regions import regions_router
 from app.features.reviews import reviews_router
@@ -37,6 +38,7 @@ api_router.include_router(profiles_router)
 api_router.include_router(tours_router)
 api_router.include_router(leads_router)
 api_router.include_router(notifications_router)
+api_router.include_router(webhooks_router)
 api_router.include_router(legal_router)
 api_router.include_router(announcements_router)
 api_router.include_router(admin_router)

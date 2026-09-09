@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Mail, KeyRound, Loader2 } from 'lucide-react-native';
@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase/client';
 import { AuthFlowCancelledError, signInWithGoogle } from '../../features/auth/oauth';
 import { useSessionHydration } from '../../features/auth/use-auth';
+import { useSessionStore } from '../../stores/session';
 import { palette, radii } from '../../lib/theme';
 
 function useRedirectAfterAuth() {
@@ -28,6 +29,14 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
+
+  // Already signed in — skip the login form (web redirects to /account).
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/profile');
+    }
+  }, [isAuthenticated, router]);
 
   const handleEmailSignIn = async () => {
     if (!email || !password) {
@@ -42,7 +51,26 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Sign In Failed', error.message);
+      if (error.message === 'Invalid login credentials') {
+        // Distinguish an unregistered email from a wrong password (web parity).
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('email', email.trim().toLowerCase())
+            .maybeSingle();
+          Alert.alert(
+            'Sign In Failed',
+            profile
+              ? 'Wrong password. Please try again.'
+              : 'This email is not registered. Sign up with Google above.',
+          );
+        } catch {
+          Alert.alert('Sign In Failed', error.message);
+        }
+      } else {
+        Alert.alert('Sign In Failed', error.message);
+      }
       return;
     }
 

@@ -79,7 +79,7 @@ export default function LoginPage() {
 
       setLoading(false);
     })();
-  }, []);
+  }, [router]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

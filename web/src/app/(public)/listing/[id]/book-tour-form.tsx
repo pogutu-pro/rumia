@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -123,7 +123,12 @@ export function BookTourForm({
   campusName,
 }: BookTourFormProps) {
   const isMobile = useIsMobile();
-  const [mounted, setMounted] = useState(false);
+  // Returns true only after hydration, so the portal/sheet never renders on SSR.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [step, setStep] = useState<FormStep>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booking, setBooking] = useState<TourBooking | null>(null);
@@ -145,10 +150,6 @@ export function BookTourForm({
     () => zoneFullSearchPrice ?? null,
     [zoneFullSearchPrice],
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Auto-fill from profile if user is logged in
   useEffect(() => {

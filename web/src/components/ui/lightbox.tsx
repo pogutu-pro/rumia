@@ -21,10 +21,13 @@ export function Lightbox({
   onClose,
 }: LightboxProps) {
   const [current, setCurrent] = React.useState(currentIndex);
+  const [prevIndex, setPrevIndex] = React.useState(currentIndex);
 
-  React.useEffect(() => {
+  // Sync when the parent opens the lightbox at a different index.
+  if (currentIndex !== prevIndex) {
+    setPrevIndex(currentIndex);
     setCurrent(currentIndex);
-  }, [currentIndex]);
+  }
 
   const navigate = React.useCallback(
     (direction: 'prev' | 'next') => {

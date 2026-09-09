@@ -50,7 +50,7 @@ class HostelRequestService:
                 """
                 SELECT full_name, phone, COALESCE(home_campus_id, campus_id) AS campus_id
                 FROM public.profiles
-                WHERE id = :user_id::uuid
+                WHERE id = CAST(:user_id AS uuid)
                 """
             ),
             {"user_id": user_id},
@@ -64,7 +64,7 @@ class HostelRequestService:
     async def _get_campus(db: AsyncSession, campus_id: str) -> Tuple[Optional[str], int]:
         result = await db.execute(
             text(
-                "SELECT name, COALESCE(hostel_finding_fee, :default) AS fee FROM public.campuses WHERE id = :campus_id::uuid"
+                "SELECT name, COALESCE(hostel_finding_fee, :default) AS fee FROM public.campuses WHERE id = CAST(:campus_id AS uuid)"
             ),
             {"campus_id": campus_id, "default": DEFAULT_FEE},
         )
@@ -80,7 +80,7 @@ class HostelRequestService:
                 """
                 SELECT id::text AS id, name
                 FROM public.campus_zones
-                WHERE campus_id = :campus_id::uuid
+                WHERE campus_id = CAST(:campus_id AS uuid)
                 ORDER BY name ASC
                 """
             ),
@@ -99,7 +99,7 @@ class HostelRequestService:
                 text(
                     """
                     SELECT id::text AS id FROM public.profiles
-                    WHERE role = 'manager' AND managed_campus_id = :campus_id::uuid
+                    WHERE role = 'manager' AND managed_campus_id = CAST(:campus_id AS uuid)
                     """
                 ),
                 {"campus_id": campus_id},
@@ -111,7 +111,7 @@ class HostelRequestService:
                     text(
                         """
                         SELECT c.region_id::text FROM public.campuses c
-                        WHERE c.id = :campus_id::uuid
+                        WHERE c.id = CAST(:campus_id AS uuid)
                         """
                     ),
                     {"campus_id": campus_id},
@@ -122,7 +122,7 @@ class HostelRequestService:
                         text(
                             """
                             SELECT id::text FROM public.profiles
-                            WHERE role = 'manager' AND managed_region_id = :region_id::uuid
+                            WHERE role = 'manager' AND managed_region_id = CAST(:region_id AS uuid)
                             """
                         ),
                         {"region_id": region_row.region_id},
@@ -148,7 +148,7 @@ class HostelRequestService:
                     text(
                         """
                         INSERT INTO public.app_notifications (id, user_id, title, body, url, is_read)
-                        VALUES (:id::uuid, :user_id::uuid, :title, :body, :url, false)
+                        VALUES (CAST(:id AS uuid), CAST(:user_id AS uuid), :title, :body, :url, false)
                         """
                     ),
                     {

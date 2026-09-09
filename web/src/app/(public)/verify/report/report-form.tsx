@@ -249,10 +249,10 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
         <div className="text-center">
           <p className="text-xs text-slate-400 mb-2">Or send us an email</p>
           <a
-            href="mailto:contact@rumiamanage.com?subject=Hostel%20Report"
+            href="mailto:contact@rumia.co.ke?subject=Hostel%20Report"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
           >
-            contact@rumiamanage.com
+            contact@rumia.co.ke
             <ExternalLink className="h-3 w-3" />
           </a>
         </div>

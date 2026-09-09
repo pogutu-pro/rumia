@@ -164,7 +164,7 @@ export default function AccountPage() {
             images: { r2_url: string; display_order: number }[];
           }[];
           total: number;
-        }>('/profiles/me/saved?limit=5'),
+        }>('/profiles/me/wishlist?limit=5'),
         supabase
           .from('tour_bookings')
           .select(
@@ -303,7 +303,7 @@ export default function AccountPage() {
               Sign in to your account
             </h1>
             <p className="text-sm text-slate-500 leading-relaxed">
-              View your tours, saved hostels, and manage your profile.
+              View your tours, wishlist, and manage your profile.
             </p>
           </div>
 

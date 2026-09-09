@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@/lib/utils/cn';
@@ -30,11 +30,12 @@ export function FilterBottomSheet({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<FilterState>(currentFilters);
 
-  useEffect(() => {
+  const handleOpenChange = (open: boolean) => {
     if (open) {
       setDraft(currentFilters);
     }
-  }, [open, currentFilters]);
+    setOpen(open);
+  };
 
   const handleApply = () => {
     onApply(draft);
@@ -95,7 +96,7 @@ export function FilterBottomSheet({
   };
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
+    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
       <DialogPrimitive.Trigger asChild>
         {trigger || (
           <button

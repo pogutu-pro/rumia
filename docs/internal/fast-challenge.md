@@ -222,7 +222,7 @@ Every one of these is **currently true** and would be **silently copied into Fas
 1. Confirm Next.js currently on **Vercel** (or where) — affects Challenge 8 (only FastAPI moves to Oracle).
 2. Confirm **Supabase Postgres stays managed** (recommended YES).
 3. Confirm **Supabase Auth stays** (recommended YES) — the highest-leverage call.
-4. Web-to-FastAPI path: **direct `api.rumiamanage.com`** (mobile-first, recommended) vs a short Next proxy shim. Recommend direct with a proxy shim during transition.
+4. Web-to-FastAPI path: **direct `api.rumia.co.ke`** (mobile-first, recommended) vs a short Next proxy shim. Recommend direct with a proxy shim during transition.
 5. Staging DB available for the authorization test matrix? (Required for the migration to be test-driven.)
 6. Are you OK doing **P1–P10 hardening first** before Phase 0, or want them merged into Phase 0/1?
 

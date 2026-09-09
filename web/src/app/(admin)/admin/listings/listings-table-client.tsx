@@ -3,6 +3,7 @@
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -171,7 +172,7 @@ function SortableRow({
       )}
       <td className="px-5 py-4">
         {listing.cover_image ? (
-          <img src={listing.cover_image} alt={listing.title} className="h-10 w-14 object-cover rounded-lg" />
+          <Image src={listing.cover_image} alt={listing.title} width={56} height={40} className="object-cover rounded-lg" />
         ) : <div className="h-10 w-14 bg-slate-100 rounded-lg" />}
       </td>
       <td className="text-sm px-5 py-4 font-medium text-slate-900">{listing.title}</td>
@@ -353,7 +354,7 @@ function SortableMobileCard({
       )}
       <div className="flex items-start gap-3">
         {listing.cover_image ? (
-          <img src={listing.cover_image} alt={listing.title} className="h-14 w-20 object-cover rounded-lg shrink-0" />
+          <Image src={listing.cover_image} alt={listing.title} width={80} height={56} className="object-cover rounded-lg shrink-0" />
         ) : <div className="h-14 w-20 bg-slate-100 rounded-lg shrink-0" />}
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-slate-900 leading-snug">{listing.title}</h3>
@@ -444,12 +445,15 @@ function OwnerPhoneDialog({
   onClose: () => void;
   onSaved: (listingId: string, phone: string | null) => void;
 }) {
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(listing?.landlord_phone ?? '');
   const [isSaving, setIsSaving] = useState(false);
+  const [prevListingId, setPrevListingId] = useState(listing?.id ?? null);
 
-  useEffect(() => {
+  // Reset the field when the dialog targets a different listing.
+  if ((listing?.id ?? null) !== prevListingId) {
+    setPrevListingId(listing?.id ?? null);
     setPhone(listing?.landlord_phone ?? '');
-  }, [listing]);
+  }
 
   if (!listing) return null;
 

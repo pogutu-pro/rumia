@@ -96,7 +96,7 @@ async def _resolve_authenticated_user(
             text("""
                 SELECT id, email, role, managed_campus_id, managed_region_id
                 FROM public.profiles
-                WHERE id = :user_id::uuid
+                WHERE id = CAST(:user_id AS uuid)
             """),
             {"user_id": token_data.user_id},
         )
@@ -178,7 +178,7 @@ async def check_campus_scope(
             result = await db.execute(
                 text("""
                     SELECT 1 FROM public.campuses
-                    WHERE id = :campus_id::uuid AND region_id = :region_id::uuid
+                    WHERE id = CAST(:campus_id AS uuid) AND region_id = CAST(:region_id AS uuid)
                 """),
                 {"campus_id": campus_id, "region_id": user.managed_region_id},
             )

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# Let's Encrypt SSL Bootstrap Script for Rumia (rumiamanage.com)
+# Let's Encrypt SSL Bootstrap Script for Rumia (rumia.co.ke)
 # ==============================================================================
 
 set -e
 
-DOMAINS=("rumiamanage.com" "www.rumiamanage.com")
-EMAIL="support@rumiamanage.com"
+DOMAINS=("rumia.co.ke" "www.rumia.co.ke")
+EMAIL="contact@rumia.co.ke"
 RSA_KEY_SIZE=4096
 DATA_PATH="./certbot"
 STAGING=0 # Set to 1 if testing to avoid hitting Let's Encrypt rate limits

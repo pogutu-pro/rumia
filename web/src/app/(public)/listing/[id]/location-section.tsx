@@ -143,9 +143,8 @@ function StreetViewContent({ lat, lng }: { lat: number; lng: number }) {
 
     return () => {
       if (panoramaRef.current) {
-        const node = streetViewRef.current;
-        if (node) {
-          node.innerHTML = '';
+        if (container) {
+          container.innerHTML = '';
         }
         panoramaRef.current = null;
       }

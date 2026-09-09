@@ -67,7 +67,7 @@ describe('apiFetch', () => {
 
   it('returns an empty object for 204', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({}, 204));
-    const result = await apiFetch('/profiles/me/saved/x', { method: 'DELETE' });
+    const result = await apiFetch('/profiles/me/wishlist/x', { method: 'DELETE' });
     expect(result).toEqual({});
     expect(fetchMock.mock.calls[0][1]?.method).toBe('DELETE');
   });
@@ -103,7 +103,7 @@ describe('apiFetch', () => {
       .mockResolvedValueOnce(jsonResponse({ error: 'Unauthorized' }, 401))
       .mockResolvedValueOnce(jsonResponse({ data: [{ id: '1' }] }));
 
-    const result = await apiFetch('/profiles/me/saved');
+    const result = await apiFetch('/profiles/me/wishlist');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const retryInit = fetchMock.mock.calls[1][1] as RequestInit;
     expect((retryInit.headers as Record<string, string>)['Authorization']).toBe('Bearer new-token');

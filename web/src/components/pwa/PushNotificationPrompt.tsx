@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Bell, X } from "lucide-react";
 import { useNotificationPrompt } from "@/hooks/useNotificationPrompt";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 export function PushNotificationPrompt() {
-  const [mounted, setMounted] = useState(false);
+  // Returns true only after hydration, so createPortal never runs on the server.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const { shouldShow, dismiss } = useNotificationPrompt();
   const { subscribe, permission } = usePushSubscription();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted || !shouldShow || permission !== "default") return null;
 

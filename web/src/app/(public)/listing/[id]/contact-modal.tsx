@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -134,7 +134,12 @@ export function ContactModal({
   resumedContactType,
 }: ContactModalProps) {
   const isMobile = useIsMobile();
-  const [mounted, setMounted] = useState(false);
+  // Returns true only after hydration, so createPortal never runs on the server.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   // Flow state
   const [step, setStep] = useState<Step>('choose');
@@ -154,10 +159,6 @@ export function ContactModal({
   const [phoneError, setPhoneError] = useState('');
   const [savingPhone, setSavingPhone] = useState(false);
   const [phoneAttempts, setPhoneAttempts] = useState(0);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Lock body scroll
   useEffect(() => {
@@ -313,7 +314,9 @@ export function ContactModal({
   // Ref always holds the latest continueToWhatsApp, avoiding stale closures
   // in handleContactTypeSelect / handlePhoneSubmit / handleFeeAccepted.
   const continueRef = useRef(continueToWhatsApp);
-  continueRef.current = continueToWhatsApp;
+  useEffect(() => {
+    continueRef.current = continueToWhatsApp;
+  }, [continueToWhatsApp]);
 
   // ── Step 1: User picks a contact type ───────────────────────────────────────
   const handleContactTypeSelect = useCallback(
@@ -374,10 +377,14 @@ export function ContactModal({
     [listingId, listingTitle, agentId, agentPhone, paysCommission, isFullEffective],
   );
 
-  // Handle seamless resumption after OAuth
+  // Handle seamless resumption after OAuth. Deferred past the commit so the
+  // async contact flow never performs synchronous state updates in an effect.
   useEffect(() => {
     if (isOpen && resumedContactType) {
-      handleContactTypeSelect(resumedContactType);
+      const timer = setTimeout(() => {
+        void handleContactTypeSelect(resumedContactType);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isOpen, resumedContactType, handleContactTypeSelect]);
 

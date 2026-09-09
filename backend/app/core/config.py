@@ -20,11 +20,17 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str = ""
 
     # CORS Configuration
+    # Web app (Next.js on :3000), mobile (Expo web dev on :8081 / legacy :19006),
+    # and the public rumia.co.ke domain.
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://rumiamanage.com",
-        "https://www.rumiamanage.com",
+        "http://localhost:8081",
+        "http://127.0.0.1:8081",
+        "http://localhost:19006",
+        "http://127.0.0.1:19006",
+        "https://rumia.co.ke",
+        "https://www.rumia.co.ke",
     ]
 
     # Cloudflare R2
@@ -37,7 +43,7 @@ class Settings(BaseSettings):
     # Web Push (VAPID)
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""
-    VAPID_SUBJECT: str = "mailto:support@rumiamanage.com"
+    VAPID_SUBJECT: str = "mailto:contact@rumia.co.ke"
 
     # Rate limiting (per-IP, app-level). Sensitive routes apply stricter limits.
     RATE_LIMIT_ENABLED: bool = True
@@ -45,6 +51,15 @@ class Settings(BaseSettings):
 
     # Expo Push (optional bearer token when EAS push security is enabled)
     EXPO_PUSH_ACCESS_TOKEN: str = ""
+
+    # Brevo Transactional Email
+    BREVO_API_KEY: str = ""
+    BREVO_SENDER_EMAIL: str = "contact@rumia.co.ke"
+    BREVO_SENDER_NAME: str = "Rumia"
+    BREVO_WEBHOOK_SECRET: str = ""
+
+    # Public site base URL (used for building deep links in emails/push)
+    PUBLIC_BASE_URL: str = "https://rumia.co.ke"
 
     # PostHog Telemetry
     POSTHOG_PROJECT_TOKEN: str = ""

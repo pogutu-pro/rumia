@@ -6,7 +6,7 @@ import { PublicAnnouncements } from '@/components/announcements/public-announcem
 import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
 
 // Search is client-side over a single filtered snapshot; ISR keeps this
 // expensive joined query from re-running on every list visit. If a build-time

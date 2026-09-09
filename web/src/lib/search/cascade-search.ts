@@ -36,6 +36,7 @@ export interface SearchListing {
   created_at?: string;
   sort_position?: number | null;
   is_full?: boolean | null;
+  property_type?: 'hostel' | 'apartment' | 'short_stay' | null;
   listing_images: {
     r2_url: string;
     display_order: number;

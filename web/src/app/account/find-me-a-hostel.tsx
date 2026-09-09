@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ChevronDown,
@@ -99,9 +99,12 @@ export function FindMeAHostel({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAccepted, setPaymentAccepted] = useState(false);
   const [pendingDraftInput, setPendingDraftInput] = useState<CreateHostelRequestInput | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
+  // Returns true only after hydration, so portal rendering never runs on SSR.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   // Form state
   const [phone, setPhone] = useState<string>(studentPhone || '');
@@ -204,21 +207,25 @@ export function FindMeAHostel({
     }
 
     // Mark draft as handled so it only fires once, then show the payment
-    // acceptance modal instead of submitting directly.
+    // acceptance modal instead of submitting directly. Deferred past the
+    // commit so the state updates never happen synchronously in an effect.
     draftHandled.current = true;
-    setPendingDraftInput({
-      phone: pending.phone || '',
-      preferred_zone: pending.preferred_zone || null,
-      budget_range: pending.budget_range || '',
-      gender: pending.gender || 'no_preference',
-      room_type: pending.room_type || 'no_preference',
-      furnishing: pending.furnishing || 'no_preference',
-      stay_preference: pending.stay_preference || 'no_preference',
-      move_in_date: pending.move_in_date || null,
-      additional_requirements: pending.additional_requirements || null,
-    });
-    setShowPaymentModal(true);
-    setPaymentAccepted(false);
+    const timer = setTimeout(() => {
+      setPendingDraftInput({
+        phone: pending.phone || '',
+        preferred_zone: pending.preferred_zone || null,
+        budget_range: pending.budget_range || '',
+        gender: pending.gender || 'no_preference',
+        room_type: pending.room_type || 'no_preference',
+        furnishing: pending.furnishing || 'no_preference',
+        stay_preference: pending.stay_preference || 'no_preference',
+        move_in_date: pending.move_in_date || null,
+        additional_requirements: pending.additional_requirements || null,
+      });
+      setShowPaymentModal(true);
+      setPaymentAccepted(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [draft, isHome, hasCampus, submitting]);
 
   const canSubmit = useMemo(() => {

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Check, Copy } from 'lucide-react';
 import { toast } from 'sonner';
@@ -411,9 +412,11 @@ function ListingPreview({ listing }: { listing: ShareModalProps['listing'] }) {
     <div className="flex items-center gap-3.5 mb-6">
       <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-[#16a34a] flex items-center justify-center">
         {listing.imageUrl ? (
-          <img
+          <Image
             src={listing.imageUrl}
             alt={listing.name}
+            width={64}
+            height={64}
             className="w-full h-full object-cover"
           />
         ) : (

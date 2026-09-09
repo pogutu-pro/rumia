@@ -15,6 +15,7 @@ export interface ListingsFeedParams {
   zone_slug?: string;
   county?: string;
   area?: string;
+  property_type?: string;
   is_active?: boolean;
   sort?: 'views' | string;
 }
@@ -31,6 +32,7 @@ export const listingsApi = {
     if (params?.zone_slug) searchParams.set('zone_slug', params.zone_slug);
     if (params?.county) searchParams.set('county', params.county);
     if (params?.area) searchParams.set('area', params.area);
+    if (params?.property_type) searchParams.set('property_type', params.property_type);
     if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
     if (params?.sort) searchParams.set('sort', params.sort);
 
@@ -49,6 +51,7 @@ export const listingsApi = {
     if (params?.zone_slug) searchParams.set('zone_slug', params.zone_slug);
     if (params?.county) searchParams.set('county', params.county);
     if (params?.area) searchParams.set('area', params.area);
+    if (params?.property_type) searchParams.set('property_type', params.property_type);
     if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
     if (params?.sort) searchParams.set('sort', params.sort);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { cn } from '@/lib/utils/cn';
 
 /**
@@ -30,11 +30,11 @@ export function RumiaAnimatedLogo({
   className, 
   size = 'md' 
 }: RumiaAnimatedLogoProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const sizeClasses = {
     sm: 'text-2xl md:text-3xl',

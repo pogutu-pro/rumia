@@ -21,8 +21,8 @@ export default function SavedScreen() {
   const [tourListing, setTourListing] = useState<Listing | null>(null);
 
   const { data, isLoading } = useQuery<ListingsPage>({
-    queryKey: ['saved-hostels'],
-    queryFn: () => apiFetch('/profiles/me/saved'),
+    queryKey: ['wishlist'],
+    queryFn: () => apiFetch('/profiles/me/wishlist'),
     enabled: isAuthenticated,
   });
 
@@ -31,11 +31,11 @@ export default function SavedScreen() {
   const unsaveMutation = useMutation({
     mutationFn: async (listingId: string) => {
       setRemovingId(listingId);
-      await apiFetch(`/profiles/me/saved/${listingId}`, { method: 'DELETE' });
+      await apiFetch(`/profiles/me/wishlist/${listingId}`, { method: 'DELETE' });
     },
     onSettled: () => {
       setRemovingId(null);
-      queryClient.invalidateQueries({ queryKey: ['saved-hostels'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     },
   });
 
@@ -44,8 +44,8 @@ export default function SavedScreen() {
       <View style={[styles.center, { paddingTop: insets.top }]}>
         <EmptyState
           icon={<Lock size={26} color={palette.slate[400]} />}
-          title="Sign in to view saved hostels"
-          subtitle="Save your favorite hostels to easily compare and book later."
+          title="Sign in to view your wishlist"
+          subtitle="Add your favorite hostels to your wishlist to compare and book later."
           actionLabel="Sign In"
           onAction={() => router.push('/(auth)/login')}
         />
@@ -56,7 +56,7 @@ export default function SavedScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.title}>Saved Hostels</Text>
+        <Text style={styles.title}>Wishlist</Text>
         <Text style={styles.countText}>
           {isLoading ? '' : `${saved.length} ${saved.length === 1 ? 'hostel' : 'hostels'}`}
         </Text>
@@ -73,8 +73,8 @@ export default function SavedScreen() {
         <View style={styles.center}>
           <EmptyState
             icon={<Heart size={26} color={palette.slate[400]} />}
-            title="No saved hostels yet"
-            subtitle="Explore hostels and tap the heart icon to save them here."
+            title="No wishlist items yet"
+            subtitle="Explore hostels and tap the heart icon to add them to your wishlist."
             actionLabel="Explore Hostels"
             onAction={() => router.push('/explore')}
           />

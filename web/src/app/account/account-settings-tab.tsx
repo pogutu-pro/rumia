@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
+import { WishlistNotificationPreferences } from '@/components/settings/WishlistNotificationPreferences';
 import { createClient } from '@/lib/supabase/client';
 import { saveProfileCompletionAction } from '@/app/actions/profile';
 import { User, Phone, Mail, GraduationCap, Loader2, Check, LogOut, AlertTriangle, X, ArrowLeft } from 'lucide-react';
@@ -218,11 +219,13 @@ export function AccountSettingsTab({
         <div>
           <h3 className="text-sm font-bold text-slate-900">Notifications & Alerts</h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Manage alerts for tour updates and price drops on saved hostels.
+            Manage alerts for tour updates and price drops on hostels in your wishlist.
           </p>
         </div>
 
         <NotificationSettings />
+
+        <WishlistNotificationPreferences email={profile.email} />
       </div>
 
       {/* 3. Log Out Section */}
@@ -264,7 +267,7 @@ export function AccountSettingsTab({
             <div className="space-y-1">
               <h4 className="text-base font-bold text-slate-900">Leave Rumia?</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Are you sure you want to log out of your account? You will need to sign in again to access your saved hostels and tour bookings.
+                Are you sure you want to log out of your account? You will need to sign in again to access your wishlist and tour bookings.
               </p>
             </div>
 

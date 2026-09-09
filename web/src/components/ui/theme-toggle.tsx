@@ -13,12 +13,12 @@ import {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  // Prevent hydration mismatch
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Returns true only after hydration, so the dropdown never mismatches SSR.
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   if (!mounted) {
     return (

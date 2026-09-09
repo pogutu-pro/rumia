@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { promoteStudentToAgentAction, updateUserRoleAction, promoteToAdminAction } from '@/app/actions/admin';
@@ -94,7 +95,7 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       {user.avatar_url ? (
-                        <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                        <Image src={user.avatar_url} alt="" width={32} height={32} className="rounded-full object-cover shrink-0" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-slate-100 shrink-0 flex items-center justify-center">
                           <span className="text-xs font-medium text-slate-400">{(user.full_name || '?')[0]}</span>
@@ -204,7 +205,7 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   {user.avatar_url ? (
-                    <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                    <Image src={user.avatar_url} alt="" width={40} height={40} className="rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 flex items-center justify-center">
                       <span className="text-sm font-medium text-slate-400">{(user.full_name || '?')[0]}</span>

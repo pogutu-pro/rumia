@@ -3,8 +3,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useColorScheme } from 'react-native';
+import { Platform, StyleSheet, View, useColorScheme } from 'react-native';
 import type { Session } from '@supabase/supabase-js';
+import type { ReactNode } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { ApiError } from '../lib/api/client';
 import { AnalyticsProvider } from '../lib/posthog';
@@ -29,6 +30,22 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+/**
+ * On web, render the app inside a centred phone-width frame so expo web
+ * previews like a mobile app instead of a full-bleed desktop web page.
+ * Native builds render children directly.
+ */
+function AppFrame({ children }: { children: ReactNode }) {
+  if (Platform.OS !== 'web') {
+    return <>{children}</>;
+  }
+  return (
+    <View style={styles.webStage}>
+      <View style={styles.webPhone}>{children}</View>
+    </View>
+  );
+}
 
 function RootLayout() {
   const hydrateSession = useSessionHydration();
@@ -64,17 +81,42 @@ function RootLayout() {
       <ErrorBoundary>
         <AnalyticsProvider>
           <QueryClientProvider client={queryClient}>
-            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="listing/[slug]" options={{ headerShown: false }} />
-              <Stack.Screen name="notifications" options={{ headerShown: false }} />
-            </Stack>
+            <AppFrame>
+              <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="listing/[slug]" options={{ headerShown: false }} />
+                <Stack.Screen name="notifications" options={{ headerShown: false }} />
+              </Stack>
+            </AppFrame>
           </QueryClientProvider>
         </AnalyticsProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  webStage: {
+    flex: 1,
+    backgroundColor: getThemeColors('light').surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webPhone: {
+    width: '100%',
+    maxWidth: 430,
+    height: '100%',
+    backgroundColor: '#ffffff',
+    overflow: 'hidden',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: getThemeColors('light').border,
+    shadowColor: '#000000',
+    shadowOpacity: 0.18,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 40,
+  },
+});
 
 export default wrapWithSentry(RootLayout);

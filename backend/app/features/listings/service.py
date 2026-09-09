@@ -35,6 +35,7 @@ class ListingService:
         zone_id: Optional[str] = None,
         area: Optional[str] = None,
         county: Optional[str] = None,
+        property_type: Optional[str] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
         is_active: bool = True,
@@ -56,6 +57,8 @@ class ListingService:
             stmt = stmt.where(Listing.area.ilike(f"%{area}%"))
         if county:
             stmt = stmt.where(Listing.county.ilike(f"%{county}%"))
+        if property_type:
+            stmt = stmt.where(Listing.property_type == property_type)
 
         if min_price is not None:
             stmt = stmt.where(Listing.price >= min_price)
@@ -76,6 +79,8 @@ class ListingService:
                 func.coalesce(view_sub.c.view_count, 0).desc(),
                 Listing.created_at.desc().nulls_last(),
             )
+        elif sort == "newest":
+            stmt = stmt.order_by(Listing.created_at.desc().nulls_last())
         else:
             stmt = stmt.order_by(
                 Listing.sort_position.asc().nulls_last(),
@@ -256,6 +261,7 @@ class ListingService:
             title=data.title,
             slug=slug,
             description=data.description,
+            property_type=data.property_type,
             price=data.price,
             location=data.location,
             county=data.county,

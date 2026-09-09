@@ -60,7 +60,6 @@ export default async function ListingOgImage({ params }: Props) {
           }}
         >
           {coverDataUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={coverDataUrl}
               alt=""

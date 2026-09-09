@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 import { CheckCircle2, X } from 'lucide-react';
 
@@ -19,21 +19,23 @@ export function RoleGuideBanner({
   storageKey,
   icon,
 }: RoleGuideBannerProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    const dismissed = window.localStorage.getItem(storageKey) === 'true';
-    setIsVisible(!dismissed);
-    setIsReady(true);
-  }, [storageKey]);
+  const [dismissed, setDismissed] = useState(false);
+  // Returns true only after hydration, so the localStorage read never runs on
+  // the server or during the SSR-matching hydration render.
+  const isReady = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const isVisible =
+    isReady && !dismissed && window.localStorage.getItem(storageKey) !== 'true';
 
   const handleDismiss = () => {
     window.localStorage.setItem(storageKey, 'true');
-    setIsVisible(false);
+    setDismissed(true);
   };
 
-  if (!isReady || !isVisible) {
+  if (!isVisible) {
     return null;
   }
 

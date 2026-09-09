@@ -221,28 +221,33 @@ export async function GET(request: NextRequest) {
   }
 
   if (user?.user_metadata) {
-    // Different OAuth providers may populate different metadata fields.
-    const meta: any = user.user_metadata;
-    const full_name = meta.full_name || meta.name || meta.given_name || null;
-    const avatar_url = meta.avatar_url || meta.picture || null;
+    try {
+      // Different OAuth providers may populate different metadata fields.
+      const meta: any = user.user_metadata;
+      const full_name = meta.full_name || meta.name || meta.given_name || null;
+      const avatar_url = meta.avatar_url || meta.picture || null;
 
-    if (full_name || avatar_url) {
-      const updateData: Record<string, unknown> = {};
-      if (full_name) updateData.full_name = full_name;
-      if (avatar_url) updateData.avatar_url = avatar_url;
+      if (full_name || avatar_url) {
+        const updateData: Record<string, unknown> = {};
+        if (full_name) updateData.full_name = full_name;
+        if (avatar_url) updateData.avatar_url = avatar_url;
 
-      // Use update (not upsert) — the profile row was already ensured above.
-      const { error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .update(updateData)
-        .eq('id', user.id);
+        // Use update (not upsert) — the profile row was already ensured above.
+        const { error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .update(updateData)
+          .eq('id', user.id);
 
-      if (profileError) {
-        console.error('[auth/callback] profile metadata sync error', {
-          message: String(profileError.message).slice(0, 200),
-          userId: user.id,
-        });
+        if (profileError) {
+          console.error('[auth/callback] profile metadata sync error', {
+            message: String(profileError.message).slice(0, 200),
+            userId: user.id,
+          });
+        }
       }
+    } catch (metaError) {
+      // Metadata sync is best-effort and must never block the login redirect.
+      console.error('[auth/callback] profile metadata sync exception', metaError);
     }
   }
 

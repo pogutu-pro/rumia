@@ -20,6 +20,10 @@ function listingPayload(formData: any, agentId?: string) {
     county: formData.county || 'nyeri',
     area: formData.area || 'dekut',
     description: formData.description,
+    property_type:
+      ['apartment', 'short_stay', 'hostel'].includes(formData.property_type)
+        ? formData.property_type
+        : 'hostel',
     price:
       typeof formData.price === 'number'
         ? formData.price

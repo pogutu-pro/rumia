@@ -8,8 +8,8 @@ from app.core.errors import NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
 from app.features.listings.models import Listing
-from app.features.profiles.models import SavedHostel, UserProfile
-from app.features.profiles.schemas import ProfileUpdate, SavedHostelActionResponse, SetHomeCampusRequest
+from app.features.profiles.models import UserProfile, Wishlist
+from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, WishlistActionResponse
 
 
 class ProfileService:
@@ -65,34 +65,34 @@ class ProfileService:
     @staticmethod
     async def save_hostel(
         db: AsyncSession, user: AuthenticatedUser, listing_id: str
-    ) -> SavedHostelActionResponse:
+    ) -> WishlistActionResponse:
         res = await db.execute(select(Listing).where(Listing.id == listing_id))
         listing = res.scalar_one_or_none()
         if not listing:
             raise NotFoundException("Listing not found")
 
         existing = await db.execute(
-            select(SavedHostel).where(
-                SavedHostel.user_id == user.id, SavedHostel.listing_id == listing_id
+            select(Wishlist).where(
+                Wishlist.user_id == user.id, Wishlist.listing_id == listing_id
             )
         )
         saved = existing.scalar_one_or_none()
         if not saved:
-            saved = SavedHostel(user_id=user.id, listing_id=listing_id)
+            saved = Wishlist(user_id=user.id, listing_id=listing_id)
             db.add(saved)
             await db.flush()
 
-        return SavedHostelActionResponse(
+        return WishlistActionResponse(
             message="Hostel saved successfully", is_saved=True, listing_id=listing_id
         )
 
     @staticmethod
     async def unsave_hostel(
         db: AsyncSession, user: AuthenticatedUser, listing_id: str
-    ) -> SavedHostelActionResponse:
+    ) -> WishlistActionResponse:
         existing = await db.execute(
-            select(SavedHostel).where(
-                SavedHostel.user_id == user.id, SavedHostel.listing_id == listing_id
+            select(Wishlist).where(
+                Wishlist.user_id == user.id, Wishlist.listing_id == listing_id
             )
         )
         saved = existing.scalar_one_or_none()
@@ -100,21 +100,21 @@ class ProfileService:
             await db.delete(saved)
             await db.flush()
 
-        return SavedHostelActionResponse(
+        return WishlistActionResponse(
             message="Hostel unsaved successfully", is_saved=False, listing_id=listing_id
         )
 
     @staticmethod
     async def get_saved_state(
         db: AsyncSession, user: AuthenticatedUser, listing_id: str
-    ) -> SavedHostelActionResponse:
+    ) -> WishlistActionResponse:
         existing = await db.execute(
-            select(SavedHostel).where(
-                SavedHostel.user_id == user.id, SavedHostel.listing_id == listing_id
+            select(Wishlist).where(
+                Wishlist.user_id == user.id, Wishlist.listing_id == listing_id
             )
         )
         is_saved = existing.scalar_one_or_none() is not None
-        return SavedHostelActionResponse(
+        return WishlistActionResponse(
             message="Hostel saved" if is_saved else "Hostel not saved",
             is_saved=is_saved,
             listing_id=listing_id,
@@ -125,20 +125,20 @@ class ProfileService:
         db: AsyncSession, user: AuthenticatedUser, pagination: PaginationParams
     ) -> Tuple[List[Listing], int]:
         count_res = await db.execute(
-            select(func.count(SavedHostel.id)).where(SavedHostel.user_id == user.id)
+            select(func.count(Wishlist.id)).where(Wishlist.user_id == user.id)
         )
         total = count_res.scalar_one() or 0
 
         stmt = (
             select(Listing)
-            .join(SavedHostel, SavedHostel.listing_id == Listing.id)
+            .join(Wishlist, Wishlist.listing_id == Listing.id)
             .options(
                 selectinload(Listing.agent),
                 selectinload(Listing.images),
                 selectinload(Listing.room_types),
             )
-            .where(SavedHostel.user_id == user.id)
-            .order_by(SavedHostel.created_at.desc())
+            .where(Wishlist.user_id == user.id)
+            .order_by(Wishlist.created_at.desc())
             .offset(pagination.offset)
             .limit(pagination.limit)
         )
@@ -157,9 +157,9 @@ class ProfileService:
             return set()
 
         res = await db.execute(
-            select(SavedHostel.listing_id).where(
-                SavedHostel.user_id == user.id,
-                SavedHostel.listing_id.in_(ids),
+            select(Wishlist.listing_id).where(
+                Wishlist.user_id == user.id,
+                Wishlist.listing_id.in_(ids),
             )
         )
         return {str(listing_id) for listing_id in res.scalars().all()}

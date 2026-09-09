@@ -70,6 +70,7 @@ class ListingRead(BaseModel):
     title: str
     slug: Optional[str] = None
     description: str
+    property_type: str = "hostel"
     price: float
     location: str
     county: Optional[str] = None
@@ -116,6 +117,7 @@ class ListingRead(BaseModel):
 class ListingCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=200)
     description: str = Field(..., min_length=10)
+    property_type: str = Field(default="hostel", pattern="^(hostel|apartment|short_stay)$")
     price: float = Field(..., ge=0)
     location: str = Field(..., min_length=2)
     county: Optional[str] = "nyeri"
@@ -154,6 +156,7 @@ class ListingCreate(BaseModel):
 class ListingUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=3, max_length=200)
     description: Optional[str] = Field(None, min_length=10)
+    property_type: Optional[str] = Field(None, pattern="^(hostel|apartment|short_stay)$")
     price: Optional[float] = Field(None, ge=0)
     location: Optional[str] = None
     county: Optional[str] = None

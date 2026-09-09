@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import {
   CalendarCheck,
@@ -91,7 +92,12 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
   }, []);
 
   useEffect(() => {
-    fetchBookings();
+    // Deferred past the commit so the async fetch never updates state
+    // synchronously within the effect body.
+    const timer = setTimeout(() => {
+      void fetchBookings();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchBookings]);
 
   async function handleCancel(bookingId: string) {
@@ -331,9 +337,11 @@ function TourRow({
       {/* Thumbnail */}
       {image ? (
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/60">
-          <img
+          <Image
             src={image.r2_url}
             alt={listing?.title || 'Hostel'}
+            width={64}
+            height={64}
             className="w-full h-full object-cover"
           />
         </div>

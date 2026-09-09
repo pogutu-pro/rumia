@@ -33,7 +33,8 @@ export function AnimatedCounter({
 
   // Intersection Observer to trigger animation when element is visible
   useEffect(() => {
-    if (!elementRef.current || hasAnimated) return;
+    const element = elementRef.current;
+    if (!element || hasAnimated) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -68,11 +69,11 @@ export function AnimatedCounter({
       }
     );
 
-    observer.observe(elementRef.current);
+    observer.observe(element);
 
     return () => {
-      if (elementRef.current) {
-        observer.unobserve(elementRef.current);
+      if (element) {
+        observer.unobserve(element);
       }
     };
   }, [hasAnimated, targetNumber, duration]);

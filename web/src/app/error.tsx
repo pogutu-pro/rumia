@@ -139,7 +139,7 @@ export default function Error({ error, reset }: ErrorProps) {
 
             <div className="mt-6 text-center">
               <a
-                href="mailto:support@rumi.app"
+                href="mailto:contact@rumia.co.ke"
                 className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />

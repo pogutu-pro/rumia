@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, CalendarCheck } from 'lucide-react';
+import { MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, CalendarCheck } from 'lucide-react';
+import { ListingSearchInput } from '@/components/ui/listing-search-input';
 import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/use-debounce';
 import { createClient } from '@/lib/supabase/client';
@@ -81,6 +82,9 @@ export default function HostelsSearch({
   // router navigation per keystroke.
   const [committedQuery, setCommittedQuery] = useState(initialQuery);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
+
+  // Optional category pre-filter from Home Explore "See all" links (?type=).
+  const propertyType = searchParams.get('type');
 
   const {
     genders,
@@ -220,7 +224,14 @@ export default function HostelsSearch({
     [allListings, combinedFilters],
   );
 
-  const totalCountState = allFiltered.length;
+  // Category pre-filter (?type=hostel|apartment|short_stay) layered on top of
+  // the search snapshot. Legacy rows without a property_type default to hostel.
+  const typedListings = useMemo(() => {
+    if (!propertyType) return allFiltered;
+    return allFiltered.filter((l) => (l.property_type ?? 'hostel') === propertyType);
+  }, [allFiltered, propertyType]);
+
+  const totalCountState = typedListings.length;
 
   // ── URL sync ───────────────────────────────────────────────────────────────
   // Runs on filter changes and committed queries (Enter / blur / clear) so the
@@ -243,7 +254,15 @@ export default function HostelsSearch({
     reset();
     setQuery('');
     setCommittedQuery('');
-  }, [reset]);
+    if (propertyType) {
+      const rest = new URLSearchParams(searchParams.toString());
+      rest.delete('type');
+      router.replace(
+        `${basePath}${rest.toString() ? `?${rest.toString()}` : ''}`,
+        { scroll: false },
+      );
+    }
+  }, [reset, propertyType, searchParams, basePath, router]);
 
   const handleMobileApply = useCallback(
     (draft: FilterState) => {
@@ -282,33 +301,18 @@ export default function HostelsSearch({
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         {/* Search zone — elevated container bridging navbar and content */}
         <div className="bg-white rounded-2xl shadow-[0_1px_14px_rgba(0,0,0,0.06)] border border-slate-100 p-3 sm:p-4 mb-4">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setCommittedQuery(query);
-              }}
-              onBlur={() => setCommittedQuery(query)}
-              placeholder="Search by name, area, or price"
-              className="w-full h-12 lg:h-[50px] pl-10 pr-10 bg-slate-100/60 border border-slate-200 rounded-xl text-[15px] font-medium text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition-all duration-200"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery('');
-                  setCommittedQuery('');
-                }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+          <ListingSearchInput
+            value={query}
+            onChange={(v) => setQuery(v)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') setCommittedQuery(query);
+            }}
+            onBlur={() => setCommittedQuery(query)}
+            onClear={() => {
+              setQuery('');
+              setCommittedQuery('');
+            }}
+          />
 
           {/* Controls row */}
           <div className="flex flex-nowrap items-center gap-2 mt-3 overflow-x-auto scrollbar-none">
@@ -478,12 +482,32 @@ export default function HostelsSearch({
               </span>
             )}
           </p>
+          {propertyType && (
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-emerald-700">
+              {propertyType === 'apartment' ? 'Apartments' : propertyType === 'short_stay' ? 'Short stays' : 'Hostels'}
+              <button
+                type="button"
+                aria-label="Clear category filter"
+                onClick={() => {
+                  const rest = new URLSearchParams(searchParams.toString());
+                  rest.delete('type');
+                  router.replace(
+                    `${basePath}${rest.toString() ? `?${rest.toString()}` : ''}`,
+                    { scroll: false },
+                  );
+                }}
+                className="text-emerald-600 hover:text-emerald-800 rounded-full p-0.5 hover:bg-emerald-100 cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Listing Grid — all listings render in HTML for crawlers */}
-        {allFiltered.length > 0 ? (
+        {typedListings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allFiltered.map((item) => {
+            {typedListings.map((item) => {
               const sorted = [...(item.listing_images || [])].sort(
                 (a, b) => a.display_order - b.display_order,
               );

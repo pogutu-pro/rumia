@@ -27,7 +27,7 @@ import { useCompareStore, type CompareSelection } from '@/stores/compare-store';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 
 interface SavedListing {
-  id: string; // listing id (FastAPI /profiles/me/saved is authoritative)
+  id: string; // listing id (FastAPI /profiles/me/wishlist is authoritative)
   listing_id: string;
   created_at: string;
   listings: {
@@ -60,7 +60,7 @@ interface ApiSavedImage {
   blur_data_url?: string | null;
 }
 
-// Shape of a listing as returned by GET /profiles/me/saved (ListingRead).
+// Shape of a listing as returned by GET /profiles/me/wishlist (ListingRead).
 interface ApiSavedListing {
   id: string;
   title: string;
@@ -155,7 +155,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
 
     async function fetchSaved() {
       try {
-        const res = await apiClient<ApiSavedResponse>('/profiles/me/saved?limit=100');
+        const res = await apiClient<ApiSavedResponse>('/profiles/me/wishlist?limit=100');
         if (cancelled) return;
         const validData = res.items.map(toSavedListing).filter((item) => item.listings);
         setSaved(validData);
@@ -195,7 +195,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
           loadFromIds(selectedIds, remoteSelections);
         }
       } catch {
-        // Error fetching saved hostels — leave the tab empty.
+        // Error fetching wishlist — leave the tab empty.
       }
       setLoading(false);
     }
@@ -204,16 +204,16 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadFromIds, selectedIds]);
 
   async function handleUnsave(_savedId: string, listingId: string) {
     setRemovingId(listingId);
     try {
-      await apiClient(`/profiles/me/saved/${listingId}`, { method: 'DELETE' });
+      await apiClient(`/profiles/me/wishlist/${listingId}`, { method: 'DELETE' });
       setSaved((prev) => prev.filter((s) => s.listing_id !== listingId));
       removeSelection(listingId);
     } catch {
-      // Failed to unsave remotely — keep the item.
+      // Failed to remove from wishlist remotely — keep the item.
     }
     setRemovingId(null);
   }
@@ -266,7 +266,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
             <div key={i} className="skeleton aspect-4/3 rounded-2xl" />
           ))}
         </div>
-        <span className="sr-only">Loading your saved hostels</span>
+        <span className="sr-only">Loading your wishlist</span>
       </div>
     );
   }
@@ -306,7 +306,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:px-6">
         <div>
           <h2 className="text-base font-bold text-slate-900">
-            {saved.length} Saved {saved.length === 1 ? 'Hostel' : 'Hostels'}
+            {saved.length} in wishlist
           </h2>
           <p className="text-xs text-slate-500">
             Select hostels below to compare prices, amenities, and locations side-by-side.
@@ -323,7 +323,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
             }`}
           >
             <GitCompareArrows className="h-3.5 w-3.5" />
-            {compareMode ? 'Back to Saved List' : `Compare Selected (${selectedIds.length})`}
+            {compareMode ? 'Back to Wishlist' : `Compare Selected (${selectedIds.length})`}
           </button>
         )}
       </div>
@@ -334,9 +334,9 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
           <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3">
             <Heart className="h-6 w-6" />
           </div>
-          <h3 className="text-base font-bold text-slate-900 mb-1">No saved hostels</h3>
+          <h3 className="text-base font-bold text-slate-900 mb-1">No wishlist items yet</h3>
           <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-            Tap the heart icon on any hostel listing to save it here for quick access and side-by-side comparison.
+            Tap the heart icon on any hostel listing to add it to your wishlist for quick access and side-by-side comparison.
           </p>
           <Link
             href="/hostels"
@@ -381,10 +381,12 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
                           <Link href={href} className="block group">
                             <div className="w-full aspect-[16/10] rounded-lg bg-slate-100 overflow-hidden mb-2 relative">
                               {item.imageUrl ? (
-                                <img
+                                <Image
                                   src={item.imageUrl}
                                   alt={item.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                  fill
+                                  sizes="(min-width: 768px) 25vw, 100vw"
+                                  className="object-cover group-hover:scale-105 transition-transform"
                                 />
                               ) : (
                                 <div className="w-full h-full bg-slate-100" />
@@ -538,12 +540,12 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
         </div>
       ) : null}
 
-      {/* Saved Hostels List */}
+      {/* Wishlist */}
       {saved.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Saved Hostels List
+              Wishlist
             </p>
             {selectedIds.length > 0 && (
               <span className="text-xs text-slate-500 font-medium">
@@ -640,7 +642,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
                         onClick={() => handleUnsave(item.id, listing.id)}
                         disabled={removingId === item.id}
                         className="inline-flex items-center justify-center gap-1 h-8 px-2.5 rounded-lg border border-slate-200 text-slate-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 text-xs font-semibold transition-colors disabled:opacity-50"
-                        title="Remove from saved"
+                        title="Remove from wishlist"
                       >
                         {removingId === item.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />

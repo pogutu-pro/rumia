@@ -631,7 +631,7 @@ export function SettingsClient({
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                placeholder="e.g. support@rumiamanage.com"
+                placeholder="e.g. contact@rumia.co.ke"
                 className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-slate-900"
               />
             </div>

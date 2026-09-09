@@ -30,6 +30,7 @@ class Listing(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     slug: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    property_type: Mapped[str] = mapped_column(String, server_default="hostel", index=True)
     price: Mapped[float] = mapped_column(Numeric, nullable=False)
     location: Mapped[str] = mapped_column(String, nullable=False)
     county: Mapped[Optional[str]] = mapped_column(String, nullable=True)

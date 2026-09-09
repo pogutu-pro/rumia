@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,13 +25,13 @@ export default function RumiVideo({
   className,
 }: VideoProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  // Returns true only after hydration, so the embed never mismatches SSR.
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // Extract YouTube ID
   const youtubeId = url.match(

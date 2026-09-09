@@ -20,7 +20,7 @@ class AnalyticsService:
     ) -> TrackViewResponse:
         """Delegate to the Supabase RPC `track_listing_view` stored procedure."""
         result = await db.execute(
-            text("SELECT public.track_listing_view(:listing_id::uuid, :user_id::uuid, :ip_hash)"),
+            text("SELECT public.track_listing_view(CAST(:listing_id AS uuid), CAST(:user_id AS uuid), :ip_hash)"),
             {
                 "listing_id": listing_id,
                 "user_id": user_id,
@@ -43,7 +43,7 @@ class AnalyticsService:
     ) -> ViewCountRead:
         """Calls DB RPC `get_listing_view_counts`."""
         result = await db.execute(
-            text("SELECT * FROM public.get_listing_view_counts(:listing_id::uuid)"),
+            text("SELECT * FROM public.get_listing_view_counts(CAST(:listing_id AS uuid))"),
             {"listing_id": listing_id},
         )
         row = result.fetchone()
@@ -63,7 +63,7 @@ class AnalyticsService:
         agent_id: str,
     ) -> List[AgentListingViewEntry]:
         result = await db.execute(
-            text("SELECT * FROM public.get_agent_listing_view_analytics(:agent_id::uuid)"),
+            text("SELECT * FROM public.get_agent_listing_view_analytics(CAST(:agent_id AS uuid))"),
             {"agent_id": agent_id},
         )
         rows = result.fetchall()

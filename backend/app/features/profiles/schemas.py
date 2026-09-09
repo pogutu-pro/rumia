@@ -41,3 +41,9 @@ class SavedHostelActionResponse(BaseModel):
     is_saved: bool
     listing_id: str
 
+
+class WishlistActionResponse(BaseModel):
+    message: str
+    is_saved: bool
+    listing_id: str
+

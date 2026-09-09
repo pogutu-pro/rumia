@@ -41,7 +41,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com'
+    process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke'
   ),
   title: {
     default: 'Find Student Hostels Near DeKUT Nyeri | Rumia',
@@ -57,14 +57,14 @@ export const metadata: Metadata = {
     'student housing Nyeri Kenya',
     'verified hostels near DeKUT',
   ],
-  authors: [{ name: 'Rumia', url: 'https://rumiamanage.com' }],
+  authors: [{ name: 'Rumia', url: 'https://rumia.co.ke' }],
   creator: 'Rumia',
   publisher: 'Rumia',
   icons: {
     icon: [{ url: '/images/logo/logo.svg', type: 'image/svg+xml' }],
   },
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumiamanage.com',
+    canonical: process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke',
   },
 };
 

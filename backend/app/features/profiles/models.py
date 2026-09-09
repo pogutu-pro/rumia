@@ -28,8 +28,8 @@ class UserProfile(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
-class SavedHostel(Base):
-    __tablename__ = "saved_hostels"
+class Wishlist(Base):
+    __tablename__ = "wishlists"
     __table_args__ = {"extend_existing": True}
 
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))

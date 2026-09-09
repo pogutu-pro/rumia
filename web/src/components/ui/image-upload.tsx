@@ -28,10 +28,13 @@ export function ImageUpload({
   const [preview, setPreview] = React.useState<string | null>(
     currentImageUrl || null,
   );
+  const [prevImageUrl, setPrevImageUrl] = React.useState(currentImageUrl ?? null);
 
-  React.useEffect(() => {
+  // Sync when the parent changes the current image URL.
+  if ((currentImageUrl ?? null) !== prevImageUrl) {
+    setPrevImageUrl(currentImageUrl ?? null);
     setPreview(currentImageUrl || null);
-  }, [currentImageUrl]);
+  }
 
   const onDrop = React.useCallback(
     (acceptedFiles: File[]) => {

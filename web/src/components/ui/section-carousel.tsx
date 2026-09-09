@@ -19,16 +19,16 @@ export function SectionCarousel({
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [isHovered, setIsHovered] = React.useState(false);
 
-  const paginate = (newDirection: number) => {
+  const paginate = React.useCallback((newDirection: number) => {
     setCurrentIndex((prevIndex) => (prevIndex + newDirection + images.length) % images.length);
-  };
+  }, [images.length]);
 
   // Auto-play
   React.useEffect(() => {
     if (isHovered || images.length <= 1) return;
     const timer = setInterval(() => paginate(1), 5000);
     return () => clearInterval(timer);
-  }, [isHovered, images.length, currentIndex]);
+  }, [isHovered, images.length, currentIndex, paginate]);
 
   if (!images || images.length === 0) return null;
 

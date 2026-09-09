@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   CalendarCheck,
   Heart,
@@ -174,7 +175,7 @@ export function AccountOverviewTab({
           </div>
         </div>
 
-        {/* Saved Hostels & Compare Card */}
+        {/* Wishlist & Compare Card */}
         <div
           onClick={() => onTabChange('saved')}
           className="group cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
@@ -185,16 +186,16 @@ export function AccountOverviewTab({
                 <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
-                {savedCount} Saved
+                {savedCount} in wishlist
               </span>
             </div>
 
             <div>
               <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-rose-600 transition-colors leading-tight">
-                Saved & Compare
+                Wishlist & Compare
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
-                Review your saved hostels and compare prices, room types, and amenities.
+                Review hostels in your wishlist and compare prices, room types, and amenities.
               </p>
             </div>
 
@@ -210,7 +211,7 @@ export function AccountOverviewTab({
                       className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0"
                     >
                       {image ? (
-                        <img src={image.r2_url} alt="" className="w-full h-full object-cover" />
+                        <Image src={image.r2_url} alt="" width={44} height={44} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Heart className="h-3 w-3 text-slate-300" />
@@ -226,7 +227,7 @@ export function AccountOverviewTab({
           <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-rose-600">
             <span className="flex items-center gap-1">
               <GitCompareArrows className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              Saved & Compare
+              Wishlist & Compare
             </span>
             <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
           </div>

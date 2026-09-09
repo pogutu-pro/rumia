@@ -3,6 +3,7 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import { Loader2, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -343,10 +344,12 @@ export function ManagerListingsClient({
                   <tr key={listing.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-4">
                       {listing.cover_image ? (
-                        <img
+                        <Image
                           src={listing.cover_image}
                           alt={listing.title}
-                          className="h-10 w-14 object-cover rounded-lg"
+                          width={56}
+                          height={40}
+                          className="object-cover rounded-lg"
                         />
                       ) : (
                         <div className="h-10 w-14 bg-slate-100 rounded-lg" />
@@ -398,10 +401,12 @@ export function ManagerListingsClient({
               >
                 <div className="flex items-start gap-3">
                   {listing.cover_image ? (
-                    <img
+                    <Image
                       src={listing.cover_image}
                       alt={listing.title}
-                      className="h-14 w-20 object-cover rounded-lg shrink-0"
+                      width={80}
+                      height={56}
+                      className="object-cover rounded-lg shrink-0"
                     />
                   ) : (
                     <div className="h-14 w-20 bg-slate-100 rounded-lg shrink-0" />

@@ -34,6 +34,14 @@ async def archive_expired_announcements() -> None:
         logger.error("archive_expired_announcements failed: %s", exc)
 
 
+async def retry_failed_deliveries() -> None:
+    """Retry pending/failed email and push delivery rows (maintenance sweep)."""
+    from app.core.tasks.worker import retry_email_deliveries, retry_push_deliveries
+
+    await retry_email_deliveries()
+    await retry_push_deliveries()
+
+
 async def _run_cron_loop(interval_seconds: int, coro_fn) -> None:
     """Run a coroutine on a fixed interval, logging errors without stopping the loop."""
     while True:
@@ -52,4 +60,6 @@ def start_cron_jobs() -> None:
     loop = asyncio.get_event_loop()
     # Archive expired announcements every 15 minutes
     loop.create_task(_run_cron_loop(900, archive_expired_announcements))
-    logger.info("Cron jobs scheduled: archive_expired_announcements (every 15m)")
+    # Retry pending/failed email + push deliveries every minute
+    loop.create_task(_run_cron_loop(60, retry_failed_deliveries))
+    logger.info("Cron jobs scheduled: archive_expired_announcements (every 15m), retry_failed_deliveries (every 1m)")

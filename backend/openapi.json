@@ -425,6 +425,10 @@
       },
       "AppNotificationRead": {
         "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -435,10 +439,12 @@
             "type": "string"
           },
           "message": {
+            "default": "",
             "title": "Message",
             "type": "string"
           },
           "read": {
+            "default": false,
             "title": "Read",
             "type": "boolean"
           },
@@ -447,8 +453,20 @@
             "type": "string"
           },
           "type": {
+            "default": "info",
             "title": "Type",
             "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
           },
           "user_id": {
             "title": "User Id",
@@ -459,9 +477,7 @@
           "id",
           "user_id",
           "title",
-          "message",
-          "type",
-          "read",
+          "body",
           "created_at"
         ],
         "title": "AppNotificationRead",
@@ -1906,6 +1922,12 @@
             ],
             "title": "Price Single"
           },
+          "property_type": {
+            "default": "hostel",
+            "pattern": "^(hostel|apartment|short_stay)$",
+            "title": "Property Type",
+            "type": "string"
+          },
           "room_type": {
             "anyOf": [
               {
@@ -2372,6 +2394,11 @@
               }
             ],
             "title": "Price Single"
+          },
+          "property_type": {
+            "default": "hostel",
+            "title": "Property Type",
+            "type": "string"
           },
           "rating": {
             "default": 0.0,
@@ -3031,6 +3058,18 @@
             ],
             "title": "Price Single"
           },
+          "property_type": {
+            "anyOf": [
+              {
+                "pattern": "^(hostel|apartment|short_stay)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Type"
+          },
           "room_type": {
             "anyOf": [
               {
@@ -3237,6 +3276,85 @@
           "role"
         ],
         "title": "ManagerRead",
+        "type": "object"
+      },
+      "NotificationPreferenceActionResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "wishlist_email_enabled": {
+            "title": "Wishlist Email Enabled",
+            "type": "boolean"
+          },
+          "wishlist_push_enabled": {
+            "title": "Wishlist Push Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message",
+          "wishlist_push_enabled",
+          "wishlist_email_enabled"
+        ],
+        "title": "NotificationPreferenceActionResponse",
+        "type": "object"
+      },
+      "NotificationPreferenceRead": {
+        "properties": {
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wishlist_email_enabled": {
+            "default": true,
+            "title": "Wishlist Email Enabled",
+            "type": "boolean"
+          },
+          "wishlist_push_enabled": {
+            "default": true,
+            "title": "Wishlist Push Enabled",
+            "type": "boolean"
+          }
+        },
+        "title": "NotificationPreferenceRead",
+        "type": "object"
+      },
+      "NotificationPreferenceUpdate": {
+        "properties": {
+          "wishlist_email_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wishlist Email Enabled"
+          },
+          "wishlist_push_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wishlist Push Enabled"
+          }
+        },
+        "title": "NotificationPreferenceUpdate",
         "type": "object"
       },
       "PaginatedResponse_AgentApplicationRead_": {
@@ -4854,6 +4972,19 @@
         "title": "TrackViewResponse",
         "type": "object"
       },
+      "UnreadCountResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "UnreadCountResponse",
+        "type": "object"
+      },
       "UploadUrlRequest": {
         "properties": {
           "content_type": {
@@ -4986,6 +5117,29 @@
           "all_time_count"
         ],
         "title": "ViewCountRead",
+        "type": "object"
+      },
+      "WishlistActionResponse": {
+        "properties": {
+          "is_saved": {
+            "title": "Is Saved",
+            "type": "boolean"
+          },
+          "listing_id": {
+            "title": "Listing Id",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "is_saved",
+          "listing_id"
+        ],
+        "title": "WishlistActionResponse",
         "type": "object"
       },
       "app__features__agents__schemas__AgentRead": {
@@ -7869,6 +8023,24 @@
             }
           },
           {
+            "description": "Filter by property type: 'hostel', 'apartment', or 'short_stay'",
+            "in": "query",
+            "name": "property_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by property type: 'hostel', 'apartment', or 'short_stay'",
+              "title": "Property Type"
+            }
+          },
+          {
             "description": "Minimum price filter",
             "in": "query",
             "name": "min_price",
@@ -7907,7 +8079,7 @@
             }
           },
           {
-            "description": "Sort mode: 'views' ranks by most-visited, otherwise curated sort_position order",
+            "description": "Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order",
             "in": "query",
             "name": "sort",
             "required": false,
@@ -7920,7 +8092,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Sort mode: 'views' ranks by most-visited, otherwise curated sort_position order",
+              "description": "Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order",
               "title": "Sort"
             }
           },
@@ -8612,6 +8784,114 @@
         ]
       }
     },
+    "/api/v1/notifications/preferences": {
+      "get": {
+        "description": "Fetch current user's notification channel preferences. Authenticated.",
+        "operationId": "get_preferences_api_v1_notifications_preferences_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Notification Preferences",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "patch": {
+        "description": "Update channel opt-ins (email/push) for wishlist notifications. Authenticated.",
+        "operationId": "update_preferences_api_v1_notifications_preferences_patch",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferenceUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferenceActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Notification Preferences",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
     "/api/v1/notifications/push/subscribe": {
       "post": {
         "description": "Save Web Push subscription keys. Authenticated.",
@@ -8783,6 +9063,56 @@
           }
         },
         "summary": "Mark All Notifications Read",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/unread-count": {
+      "get": {
+        "description": "Count of unread in-app notifications for the current user. Authenticated.",
+        "operationId": "unread_count_api_v1_notifications_unread_count_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnreadCountResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unread Notification Count",
         "tags": [
           "Notifications"
         ]
@@ -9017,7 +9347,8 @@
     },
     "/api/v1/profiles/me/saved": {
       "get": {
-        "description": "Retrieve user's saved hostels. Authenticated.",
+        "deprecated": true,
+        "description": "Alias of GET /profiles/me/wishlist. Deprecated; will be removed. Authenticated.",
         "operationId": "get_saved_hostels_api_v1_profiles_me_saved_get",
         "parameters": [
           {
@@ -9086,7 +9417,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Saved Hostels",
+        "summary": "Get Saved Hostels (deprecated)",
         "tags": [
           "Profiles"
         ]
@@ -9094,7 +9425,8 @@
     },
     "/api/v1/profiles/me/saved/{listing_id}": {
       "delete": {
-        "description": "Remove a hostel from current user's favorites. Authenticated.",
+        "deprecated": true,
+        "description": "Alias of DELETE /profiles/me/wishlist/{listing_id}. Deprecated. Authenticated.",
         "operationId": "unsave_hostel_api_v1_profiles_me_saved__listing_id__delete",
         "parameters": [
           {
@@ -9145,13 +9477,14 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Unsave Hostel",
+        "summary": "Unsave Hostel (deprecated)",
         "tags": [
           "Profiles"
         ]
       },
       "get": {
-        "description": "Check whether the current user has saved a hostel. Authenticated.",
+        "deprecated": true,
+        "description": "Alias of GET /profiles/me/wishlist/{listing_id}. Deprecated. Authenticated.",
         "operationId": "get_saved_state_api_v1_profiles_me_saved__listing_id__get",
         "parameters": [
           {
@@ -9202,13 +9535,14 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Check Saved State",
+        "summary": "Check Saved State (deprecated)",
         "tags": [
           "Profiles"
         ]
       },
       "post": {
-        "description": "Save a hostel to current user's favorites. Authenticated.",
+        "deprecated": true,
+        "description": "Alias of POST /profiles/me/wishlist/{listing_id}. Deprecated. Authenticated.",
         "operationId": "save_hostel_api_v1_profiles_me_saved__listing_id__post",
         "parameters": [
           {
@@ -9259,7 +9593,257 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Save Hostel",
+        "summary": "Save Hostel (deprecated)",
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/v1/profiles/me/wishlist": {
+      "get": {
+        "description": "Retrieve current user's wishlisted hostels. Authenticated.",
+        "operationId": "get_wishlist_api_v1_profiles_me_wishlist_get",
+        "parameters": [
+          {
+            "description": "Page number (1-indexed)",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "description": "Page number (1-indexed)",
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page (max 1000)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "description": "Items per page (max 1000)",
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ListingRead_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Wishlist",
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/v1/profiles/me/wishlist/{listing_id}": {
+      "delete": {
+        "description": "Remove a hostel from the current user's wishlist. Authenticated.",
+        "operationId": "unwishlist_hostel_api_v1_profiles_me_wishlist__listing_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WishlistActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove From Wishlist",
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "get": {
+        "description": "Check whether the current user has wishlisted a hostel. Authenticated.",
+        "operationId": "get_wishlist_state_api_v1_profiles_me_wishlist__listing_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WishlistActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Wishlist State",
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "post": {
+        "description": "Add a hostel to the current user's wishlist. Authenticated.",
+        "operationId": "wishlist_hostel_api_v1_profiles_me_wishlist__listing_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WishlistActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Wishlist Hostel",
         "tags": [
           "Profiles"
         ]
@@ -9958,6 +10542,24 @@
               ],
               "description": "Filter by specific area",
               "title": "Area"
+            }
+          },
+          {
+            "description": "Filter by property type: 'hostel', 'apartment', or 'short_stay'",
+            "in": "query",
+            "name": "property_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by property type: 'hostel', 'apartment', or 'short_stay'",
+              "title": "Property Type"
             }
           },
           {

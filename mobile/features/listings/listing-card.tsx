@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 import { View, Text, StyleSheet, Pressable, type StyleProp, type ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { MapPin, Eye, Heart } from 'lucide-react-native';
+import { MapPin, Eye, Heart, Check, GitCompareArrows } from 'lucide-react-native';
 import type { Listing } from '../../lib/api/schema';
-import { radii } from '../../lib/theme';
+import { distanceBadgeText } from '../../lib/format';
+import { palette, radii } from '../../lib/theme';
 
 type ListingCardVariant = 'search' | 'popular';
 
@@ -15,6 +16,10 @@ interface ListingCardProps {
   rightAction?: ReactNode;
   /** Rank badge shown on popular cards (web: index + 1 circle). */
   rank?: number;
+  /** Whether the listing is a selected comparison (web: compare-store). */
+  compareSelected?: boolean;
+  /** Toggles the compare selection (web: compare store toggle on the card). */
+  onCompare?: () => void;
   style?: StyleProp<ViewStyle>;
   imageWidth?: number;
 }
@@ -46,6 +51,8 @@ export function ListingCard({
   onPress,
   rightAction,
   rank,
+  compareSelected,
+  onCompare,
   style,
   imageWidth,
 }: ListingCardProps) {
@@ -54,7 +61,7 @@ export function ListingCard({
       <PopularCardImage listing={listing} onPress={onPress} rank={rank} rightAction={rightAction} style={style} imageWidth={imageWidth} />
     );
   }
-  return <SearchCard listing={listing} onPress={onPress} rightAction={rightAction} style={style} imageWidth={imageWidth} />;
+  return <SearchCard listing={listing} onPress={onPress} rightAction={rightAction} compareSelected={compareSelected} onCompare={onCompare} style={style} imageWidth={imageWidth} />;
 }
 
 /** Web search-result card (hostels-search.tsx). */
@@ -62,6 +69,8 @@ function SearchCard({
   listing,
   onPress,
   rightAction,
+  compareSelected = false,
+  onCompare,
   style,
   imageWidth,
 }: Omit<ListingCardProps, 'variant' | 'rank'>) {
@@ -70,6 +79,7 @@ function SearchCard({
     : listing.location;
   const showGender = listing.gender != null && listing.gender !== 'mixed';
   const showPricePill = !listing.area && !showGender;
+  const distanceBadge = distanceBadgeText(listing.distance_category);
 
   return (
     <Pressable
@@ -82,9 +92,9 @@ function SearchCard({
         imageWidth={imageWidth}
         overlay={
           <>
-            {listing.distance_to_campus ? (
+            {distanceBadge ? (
               <View style={styles.distanceBadge}>
-                <Text style={styles.distanceBadgeText}>{listing.distance_to_campus}</Text>
+                <Text style={styles.distanceBadgeText}>{distanceBadge}</Text>
               </View>
             ) : null}
             {showGender && listing.gender ? (
@@ -124,8 +134,41 @@ function SearchCard({
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerMeta}>Agent: {listing.agent?.name ?? 'Rumia Agent'}</Text>
+          <Text style={styles.footerMeta} numberOfLines={1}>
+            Agent: {listing.agent?.name ?? 'Rumia Agent'}
+          </Text>
           {rightAction ? <View style={styles.footerAction}>{rightAction}</View> : null}
+          {onCompare ? (
+            <View style={styles.footerActions}>
+              <Pressable
+                onPress={onCompare}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.compareButton,
+                  compareSelected && styles.compareButtonSelected,
+                  pressed && styles.pressed,
+                ]}
+              >
+                {compareSelected ? (
+                  <Check size={14} color="#ffffff" strokeWidth={3} />
+                ) : (
+                  <GitCompareArrows size={14} color={palette.slate[900]} />
+                )}
+                <Text
+                  style={[
+                    styles.compareButtonText,
+                    compareSelected && styles.compareButtonTextSelected,
+                  ]}
+                >
+                  {compareSelected ? 'Added' : 'Compare'}
+                </Text>
+              </Pressable>
+              <View style={styles.viewDetails}>
+                <Eye size={14} color={palette.emerald[600]} />
+                <Text style={styles.viewDetailsText}>View Details</Text>
+              </View>
+            </View>
+          ) : null}
         </View>
       </View>
     </Pressable>
@@ -140,6 +183,8 @@ function PopularCardImage({
   rightAction,
   style,
   imageWidth,
+  compareSelected = false,
+  onCompare,
 }: ListingCardProps) {
   return (
     <Pressable
@@ -186,7 +231,36 @@ function PopularCardImage({
 
         <View style={styles.popularFooter}>
           <Text style={styles.footerMeta}>Agent: {listing.agent?.name ?? 'Rumia Agent'}</Text>
-          {rightAction ? <View style={styles.footerAction}>{rightAction}</View> : null}
+          {rightAction || onCompare ? (
+            <View style={styles.footerAction}>
+              {rightAction}
+              {onCompare ? (
+                <Pressable
+                  onPress={onCompare}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.compareButton,
+                    compareSelected && styles.compareButtonSelected,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  {compareSelected ? (
+                    <Check size={14} color="#ffffff" strokeWidth={3} />
+                  ) : (
+                    <GitCompareArrows size={14} color={palette.slate[900]} />
+                  )}
+                  <Text
+                    style={[
+                      styles.compareButtonText,
+                      compareSelected && styles.compareButtonTextSelected,
+                    ]}
+                  >
+                    {compareSelected ? 'Added' : 'Compare'}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
         </View>
       </View>
     </Pressable>
@@ -236,12 +310,12 @@ const styles = StyleSheet.create({
   imageWrap: { aspectRatio: FALLBACK_ASPECT, backgroundColor: '#f1f5f9', position: 'relative' },
   image: { width: '100%', height: '100%' },
   body: { padding: 16, flex: 1 },
-  cardTitle: { color: '#0f172a', fontSize: 15, fontWeight: '700' },
+  cardTitle: { color: '#0f172a', fontSize: 16, fontWeight: '700' },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4, marginBottom: 6 },
   locationText: { color: '#64748b', fontSize: 12, fontWeight: '600', flex: 1 },
   cardDescription: { color: '#64748b', fontSize: 12, lineHeight: 17, marginBottom: 12 },
   divider: { borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 8, marginBottom: 8 },
-  price: { color: '#059669', fontSize: 13, fontWeight: '700' },
+  price: { color: '#059669', fontSize: 14, fontWeight: '700' },
   footer: {
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
@@ -249,9 +323,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 8,
   },
-  footerMeta: { color: '#94a3b8', fontSize: 11, fontWeight: '500' },
+  footerMeta: { color: '#94a3b8', fontSize: 12, fontWeight: '500', flex: 1 },
   footerAction: { flexDirection: 'row', alignItems: 'center' },
+  footerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  compareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 2,
+    borderColor: '#0f172a',
+    backgroundColor: '#ffffff',
+  },
+  compareButtonSelected: {
+    backgroundColor: '#059669',
+    borderColor: '#059669',
+  },
+  compareButtonText: { color: '#0f172a', fontSize: 12, fontWeight: '700' },
+  compareButtonTextSelected: { color: '#ffffff' },
+  viewDetails: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  viewDetailsText: { color: '#059669', fontSize: 12, fontWeight: '600' },
   // Image overlays
   distanceBadge: {
     position: 'absolute',

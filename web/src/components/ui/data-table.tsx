@@ -64,6 +64,7 @@ export function DataTable<TData, TValue>({
     }
   }, [sorting, onSort]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: memoizedData,
     columns: memoizedColumns,

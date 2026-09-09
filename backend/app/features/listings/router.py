@@ -1,11 +1,12 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.errors import NotFoundException
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.security import AuthenticatedUser, get_optional_current_user, require_roles
+from app.core.tasks.worker import enqueue_wishlist_event
 from app.features.listings.schemas import (
     ListingCreate,
     ListingRead,
@@ -34,9 +35,10 @@ async def get_listings(
     zone_id: Optional[str] = Query(None, description="Filter by zone UUID"),
     area: Optional[str] = Query(None, description="Filter by area name"),
     county: Optional[str] = Query(None, description="Filter by county name"),
+    property_type: Optional[str] = Query(None, description="Filter by property type: 'hostel', 'apartment', or 'short_stay'"),
     min_price: Optional[float] = Query(None, ge=0, description="Minimum price filter"),
     max_price: Optional[float] = Query(None, ge=0, description="Maximum price filter"),
-    sort: Optional[str] = Query(None, description="Sort mode: 'views' ranks by most-visited, otherwise curated sort_position order"),
+    sort: Optional[str] = Query(None, description="Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order"),
     pagination: PaginationParams = Depends(),
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
@@ -50,6 +52,7 @@ async def get_listings(
         zone_id=zone_id,
         area=area,
         county=county,
+        property_type=property_type,
         min_price=min_price,
         max_price=max_price,
         sort=sort,
@@ -121,10 +124,26 @@ async def create_listing(
 async def update_listing(
     listing_id: str,
     data: ListingUpdate,
+    background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
     db: AsyncSession = Depends(get_db_session),
 ) -> ListingRead:
+    before = await ListingService.get_listing_by_id_or_slug(db, listing_id)
+    if not before:
+        raise NotFoundException(f"Listing '{listing_id}' not found")
+
     listing = await ListingService.update_listing(db=db, listing_id=listing_id, user=user, data=data)
+
+    old_price = before.price
+    new_price = listing.price
+    if data.model_dump(exclude_unset=True).get("price") is not None and old_price != new_price:
+        notification_type = "wishlist_price_updated"
+        event_data = {"old_price": old_price, "new_price": new_price}
+    else:
+        notification_type = "wishlist_listing_updated"
+        event_data = {"summary": "The listing details have been updated."}
+
+    enqueue_wishlist_event(background_tasks, str(listing.id), notification_type, event_data)
     return ListingRead.model_validate(listing)
 
 
@@ -138,12 +157,28 @@ async def update_listing(
 async def toggle_listing_full(
     listing_id: str,
     payload: ListingToggleFull,
+    background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
     db: AsyncSession = Depends(get_db_session),
 ) -> ListingRead:
+    before = await ListingService.get_listing_by_id_or_slug(db, listing_id)
+    if not before:
+        raise NotFoundException(f"Listing '{listing_id}' not found")
+    was_full = bool(before.is_full)
+
     listing = await ListingService.toggle_listing_full(
         db=db, listing_id=listing_id, user=user, is_full=payload.is_full
     )
+
+    if was_full and not listing.is_full:
+        # Hostel became available again — notify everyone who wishlisted it.
+        enqueue_wishlist_event(
+            background_tasks,
+            str(listing.id),
+            "wishlist_listing_available",
+            {"summary": "This hostel is now available."},
+        )
+
     return ListingRead.model_validate(listing)
 
 

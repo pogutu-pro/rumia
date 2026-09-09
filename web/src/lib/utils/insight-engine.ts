@@ -110,10 +110,10 @@ export function generateInsight(
 
   if (activity.savedCount > 0) {
     candidates.push(
-      `You have ${activity.savedCount} saved ${activity.savedCount === 1 ? 'hostel' : 'hostels'} — compare them side-by-side to pick the best fit.`,
+      `You have ${activity.savedCount} ${activity.savedCount === 1 ? 'hostel in' : 'hostels in'} your wishlist — compare them side-by-side to pick the best fit.`,
     );
     candidates.push(
-      `${activity.savedCount} ${activity.savedCount === 1 ? 'hostel is' : 'hostels are'} saved in your list. Take a closer look before rooms fill up.`,
+      `${activity.savedCount} ${activity.savedCount === 1 ? 'hostel is' : 'hostels are'} in your wishlist. Take a closer look before rooms fill up.`,
     );
   }
 
