@@ -2291,6 +2291,11 @@ export interface components {
             price_sharing?: number | null;
             /** Price Single */
             price_single?: number | null;
+            /**
+             * Property Type
+             * @default hostel
+             */
+            property_type: string;
             /** Room Type */
             room_type?: string | null;
             /**
@@ -2445,6 +2450,11 @@ export interface components {
             price_sharing?: number | null;
             /** Price Single */
             price_single?: number | null;
+            /**
+             * Property Type
+             * @default hostel
+             */
+            property_type: string;
             /**
              * Rating
              * @default 0
@@ -2613,6 +2623,8 @@ export interface components {
             price_sharing?: number | null;
             /** Price Single */
             price_single?: number | null;
+            /** Property Type */
+            property_type?: string | null;
             /** Room Type */
             room_type?: string | null;
             /** Room Types */
@@ -4941,11 +4953,13 @@ export interface operations {
                 area?: string | null;
                 /** @description Filter by county name */
                 county?: string | null;
+                /** @description Filter by property type: 'hostel', 'apartment', or 'short_stay' */
+                property_type?: string | null;
                 /** @description Minimum price filter */
                 min_price?: number | null;
                 /** @description Maximum price filter */
                 max_price?: number | null;
-                /** @description Sort mode: 'views' ranks by most-visited, otherwise curated sort_position order */
+                /** @description Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order */
                 sort?: string | null;
                 /** @description Page number (1-indexed) */
                 page?: number;
@@ -6307,6 +6321,8 @@ export interface operations {
                 zone_slug?: string | null;
                 /** @description Filter by specific area */
                 area?: string | null;
+                /** @description Filter by property type: 'hostel', 'apartment', or 'short_stay' */
+                property_type?: string | null;
                 /** @description Minimum monthly price */
                 min_price?: number | null;
                 /** @description Maximum monthly price */

@@ -21,22 +21,17 @@ done
 [ "$missing" -eq 1 ] && exit 1
 
 echo "=== [1/5] Pulling latest code changes from repository ==="
-# Stash any local changes (env edits etc.) so pull never fails
-dirty=$(git status --porcelain)
-if [ -n "$dirty" ]; then
-  echo "  Stashing local changes..."
-  git stash push -m "deploy-sh-auto-stash $(date +%s)"
-  stashed=1
-else
-  stashed=0
-fi
-
-git pull origin main || git pull origin master
-
-# Restore stashed changes (env files etc.)
-if [ "$stashed" -eq 1 ]; then
-  git stash pop || true
-fi
+# This host is provisioned by CI, so the committed tree is the source of truth.
+# - Env files (backend/.env, web/.env.production) are gitignored and survive reset.
+# - Live TLS certs (certbot/) are untracked and are never touched.
+# - Any stray tracked edits or stale conflict markers from a previous failed
+#   deploy are discarded (a stash/pop here is what left conflict markers in
+#   web/src/app/(public)/page.tsx and broke a build once).
+git fetch origin main 2>/dev/null || git fetch origin master 2>/dev/null
+git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
+# Drop stale auto-stash snapshots left behind by older deploy.sh versions.
+git stash list | grep -q 'deploy-sh-auto-stash' && \
+  git stash list | grep 'deploy-sh-auto-stash' | sed 's/:.*//' | xargs -r -n1 git stash drop || true
 
 echo "=== [2/5] Building production Docker container images ==="
 docker compose build --pull
