@@ -46,7 +46,7 @@ export function ListingSection({
         )}
       </div>
 
-      <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1 pb-2.5 sm:mx-0 sm:gap-4 sm:px-0 overscroll-x-contain touch-pan-x">
+      <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1 pb-2.5 sm:mx-0 sm:gap-4 sm:px-0 overscroll-x-contain">
         {items.map((item) => (
           <ExploreListingCard key={item.id} item={item} />
         ))}

@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BedDouble, Building2, LayoutGrid, MapPin, Moon } from 'lucide-react';
+import {
+  ArrowRight,
+  BedDouble,
+  Building2,
+  LayoutGrid,
+  MapPin,
+  Moon,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import {
   ExploreListingCard,
@@ -119,7 +126,7 @@ export function ExploreDiscovery({
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-3 sm:pt-4 lg:px-8">
       {/* 1. PROPERTY TYPE NAVIGATION (WHAT) */}
-      <div className="scrollbar-none -mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0 overscroll-x-contain touch-pan-x">
+      <div className="scrollbar-none -mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
         {CATEGORIES.map(({ key, label, Icon }) => {
           const active = category === key;
           return (
@@ -167,7 +174,7 @@ export function ExploreDiscovery({
             )}
           </div>
 
-          <div className="scrollbar-none -mx-4 flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0 py-0.5 overscroll-x-contain touch-pan-x">
+          <div className="scrollbar-none -mx-4 flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0 py-0.5 overscroll-x-contain">
             <button
               type="button"
               onClick={() => setSelectedZone(null)}
@@ -187,9 +194,7 @@ export function ExploreDiscovery({
                 <button
                   key={zone.name}
                   type="button"
-                  onClick={() =>
-                    setSelectedZone(active ? null : zone.name)
-                  }
+                  onClick={() => setSelectedZone(active ? null : zone.name)}
                   aria-pressed={active}
                   className={cn(
                     'inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-150 touch-manipulation active:scale-95',
@@ -237,7 +242,7 @@ export function ExploreDiscovery({
         </div>
 
         {filtered.length > 0 ? (
-          <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1 pb-2.5 sm:mx-0 sm:gap-4 sm:px-0 overscroll-x-contain touch-pan-x">
+          <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1 pb-2.5 sm:mx-0 sm:gap-4 sm:px-0 overscroll-x-contain">
             {filtered.map((item) => (
               <ExploreListingCard key={item.id} item={item} />
             ))}
@@ -246,7 +251,8 @@ export function ExploreDiscovery({
           <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-6 text-center sm:p-8">
             <p className="text-xs sm:text-sm font-medium text-slate-500">
               No {categoryLabel.toLowerCase()} found in{' '}
-              <span className="font-bold text-slate-700">{selectedZone}</span> right now.
+              <span className="font-bold text-slate-700">{selectedZone}</span>{' '}
+              right now.
             </p>
             <div className="mt-3 flex items-center justify-center gap-2">
               <button

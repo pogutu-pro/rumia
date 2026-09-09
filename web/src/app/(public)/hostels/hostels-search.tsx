@@ -4,7 +4,16 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Eye, X, SlidersHorizontal, GitCompareArrows, Check, Tag, CalendarCheck } from 'lucide-react';
+import {
+  MapPin,
+  Eye,
+  X,
+  SlidersHorizontal,
+  GitCompareArrows,
+  Check,
+  Tag,
+  CalendarCheck,
+} from 'lucide-react';
 import { ListingSearchInput } from '@/components/ui/listing-search-input';
 import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -25,7 +34,10 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { clientSearch } from '@/lib/search/client-search';
-import type { SearchListing, CombinedFilters } from '@/lib/search/cascade-search';
+import type {
+  SearchListing,
+  CombinedFilters,
+} from '@/lib/search/cascade-search';
 
 export type Listing = SearchListing;
 
@@ -130,11 +142,15 @@ export default function HostelsSearch({
   useEffect(() => {
     let active = true;
     async function checkAuth() {
-      const { data: { user } } = await createClient().auth.getUser();
+      const {
+        data: { user },
+      } = await createClient().auth.getUser();
       if (active && user) setIsLoggedIn(true);
     }
     void checkAuth();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleCompareToggle = useCallback(
@@ -200,7 +216,12 @@ export default function HostelsSearch({
         });
       }
     },
-    [addCompareSelection, removeCompareSelection, isCompareSelected, compareSelectedIds.length],
+    [
+      addCompareSelection,
+      removeCompareSelection,
+      isCompareSelected,
+      compareSelectedIds.length,
+    ],
   );
 
   // ── Client-side search ─────────────────────────────────────────────────────
@@ -220,7 +241,9 @@ export default function HostelsSearch({
 
   // Client-side search — fully synchronous, derived via useMemo
   const allFiltered = useMemo(
-    () => clientSearch(allListings, combinedFilters, allListings.length, 0).listings,
+    () =>
+      clientSearch(allListings, combinedFilters, allListings.length, 0)
+        .listings,
     [allListings, combinedFilters],
   );
 
@@ -228,7 +251,9 @@ export default function HostelsSearch({
   // the search snapshot. Legacy rows without a property_type default to hostel.
   const typedListings = useMemo(() => {
     if (!propertyType) return allFiltered;
-    return allFiltered.filter((l) => (l.property_type ?? 'hostel') === propertyType);
+    return allFiltered.filter(
+      (l) => (l.property_type ?? 'hostel') === propertyType,
+    );
   }, [allFiltered, propertyType]);
 
   const totalCountState = typedListings.length;
@@ -236,29 +261,42 @@ export default function HostelsSearch({
   // ── Progressive rendering for mobile performance ──────────────────────────
   const INITIAL_DISPLAY_COUNT = 12;
   const BATCH_SIZE = 12;
-  const [displayLimit, setDisplayLimit] = useState(INITIAL_DISPLAY_COUNT);
+  const displayFilterKey = JSON.stringify([
+    debouncedQuery,
+    genders,
+    amenities,
+    roomTypes,
+    minPrice,
+    maxPrice,
+    zones,
+    propertyType,
+  ]);
+  const [displayState, setDisplayState] = useState({ key: '', limit: INITIAL_DISPLAY_COUNT });
+  const displayLimit = displayState.key === displayFilterKey ? displayState.limit : INITIAL_DISPLAY_COUNT;
   const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setDisplayLimit(INITIAL_DISPLAY_COUNT);
-  }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, propertyType]);
 
   useEffect(() => {
     if (displayLimit >= typedListings.length) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setDisplayLimit((prev) => Math.min(prev + BATCH_SIZE, typedListings.length));
+          setDisplayState((prev) => {
+            const currentLimit = prev.key === displayFilterKey ? prev.limit : INITIAL_DISPLAY_COUNT;
+            return {
+              key: displayFilterKey,
+              limit: Math.min(currentLimit + BATCH_SIZE, typedListings.length),
+            };
+          });
         }
       },
-      { rootMargin: '600px 0px' }
+      { rootMargin: '600px 0px' },
     );
     const target = loadMoreRef.current;
     if (target) observer.observe(target);
     return () => {
       if (target) observer.unobserve(target);
     };
-  }, [displayLimit, typedListings.length]);
+  }, [displayFilterKey, displayLimit, typedListings.length]);
 
   const visibleListings = useMemo(() => {
     return typedListings.slice(0, displayLimit);
@@ -279,7 +317,18 @@ export default function HostelsSearch({
         ? `${basePath}?${[qParam, filterStr].filter(Boolean).join('&')}`
         : basePath;
     router.replace(url, { scroll: false });
-  }, [committedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, basePath, router, toParams]);
+  }, [
+    committedQuery,
+    genders,
+    amenities,
+    roomTypes,
+    minPrice,
+    maxPrice,
+    zones,
+    basePath,
+    router,
+    toParams,
+  ]);
 
   const handleClearAll = useCallback(() => {
     reset();
@@ -479,9 +528,7 @@ export default function HostelsSearch({
             maxDistance,
             sortByNearest,
           }}
-          onRemoveGender={(v) =>
-            setGenders(genders.filter((g) => g !== v))
-          }
+          onRemoveGender={(v) => setGenders(genders.filter((g) => g !== v))}
           onRemoveAmenity={(v) =>
             setAmenities(amenities.filter((a) => a !== v))
           }
@@ -498,11 +545,12 @@ export default function HostelsSearch({
         {/* Results count */}
         <div className="mb-5 mt-3 px-1">
           <p className="text-sm text-slate-400 font-semibold">
-            {totalCountState}{' '}
-            {totalCountState === 1 ? 'hostel' : 'hostels'} found
+            {totalCountState} {totalCountState === 1 ? 'hostel' : 'hostels'}{' '}
+            found
             {hasAnyFilters && (
               <span className="text-slate-300">
-                {' '}·{' '}
+                {' '}
+                ·{' '}
                 <button
                   type="button"
                   onClick={handleClearAll}
@@ -515,7 +563,11 @@ export default function HostelsSearch({
           </p>
           {propertyType && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-emerald-700">
-              {propertyType === 'apartment' ? 'Apartments' : propertyType === 'short_stay' ? 'Short stays' : 'Hostels'}
+              {propertyType === 'apartment'
+                ? 'Apartments'
+                : propertyType === 'short_stay'
+                  ? 'Short stays'
+                  : 'Hostels'}
               <button
                 type="button"
                 aria-label="Clear category filter"
@@ -571,10 +623,7 @@ export default function HostelsSearch({
                 }
 
                 return (
-                  <div
-                    key={item.id}
-                    className="relative group/card"
-                  >
+                  <div key={item.id} className="relative group/card">
                     <Link
                       href={href}
                       className={`group flex flex-col bg-white rounded-2xl overflow-hidden md:hover:shadow-lg md:transition-shadow md:duration-200 h-full cursor-pointer ${
@@ -642,7 +691,9 @@ export default function HostelsSearch({
                         </div>
 
                         <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
-                          <span>Agent: {item.agents?.name ?? 'Rumia Agent'}</span>
+                          <span>
+                            Agent: {item.agents?.name ?? 'Rumia Agent'}
+                          </span>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
@@ -683,10 +734,21 @@ export default function HostelsSearch({
 
             {/* Infinite scroll sentinel & manual fallback for progressive loading */}
             {displayLimit < typedListings.length && (
-              <div ref={loadMoreRef} className="py-8 flex flex-col items-center justify-center gap-2">
+              <div
+                ref={loadMoreRef}
+                className="py-8 flex flex-col items-center justify-center gap-2"
+              >
                 <button
                   type="button"
-                  onClick={() => setDisplayLimit((prev) => Math.min(prev + BATCH_SIZE, typedListings.length))}
+                  onClick={() =>
+                    setDisplayState((prev) => {
+                      const currentLimit = prev.key === displayFilterKey ? prev.limit : INITIAL_DISPLAY_COUNT;
+                      return {
+                        key: displayFilterKey,
+                        limit: Math.min(currentLimit + BATCH_SIZE, typedListings.length),
+                      };
+                    })
+                  }
                   className="inline-flex items-center justify-center px-6 py-2.5 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs touch-manipulation cursor-pointer"
                 >
                   Show more ({typedListings.length - displayLimit} remaining)
@@ -697,7 +759,8 @@ export default function HostelsSearch({
         ) : (
           <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
             <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">
-              No hostels match your search. Try different terms or clear your filters.
+              No hostels match your search. Try different terms or clear your
+              filters.
             </p>
             <button
               type="button"
