@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     );
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
     if (user) {
       return NextResponse.redirect(new URL(next, origin));
     }
@@ -72,7 +72,16 @@ export async function GET(request: NextRequest) {
     },
   );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  let error: { message?: string; name?: string; code?: string; status?: number } | null = null;
+  try {
+    const result = await supabase.auth.exchangeCodeForSession(code);
+    error = result.error;
+  } catch (err) {
+    // A thrown exchange (network reset from the VPS, etc.) must never surface
+    // as a 502 — treat it like any other exchange failure and bounce to login.
+    console.error('[auth/callback] exchangeCodeForSession threw', err);
+    error = err as { message?: string; name?: string; code?: string; status?: number };
+  }
 
   if (error) {
     // Log the full error so the underlying cause is visible in server logs
@@ -90,7 +99,7 @@ export async function GET(request: NextRequest) {
     // never bounced to the homepage; otherwise send them back to login.
     const {
       data: { user: existingUser },
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
     if (existingUser) {
       return NextResponse.redirect(new URL(next, origin));
