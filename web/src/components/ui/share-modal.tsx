@@ -7,6 +7,7 @@ import { Home, Check, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
+import { useScrollLock } from '@/hooks/use-scroll-lock';
 
 // ── Simple Icons SVGs (v16) ──
 
@@ -167,14 +168,7 @@ export function ShareModal({ isOpen, onClose, listing }: ShareModalProps) {
   const absoluteUrl = React.useMemo(() => buildAbsoluteUrl(listing.url), [listing.url]);
 
   // Lock body scroll when open
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const openShareWindow = React.useCallback((href: string) => {
     const width = 600;

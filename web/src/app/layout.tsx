@@ -3,15 +3,12 @@ import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
-import { NavigationProvider } from '@/context/NavigationContext';
-import { SwipeNavigator } from '@/components/pwa/SwipeNavigator';
 import { BottomNav } from '@/components/pwa/BottomNav';
-import { GestureTutorial } from '@/components/pwa/GestureTutorial';
-import { AnimatedMain } from '@/components/pwa/AnimatedMain';
 import { RouteProgress } from '@/components/pwa/RouteProgress';
 import { CompareTray } from '@/components/compare/compare-tray';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
+import { MobileMain } from '@/components/pwa/MobileMain';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -77,7 +74,6 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(inter.variable, jakarta.variable)}
-      data-scroll-behavior="smooth"
     >
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
@@ -95,17 +91,12 @@ export default function RootLayout({
         )}
       >
         <Providers>
-          <NavigationProvider>
-            <RouteProgress />
-            <SwipeNavigator>
-              <AnimatedMain>
-                {children}
-              </AnimatedMain>
-            </SwipeNavigator>
-            <CompareTray />
-            <BottomNav />
-            <GestureTutorial />
-          </NavigationProvider>
+          <RouteProgress />
+          <MobileMain>
+            {children}
+          </MobileMain>
+          <CompareTray />
+          <BottomNav />
         </Providers>
         <ServiceWorkerRegister />
         <InstallBanner />

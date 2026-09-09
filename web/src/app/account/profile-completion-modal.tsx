@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { saveProfileCompletionAction } from '@/app/actions/profile';
+import { useScrollLock } from '@/hooks/use-scroll-lock';
 
 interface ProfileCompletionModalProps {
   isOpen: boolean;
@@ -125,14 +126,7 @@ export function ProfileCompletionModal({
     }
   }
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   if (!mounted) return null;
 

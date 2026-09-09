@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollLock } from '@/hooks/use-scroll-lock';
 import {
   CalendarCheck,
   Check,
@@ -295,16 +296,7 @@ export function BookTourForm({
   }, [listingZone]);
 
   // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   if (!mounted) return null;
 

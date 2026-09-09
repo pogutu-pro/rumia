@@ -60,7 +60,7 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full"
+      className="group flex flex-col bg-white rounded-2xl overflow-hidden md:hover:shadow-lg md:transition-shadow md:duration-200 h-full border border-slate-100"
     >
       <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
         <Image
@@ -70,23 +70,23 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
           }
           alt={`${item.title} — popular student hostel near ${shortName} ${city}`}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           placeholder={item.blur_data_url ? 'blur' : undefined}
           blurDataURL={item.blur_data_url || undefined}
           priority={index < 3}
         />
 
-        <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-slate-900/80 backdrop-blur-sm flex items-center justify-center text-white text-xs font-black border border-white/20">
+        <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-slate-900/85 flex items-center justify-center text-white text-xs font-black border border-white/20">
           {index + 1}
         </div>
 
-        <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-700 border border-slate-100/50">
+        <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-700 border border-slate-100">
           <Eye className="h-3 w-3 text-slate-400" />
           {item.view_count.toLocaleString()}
         </div>
 
-        <div className="absolute bottom-3 right-3 bg-emerald-600/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm">
+        <div className="absolute bottom-3 right-3 bg-emerald-600 px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-xs">
           KES {item.price.toLocaleString()}/mo
         </div>
       </div>

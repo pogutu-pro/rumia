@@ -23,7 +23,21 @@ export const PublicHeader = React.memo(function PublicHeader({
   const [query, setQuery] = React.useState('');
 
   React.useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    let ticking = false;
+    let lastScrolled = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const nextScrolled = window.scrollY > 10;
+          if (nextScrolled !== lastScrolled) {
+            lastScrolled = nextScrolled;
+            setIsScrolled(nextScrolled);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -60,10 +74,10 @@ export const PublicHeader = React.memo(function PublicHeader({
     <>
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-50 h-16 xs:h-[68px] transition-all duration-300',
+          'fixed inset-x-0 top-0 z-50 h-16 xs:h-[68px] transition-[border-color,box-shadow] duration-150',
           isScrolled
-            ? 'border-b border-slate-100 bg-white/90 shadow-xs backdrop-blur-md'
-            : 'border-b border-slate-100/60 bg-white/70 backdrop-blur-xs',
+            ? 'border-b border-slate-200 bg-white shadow-xs md:bg-white/90 md:backdrop-blur-md'
+            : 'border-b border-slate-100 bg-white md:bg-white/80 md:backdrop-blur-xs',
         )}
       >
         <div className="mx-auto h-full max-w-6xl px-3 sm:px-4 lg:px-8">

@@ -62,7 +62,7 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
   return (
     <Link
       href={href}
-      className="group block w-[230px] xs:w-[250px] sm:w-[264px] shrink-0 snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 rounded-2xl transition-all duration-200 touch-manipulation active:scale-[0.98]"
+      className="group block w-[230px] xs:w-[250px] sm:w-[264px] shrink-0 snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 rounded-2xl touch-manipulation"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-900/5">
         <Image
@@ -71,12 +71,12 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
           fill
           loading="lazy"
           sizes="(max-width: 480px) 230px, (max-width: 640px) 250px, 264px"
-          className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+          className="object-cover md:transition-transform md:duration-300 md:ease-out md:group-hover:scale-105"
           placeholder={item.blur_data_url ? 'blur' : undefined}
           blurDataURL={item.blur_data_url || undefined}
         />
 
-        <div className="absolute left-2.5 top-2.5 rounded-lg bg-white/95 backdrop-blur-xs px-2.5 py-1 text-[11px] font-bold text-slate-800 shadow-xs border border-white/60">
+        <div className="absolute left-2.5 top-2.5 rounded-lg bg-white px-2.5 py-1 text-[11px] font-bold text-slate-800 shadow-xs border border-slate-100">
           {propertyTypeLabel(type)}
         </div>
 

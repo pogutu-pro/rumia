@@ -6,6 +6,7 @@ import { LayoutGrid, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-reac
 import { GalleryImage, GalleryViewMode } from '@/components/gallery/gallery-types';
 import { GalleryMasonryGrid } from '@/components/gallery/gallery-masonry-grid';
 import { GalleryCarouselViewer } from '@/components/gallery/gallery-carousel-viewer';
+import { useScrollLock } from '@/hooks/use-scroll-lock';
 
 interface ImageGalleryProps {
   images: (string | GalleryImage)[];
@@ -52,14 +53,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
 
   // Manage body scroll lock
-  useEffect(() => {
-    if (viewMode !== null) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-      };
-    }
-  }, [viewMode]);
+  useScrollLock(viewMode !== null);
 
   // Intercept mobile Back button / Android back gesture to close gallery instead of leaving page
   useEffect(() => {

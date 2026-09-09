@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollLock } from '@/hooks/use-scroll-lock';
 import {
   MessageCircle,
   Building2,
@@ -161,16 +162,7 @@ export function ContactModal({
   const [phoneAttempts, setPhoneAttempts] = useState(0);
 
   // Lock body scroll
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   // Reset when modal closes
   const handleClose = useCallback(() => {

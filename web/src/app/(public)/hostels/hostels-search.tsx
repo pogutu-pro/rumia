@@ -233,6 +233,37 @@ export default function HostelsSearch({
 
   const totalCountState = typedListings.length;
 
+  // ── Progressive rendering for mobile performance ──────────────────────────
+  const INITIAL_DISPLAY_COUNT = 12;
+  const BATCH_SIZE = 12;
+  const [displayLimit, setDisplayLimit] = useState(INITIAL_DISPLAY_COUNT);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setDisplayLimit(INITIAL_DISPLAY_COUNT);
+  }, [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones, propertyType]);
+
+  useEffect(() => {
+    if (displayLimit >= typedListings.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setDisplayLimit((prev) => Math.min(prev + BATCH_SIZE, typedListings.length));
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+    const target = loadMoreRef.current;
+    if (target) observer.observe(target);
+    return () => {
+      if (target) observer.unobserve(target);
+    };
+  }, [displayLimit, typedListings.length]);
+
+  const visibleListings = useMemo(() => {
+    return typedListings.slice(0, displayLimit);
+  }, [typedListings, displayLimit]);
+
   // ── URL sync ───────────────────────────────────────────────────────────────
   // Runs on filter changes and committed queries (Enter / blur / clear) so the
   // search box never triggers a navigation while the user is still typing.
@@ -504,149 +535,165 @@ export default function HostelsSearch({
           )}
         </div>
 
-        {/* Listing Grid — all listings render in HTML for crawlers */}
+        {/* Listing Grid — progressive rendering for silky smooth mobile scrolling */}
         {typedListings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {typedListings.map((item) => {
-              const sorted = [...(item.listing_images || [])].sort(
-                (a, b) => a.display_order - b.display_order,
-              );
-              const imageUrl =
-                sorted[0]?.r2_url ??
-                'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
-              const blurDataUrl = sorted[0]?.blur_data_url;              const href = item.slug
-                ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
-                : `/listing/${item.id}`;
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibleListings.map((item) => {
+                const sorted = [...(item.listing_images || [])].sort(
+                  (a, b) => a.display_order - b.display_order,
+                );
+                const imageUrl =
+                  sorted[0]?.r2_url ??
+                  'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+                const blurDataUrl = sorted[0]?.blur_data_url;
+                const href = item.slug
+                  ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
+                  : `/listing/${item.id}`;
 
-              const distanceBadge = getDistanceBadgeText(
-                item.distance_category,
-              );
-              const isSelected = isCompareSelected(item.id);
+                const distanceBadge = getDistanceBadgeText(
+                  item.distance_category,
+                );
+                const isSelected = isCompareSelected(item.id);
 
-              let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
-              if (item.price_single && item.price_sharing) {
-                priceDisplay = `KES ${item.price_single.toLocaleString()} for 1 person · KES ${item.price_sharing.toLocaleString()} sharing`;
-              } else if (item.price_single) {
-                priceDisplay = `KES ${item.price_single.toLocaleString()}/mo for 1 person`;
-              } else if (item.price_sharing) {
-                priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
-              }
+                let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
+                if (item.price_single && item.price_sharing) {
+                  priceDisplay = `KES ${item.price_single.toLocaleString()} for 1 person · KES ${item.price_sharing.toLocaleString()} sharing`;
+                } else if (item.price_single) {
+                  priceDisplay = `KES ${item.price_single.toLocaleString()}/mo for 1 person`;
+                } else if (item.price_sharing) {
+                  priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
+                }
 
-              let areaDisplay = item.area || 'Hostel Area';
-              if (item.specific_location) {
-                areaDisplay = `${areaDisplay} · ${item.specific_location}`;
-              }
+                let areaDisplay = item.area || 'Hostel Area';
+                if (item.specific_location) {
+                  areaDisplay = `${areaDisplay} · ${item.specific_location}`;
+                }
 
-              return (
-                <div
-                  key={item.id}
-                  className="relative group/card"
-                >
-                  <Link
-                    href={href}
-                    className={`group flex flex-col bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full cursor-pointer ${
-                      isSelected
-                        ? 'border-2 border-emerald-400 shadow-md shadow-emerald-100'
-                        : 'border border-slate-100'
-                    }`}
+                return (
+                  <div
+                    key={item.id}
+                    className="relative group/card"
                   >
-                    <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                      <Image
-                        src={imageUrl}
-                        alt={`${item.title} — student hostel near DeKUT`}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        placeholder="blur"
-                        blurDataURL={blurDataUrl || FALLBACK_BLUR}
-                      />
+                    <Link
+                      href={href}
+                      className={`group flex flex-col bg-white rounded-2xl overflow-hidden md:hover:shadow-lg md:transition-shadow md:duration-200 h-full cursor-pointer ${
+                        isSelected
+                          ? 'border-2 border-emerald-500 shadow-md shadow-emerald-100'
+                          : 'border border-slate-100'
+                      }`}
+                    >
+                      <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
+                        <Image
+                          src={imageUrl}
+                          alt={`${item.title} — student hostel near DeKUT`}
+                          fill
+                          className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          placeholder="blur"
+                          blurDataURL={blurDataUrl || FALLBACK_BLUR}
+                        />
 
-                      {distanceBadge && (
-                        <div className="absolute top-3 left-3 bg-slate-900/70 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white">
-                          {distanceBadge}
-                        </div>
-                      )}
+                        {distanceBadge && (
+                          <div className="absolute top-3 left-3 bg-slate-900/85 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white">
+                            {distanceBadge}
+                          </div>
+                        )}
 
-                      {item.gender && item.gender !== 'mixed' && (
-                        <div
-                          className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white ${
-                            item.gender === 'female'
-                              ? 'bg-pink-600/90'
-                              : 'bg-blue-600/90'
-                          } backdrop-blur-sm`}
-                        >
-                          {item.gender === 'female'
-                            ? 'Ladies Only'
-                            : 'Gents Only'}
-                        </div>
-                      )}
+                        {item.gender && item.gender !== 'mixed' && (
+                          <div
+                            className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white ${
+                              item.gender === 'female'
+                                ? 'bg-pink-600'
+                                : 'bg-blue-600'
+                            }`}
+                          >
+                            {item.gender === 'female'
+                              ? 'Ladies Only'
+                              : 'Gents Only'}
+                          </div>
+                        )}
 
-                      {!item.area && (
-                        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-900 border border-slate-100/50">
-                          {priceDisplay.split('/')[0]}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-4 flex-1 flex flex-col">
-                      <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
-                        {item.title}
-                      </h3>
-
-                      <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mt-1 mb-2 truncate">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{areaDisplay}</span>
+                        {!item.area && (
+                          <div className="absolute top-3 right-3 bg-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-900 border border-slate-100">
+                            {priceDisplay.split('/')[0]}
+                          </div>
+                        )}
                       </div>
 
-                      <p className="text-slate-500 text-xs line-clamp-2 mb-4 flex-1">
-                        {item.description}
-                      </p>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                          {item.title}
+                        </h3>
 
-                      <div className="mb-3 pt-2 border-t border-slate-100">
-                        <p className="text-sm font-bold text-emerald-600">
-                          {priceDisplay}
+                        <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mt-1 mb-2 truncate">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{areaDisplay}</span>
+                        </div>
+
+                        <p className="text-slate-500 text-xs line-clamp-2 mb-4 flex-1">
+                          {item.description}
                         </p>
-                      </div>
 
-                      <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
-                        <span>Agent: {item.agents?.name ?? 'Rumia Agent'}</span>
-                        <div className="flex items-center gap-2">
-                           <button
-                             type="button"
-                             onClick={(e) => {
-                               e.preventDefault();
-                               e.stopPropagation();
-                               handleCompareToggle(item);
-                             }}
-                             className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200 cursor-pointer border-2 ${
-                               isSelected
-                                 ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20'
-                                 : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-sm'
-                             }`}
-                           >
-                             {isSelected ? (
-                               <>
-                                 <Check className="h-4 w-4" />
-                                 Added
-                               </>
-                             ) : (
-                               <>
-                                 <GitCompareArrows className="h-4 w-4" />
-                                 Compare
-                               </>
-                             )}
-                           </button>
-                          <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5 cursor-pointer">
-                            <Eye className="h-3.5 w-3.5" /> View Details
-                          </span>
+                        <div className="mb-3 pt-2 border-t border-slate-100">
+                          <p className="text-sm font-bold text-emerald-600">
+                            {priceDisplay}
+                          </p>
+                        </div>
+
+                        <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
+                          <span>Agent: {item.agents?.name ?? 'Rumia Agent'}</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleCompareToggle(item);
+                              }}
+                              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors cursor-pointer border-2 touch-manipulation ${
+                                isSelected
+                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                  : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-xs'
+                              }`}
+                            >
+                              {isSelected ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5" />
+                                  Added
+                                </>
+                              ) : (
+                                <>
+                                  <GitCompareArrows className="h-3.5 w-3.5" />
+                                  Compare
+                                </>
+                              )}
+                            </button>
+                            <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5 cursor-pointer">
+                              <Eye className="h-3.5 w-3.5" /> View Details
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Infinite scroll sentinel & manual fallback for progressive loading */}
+            {displayLimit < typedListings.length && (
+              <div ref={loadMoreRef} className="py-8 flex flex-col items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDisplayLimit((prev) => Math.min(prev + BATCH_SIZE, typedListings.length))}
+                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs touch-manipulation cursor-pointer"
+                >
+                  Show more ({typedListings.length - displayLimit} remaining)
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
             <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">
