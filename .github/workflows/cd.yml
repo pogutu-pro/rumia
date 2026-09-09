@@ -22,5 +22,9 @@ jobs:
           port: 22
           script: |
             cd /home/${{ secrets.ORACLE_VPS_USER }}/rumia
+            # Recover from any leftover conflicted working tree BEFORE running
+            # the deploy script (env files are gitignored, certbot/ untracked).
+            git fetch origin main 2>/dev/null || git fetch origin master 2>/dev/null
+            git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
             chmod +x scripts/deploy.sh
             ./scripts/deploy.sh
