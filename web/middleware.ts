@@ -39,6 +39,30 @@ function applySecurityHeaders(headers: Headers) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ── Surface Supabase OAuth failures on the login page ───────────────────────
+  // When Google OAuth fails server-side (e.g. `bad_oauth_state`), GoTrue
+  // bounces the browser to the configured Site URL root with error params.
+  // Catch those here and forward the user to the login page with a readable
+  // message instead of leaving them stranded on a blank homepage.
+  if (
+    pathname !== '/auth/login' &&
+    (request.nextUrl.searchParams.has('error_code') ||
+      request.nextUrl.searchParams.get('error') === 'invalid_request')
+  ) {
+    const loginUrl = new URL('/auth/login', request.url);
+    const isOauthStateExpired =
+      request.nextUrl.searchParams.get('error_code') === 'bad_oauth_state' ||
+      /state|expired|cannot be verified/i.test(
+        request.nextUrl.searchParams.get('error_description') || '',
+      );
+    loginUrl.searchParams.set(
+      'error',
+      isOauthStateExpired ? 'oauth_state_expired' : 'oauth_failed',
+    );
+    loginUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   // ── 301 redirect /browse → /hostels ──────────────────────────────────────────
   if (pathname === '/browse') {
     const dest = new URL('/hostels', request.url);

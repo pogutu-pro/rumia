@@ -1,8 +1,21 @@
 import { createClient } from './client';
 
+/**
+ * Canonical site origin used for OAuth redirect targets. Prefer the explicit
+ * NEXT_PUBLIC_SITE_URL over the browser origin so the flow survives proxies /
+ * HOST_HEADER quirks and always redirects back to the same public URL that is
+ * configured in the Supabase auth allowlist.
+ */
+function getSiteOrigin(): string {
+  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL) {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL).origin;
+  }
+  return window.location.origin;
+}
+
 export async function signInWithGoogle(next?: string) {
   const supabase = createClient();
-  const baseUrl = `${window.location.origin}/auth/callback`;
+  const baseUrl = `${getSiteOrigin()}/auth/callback`;
   const redirectTo = next
     ? `${baseUrl}?next=${encodeURIComponent(next)}`
     : baseUrl;
