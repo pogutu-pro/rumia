@@ -32,11 +32,13 @@ function applySecurityHeaders(headers: Headers) {
 }
 
 /**
- * Middleware for Rumia Marketplace.
- * - Protects /dashboard and /admin routes
+ * Proxy (Next.js 16: formerly middleware.ts) for Rumia Marketplace.
+ * Runs on the Node.js runtime before every matched request.
+ * - Surfaces Supabase OAuth failures on the login page
  * - 301 redirects /listing/[id] and /agent/[id] UUID paths to slug-based canonical URLs
+ * - Protects /dashboard, /admin, /manager and /account routes
  */
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Surface Supabase OAuth failures on the login page ───────────────────────
