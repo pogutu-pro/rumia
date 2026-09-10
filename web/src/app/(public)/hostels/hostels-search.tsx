@@ -95,6 +95,13 @@ export default function HostelsSearch({
   const [committedQuery, setCommittedQuery] = useState(initialQuery);
   const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
 
+  // Synchronize state with URL query when it changes (e.g. from navbar search or back/forward navigation)
+  const qParamFromUrl = searchParams.get('q') ?? '';
+  useEffect(() => {
+    setQuery(qParamFromUrl);
+    setCommittedQuery(qParamFromUrl);
+  }, [qParamFromUrl]);
+
   // Optional category pre-filter from Home Explore "See all" links (?type=).
   const propertyType = searchParams.get('type');
 
