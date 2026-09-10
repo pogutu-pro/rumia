@@ -1,12 +1,11 @@
 """Webhook endpoints for external service callbacks (Brevo delivery events).
 
-All webhooks use HMAC signature verification. No authenticated user is
+All webhooks use Bearer token verification. No authenticated user is
 involved; these are signed provider callbacks from Brevo to update
 `email_deliveries` status (delivered / bounced / blocked / deferred / opened).
 """
-import hashlib
-import hmac
 import logging
+import secrets
 
 from sqlalchemy import text
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -31,38 +30,36 @@ EVENT_TO_STATUS = {
 }
 
 
-def _signature_valid(request: Request, body: bytes) -> bool:
-    """Verify the `X-Brevo-Signature` HMAC-SHA256 over the request body."""
+def _verify_bearer_token(request: Request) -> bool:
+    """Verify the Authorization header contains a valid Bearer token."""
     if not settings.BREVO_WEBHOOK_SECRET:
         return False
-    provided = request.headers.get("X-Brevo-Signature") or request.headers.get("x-brevo-signature")
-    if not provided:
+    auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
+    if not auth_header:
         return False
-    expected = hmac.new(
-        settings.BREVO_WEBHOOK_SECRET.encode(),
-        body,
-        hashlib.sha256,
-    ).hexdigest()
-    return hmac.compare_digest(provided.lower(), expected.lower())
+    if not auth_header.startswith("Bearer "):
+        return False
+    provided = auth_header[7:]  # strip "Bearer "
+    return secrets.compare_digest(provided, settings.BREVO_WEBHOOK_SECRET)
 
 
 @router.post(
     "/brevo",
     status_code=status.HTTP_200_OK,
     summary="Brevo Delivery Events",
-    description="Update email delivery status from Brevo callback events. Signed webhook; no auth required.",
+    description="Update email delivery status from Brevo callback events. Bearer token auth; no auth required.",
     include_in_schema=False,
 )
 async def brevo_webhook(
     request: Request,
     db: AsyncSession = Depends(get_db_session),
 ) -> dict:
-    body = await request.body()
-    if not _signature_valid(request, body):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid webhook signature")
+    if not _verify_bearer_token(request):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid webhook token")
 
     import json
 
+    body = await request.body()
     try:
         payload = json.loads(body)
     except (TypeError, ValueError):
