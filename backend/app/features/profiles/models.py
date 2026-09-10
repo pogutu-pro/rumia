@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -20,7 +21,14 @@ class UserProfile(Base):
     managed_campus_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
     managed_region_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
     home_campus_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    home_campus_confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # The live profiles table has no boolean confirmation column; the app
+    # confirms a campus by setting home_campus_confirmed_at (NULL = not
+    # confirmed). Expose a derived boolean for the API response/schema.
+    home_campus_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    @hybrid_property
+    def home_campus_confirmed(self) -> bool:
+        return self.home_campus_confirmed_at is not None
     full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     avatar_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)

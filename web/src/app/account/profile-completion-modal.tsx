@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Phone, Loader2, Check } from 'lucide-react';
+import { Phone, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,18 +15,14 @@ import { useScrollLock } from '@/hooks/use-scroll-lock';
 
 interface ProfileCompletionModalProps {
   isOpen: boolean;
-  userId: string;
-  currentName: string | null;
   currentPhone: string | null;
   currentCampusId?: string | null;
   currentCampusName?: string | null;
   campuses?: Array<{ id: string; name: string }>;
   /** Only render + validate the fields that are actually missing. */
-  requireName?: boolean;
   requirePhone?: boolean;
   requireCampus?: boolean;
   onSuccess: (data: {
-    full_name?: string;
     phone?: string;
     home_campus_id?: string | null;
     home_campus_name?: string | null;
@@ -79,25 +75,20 @@ const mobileSheetVariants = {
 
 export function ProfileCompletionModal({
   isOpen,
-  userId,
-  currentName,
   currentPhone,
   campuses = [],
   currentCampusId = null,
   currentCampusName = null,
-  requireName = true,
   requirePhone = true,
   requireCampus = true,
   onSuccess,
 }: ProfileCompletionModalProps) {
   const isMobile = useIsMobile();
-  // Returns true only after hydration, so the modal never mismatches SSR.
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false,
   );
-  const [fullName, setFullName] = useState(currentName || '');
   const [phone, setPhone] = useState(currentPhone || '');
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [campusInput, setCampusInput] = useState('');
@@ -133,11 +124,6 @@ export function ProfileCompletionModal({
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
 
-    if (requireName && !fullName.trim()) {
-      toast.error('Please enter your full name');
-      return;
-    }
-
     if (requirePhone) {
       const normalizedPhone = phone.replace(/\D/g, '');
       const localPattern = /^(0[17]\d{8})$/;
@@ -166,49 +152,17 @@ export function ProfileCompletionModal({
 
     setIsSaving(true);
     try {
-      let homeCampusId: string | null = null;
-
-      if (requireCampus) {
-        // Determine if campusInput matches an existing campus name (case-insensitive)
-        const matched = campuses.find(
-          (c) => c.name.toLowerCase() === campusInput.trim().toLowerCase(),
-        );
-        homeCampusId = matched ? matched.id : null;
-
-        // If no match, record a lightweight suggestion event (admins will review)
-        // so unvalidated campus entries are visible for review.
-        if (!homeCampusId) {
-          try {
-            const posthog = (await import('posthog-js')).default;
-            if (posthog && posthog.capture) {
-              posthog.capture('campus_suggested', {
-                user_id: userId,
-                name: campusInput.trim(),
-              });
-            }
-          } catch (err) {
-            // ignore analytics failures
-          }
-        }
-      }
-
-      // Write through the server action so the save is atomic. The action
-      // resolves the matched campus server-side, so the truth comes from the
-      // `campuses` table rather than the client render prop.
       const result = await saveProfileCompletionAction({
-        ...(requireName ? { full_name: fullName.trim() } : {}),
         ...(requirePhone ? { phone: phone.trim() } : {}),
         ...(requireCampus ? { campus_input: campusInput.trim() } : {}),
       });
 
       if (!result.success) {
-        throw new Error(result.error);
+        toast.error(result.error);
+        return;
       }
 
       onSuccess({
-        ...(result.updated.full_name !== undefined
-          ? { full_name: result.updated.full_name }
-          : {}),
         ...(result.updated.phone !== undefined
           ? { phone: result.updated.phone }
           : {}),
@@ -232,30 +186,6 @@ export function ProfileCompletionModal({
 
   const formContent = (
     <form onSubmit={handleSave} className="space-y-5">
-      {requireName && (
-        <div className="space-y-2">
-          <Label
-            htmlFor="pc-name"
-            className="text-sm font-semibold text-gray-700"
-          >
-            Full name
-          </Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              id="pc-name"
-              type="text"
-              placeholder="e.g. John Kamau"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="h-11 pl-10 border-gray-300 focus:border-gray-500"
-              autoFocus
-              required
-            />
-          </div>
-        </div>
-      )}
-
       {requirePhone && (
         <div className="space-y-2">
           <Label
@@ -307,7 +237,7 @@ export function ProfileCompletionModal({
               onFocus={() => setSuggestionsVisible(true)}
               onBlur={() => setTimeout(() => setSuggestionsVisible(false), 150)}
               className="h-11 pl-3 border-gray-300 focus:border-gray-500"
-              autoFocus={!requireName && !requirePhone}
+              autoFocus={!requirePhone}
               required
             />
             <datalist id="campus-list">

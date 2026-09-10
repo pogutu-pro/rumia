@@ -344,26 +344,19 @@ export default function AccountPage() {
     );
   }
 
-  const missingName = !profile.full_name?.trim();
   const missingPhone = !profile.phone?.trim();
-  // The user's home university is only considered complete once they have
-  // explicitly confirmed it. Auto-stamped values (the DeKUT backfill) are not
-  // trusted, so every unconfirmed profile is prompted exactly once.
   const missingCampus = !profile.home_campus_confirmed_at;
-  const needsProfileCompletion = missingName || missingPhone || missingCampus;
+  const needsProfileCompletion = missingPhone || missingCampus;
 
   return (
     <div className="min-h-screen bg-white">
       {needsProfileCompletion && (
         <ProfileCompletionModal
           isOpen={true}
-          userId={profile.id}
-          currentName={profile.full_name}
           currentPhone={profile.phone}
           currentCampusId={profile.home_campus_id ?? profile.campus_id ?? null}
           currentCampusName={profile.home_campus_name}
           campuses={campuses}
-          requireName={missingName}
           requirePhone={missingPhone}
           requireCampus={missingCampus}
           onSuccess={(data) => {
@@ -371,9 +364,6 @@ export default function AccountPage() {
               prev
                 ? {
                     ...prev,
-                    ...(data.full_name !== undefined
-                      ? { full_name: data.full_name }
-                      : {}),
                     ...(data.phone !== undefined
                       ? { phone: data.phone }
                       : {}),

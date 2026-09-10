@@ -21,12 +21,8 @@ interface ProfileSaveInput {
   campus_input?: string;
 }
 
-function normalizePhone(value: string): string {
-  return value.replace(/\D/g, '');
-}
-
 function isValidKenyanPhone(value: string): boolean {
-  const normalized = normalizePhone(value);
+  const normalized = value.replace(/\D/g, '');
   const localPattern = /^(0[17]\d{8})$/;
   const internationalPattern = /^(?:254)([17]\d{8})$/;
   return localPattern.test(normalized) || internationalPattern.test(normalized);
@@ -35,10 +31,6 @@ function isValidKenyanPhone(value: string): boolean {
 export async function saveProfileCompletionAction(
   input: ProfileSaveInput,
 ): Promise<ProfileSaveResult> {
-  if (input.full_name !== undefined && !input.full_name.trim()) {
-    return { success: false, error: 'Please enter your full name' };
-  }
-
   if (input.phone !== undefined) {
     if (!input.phone.trim()) {
       return { success: false, error: 'Please enter your phone number' };
@@ -52,12 +44,12 @@ export async function saveProfileCompletionAction(
   }
 
   try {
-    let updatedProfile;
-    if (input.campus_input) {
-      updatedProfile = await profilesApi.setHomeCampusServer('', input.campus_input.trim());
-    } else {
-      updatedProfile = await profilesApi.updateMeServer({});
-    }
+    const updatedProfile = await profilesApi.updateMeServer({
+      ...(input.full_name !== undefined ? { full_name: input.full_name.trim() } : {}),
+      ...(input.phone !== undefined ? { phone: input.phone.trim() } : {}),
+      ...(input.campus_input ? { campus_input: input.campus_input.trim() } : {}),
+      home_campus_confirmed: true,
+    });
 
     return {
       success: true,
@@ -65,7 +57,7 @@ export async function saveProfileCompletionAction(
         full_name: input.full_name?.trim(),
         phone: input.phone?.trim(),
         home_campus_id: updatedProfile.home_campus_id ?? null,
-        home_campus_name: updatedProfile.home_campus_name ?? input.campus_input?.trim(),
+        home_campus_name: updatedProfile.home_campus_name ?? (input.campus_input?.trim() || null),
         home_campus_confirmed_at: new Date().toISOString(),
       },
     };

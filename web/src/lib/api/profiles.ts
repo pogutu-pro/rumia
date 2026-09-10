@@ -15,9 +15,12 @@ export interface UserProfile {
 }
 
 export interface ProfileUpdate {
+  full_name?: string | null;
+  phone?: string | null;
   home_campus_id?: string | null;
   home_campus_name?: string | null;
   home_campus_confirmed?: boolean;
+  campus_input?: string;
 }
 
 export const profilesApi = {

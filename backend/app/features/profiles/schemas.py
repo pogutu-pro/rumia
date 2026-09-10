@@ -16,6 +16,7 @@ class ProfileRead(BaseModel):
     managed_region_id: Optional[str] = None
     home_campus_name: Optional[str] = None
     home_campus_confirmed: bool = False
+    home_campus_confirmed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -29,6 +30,8 @@ class ProfileUpdate(BaseModel):
     home_campus_id: Optional[str] = None
     home_campus_name: Optional[str] = None
     home_campus_confirmed: Optional[bool] = None
+    home_campus_confirmed_at: Optional[datetime] = None
+    campus_input: Optional[str] = None
 
 
 class SetHomeCampusRequest(BaseModel):

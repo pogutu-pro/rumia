@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from app.core.errors import NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
+from app.features.campuses.models import Campus
 from app.features.listings.models import Listing
 from app.features.profiles.models import UserProfile, Wishlist
 from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, WishlistActionResponse
@@ -24,7 +25,6 @@ class ProfileService:
                 role=user.role,
                 managed_campus_id=user.managed_campus_id,
                 managed_region_id=user.managed_region_id,
-                home_campus_confirmed=False,
                 created_at=datetime.now(timezone.utc),
             )
             db.add(profile)
@@ -41,12 +41,32 @@ class ProfileService:
             profile.phone = data.phone
         if data.avatar_url is not None:
             profile.avatar_url = data.avatar_url
+
+        if data.campus_input is not None:
+            campus = await db.execute(
+                select(Campus).where(Campus.name.ilike(data.campus_input.strip())).limit(1)
+            )
+            matched = campus.scalar_one_or_none()
+            if matched:
+                profile.home_campus_id = matched.id
+                profile.home_campus_name = data.campus_input.strip()
+            else:
+                profile.home_campus_name = data.campus_input.strip()
+            if profile.home_campus_confirmed_at is None:
+                profile.home_campus_confirmed_at = datetime.now(timezone.utc)
+
         if data.home_campus_id is not None:
             profile.home_campus_id = data.home_campus_id
         if data.home_campus_name is not None:
             profile.home_campus_name = data.home_campus_name
         if data.home_campus_confirmed is not None:
-            profile.home_campus_confirmed = data.home_campus_confirmed
+            if data.home_campus_confirmed:
+                if profile.home_campus_confirmed_at is None:
+                    profile.home_campus_confirmed_at = datetime.now(timezone.utc)
+            else:
+                profile.home_campus_confirmed_at = None
+        if data.home_campus_confirmed_at is not None:
+            profile.home_campus_confirmed_at = data.home_campus_confirmed_at
 
         profile.updated_at = datetime.now(timezone.utc)
         await db.flush()
@@ -57,7 +77,8 @@ class ProfileService:
         profile = await ProfileService.get_or_create_profile(db, user)
         profile.home_campus_id = req.campus_id
         profile.home_campus_name = req.campus_name
-        profile.home_campus_confirmed = True
+        if profile.home_campus_confirmed_at is None:
+            profile.home_campus_confirmed_at = datetime.now(timezone.utc)
         profile.updated_at = datetime.now(timezone.utc)
         await db.flush()
         return profile
