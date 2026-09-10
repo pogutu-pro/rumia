@@ -99,12 +99,21 @@ export default function RootLayout({
         </Providers>
         <ServiceWorkerRegister />
         <InstallBanner />
-        {/* Cloudflare Web Analytics — plain script tag avoids Next.js injecting an
-            integrity attribute that breaks against Cloudflare's versioned beacon URL */}
+        {/* Cloudflare Web Analytics — injected dynamically to prevent Cloudflare edge SRI integrity mismatch */}
         <script
-          defer
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token": "2bc8ed7166524484a89c065d7cf3ba79"}'
+          id="cloudflare-analytics"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (!window.cfBeaconInjected && !document.querySelector('script[src*="cloudflareinsights.com"]')) {
+                window.cfBeaconInjected = true;
+                var s = document.createElement('script');
+                s.defer = true;
+                s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+                s.setAttribute('data-cf-beacon', '{"token": "2bc8ed7166524484a89c065d7cf3ba79"}');
+                document.head.appendChild(s);
+              }
+            `,
+          }}
         />
       </body>
     </html>
