@@ -111,6 +111,14 @@ export default function AccountPage() {
     PlatformInsightData | undefined
   >(undefined);
   const [campuses, setCampuses] = useState<Campus[]>([]);
+  // Session-scoped fallback: if profile completion keeps failing the user can
+  // dismiss the modal for this session instead of being stranded on it. The
+  // draft is preserved and settings still lets them finish any time.
+  const [profileCompletionDismissed, setProfileCompletionDismissed] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      sessionStorage.getItem('rumia:pc:dismissed') === '1',
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -292,6 +300,13 @@ export default function AccountPage() {
     [router],
   );
 
+  const dismissProfileCompletion = useCallback(() => {
+    setProfileCompletionDismissed(true);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('rumia:pc:dismissed', '1');
+    }
+  }, []);
+
   useEffect(() => {
     if (hasAgent && activeTab === 'agent-application') {
       router.replace('/account?tab=overview', { scroll: false });
@@ -346,7 +361,8 @@ export default function AccountPage() {
 
   const missingPhone = !profile.phone?.trim();
   const missingCampus = !profile.home_campus_confirmed_at;
-  const needsProfileCompletion = missingPhone || missingCampus;
+  const needsProfileCompletion =
+    !profileCompletionDismissed && (missingPhone || missingCampus);
 
   return (
     <div className="min-h-screen bg-white">
@@ -383,6 +399,7 @@ export default function AccountPage() {
                 : prev,
             );
           }}
+          onDismiss={dismissProfileCompletion}
         />
       )}
 

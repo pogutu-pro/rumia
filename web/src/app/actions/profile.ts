@@ -1,5 +1,6 @@
 'use server';
 
+import * as Sentry from '@sentry/nextjs';
 import { profilesApi } from '@/lib/api/profiles';
 
 export type ProfileSaveResult =
@@ -62,6 +63,9 @@ export async function saveProfileCompletionAction(
       },
     };
   } catch (err: any) {
+    Sentry.captureException(err instanceof Error ? err : new Error(String(err)), {
+      tags: { event_name: 'profile_completion_failed', source: 'web-server-action' },
+    });
     return { success: false, error: err.message || err.data?.detail || 'Failed to update profile.' };
   }
 }

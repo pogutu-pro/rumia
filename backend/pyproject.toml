@@ -19,6 +19,7 @@ dependencies = [
     "gunicorn>=23.0.0",
     "sentry-sdk[fastapi]>=2.0.0",
     "slowapi>=0.1.9",
+    "posthog>=7.48.0",
 ]
 
 [build-system]

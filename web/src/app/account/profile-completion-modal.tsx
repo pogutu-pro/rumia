@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Loader2, Check } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
+import { Phone, Loader2, Check, HelpCircle } from 'lucide-react';
 import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,10 @@ import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { saveProfileCompletionAction } from '@/app/actions/profile';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
+
+const DRAFT_PHONE_KEY = 'rumia:pc:draft-phone';
+const DRAFT_CAMPUS_KEY = 'rumia:pc:draft-campus';
+const SUPPORT_EMAIL = 'contact@rumia.co.ke';
 
 interface ProfileCompletionModalProps {
   isOpen: boolean;
@@ -29,6 +34,8 @@ interface ProfileCompletionModalProps {
     home_campus_name?: string | null;
     home_campus_confirmed_at?: string | null;
   }) => void;
+  /** Fallback escape hatch shown after a failed save so users are never stranded. */
+  onDismiss?: () => void;
 }
 
 const overlayVariants = {
@@ -80,9 +87,10 @@ export function ProfileCompletionModal({
   campuses = [],
   currentCampusId = null,
   currentCampusName = null,
-  requirePhone = true,
+requirePhone = true,
   requireCampus = true,
   onSuccess,
+  onDismiss,
 }: ProfileCompletionModalProps) {
   const isMobile = useIsMobile();
   const mounted = useSyncExternalStore(
@@ -90,9 +98,15 @@ export function ProfileCompletionModal({
     () => true,
     () => false,
   );
-  const [phone, setPhone] = useState(currentPhone || '');
+  const [phone, setPhone] = useState(() => {
+    if (typeof window === 'undefined') return currentPhone || '';
+    return sessionStorage.getItem(DRAFT_PHONE_KEY) || currentPhone || '';
+  });
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [campusInput, setCampusInput] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    const draft = sessionStorage.getItem(DRAFT_CAMPUS_KEY);
+    if (draft) return draft;
     if (currentCampusName) return currentCampusName;
     if (currentCampusId) {
       const matched = campuses.find((c) => c.id === currentCampusId);
@@ -102,6 +116,18 @@ export function ProfileCompletionModal({
   });
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+
+  // Persist a partial draft to sessionStorage so a failed/abandoned save never
+  // makes the user re-type their phone/campus after a refresh or retry.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (phone.trim()) sessionStorage.setItem(DRAFT_PHONE_KEY, phone.trim());
+  }, [phone]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (campusInput.trim()) sessionStorage.setItem(DRAFT_CAMPUS_KEY, campusInput.trim());
+  }, [campusInput]);
 
   // Prefill campus input: prefer the user's stored campus name (e.g. a
   // university they typed that isn't in the registry), else resolve the id.
@@ -167,15 +193,30 @@ export function ProfileCompletionModal({
       });
 
       if (!result.success) {
+        setSaveFailed(true);
         posthog.capture('profile_completion_failed', {
           error: result.error,
           required_phone: requirePhone,
           required_campus: requireCampus,
+          source: 'web-modal',
+        });
+        Sentry.captureException(new Error(result.error), {
+          tags: { event_name: 'profile_completion_failed', source: 'web-modal' },
         });
         toast.error(result.error);
         return;
       }
 
+      setSaveFailed(false);
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(DRAFT_PHONE_KEY);
+        sessionStorage.removeItem(DRAFT_CAMPUS_KEY);
+      }
+      posthog.capture('profile_completion_succeeded', {
+        required_phone: requirePhone,
+        required_campus: requireCampus,
+        campus: result.updated.home_campus_name ?? null,
+      });
       onSuccess({
         ...(result.updated.phone !== undefined
           ? { phone: result.updated.phone }
@@ -192,11 +233,16 @@ export function ProfileCompletionModal({
       });
       toast.success('Profile updated');
     } catch (err) {
+      setSaveFailed(true);
       posthog.capture('profile_completion_failed', {
         error: err instanceof Error ? err.message : String(err),
         unexpected: true,
         required_phone: requirePhone,
         required_campus: requireCampus,
+        source: 'web-modal',
+      });
+      Sentry.captureException(err instanceof Error ? err : new Error(String(err)), {
+        tags: { event_name: 'profile_completion_failed', unexpected: 'true' },
       });
       toast.error('Unable to update profile right now. Please try again.');
     } finally {
@@ -283,6 +329,33 @@ export function ProfileCompletionModal({
           </>
         )}
       </Button>
+
+      {saveFailed && !isSaving && (
+        <div className="rounded-xl border border-red-100 bg-red-50/70 p-3 space-y-2.5">
+          <p className="text-xs text-red-700 leading-relaxed">
+            We couldn&apos;t save your details yet — your draft is kept, so you can
+            try again. You can also keep browsing and finish this later.
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 items-center">
+            <a
+              href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Profile setup problem')}`}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-700 hover:text-red-900"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              Contact support
+            </a>
+            {onDismiss && (
+              <button
+                type="button"
+                onClick={onDismiss}
+                className="text-xs font-medium text-slate-500 hover:text-slate-700"
+              >
+                Complete later
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </form>
   );
 

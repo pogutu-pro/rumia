@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from app.core.errors import NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
+from app.core.telemetry import capture_error, capture_event
 from app.features.campuses.models import Campus
 from app.features.listings.models import Listing
 from app.features.profiles.models import UserProfile, Wishlist
@@ -39,48 +40,83 @@ class ProfileService:
                 created_at=datetime.now(timezone.utc),
             )
             db.add(profile)
-            await db.flush()
+            try:
+                await db.flush()
+            except Exception as exc:
+                capture_error(
+                    "profile_completion_failed",
+                    exc,
+                    user_id=user.id,
+                    extra={"stage": "create_row", "campus_defaulted": bool(campus_id)},
+                )
+                raise
+            capture_event(
+                "profile_created",
+                distinct_id=user.id,
+                properties={"campus_defaulted": bool(campus_id)},
+            )
         return profile
 
     @staticmethod
     async def update_profile(db: AsyncSession, user: AuthenticatedUser, data: ProfileUpdate) -> UserProfile:
         profile = await ProfileService.get_or_create_profile(db, user)
 
-        if data.full_name is not None:
-            profile.full_name = data.full_name
-        if data.phone is not None:
-            profile.phone = data.phone
-        if data.avatar_url is not None:
-            profile.avatar_url = data.avatar_url
+        try:
+            if data.full_name is not None:
+                profile.full_name = data.full_name
+            if data.phone is not None:
+                profile.phone = data.phone
+            if data.avatar_url is not None:
+                profile.avatar_url = data.avatar_url
 
-        if data.campus_input is not None:
-            campus = await db.execute(
-                select(Campus).where(Campus.name.ilike(data.campus_input.strip())).limit(1)
-            )
-            matched = campus.scalar_one_or_none()
-            if matched:
-                profile.home_campus_id = matched.id
-                profile.home_campus_name = data.campus_input.strip()
-            else:
-                profile.home_campus_name = data.campus_input.strip()
-            if profile.home_campus_confirmed_at is None:
-                profile.home_campus_confirmed_at = datetime.now(timezone.utc)
-
-        if data.home_campus_id is not None:
-            profile.home_campus_id = data.home_campus_id
-        if data.home_campus_name is not None:
-            profile.home_campus_name = data.home_campus_name
-        if data.home_campus_confirmed is not None:
-            if data.home_campus_confirmed:
+            if data.campus_input is not None:
+                campus = await db.execute(
+                    select(Campus).where(Campus.name.ilike(data.campus_input.strip())).limit(1)
+                )
+                matched = campus.scalar_one_or_none()
+                if matched:
+                    profile.home_campus_id = matched.id
+                    profile.home_campus_name = data.campus_input.strip()
+                else:
+                    profile.home_campus_name = data.campus_input.strip()
                 if profile.home_campus_confirmed_at is None:
                     profile.home_campus_confirmed_at = datetime.now(timezone.utc)
-            else:
-                profile.home_campus_confirmed_at = None
-        if data.home_campus_confirmed_at is not None:
-            profile.home_campus_confirmed_at = data.home_campus_confirmed_at
 
-        profile.updated_at = datetime.now(timezone.utc)
-        await db.flush()
+            if data.home_campus_id is not None:
+                profile.home_campus_id = data.home_campus_id
+            if data.home_campus_name is not None:
+                profile.home_campus_name = data.home_campus_name
+            if data.home_campus_confirmed is not None:
+                if data.home_campus_confirmed:
+                    if profile.home_campus_confirmed_at is None:
+                        profile.home_campus_confirmed_at = datetime.now(timezone.utc)
+                else:
+                    profile.home_campus_confirmed_at = None
+            if data.home_campus_confirmed_at is not None:
+                profile.home_campus_confirmed_at = data.home_campus_confirmed_at
+
+            profile.updated_at = datetime.now(timezone.utc)
+            await db.flush()
+        except Exception as exc:
+            capture_error(
+                "profile_completion_failed",
+                exc,
+                user_id=user.id,
+                extra={
+                    "stage": "update_flush",
+                    "had_phone": data.phone is not None,
+                    "had_campus": data.campus_input is not None or data.home_campus_id is not None,
+                    "confirming": bool(data.home_campus_confirmed),
+                },
+            )
+            raise
+
+        if data.home_campus_confirmed:
+            capture_event(
+                "profile_completion_succeeded",
+                distinct_id=user.id,
+                properties={"campus": profile.home_campus_name or None},
+            )
         return profile
 
     @staticmethod
@@ -91,7 +127,16 @@ class ProfileService:
         if profile.home_campus_confirmed_at is None:
             profile.home_campus_confirmed_at = datetime.now(timezone.utc)
         profile.updated_at = datetime.now(timezone.utc)
-        await db.flush()
+        try:
+            await db.flush()
+        except Exception as exc:
+            capture_error(
+                "profile_completion_failed",
+                exc,
+                user_id=user.id,
+                extra={"stage": "set_campus_flush"},
+            )
+            raise
         return profile
 
     @staticmethod

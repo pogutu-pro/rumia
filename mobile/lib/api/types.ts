@@ -2922,6 +2922,8 @@ export interface components {
              * @default false
              */
             home_campus_confirmed: boolean;
+            /** Home Campus Confirmed At */
+            home_campus_confirmed_at?: string | null;
             /** Home Campus Id */
             home_campus_id?: string | null;
             /** Home Campus Name */
@@ -2946,10 +2948,14 @@ export interface components {
         ProfileUpdate: {
             /** Avatar Url */
             avatar_url?: string | null;
+            /** Campus Input */
+            campus_input?: string | null;
             /** Full Name */
             full_name?: string | null;
             /** Home Campus Confirmed */
             home_campus_confirmed?: boolean | null;
+            /** Home Campus Confirmed At */
+            home_campus_confirmed_at?: string | null;
             /** Home Campus Id */
             home_campus_id?: string | null;
             /** Home Campus Name */
@@ -3194,7 +3200,10 @@ export interface components {
         };
         /** SetHomeCampusRequest */
         SetHomeCampusRequest: {
-            /** Campus Id */
+            /**
+             * Campus Id
+             * Format: uuid
+             */
             campus_id: string;
             /** Campus Name */
             campus_name: string;

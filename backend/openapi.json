@@ -3749,6 +3749,18 @@
             "title": "Home Campus Confirmed",
             "type": "boolean"
           },
+          "home_campus_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Campus Confirmed At"
+          },
           "home_campus_id": {
             "anyOf": [
               {
@@ -3846,6 +3858,17 @@
             ],
             "title": "Avatar Url"
           },
+          "campus_input": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Input"
+          },
           "full_name": {
             "anyOf": [
               {
@@ -3867,6 +3890,18 @@
               }
             ],
             "title": "Home Campus Confirmed"
+          },
+          "home_campus_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Campus Confirmed At"
           },
           "home_campus_id": {
             "anyOf": [
@@ -4687,6 +4722,7 @@
       "SetHomeCampusRequest": {
         "properties": {
           "campus_id": {
+            "format": "uuid",
             "title": "Campus Id",
             "type": "string"
           },
