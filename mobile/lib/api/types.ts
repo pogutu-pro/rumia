@@ -1276,6 +1276,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profiles/me/wishlist/batch-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Batch Check Wishlist State
+         * @description Check wishlist state for multiple listings in a single request. Accepts up to 100 listing IDs. Authenticated.
+         */
+        post: operations["batch_check_wishlist_api_v1_profiles_me_wishlist_batch_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles/me/wishlist/{listing_id}": {
         parameters: {
             query?: never;
@@ -3398,6 +3418,21 @@ export interface components {
             listing_id: string;
             /** Message */
             message: string;
+        };
+        /** WishlistBatchCheckRequest */
+        WishlistBatchCheckRequest: {
+            /** Ids */
+            ids: string[];
+        };
+        /**
+         * WishlistBatchCheckResponse
+         * @description Map of listing_id → is_saved for every requested id.
+         */
+        WishlistBatchCheckResponse: {
+            /** Saved */
+            saved: {
+                [key: string]: boolean;
+            };
         };
         /** AgentRead */
         app__features__agents__schemas__AgentRead: {
@@ -5898,6 +5933,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_ListingRead_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    batch_check_wishlist_api_v1_profiles_me_wishlist_batch_check_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WishlistBatchCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WishlistBatchCheckResponse"];
                 };
             };
             /** @description Validation Error */

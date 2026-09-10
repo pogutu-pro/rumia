@@ -5189,6 +5189,39 @@
         "title": "WishlistActionResponse",
         "type": "object"
       },
+      "WishlistBatchCheckRequest": {
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "title": "WishlistBatchCheckRequest",
+        "type": "object"
+      },
+      "WishlistBatchCheckResponse": {
+        "description": "Map of listing_id \u2192 is_saved for every requested id.",
+        "properties": {
+          "saved": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Saved",
+            "type": "object"
+          }
+        },
+        "required": [
+          "saved"
+        ],
+        "title": "WishlistBatchCheckResponse",
+        "type": "object"
+      },
       "app__features__agents__schemas__AgentRead": {
         "properties": {
           "bio": {
@@ -9768,6 +9801,66 @@
           }
         },
         "summary": "Get Wishlist",
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/v1/profiles/me/wishlist/batch-check": {
+      "post": {
+        "description": "Check wishlist state for multiple listings in a single request. Accepts up to 100 listing IDs. Authenticated.",
+        "operationId": "batch_check_wishlist_api_v1_profiles_me_wishlist_batch_check_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WishlistBatchCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WishlistBatchCheckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Batch Check Wishlist State",
         "tags": [
           "Profiles"
         ]
