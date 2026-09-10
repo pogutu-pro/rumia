@@ -69,3 +69,33 @@ async def test_review_application_non_admin_forbidden(client: AsyncClient):
         assert response.status_code == 403
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_get_my_agent_profile_not_found(client: AsyncClient):
+    user = AuthenticatedUser(id="user-without-agent", email="user@rumia.app", role="student")
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        response = await client.get("/api/v1/agents/me")
+        assert response.status_code == 404
+        data = response.json()
+        assert data["detail"]["code"] == "NOT_FOUND"
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_update_agent_me_not_found(client: AsyncClient):
+    user = AuthenticatedUser(id="user-without-agent", email="user@rumia.app", role="student")
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        response = await client.patch(
+            "/api/v1/agents/me",
+            json={"bio": "New agent bio", "whatsapp": "+254700000000"},
+        )
+        assert response.status_code == 404
+        data = response.json()
+        assert data["detail"]["code"] == "NOT_FOUND"
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+

@@ -21,8 +21,32 @@ function safeNext(raw: string | null): string {
   return '/account';
 }
 
+/**
+ * Resolve the canonical public site origin so internal Docker container hostnames
+ * (e.g. ed5c6283fc0c:3000) or internal proxy headers never leak into user redirects.
+ */
+function getCanonicalOrigin(request: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).origin;
+    } catch {}
+  }
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (
+    forwardedHost &&
+    !forwardedHost.includes(':3000') &&
+    !forwardedHost.includes('localhost') &&
+    !/^[0-9a-f]{12}/i.test(forwardedHost)
+  ) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  return 'https://rumia.co.ke';
+}
+
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const origin = getCanonicalOrigin(request);
   const code = searchParams.get('code');
   const next = safeNext(searchParams.get('next'));
 

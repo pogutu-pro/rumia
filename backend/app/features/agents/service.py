@@ -30,10 +30,21 @@ class AgentService:
         return agent
 
     @staticmethod
+    async def get_agent_by_user_id(db: AsyncSession, user_id: str) -> AgentProfile:
+        res = await db.execute(select(AgentProfile).where(AgentProfile.user_id == user_id))
+        agent = res.scalar_one_or_none()
+        if not agent:
+            raise NotFoundException("Agent profile not found for current user")
+        return agent
+
+    @staticmethod
     async def update_agent_profile(db: AsyncSession, user: AuthenticatedUser, agent_id: str, data: AgentUpdate) -> AgentProfile:
-        agent = await AgentService.get_agent_by_id(db, agent_id)
-        if agent.user_id != user.id and not user.is_admin:
-            raise ForbiddenException("You can only edit your own agent profile")
+        if agent_id == "me":
+            agent = await AgentService.get_agent_by_user_id(db, user.id)
+        else:
+            agent = await AgentService.get_agent_by_id(db, agent_id)
+            if agent.user_id != user.id and not user.is_admin:
+                raise ForbiddenException("You can only edit your own agent profile")
 
         if data.name is not None:
             agent.name = data.name
@@ -45,8 +56,9 @@ class AgentService:
             agent.bio = data.bio
         if data.portfolio_url is not None:
             agent.portfolio_url = data.portfolio_url
-        if data.profile_photo_url is not None:
-            agent.profile_photo_url = data.profile_photo_url
+        photo_url = data.profile_photo_url or data.profile_image_url
+        if photo_url is not None:
+            agent.profile_photo_url = photo_url
 
         await db.flush()
         return agent

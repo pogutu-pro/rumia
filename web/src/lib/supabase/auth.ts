@@ -7,10 +7,22 @@ import { createClient } from './client';
  * configured in the Supabase auth allowlist.
  */
 function getSiteOrigin(): string {
-  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL) {
-    return new URL(process.env.NEXT_PUBLIC_SITE_URL).origin;
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).origin;
+    } catch {}
   }
-  return window.location.origin;
+  if (typeof window !== 'undefined' && window.location.origin) {
+    const origin = window.location.origin;
+    if (
+      !origin.includes(':3000') &&
+      !origin.includes('localhost') &&
+      !/^[0-9a-f]{12}/i.test(window.location.hostname)
+    ) {
+      return origin;
+    }
+  }
+  return 'https://rumia.co.ke';
 }
 
 export async function signInWithGoogle(next?: string) {
@@ -23,6 +35,9 @@ export async function signInWithGoogle(next?: string) {
     provider: 'google',
     options: {
       redirectTo,
+      queryParams: {
+        prompt: 'select_account',
+      },
     },
   });
   return { data, error };

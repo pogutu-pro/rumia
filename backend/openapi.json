@@ -298,6 +298,17 @@
             ],
             "title": "Portfolio Url"
           },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Image Url"
+          },
           "profile_photo_url": {
             "anyOf": [
               {
@@ -6220,6 +6231,56 @@
           }
         },
         "summary": "Submit Agent Application",
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/v1/agents/me": {
+      "get": {
+        "description": "Fetch current authenticated user's agent profile.",
+        "operationId": "get_my_agent_profile_api_v1_agents_me_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__features__agents__schemas__AgentRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Current Agent Profile",
         "tags": [
           "Agents"
         ]

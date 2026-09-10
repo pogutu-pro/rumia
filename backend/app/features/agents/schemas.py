@@ -29,6 +29,7 @@ class AgentUpdate(BaseModel):
     bio: Optional[str] = None
     portfolio_url: Optional[str] = None
     profile_photo_url: Optional[str] = None
+    profile_image_url: Optional[str] = None
 
 
 class AgentApplicationCreate(BaseModel):

@@ -252,6 +252,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agents/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Current Agent Profile
+         * @description Fetch current authenticated user's agent profile.
+         */
+        get: operations["get_my_agent_profile_api_v1_agents_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/agents/{agent_id}": {
         parameters: {
             query?: never;
@@ -1674,6 +1694,8 @@ export interface components {
             phone?: string | null;
             /** Portfolio Url */
             portfolio_url?: string | null;
+            /** Profile Image Url */
+            profile_image_url?: string | null;
             /** Profile Photo Url */
             profile_photo_url?: string | null;
             /** Whatsapp */
@@ -3916,6 +3938,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AgentApplicationRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_agent_profile_api_v1_agents_me_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__features__agents__schemas__AgentRead"];
                 };
             };
             /** @description Validation Error */

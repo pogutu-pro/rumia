@@ -99,6 +99,21 @@ async def submit_application(
 
 
 @router.get(
+    "/me",
+    response_model=AgentRead,
+    status_code=status.HTTP_200_OK,
+    summary="Get Current Agent Profile",
+    description="Fetch current authenticated user's agent profile.",
+)
+async def get_my_agent_profile(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> AgentRead:
+    agent = await AgentService.get_agent_by_user_id(db, user.id)
+    return AgentRead.model_validate(agent)
+
+
+@router.get(
     "/{agent_id}",
     response_model=AgentRead,
     status_code=status.HTTP_200_OK,
