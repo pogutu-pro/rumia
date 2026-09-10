@@ -52,3 +52,11 @@ class WishlistActionResponse(BaseModel):
     is_saved: bool
     listing_id: str
 
+
+class WishlistBatchCheckRequest(BaseModel):
+    ids: list[str]
+
+
+class WishlistBatchCheckResponse(BaseModel):
+    """Map of listing_id → is_saved for every requested id."""
+    saved: dict[str, bool]

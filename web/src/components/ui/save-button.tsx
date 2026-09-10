@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Heart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { apiClient } from '@/lib/api/client';
+import { useWishlistStore } from '@/stores/wishlist-store';
 import { cn } from '@/lib/utils/cn';
 import posthog from 'posthog-js';
 
@@ -27,27 +28,17 @@ export function SaveButton({
 }: SaveButtonProps) {
   const router = useRouter();
   const supabase = createClient();
-  const { auth } = supabase;
-  const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const {
-        data: { session },
-      } = await auth.getSession();
-      if (!session?.user) return;
+  // Read saved state from the batched wishlist store
+  const isSaved = useWishlistStore((s) => s.saved[listingId] ?? false);
+  const requestCheck = useWishlistStore((s) => s.requestCheck);
+  const setSaved = useWishlistStore((s) => s.setSaved);
 
-      try {
-        const res = await apiClient<WishlistActionResponse>(
-          `/profiles/me/wishlist/${listingId}`,
-        );
-        setIsSaved(res.is_saved);
-      } catch {
-        // Treated as not in wishlist when the request fails.
-      }
-    })();
-  }, [listingId, auth]);
+  // On mount, register interest — the store batches all IDs and fires one request
+  useEffect(() => {
+    requestCheck(listingId);
+  }, [listingId, requestCheck]);
 
   const handleToggle = useCallback(async () => {
     const {
@@ -62,20 +53,23 @@ export function SaveButton({
     setIsLoading(true);
     const previous = isSaved;
 
+    // Optimistic update
+    setSaved(listingId, !previous);
+
     try {
       await apiClient<WishlistActionResponse>(`/profiles/me/wishlist/${listingId}`, {
-        method: isSaved ? 'DELETE' : 'POST',
+        method: previous ? 'DELETE' : 'POST',
       });
-      setIsSaved(!previous);
       posthog.capture(previous ? 'hostel_unwishlisted' : 'hostel_wishlisted', {
         listing_id: listingId,
       });
     } catch {
-      setIsSaved(previous);
+      // Revert on failure
+      setSaved(listingId, previous);
     } finally {
       setIsLoading(false);
     }
-  }, [listingId, isSaved, router, supabase]);
+  }, [listingId, isSaved, router, supabase, setSaved]);
 
   if (variant === 'icon') {
     return (

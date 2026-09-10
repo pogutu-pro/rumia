@@ -11,6 +11,8 @@ from app.features.profiles.schemas import (
     SavedHostelActionResponse,
     SetHomeCampusRequest,
     WishlistActionResponse,
+    WishlistBatchCheckRequest,
+    WishlistBatchCheckResponse,
 )
 from app.features.profiles.service import ProfileService
 
@@ -101,6 +103,27 @@ async def get_saved_hostels(
     db: AsyncSession = Depends(get_db_session),
 ) -> PaginatedResponse[ListingRead]:
     return await get_wishlist(pagination, user, db)
+
+
+@router.post(
+    "/me/wishlist/batch-check",
+    response_model=WishlistBatchCheckResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Batch Check Wishlist State",
+    description="Check wishlist state for multiple listings in a single request. "
+    "Accepts up to 100 listing IDs. Authenticated.",
+)
+async def batch_check_wishlist(
+    body: WishlistBatchCheckRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> WishlistBatchCheckResponse:
+    # Cap at 100 to prevent abuse
+    ids = body.ids[:100]
+    saved_ids = await ProfileService.get_saved_listing_ids(db, user, ids)
+    return WishlistBatchCheckResponse(
+        saved={lid: lid in saved_ids for lid in ids}
+    )
 
 
 @router.get(
