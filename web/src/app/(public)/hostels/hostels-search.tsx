@@ -271,8 +271,14 @@ export default function HostelsSearch({
     zones,
     propertyType,
   ]);
-  const [displayState, setDisplayState] = useState({ key: '', limit: INITIAL_DISPLAY_COUNT });
-  const displayLimit = displayState.key === displayFilterKey ? displayState.limit : INITIAL_DISPLAY_COUNT;
+  const [displayState, setDisplayState] = useState({
+    key: '',
+    limit: INITIAL_DISPLAY_COUNT,
+  });
+  const displayLimit =
+    displayState.key === displayFilterKey
+      ? displayState.limit
+      : INITIAL_DISPLAY_COUNT;
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -281,7 +287,10 @@ export default function HostelsSearch({
       (entries) => {
         if (entries[0]?.isIntersecting) {
           setDisplayState((prev) => {
-            const currentLimit = prev.key === displayFilterKey ? prev.limit : INITIAL_DISPLAY_COUNT;
+            const currentLimit =
+              prev.key === displayFilterKey
+                ? prev.limit
+                : INITIAL_DISPLAY_COUNT;
             return {
               key: displayFilterKey,
               limit: Math.min(currentLimit + BATCH_SIZE, typedListings.length),
@@ -742,10 +751,16 @@ export default function HostelsSearch({
                   type="button"
                   onClick={() =>
                     setDisplayState((prev) => {
-                      const currentLimit = prev.key === displayFilterKey ? prev.limit : INITIAL_DISPLAY_COUNT;
+                      const currentLimit =
+                        prev.key === displayFilterKey
+                          ? prev.limit
+                          : INITIAL_DISPLAY_COUNT;
                       return {
                         key: displayFilterKey,
-                        limit: Math.min(currentLimit + BATCH_SIZE, typedListings.length),
+                        limit: Math.min(
+                          currentLimit + BATCH_SIZE,
+                          typedListings.length,
+                        ),
                       };
                     })
                   }
