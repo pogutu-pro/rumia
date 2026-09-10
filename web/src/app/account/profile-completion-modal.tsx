@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Loader2, Check } from 'lucide-react';
+import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,13 +92,21 @@ export function ProfileCompletionModal({
   );
   const [phone, setPhone] = useState(currentPhone || '');
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [campusInput, setCampusInput] = useState('');
+  const [campusInput, setCampusInput] = useState(() => {
+    if (currentCampusName) return currentCampusName;
+    if (currentCampusId) {
+      const matched = campuses.find((c) => c.id === currentCampusId);
+      return matched ? matched.name : '';
+    }
+    return '';
+  });
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Prefill campus input: prefer the user's stored campus name (e.g. a
   // university they typed that isn't in the registry), else resolve the id.
-  // Sync when the props change — derived-state adjustment during render.
+  // Sync when the props change (e.g. campuses arrive after mount) —
+  // derived-state adjustment during render, guarded so it runs once.
   const [prevCampusId, setPrevCampusId] = useState(currentCampusId);
   const [prevCampusName, setPrevCampusName] = useState(currentCampusName);
   const [prevCampusList, setPrevCampusList] = useState(campuses);
@@ -113,7 +122,7 @@ export function ProfileCompletionModal({
       setCampusInput(currentCampusName);
     } else if (currentCampusId) {
       const matched = campuses.find((c) => c.id === currentCampusId);
-      setCampusInput(matched ? matched.name : String(currentCampusId));
+      setCampusInput(matched ? matched.name : '');
     }
   }
 
@@ -158,6 +167,11 @@ export function ProfileCompletionModal({
       });
 
       if (!result.success) {
+        posthog.capture('profile_completion_failed', {
+          error: result.error,
+          required_phone: requirePhone,
+          required_campus: requireCampus,
+        });
         toast.error(result.error);
         return;
       }
@@ -178,6 +192,12 @@ export function ProfileCompletionModal({
       });
       toast.success('Profile updated');
     } catch (err) {
+      posthog.capture('profile_completion_failed', {
+        error: err instanceof Error ? err.message : String(err),
+        unexpected: true,
+        required_phone: requirePhone,
+        required_campus: requireCampus,
+      });
       toast.error('Unable to update profile right now. Please try again.');
     } finally {
       setIsSaving(false);

@@ -30,12 +30,31 @@ async def test_set_home_campus_success(client: AsyncClient):
     user = AuthenticatedUser(id="student-1", email="student@rumia.app", role="student")
     app.dependency_overrides[get_current_user] = lambda: user
     try:
-        payload = {"campus_id": "dekut-id-1", "campus_name": "DeKUT Main Campus"}
+        payload = {
+            "campus_id": "8f853c92-36bf-455d-b21f-14471ec16311",
+            "campus_name": "DeKUT Main Campus",
+        }
         response = await client.post("/api/v1/profiles/me/campus", json=payload)
         assert response.status_code == 200
         data = response.json()
-        assert data["home_campus_id"] == "dekut-id-1"
+        assert data["home_campus_id"] == "8f853c92-36bf-455d-b21f-14471ec16311"
         assert data["home_campus_name"] == "DeKUT Main Campus"
         assert data["home_campus_confirmed"] is True
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_set_home_campus_rejects_invalid_uuid(client: AsyncClient):
+    user = AuthenticatedUser(id="student-1", email="student@rumia.app", role="student")
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        # An empty/non-UUID campus_id must be a clean 422, not a 500 from a
+        # Postgres UUID conversion failure.
+        response = await client.post(
+            "/api/v1/profiles/me/campus",
+            json={"campus_id": "", "campus_name": "DeKUT Main Campus"},
+        )
+        assert response.status_code == 422
     finally:
         app.dependency_overrides.pop(get_current_user, None)

@@ -75,7 +75,7 @@ class ProfileService:
     @staticmethod
     async def set_home_campus(db: AsyncSession, user: AuthenticatedUser, req: SetHomeCampusRequest) -> UserProfile:
         profile = await ProfileService.get_or_create_profile(db, user)
-        profile.home_campus_id = req.campus_id
+        profile.home_campus_id = str(req.campus_id)
         profile.home_campus_name = req.campus_name
         if profile.home_campus_confirmed_at is None:
             profile.home_campus_confirmed_at = datetime.now(timezone.utc)

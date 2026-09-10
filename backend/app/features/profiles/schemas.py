@@ -1,5 +1,7 @@
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -35,7 +37,7 @@ class ProfileUpdate(BaseModel):
 
 
 class SetHomeCampusRequest(BaseModel):
-    campus_id: str
+    campus_id: UUID
     campus_name: str
 
 
