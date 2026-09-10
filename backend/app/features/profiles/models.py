@@ -16,7 +16,7 @@ class UserProfile(Base):
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True)
     email: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     role: Mapped[str] = mapped_column(String, default="student", nullable=False)
-    campus_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
+    campus_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     home_campus_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
     managed_campus_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
     managed_region_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)

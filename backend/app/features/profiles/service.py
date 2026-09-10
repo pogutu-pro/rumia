@@ -19,12 +19,23 @@ class ProfileService:
         res = await db.execute(select(UserProfile).where(UserProfile.id == user.id))
         profile = res.scalar_one_or_none()
         if not profile:
+            # The live profiles table constrains campus_id to NOT NULL. The
+            # signup auth hook normally stamps it with DeKUT before the API is
+            # ever called, so mirror that default here to keep the create path
+            # safe when no profile row exists yet.
+            campus_id = None
+            default = await db.execute(
+                select(Campus.id).where(Campus.slug == "dekut").limit(1)
+            )
+            if default_id := default.scalar_one_or_none():
+                campus_id = str(default_id)
             profile = UserProfile(
                 id=user.id,
                 email=user.email,
                 role=user.role,
                 managed_campus_id=user.managed_campus_id,
                 managed_region_id=user.managed_region_id,
+                campus_id=campus_id,
                 created_at=datetime.now(timezone.utc),
             )
             db.add(profile)
