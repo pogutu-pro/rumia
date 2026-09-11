@@ -11,6 +11,13 @@ interface YouTubeEmbedProps {
   title?: string;
 }
 
+const THUMB_FALLBACKS = [
+  (id: string) => `https://img.youtube.com/vi/${id}/maxresdefault.jpg`,
+  (id: string) => `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+  (id: string) => `https://img.youtube.com/vi/${id}/sddefault.jpg`,
+  (id: string) => `https://img.youtube.com/vi/${id}/default.jpg`,
+];
+
 export function YouTubeEmbed({
   youtubeId,
   isActive,
@@ -19,22 +26,35 @@ export function YouTubeEmbed({
 }: YouTubeEmbedProps) {
   const [hasError, setHasError] = React.useState(false);
   const [isPaused, setIsPaused] = React.useState(false);
+  const [thumbIndex, setThumbIndex] = React.useState(0);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
-  const [thumbSrc, setThumbSrc] = React.useState(
-    `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`,
-  );
+
+  const thumbSrc = THUMB_FALLBACKS[thumbIndex](youtubeId);
 
   React.useEffect(() => {
     if (isActive) {
-      setTimeout(() => setIsPaused(false), 0);
+      const timer = setTimeout(() => setIsPaused(false), 0);
+      return () => clearTimeout(timer);
     }
   }, [isActive, youtubeId]);
 
   const post = React.useCallback((func: string) => {
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func, args: [] }),
-      '*',
-    );
+    if (!iframeRef.current) return;
+    const win = iframeRef.current.contentWindow;
+    if (!win) return;
+
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = setInterval(() => {
+      win.postMessage(
+        JSON.stringify({ event: 'command', func, args: [] }),
+        '*',
+      );
+      attempts += 1;
+      if (attempts >= maxAttempts) clearInterval(interval);
+    }, 250);
+
+    return () => clearInterval(interval);
   }, []);
 
   React.useEffect(() => {
@@ -79,8 +99,13 @@ export function YouTubeEmbed({
           sizes="(max-width: 768px) 100vw, 430px"
           priority={false}
           onError={() => {
-            const hq = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-            if (thumbSrc !== hq) setThumbSrc(hq);
+            setThumbIndex((prev) => {
+              const next = prev + 1;
+              if (next >= THUMB_FALLBACKS.length) {
+                setHasError(true);
+              }
+              return next < THUMB_FALLBACKS.length ? next : prev;
+            });
           }}
         />
       </div>
@@ -91,7 +116,7 @@ export function YouTubeEmbed({
     <div className="absolute inset-0 overflow-hidden bg-black" onClick={togglePause}>
       <iframe
         ref={iframeRef}
-        key={`${youtubeId}-${isMuted}-${isPaused}`}
+        key={youtubeId}
         src={embedUrl}
         title={title}
         className="absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 border-0"
