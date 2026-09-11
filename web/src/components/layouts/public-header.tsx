@@ -3,12 +3,14 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart } from 'lucide-react';
+import { Heart, Play } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
 import { NavbarSearch } from '@/components/layouts/navbar-search';
 
 export const PublicHeader = React.memo(function PublicHeader() {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const pathname = usePathname();
 
   React.useEffect(() => {
     let ticking = false;
@@ -30,6 +32,8 @@ export const PublicHeader = React.memo(function PublicHeader() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const isVideosActive = pathname === '/videos' || pathname.startsWith('/videos');
 
   return (
     <>
@@ -65,7 +69,7 @@ export const PublicHeader = React.memo(function PublicHeader() {
           <div className="flex min-w-0 flex-1 justify-center px-2 sm:px-4">
             <React.Suspense
               fallback={
-                <div className="h-9 w-full max-w-[360px] rounded-full border border-slate-200 bg-slate-50" />
+                <div className="h-11 w-full max-w-[420px] rounded-full border border-slate-200 bg-slate-50" />
               }
             >
               <NavbarSearch />
@@ -73,6 +77,27 @@ export const PublicHeader = React.memo(function PublicHeader() {
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
+            {/* Videos link — desktop only */}
+            <Link
+              href="/videos"
+              aria-label="Property Videos"
+              className={cn(
+                'hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors md:inline-flex',
+                isVideosActive
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900',
+              )}
+            >
+              <Play
+                className={cn(
+                  'h-4 w-4',
+                  isVideosActive ? 'text-emerald-600 fill-emerald-600' : 'text-slate-600',
+                )}
+                strokeWidth={isVideosActive ? 0 : 1.9}
+              />
+              Videos
+            </Link>
+
             <Link
               href="/saved"
               aria-label="Wishlist"

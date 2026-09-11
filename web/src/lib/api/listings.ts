@@ -18,6 +18,7 @@ export interface ListingsFeedParams {
   property_type?: string;
   is_active?: boolean;
   sort?: 'views' | string;
+  has_video?: boolean;
 }
 
 export const listingsApi = {
@@ -35,6 +36,7 @@ export const listingsApi = {
     if (params?.property_type) searchParams.set('property_type', params.property_type);
     if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
     if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.has_video !== undefined) searchParams.set('has_video', params.has_video.toString());
 
     return api.get<PaginatedResponse<Listing>>(`/listings?${searchParams.toString()}`);
   },
@@ -54,6 +56,7 @@ export const listingsApi = {
     if (params?.property_type) searchParams.set('property_type', params.property_type);
     if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
     if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.has_video !== undefined) searchParams.set('has_video', params.has_video.toString());
 
     return fetchPublicApi<PaginatedResponse<Listing>>(`/listings?${searchParams.toString()}`);
   },

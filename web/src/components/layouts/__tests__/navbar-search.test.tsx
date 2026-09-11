@@ -26,6 +26,11 @@ jest.mock('@/lib/api/search', () => ({
 }));
 
 describe('NavbarSearch', () => {
+  const renderOpenSearch = () => {
+    render(<NavbarSearch />);
+    fireEvent.click(screen.getByRole('button', { name: /search hostels/i }));
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockPathname = '/';
@@ -33,21 +38,23 @@ describe('NavbarSearch', () => {
   });
 
   it('renders search input with placeholder', () => {
-    render(<NavbarSearch />);
-    const input = screen.getByPlaceholderText(/search hostels/i);
+    renderOpenSearch();
+    const input = screen.getByPlaceholderText(/search by name/i);
     expect(input).toBeInTheDocument();
   });
 
   it('initializes value from URL search param q', () => {
     mockSearchParams = new URLSearchParams('q=dan');
-    render(<NavbarSearch />);
-    const input = screen.getByPlaceholderText(/search hostels/i) as HTMLInputElement;
+    renderOpenSearch();
+    const input = screen.getByPlaceholderText(
+      /search by name/i,
+    ) as HTMLInputElement;
     expect(input.value).toBe('dan');
   });
 
   it('navigates to /hostels?q=... on submit when on another page', () => {
-    render(<NavbarSearch />);
-    const input = screen.getByPlaceholderText(/search hostels/i);
+    renderOpenSearch();
+    const input = screen.getByPlaceholderText(/search by name/i);
     fireEvent.change(input, { target: { value: 'boma bedsitter' } });
     fireEvent.submit(input.closest('form')!);
 
@@ -55,8 +62,8 @@ describe('NavbarSearch', () => {
   });
 
   it('navigates to /hostels on submit when query is empty', () => {
-    render(<NavbarSearch />);
-    const input = screen.getByPlaceholderText(/search hostels/i);
+    renderOpenSearch();
+    const input = screen.getByPlaceholderText(/search by name/i);
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.submit(input.closest('form')!);
 
@@ -66,12 +73,16 @@ describe('NavbarSearch', () => {
   it('clears the query when clear button is clicked', async () => {
     mockPathname = '/hostels';
     mockSearchParams = new URLSearchParams('q=nyeri');
-    render(<NavbarSearch />);
+    renderOpenSearch();
 
-    const clearButton = await screen.findByRole('button', { name: /clear search query/i });
+    const clearButton = await screen.findByRole('button', {
+      name: /clear search/i,
+    });
     fireEvent.click(clearButton);
 
-    const input = screen.getByPlaceholderText(/search hostels/i) as HTMLInputElement;
+    const input = screen.getByPlaceholderText(
+      /search by name/i,
+    ) as HTMLInputElement;
     expect(input.value).toBe('');
     expect(mockReplace).toHaveBeenCalled();
   });

@@ -77,17 +77,11 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
             <BadgeCheck className="h-3 w-3" /> Verified
           </div>
         )}
-        <div
-          className="absolute right-2 top-2"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
+        <div className="absolute right-2 top-2 z-10">
           <SaveButton
             listingId={String(item.id)}
             variant="icon"
-            className="h-8 w-8 border-white/60 shadow-sm"
+            className="h-9 w-9 border-white/60 shadow-sm backdrop-blur-none bg-white"
           />
         </div>
       </div>

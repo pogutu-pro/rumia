@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { apiClient } from '@/lib/api/client';
 import { useWishlistStore } from '@/stores/wishlist-store';
@@ -30,30 +30,31 @@ export function SaveButton({
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Read saved state from the batched wishlist store
   const isSaved = useWishlistStore((s) => s.saved[listingId] ?? false);
   const requestCheck = useWishlistStore((s) => s.requestCheck);
   const setSaved = useWishlistStore((s) => s.setSaved);
 
-  // On mount, register interest — the store batches all IDs and fires one request
   useEffect(() => {
     requestCheck(listingId);
   }, [listingId, requestCheck]);
 
-  const handleToggle = useCallback(async () => {
+  const handleToggle = useCallback(async (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      router.push('/saved');
+      router.push('/auth/login');
       return;
     }
 
+    if (isLoading) return;
     setIsLoading(true);
     const previous = isSaved;
-
-    // Optimistic update
     setSaved(listingId, !previous);
 
     try {
@@ -64,31 +65,41 @@ export function SaveButton({
         listing_id: listingId,
       });
     } catch {
-      // Revert on failure
       setSaved(listingId, previous);
     } finally {
       setIsLoading(false);
     }
-  }, [listingId, isSaved, router, supabase, setSaved]);
+  }, [listingId, isSaved, router, supabase, setSaved, isLoading]);
 
   if (variant === 'icon') {
     return (
       <button
         type="button"
         onClick={handleToggle}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+        }}
         disabled={isLoading}
+        style={{ touchAction: 'manipulation' }}
         className={cn(
-          'pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 shadow-md backdrop-blur-sm transition-colors hover:bg-white',
+          'pointer-events-auto inline-flex items-center justify-center rounded-full border bg-white shadow-md transition-all active:scale-95 touch-manipulation disabled:opacity-60',
+          'h-11 w-11 md:h-11 md:w-11 border-white/70 backdrop-blur-sm hover:bg-white',
           isSaved
-            ? 'text-red-500 hover:text-red-600'
+            ? 'text-red-500 hover:text-red-600 border-red-100'
             : 'text-slate-700 hover:text-slate-950',
+          isLoading && 'opacity-70',
           className,
         )}
         aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
+        aria-busy={isLoading}
       >
-        <Heart
-          className={`h-5 w-5 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
-        />
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+        ) : (
+          <Heart
+            className={`h-5 w-5 transition-colors ${isSaved ? 'fill-current' : ''}`}
+          />
+        )}
       </button>
     );
   }
@@ -98,18 +109,24 @@ export function SaveButton({
       type="button"
       onClick={handleToggle}
       disabled={isLoading}
+      style={{ touchAction: 'manipulation' }}
       className={cn(
-        'inline-flex items-center gap-1.5 text-xs font-semibold transition-colors',
+        'inline-flex items-center gap-1.5 text-xs font-semibold transition-colors touch-manipulation active:opacity-70 disabled:opacity-50',
         isSaved
           ? 'text-red-500 hover:text-red-600'
           : 'text-slate-600 hover:text-slate-900',
         className,
       )}
       aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
+      aria-busy={isLoading}
     >
-      <Heart
-        className={`h-4 w-4 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
-      />
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Heart
+          className={`h-4 w-4 transition-colors ${isSaved ? 'fill-current' : ''}`}
+        />
+      )}
       {isSaved ? 'In wishlist' : 'Save'}
     </button>
   );

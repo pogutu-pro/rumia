@@ -3,13 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Search, User, ShieldCheck } from "lucide-react";
+import { Home, Play, User, ShieldCheck } from "lucide-react";
 import * as React from "react";
 import { createClient } from "@/lib/supabase/client";
 
 function isTabActive(tabHref: string, pathname: string): boolean {
   if (tabHref === "/") return pathname === "/";
-  if (tabHref === "/hostels") return pathname === "/hostels" || pathname.startsWith("/hostels");
+  if (tabHref === "/videos") return pathname === "/videos" || pathname.startsWith("/videos");
   if (tabHref === "/verify") return pathname.startsWith("/verify");
   if (tabHref.startsWith("/account") || tabHref.startsWith("/auth"))
     return (
@@ -95,7 +95,7 @@ export function BottomNav() {
 
   const tabs = [
     { label: "Home", href: "/", icon: Home },
-    { label: "Search", href: "/hostels", icon: Search },
+    { label: "Videos", href: "/videos", icon: Play },
     { label: "Verify", href: "/verify", icon: ShieldCheck },
     { label: "Account", href: accountHref, icon: User, isAccount: true },
   ];

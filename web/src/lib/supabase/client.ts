@@ -17,6 +17,7 @@ export function createClient() {
           data: { subscription: { unsubscribe: () => {} } },
         }),
         getSession: async () => ({ data: { session: null }, error: null }),
+        getUser: async () => ({ data: { user: null }, error: null }),
       },
       from: () => ({
         select: () => ({
@@ -36,7 +37,7 @@ export function createClient() {
   return createBrowserClient(url, key, {
     auth: {
       persistSession: true,
-      autoRefreshToken: false,
+      autoRefreshToken: true,
       detectSessionInUrl: false,
     },
     cookieOptions: {

@@ -36,6 +36,7 @@ class ListingService:
         area: Optional[str] = None,
         county: Optional[str] = None,
         property_type: Optional[str] = None,
+        has_video: Optional[bool] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
         is_active: bool = True,
@@ -59,6 +60,11 @@ class ListingService:
             stmt = stmt.where(Listing.county.ilike(f"%{county}%"))
         if property_type:
             stmt = stmt.where(Listing.property_type == property_type)
+
+        if has_video is True:
+            stmt = stmt.where(Listing.youtube_id.is_not(None))
+        elif has_video is False:
+            stmt = stmt.where(Listing.youtube_id.is_(None))
 
         if min_price is not None:
             stmt = stmt.where(Listing.price >= min_price)
