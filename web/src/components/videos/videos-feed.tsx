@@ -54,7 +54,7 @@ export function VideosFeed({
     try {
       const res = await listingsClientApi.getFeed({
         has_video: true,
-        limit: 20,
+        limit: 10,
         page: 1,
       });
       setListings(res.items);
@@ -69,6 +69,7 @@ export function VideosFeed({
     }
   }, []);
 
+  // ── IntersectionObserver for active video detection ─────────────────
   React.useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
 
@@ -94,8 +95,9 @@ export function VideosFeed({
     return () => observerRef.current?.disconnect();
   }, [listings.length]);
 
+  // ── Prefetch next page earlier (4 items before end) ────────────────
   React.useEffect(() => {
-    if (activeIndex < listings.length - 2) return;
+    if (activeIndex < listings.length - 4) return;
     if (page >= pages) return;
     if (loadingRef.current) return;
 
@@ -107,7 +109,7 @@ export function VideosFeed({
         const res: PaginatedResponse<Listing> = await listingsClientApi.getFeed(
           {
             has_video: true,
-            limit: 20,
+            limit: 10,
             page: nextPage,
           },
         );
@@ -128,18 +130,19 @@ export function VideosFeed({
     void fetchNext();
   }, [activeIndex, listings.length, page, pages]);
 
+  // ── Error state ────────────────────────────────────────────────────
   if (hasInitialError && listings.length === 0) {
     return (
-      <div className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center px-6 text-center">
-        <h2 className="text-xl font-bold text-slate-900">Videos are unavailable</h2>
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
+      <div className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center bg-background px-6 text-center">
+        <h2 className="text-xl font-bold text-foreground">Videos are unavailable</h2>
+        <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
           We couldn&apos;t load the property videos. Please try again.
         </p>
         <button
           type="button"
           onClick={() => void retryInitialLoad()}
           disabled={isLoadingMore}
-          className="mt-6 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+          className="mt-6 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {isLoadingMore ? 'Retrying…' : 'Try again'}
         </button>
@@ -147,21 +150,25 @@ export function VideosFeed({
     );
   }
 
+  // ── Empty state ────────────────────────────────────────────────────
   if (listings.length === 0) {
     return <VideosEmptyState />;
   }
 
+  // ── Main feed ──────────────────────────────────────────────────────
   return (
-    <div className="relative w-full bg-slate-950">
+    <div className="relative w-full bg-muted">
+      {/* Desktop: center the feed in a narrow column */}
       <div
         ref={scrollContainerRef}
-        className="h-[calc(100dvh-56px)] w-full overflow-y-scroll"
+        className="mx-auto h-[calc(100dvh-56px)] w-full overflow-y-scroll md:max-w-[480px]"
         style={{
           scrollSnapType: 'y mandatory',
           scrollBehavior: 'smooth',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
+          willChange: 'transform',
         }}
       >
         {listings.map((listing, index) => (
@@ -171,7 +178,7 @@ export function VideosFeed({
               itemRefs.current[index] = el;
             }}
             data-index={index}
-            className="snap-start"
+            className="snap-start md:py-1"
             style={{ height: 'calc(100dvh - 56px)', scrollSnapAlign: 'start' }}
           >
             <VideoItem
@@ -184,12 +191,15 @@ export function VideosFeed({
           </div>
         ))}
 
+        {/* End of feed */}
         {page >= pages && listings.length > 0 && (
-          <div className="flex flex-col items-center justify-center py-12 bg-slate-950 text-center px-6">
-            <p className="text-slate-400 text-sm font-semibold">You&rsquo;ve seen all property videos</p>
+          <div className="flex flex-col items-center justify-center bg-background py-12 text-center px-6">
+            <p className="text-muted-foreground text-sm font-semibold">
+              You&rsquo;ve seen all property videos
+            </p>
             <Link
               href="/hostels"
-              className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 hover:border-slate-500 hover:text-white transition-colors"
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
             >
               Explore all listings
             </Link>
@@ -197,10 +207,11 @@ export function VideosFeed({
         )}
       </div>
 
+      {/* Loading indicator */}
       {isLoadingMore && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-full bg-black/60 px-3 py-1.5 backdrop-blur-sm">
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-          <span className="text-xs text-white font-medium">Loading more…</span>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-full bg-card/90 px-3.5 py-2 backdrop-blur-lg border border-border shadow-lg">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+          <span className="text-xs text-foreground font-medium">Loading more…</span>
         </div>
       )}
     </div>

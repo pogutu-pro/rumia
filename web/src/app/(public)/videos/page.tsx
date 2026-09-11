@@ -21,7 +21,7 @@ export default async function VideosPage() {
   try {
     const res = await listingsApi.getFeedServer({
       has_video: true,
-      limit: 20,
+      limit: 10,
     });
     initialListings = res.items;
     initialPage = res.page;
@@ -31,11 +31,20 @@ export default async function VideosPage() {
   }
 
   return (
-    <VideosFeed
-      initialListings={initialListings}
-      initialPage={initialPage}
-      initialPages={initialPages}
-      initialError={initialError}
-    />
+    <>
+      {/* Preconnect to YouTube for faster iframe + thumbnail loads */}
+      <link rel="preconnect" href="https://www.youtube.com" />
+      <link rel="preconnect" href="https://i.ytimg.com" />
+      <link rel="preconnect" href="https://img.youtube.com" />
+      <link rel="dns-prefetch" href="https://www.youtube.com" />
+      <link rel="dns-prefetch" href="https://i.ytimg.com" />
+
+      <VideosFeed
+        initialListings={initialListings}
+        initialPage={initialPage}
+        initialPages={initialPages}
+        initialError={initialError}
+      />
+    </>
   );
 }
