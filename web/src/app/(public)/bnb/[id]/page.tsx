@@ -286,10 +286,13 @@ export default async function BnbDetailPage({ params }: PageProps) {
                           Hosted by {agent.name}
                         </Link>
                       ) : (
-                        <p className="truncate font-bold leading-tight text-slate-900">Hosted by {agent.name}</p>
+                        <p className="truncate font-bold leading-tight text-slate-900">
+                          Hosted by {agent.name}
+                        </p>
                       )}
                       <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-slate-500">
-                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Rumia host
+                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />{' '}
+                        Rumia host
                       </span>
                     </div>
                   </div>
@@ -522,7 +525,6 @@ export default async function BnbDetailPage({ params }: PageProps) {
                 <hr className="border-slate-100" />
               </>
             )}
-
           </div>
 
           {/* Sidebar */}

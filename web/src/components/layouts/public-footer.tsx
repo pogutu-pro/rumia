@@ -5,14 +5,21 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { FaInstagram, FaTiktok, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6';
+import {
+  FaInstagram,
+  FaTiktok,
+  FaWhatsapp,
+  FaLinkedinIn,
+} from 'react-icons/fa6';
 import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
 
 interface FooterProps {
   whatsappNumber?: string;
 }
 
-export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps) {
+export const Footer = React.memo(function Footer({
+  whatsappNumber,
+}: FooterProps) {
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
   const isBnbPage = pathname === '/bnb' || pathname.startsWith('/bnb/');
@@ -48,7 +55,9 @@ export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps
                   sizes="40px"
                 />
               </div>
-              <span className="font-black text-2xl text-white tracking-tight">RUMIA</span>
+              <span className="font-black text-2xl text-white tracking-tight">
+                RUMIA
+              </span>
             </Link>
             <p className="text-sm text-slate-500 font-medium text-center md:text-left">
               {isBnbPage
@@ -59,10 +68,16 @@ export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps
 
           {/* Quick Links */}
           <div className="flex justify-center gap-8 text-sm font-bold">
-            <Link href={isBnbPage ? '/bnb' : '/hostels'} className="hover:text-white transition-colors">
+            <Link
+              href={isBnbPage ? '/bnb' : '/hostels'}
+              className="hover:text-white transition-colors"
+            >
               {isBnbPage ? 'Browse RumiaBnB' : 'Browse Hostels'}
             </Link>
-            <Link href="/auth/login" className="hover:text-white transition-colors">
+            <Link
+              href="/auth/login"
+              className="hover:text-white transition-colors"
+            >
               Login
             </Link>
           </div>
@@ -70,9 +85,21 @@ export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps
           {/* Social Links */}
           <div className="flex justify-center md:justify-end gap-4">
             {[
-              { href: 'https://www.instagram.com/rumia_kenya', icon: <FaInstagram className="h-5 w-5" />, label: 'Instagram' },
-              { href: 'https://www.tiktok.com/@rumia_kenya', icon: <FaTiktok className="h-5 w-5" />, label: 'TikTok' },
-              { href: 'https://www.linkedin.com/company/127854119', icon: <FaLinkedinIn className="h-5 w-5" />, label: 'LinkedIn' },
+              {
+                href: 'https://www.instagram.com/rumia_kenya',
+                icon: <FaInstagram className="h-5 w-5" />,
+                label: 'Instagram',
+              },
+              {
+                href: 'https://www.tiktok.com/@rumia_kenya',
+                icon: <FaTiktok className="h-5 w-5" />,
+                label: 'TikTok',
+              },
+              {
+                href: 'https://www.linkedin.com/company/127854119',
+                icon: <FaLinkedinIn className="h-5 w-5" />,
+                label: 'LinkedIn',
+              },
             ].map((social, idx) => (
               <a
                 key={idx}
@@ -95,7 +122,11 @@ export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps
               onClick={handleClick}
               className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/30 hover:text-emerald-400 transition-all duration-300"
             >
-              {isGating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FaWhatsapp className="h-5 w-5" />}
+              {isGating ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <FaWhatsapp className="h-5 w-5" />
+              )}
             </a>
           </div>
         </div>
@@ -117,4 +148,3 @@ export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps
     </footer>
   );
 });
-

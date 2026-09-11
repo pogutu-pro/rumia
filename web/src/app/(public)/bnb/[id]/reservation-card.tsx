@@ -45,34 +45,51 @@ export function ReservationCard({
 
   function reserve() {
     if (!hasPhone) return;
-    const dates = checkIn && checkOut
-      ? ` I would like to check in on ${checkIn} and check out on ${checkOut}.`
-      : '';
+    const dates =
+      checkIn && checkOut
+        ? ` I would like to check in on ${checkIn} and check out on ${checkOut}.`
+        : '';
     const message = [
       `Hi, I found ${listingTitle} on RumiaBnB${location ? ` in ${location}` : ''}.`,
       `I would like to ask about reserving it.${dates}`,
       `The listed price is ${formatCurrency(price)} ${priceUnit}. Is it available?`,
     ].join(' ');
-    window.open(buildWhatsAppUrl(hostPhone, message), '_blank', 'noopener,noreferrer');
+    window.open(
+      buildWhatsAppUrl(hostPhone, message),
+      '_blank',
+      'noopener,noreferrer',
+    );
   }
 
   return (
-    <div className={compact ? 'space-y-3' : 'rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.08)]'}>
+    <div
+      className={
+        compact
+          ? 'space-y-3'
+          : 'rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.08)]'
+      }
+    >
       {!compact && (
         <div className="flex items-baseline justify-between gap-3">
           <div>
             <span className="text-3xl font-black tracking-tight text-slate-950">
               {formatCurrency(price)}
             </span>
-            <span className="ml-1.5 text-sm font-semibold text-slate-500">{priceUnit}</span>
+            <span className="ml-1.5 text-sm font-semibold text-slate-500">
+              {priceUnit}
+            </span>
           </div>
-          <span className="text-xs font-medium text-slate-500">Ask before booking</span>
+          <span className="text-xs font-medium text-slate-500">
+            Ask before booking
+          </span>
         </div>
       )}
 
       <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-slate-300">
         <label className="border-r border-slate-300 px-3 py-2.5">
-          <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Check-in</span>
+          <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            Check-in
+          </span>
           <span className="mt-1 flex items-center gap-1.5">
             <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
             <input
@@ -87,7 +104,9 @@ export function ReservationCard({
           </span>
         </label>
         <label className="px-3 py-2.5">
-          <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Check-out</span>
+          <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            Check-out
+          </span>
           <span className="mt-1 flex items-center gap-1.5">
             <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
             <input
@@ -114,11 +133,19 @@ export function ReservationCard({
 
       {!compact && (
         <div className="space-y-1.5 text-xs text-slate-500">
-          {minStayNights && minStayNights > 1 && <p>Minimum stay: {minStayNights} nights</p>}
+          {minStayNights && minStayNights > 1 && (
+            <p>Minimum stay: {minStayNights} nights</p>
+          )}
           {availableFrom && <p>Available from {availableFrom}</p>}
-          {cleaningFee && cleaningFee > 0 && <p>Cleaning fee: {formatCurrency(cleaningFee)}</p>}
-          {securityDeposit && securityDeposit > 0 && <p>Security deposit: {formatCurrency(securityDeposit)}</p>}
-          {extraGuestFee && extraGuestFee > 0 && <p>Extra guest fee: {formatCurrency(extraGuestFee)}</p>}
+          {cleaningFee && cleaningFee > 0 && (
+            <p>Cleaning fee: {formatCurrency(cleaningFee)}</p>
+          )}
+          {securityDeposit && securityDeposit > 0 && (
+            <p>Security deposit: {formatCurrency(securityDeposit)}</p>
+          )}
+          {extraGuestFee && extraGuestFee > 0 && (
+            <p>Extra guest fee: {formatCurrency(extraGuestFee)}</p>
+          )}
         </div>
       )}
     </div>

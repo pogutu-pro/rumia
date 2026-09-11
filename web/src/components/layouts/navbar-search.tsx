@@ -97,7 +97,11 @@ function IdleSearchPill({
   onActivate,
   triggerRef,
 }: IdleSearchPillProps) {
-  const displayQuery = query ? (query.length > 24 ? query.slice(0, 24) + '…' : query) : null;
+  const displayQuery = query
+    ? query.length > 24
+      ? query.slice(0, 24) + '…'
+      : query
+    : null;
 
   return (
     <button
@@ -115,7 +119,9 @@ function IdleSearchPill({
 
       <span className="min-w-0 flex-1 text-left">
         {displayQuery ? (
-          <span className="truncate font-medium text-slate-900">{displayQuery}</span>
+          <span className="truncate font-medium text-slate-900">
+            {displayQuery}
+          </span>
         ) : (
           <span className="text-slate-400">
             {isBnbPage ? 'Search stays, areas…' : 'Search hostels, areas…'}
@@ -199,11 +205,15 @@ export function NavbarSearch() {
   React.useEffect(() => {
     let active = true;
     async function checkAuth() {
-      const { data: { user } } = await createClient().auth.getUser();
+      const {
+        data: { user },
+      } = await createClient().auth.getUser();
       if (active && user) setIsLoggedIn(true);
     }
     void checkAuth();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   // ── Sync query from URL ─────────────────────────────────────────────────────
@@ -223,7 +233,10 @@ export function NavbarSearch() {
   React.useEffect(() => {
     if (!isOpen) return;
     const handleMouseDown = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -300,7 +313,9 @@ export function NavbarSearch() {
       .finally(() => {
         if (active) setIsLoading(false);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [debouncedQuery, isHostelsPage]);
 
   // ── Parsed NLP tokens ───────────────────────────────────────────────────────
@@ -308,10 +323,13 @@ export function NavbarSearch() {
     if (!query.trim()) return [];
     const parsed = parseQuery(query);
     const tags: string[] = [];
-    if (parsed.gender) tags.push(parsed.gender === 'female' ? 'Ladies' : 'Gents');
+    if (parsed.gender)
+      tags.push(parsed.gender === 'female' ? 'Ladies' : 'Gents');
     if (parsed.roomType) tags.push(parsed.roomType.replace(/_/g, ' '));
-    if (parsed.maxPrice) tags.push(`Under KES ${parsed.maxPrice.toLocaleString()}`);
-    if (parsed.minPrice) tags.push(`From KES ${parsed.minPrice.toLocaleString()}`);
+    if (parsed.maxPrice)
+      tags.push(`Under KES ${parsed.maxPrice.toLocaleString()}`);
+    if (parsed.minPrice)
+      tags.push(`From KES ${parsed.minPrice.toLocaleString()}`);
     if (parsed.area) tags.push(parsed.area);
     if (parsed.amenities.length > 0) tags.push(...parsed.amenities);
     return tags;
@@ -319,7 +337,14 @@ export function NavbarSearch() {
 
   // ── Derived values ──────────────────────────────────────────────────────────
   const activeFilterCount = countActiveFilterGroups({
-    genders, amenities, roomTypes, minPrice, maxPrice, zones, maxDistance, sortByNearest,
+    genders,
+    amenities,
+    roomTypes,
+    minPrice,
+    maxPrice,
+    zones,
+    maxDistance,
+    sortByNearest,
   });
   const priceFilterActive = minPrice !== null || maxPrice !== null;
   const shouldShowAutocomplete =
@@ -391,9 +416,7 @@ export function NavbarSearch() {
   const handleQueryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev < results.length - 1 ? prev + 1 : prev,
-      );
+      setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((prev) => (prev > -1 ? prev - 1 : -1));
@@ -441,8 +464,14 @@ export function NavbarSearch() {
   };
 
   const currentFilters: FilterState = {
-    genders, amenities, roomTypes, minPrice, maxPrice,
-    zones, maxDistance, sortByNearest,
+    genders,
+    amenities,
+    roomTypes,
+    minPrice,
+    maxPrice,
+    zones,
+    maxDistance,
+    sortByNearest,
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -512,7 +541,11 @@ export function NavbarSearch() {
                     autoComplete="off"
                     role="combobox"
                     aria-autocomplete="list"
-                    aria-controls={shouldShowAutocomplete ? 'navbar-autocomplete-list' : undefined}
+                    aria-controls={
+                      shouldShowAutocomplete
+                        ? 'navbar-autocomplete-list'
+                        : undefined
+                    }
                     aria-expanded={shouldShowAutocomplete}
                     style={{ touchAction: 'manipulation' }}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-[15px] font-medium text-slate-900 transition-all placeholder:text-slate-500 focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
@@ -614,11 +647,19 @@ export function NavbarSearch() {
                   <div className="mt-3">
                     <ActiveFilterChips
                       filters={currentFilters}
-                      onRemoveGender={(v) => setGenders(genders.filter((g) => g !== v))}
-                      onRemoveAmenity={(v) => setAmenities(amenities.filter((a) => a !== v))}
-                      onRemoveRoomType={(v) => setRoomTypes(roomTypes.filter((r) => r !== v))}
+                      onRemoveGender={(v) =>
+                        setGenders(genders.filter((g) => g !== v))
+                      }
+                      onRemoveAmenity={(v) =>
+                        setAmenities(amenities.filter((a) => a !== v))
+                      }
+                      onRemoveRoomType={(v) =>
+                        setRoomTypes(roomTypes.filter((r) => r !== v))
+                      }
                       onRemovePrice={() => setPriceRange(null, null)}
-                      onRemoveZone={(v) => setZones(zones.filter((z) => z !== v))}
+                      onRemoveZone={(v) =>
+                        setZones(zones.filter((z) => z !== v))
+                      }
                       onRemoveMaxDistance={() => setMaxDistance(null)}
                       onRemoveSortByNearest={() => setSortByNearest(false)}
                       onClearAll={reset}
@@ -672,7 +713,9 @@ export function NavbarSearch() {
                                     className="object-cover"
                                     sizes="44px"
                                     placeholder="blur"
-                                    blurDataURL={images[0]?.blur_data_url || FALLBACK_BLUR}
+                                    blurDataURL={
+                                      images[0]?.blur_data_url || FALLBACK_BLUR
+                                    }
                                   />
                                 ) : (
                                   <div className="flex h-full w-full items-center justify-center text-slate-400">
@@ -709,7 +752,11 @@ export function NavbarSearch() {
                         );
                       })
                     ) : !isLoading ? (
-                      <li role="option" aria-selected={false} className="px-4 py-6 text-center">
+                      <li
+                        role="option"
+                        aria-selected={false}
+                        className="px-4 py-6 text-center"
+                      >
                         <p className="text-xs font-semibold text-slate-600">
                           {isBnbPage
                             ? `No stays found matching "${query}"`
