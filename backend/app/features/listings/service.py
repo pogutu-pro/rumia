@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ForbiddenException, NotFoundException
@@ -113,11 +114,16 @@ class ListingService:
 
     @staticmethod
     async def get_listing_by_id_or_slug(db: AsyncSession, id_or_slug: str) -> Optional[Listing]:
+        stmt = select(Listing).options(
+            selectinload(Listing.agent),
+            selectinload(Listing.images),
+            selectinload(Listing.room_types),
+        )
         try:
             parsed_id = uuid.UUID(id_or_slug)
-            stmt = select(Listing).where((Listing.id == str(parsed_id)) | (Listing.slug == id_or_slug))
+            stmt = stmt.where((Listing.id == str(parsed_id)) | (Listing.slug == id_or_slug))
         except ValueError:
-            stmt = select(Listing).where(Listing.slug == id_or_slug)
+            stmt = stmt.where(Listing.slug == id_or_slug)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
 

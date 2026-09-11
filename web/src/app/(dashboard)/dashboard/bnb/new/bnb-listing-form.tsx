@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { createBnbListingAction, updateBnbListingAction } from '@/app/actions/bnb';
 import { cn } from '@/lib/utils/cn';
 import { processAndUploadImage } from '@/lib/r2/upload';
 import { getAmenityMeta } from '@/lib/utils/amenity-icons';
@@ -368,7 +369,6 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp }: 
     if (!price || Number(price) <= 0) { toast.error('Base price is required'); setStep(3); return; }
     setIsSaving(true);
     try {
-      const { createBnbListingAction, updateBnbListingAction } = await import('@/app/actions/bnb');
       const payload = {
         title: title.trim(),
         description: description.trim(),

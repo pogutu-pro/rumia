@@ -54,7 +54,8 @@ class BnbService:
         listing = await ListingService.create_listing(db=db, user=user, data=listing_create)
 
         bnb = await BnbService._upsert_bnb_details(db, listing.id, data.bnb)
-        return listing, bnb
+        reloaded = await ListingService.get_listing_by_id_or_slug(db, listing.id)
+        return reloaded or listing, bnb
 
     @staticmethod
     async def update_bnb_listing(
@@ -103,7 +104,8 @@ class BnbService:
             )
 
         bnb = await BnbService._upsert_bnb_details(db, listing_id, data)
-        return listing, bnb
+        reloaded = await ListingService.get_listing_by_id_or_slug(db, listing_id)
+        return reloaded or listing, bnb
 
     @staticmethod
     async def get_bnb_listing(
