@@ -22,6 +22,7 @@ class BnbService:
         user: AuthenticatedUser,
         data: BnbListingCreate,
     ) -> Tuple[Listing, BnbDetails]:
+        agent = await ListingService.resolve_agent_for_user(db, user)
         listing_create = ListingCreate(
             title=data.title,
             description=data.description,
@@ -33,6 +34,7 @@ class BnbService:
             specific_location=data.specific_location,
             latitude=data.latitude,
             longitude=data.longitude,
+            campus_id=agent.campus_id or user.managed_campus_id,
             amenities=data.amenities,
             is_active=data.is_active,
             images=[
