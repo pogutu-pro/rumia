@@ -20,6 +20,10 @@ for f in backend/.env web/.env.production; do
 done
 [ "$missing" -eq 1 ] && exit 1
 
+# Prevent concurrent deployment races if manual SSH and GitHub Actions run simultaneously
+exec 200>/tmp/rumia_deploy.lock
+flock -x 200
+
 echo "=== [1/5] Pulling latest code changes from repository ==="
 # This host is provisioned by CI, so the committed tree is the source of truth.
 # - Env files (backend/.env, web/.env.production) are gitignored and survive reset.
@@ -37,7 +41,7 @@ echo "=== [2/5] Building production Docker container images ==="
 docker compose build --pull
 
 echo "=== [3/5] Starting containers in detached mode ==="
-docker compose up -d
+docker compose up -d --remove-orphans
 
 echo "=== [4/5] Running container health checks ==="
 sleep 10
