@@ -1,9 +1,11 @@
-import type { ComponentType } from 'react';
+import React, { type ComponentType, useState } from 'react';
 import { Tabs } from 'expo-router';
-import type { ColorValue } from 'react-native';
+import { Image } from 'expo-image';
+import { Text, View, type ColorValue } from 'react-native';
 import { Home, Search, ShieldCheck, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useThemeColors } from '../../lib/theme';
+import { useThemeColors, palette } from '../../lib/theme';
+import { useSessionStore } from '../../stores/session';
 
 type IconComponent = ComponentType<{
   size?: number;
@@ -28,11 +30,19 @@ const TABS: TabConfig[] = [
   { name: 'index', label: 'Home', icon: Home },
   { name: 'explore', label: 'Search', icon: Search },
   { name: 'verify', label: 'Verify', icon: ShieldCheck },
-  { name: 'profile', label: 'Account', icon: User },
+  { name: 'profile', label: 'Account', icon: User }
 ];
 
 function renderTabIcon(Icon: IconComponent) {
-  return function TabIcon({ color, focused, size }: { color: ColorValue; focused: boolean; size: number }) {
+  return function TabIcon({
+    color,
+    focused,
+    size
+  }: {
+    color: ColorValue;
+    focused: boolean;
+    size: number;
+  }) {
     return (
       <Icon
         size={size}
@@ -42,6 +52,80 @@ function renderTabIcon(Icon: IconComponent) {
       />
     );
   };
+}
+
+function getInitials(name?: string, email?: string) {
+  const source = (name || email || '').trim();
+  if (!source) {
+    return 'R';
+  }
+
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('')
+      .slice(0, 2);
+  }
+
+  return source.slice(0, 2).toUpperCase();
+}
+
+function AccountTabIcon({
+  color,
+  focused,
+  size
+}: {
+  color: ColorValue;
+  focused: boolean;
+  size: number;
+}) {
+  const user = useSessionStore((state) => state.user);
+  const [imageFailed, setImageFailed] = useState(false);
+  const avatarUri = user?.avatar_url && !imageFailed ? user.avatar_url : null;
+  const initials = getInitials(user?.full_name, user?.email);
+
+  return (
+    <View
+      style={{
+        width: size + 8,
+        height: size + 8,
+        borderRadius: 999,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: avatarUri
+          ? palette.slate[100]
+          : focused
+            ? palette.emerald[100]
+            : palette.slate[100],
+        borderWidth: 1,
+        borderColor: focused ? (color as string) : palette.slate[200]
+      }}
+    >
+      {avatarUri ? (
+        <Image
+          source={{ uri: avatarUri }}
+          style={{ width: '100%', height: '100%' }}
+          contentFit="cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : initials ? (
+        <Text
+          style={{
+            color: focused ? (color as string) : palette.slate[700],
+            fontSize: Math.max(size * 0.38, 9),
+            fontWeight: '700'
+          }}
+        >
+          {initials}
+        </Text>
+      ) : (
+        <User size={size * 0.66} color={color as string} />
+      )}
+    </View>
+  );
 }
 
 export default function TabLayout() {
@@ -62,9 +146,9 @@ export default function TabLayout() {
           borderTopWidth: 1,
           height: 56 + insets.bottom,
           paddingBottom: insets.bottom,
-          paddingTop: 6,
+          paddingTop: 6
         },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' }
       }}
     >
       {TABS.map(({ name, label, icon }) => (
@@ -74,7 +158,12 @@ export default function TabLayout() {
           options={{
             title: label,
             tabBarAccessibilityLabel: label,
-            tabBarIcon: renderTabIcon(icon),
+            tabBarIcon: ({ color, focused, size }) =>
+              name === 'profile' ? (
+                <AccountTabIcon color={color} focused={focused} size={size} />
+              ) : (
+                renderTabIcon(icon)({ color, focused, size })
+              )
           }}
         />
       ))}

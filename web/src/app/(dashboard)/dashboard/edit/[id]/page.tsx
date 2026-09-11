@@ -41,7 +41,7 @@ export default async function EditListingPage({
   const { data: listing, error } = await supabase
     .from('listings')
     .select(
-      `id, title, description, price, location, youtube_id, is_youtube_shorts, room_type,
+      `id, title, description, property_type, price, location, youtube_id, is_youtube_shorts, room_type,
       amenities, bathroom_type, distance_to_campus,
       security_type, water_included, electricity_included, wifi_included, hot_water_included, cooking_gas_included,
       latitude, longitude, gender, proximity_description, is_active,

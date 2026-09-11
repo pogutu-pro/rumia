@@ -54,14 +54,31 @@ export function ListingCard({
   compareSelected,
   onCompare,
   style,
-  imageWidth,
+  imageWidth
 }: ListingCardProps) {
   if (variant === 'popular') {
     return (
-      <PopularCardImage listing={listing} onPress={onPress} rank={rank} rightAction={rightAction} style={style} imageWidth={imageWidth} />
+      <PopularCardImage
+        listing={listing}
+        onPress={onPress}
+        rank={rank}
+        rightAction={rightAction}
+        style={style}
+        imageWidth={imageWidth}
+      />
     );
   }
-  return <SearchCard listing={listing} onPress={onPress} rightAction={rightAction} compareSelected={compareSelected} onCompare={onCompare} style={style} imageWidth={imageWidth} />;
+  return (
+    <SearchCard
+      listing={listing}
+      onPress={onPress}
+      rightAction={rightAction}
+      compareSelected={compareSelected}
+      onCompare={onCompare}
+      style={style}
+      imageWidth={imageWidth}
+    />
+  );
 }
 
 /** Web search-result card (hostels-search.tsx). */
@@ -72,7 +89,7 @@ function SearchCard({
   compareSelected = false,
   onCompare,
   style,
-  imageWidth,
+  imageWidth
 }: Omit<ListingCardProps, 'variant' | 'rank'>) {
   const location = listing.specific_location
     ? `${listing.area || 'Hostel Area'} · ${listing.specific_location}`
@@ -98,7 +115,12 @@ function SearchCard({
               </View>
             ) : null}
             {showGender && listing.gender ? (
-              <View style={[styles.genderBadge, listing.gender === 'female' ? styles.femaleBadge : styles.maleBadge]}>
+              <View
+                style={[
+                  styles.genderBadge,
+                  listing.gender === 'female' ? styles.femaleBadge : styles.maleBadge
+                ]}
+              >
                 <Text style={styles.genderBadgeText}>
                   {listing.gender === 'female' ? 'Ladies Only' : 'Gents Only'}
                 </Text>
@@ -146,7 +168,7 @@ function SearchCard({
                 style={({ pressed }) => [
                   styles.compareButton,
                   compareSelected && styles.compareButtonSelected,
-                  pressed && styles.pressed,
+                  pressed && styles.pressed
                 ]}
               >
                 {compareSelected ? (
@@ -157,7 +179,7 @@ function SearchCard({
                 <Text
                   style={[
                     styles.compareButtonText,
-                    compareSelected && styles.compareButtonTextSelected,
+                    compareSelected && styles.compareButtonTextSelected
                   ]}
                 >
                   {compareSelected ? 'Added' : 'Compare'}
@@ -184,7 +206,7 @@ function PopularCardImage({
   style,
   imageWidth,
   compareSelected = false,
-  onCompare,
+  onCompare
 }: ListingCardProps) {
   return (
     <Pressable
@@ -207,7 +229,9 @@ function PopularCardImage({
               <Text style={styles.viewsText}>{(listing.views ?? 0).toLocaleString()}</Text>
             </View>
             <View style={styles.emeraldPricePill}>
-              <Text style={styles.emeraldPriceText}>{`KES ${listing.price.toLocaleString()}/mo`}</Text>
+              <Text
+                style={styles.emeraldPriceText}
+              >{`KES ${listing.price.toLocaleString()}/mo`}</Text>
             </View>
           </>
         }
@@ -216,18 +240,12 @@ function PopularCardImage({
       <View style={styles.body}>
         <View style={styles.popularLocationRow}>
           <MapPin size={12} color="#94a3b8" />
-          <Text style={styles.popularLocationText} numberOfLines={1}>
-            {listing.location}
-          </Text>
+          <Text style={styles.popularLocationText}>{listing.location}</Text>
         </View>
 
-        <Text style={styles.cardTitle} numberOfLines={1}>
-          {listing.title}
-        </Text>
+        <Text style={styles.cardTitle}>{listing.title}</Text>
 
-        <Text style={styles.popularDescription} numberOfLines={2}>
-          {listing.description}
-        </Text>
+        <Text style={styles.popularDescription}>{listing.description}</Text>
 
         <View style={styles.popularFooter}>
           <Text style={styles.footerMeta}>Agent: {listing.agent?.name ?? 'Rumia Agent'}</Text>
@@ -241,7 +259,7 @@ function PopularCardImage({
                   style={({ pressed }) => [
                     styles.compareButton,
                     compareSelected && styles.compareButtonSelected,
-                    pressed && styles.pressed,
+                    pressed && styles.pressed
                   ]}
                 >
                   {compareSelected ? (
@@ -252,7 +270,7 @@ function PopularCardImage({
                   <Text
                     style={[
                       styles.compareButtonText,
-                      compareSelected && styles.compareButtonTextSelected,
+                      compareSelected && styles.compareButtonTextSelected
                     ]}
                   >
                     {compareSelected ? 'Added' : 'Compare'}
@@ -270,7 +288,7 @@ function PopularCardImage({
 function ListingImage({
   listing,
   imageWidth,
-  overlay,
+  overlay
 }: {
   listing: Listing;
   imageWidth?: number;
@@ -296,7 +314,7 @@ const styles = StyleSheet.create({
     borderRadius: radii['2xl'],
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: '#f1f5f9'
   },
   popularCard: {
     backgroundColor: '#ffffff',
@@ -304,14 +322,20 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#f1f5f9',
-    width: 268,
+    width: 268
   },
   pressed: { opacity: 0.92 },
   imageWrap: { aspectRatio: FALLBACK_ASPECT, backgroundColor: '#f1f5f9', position: 'relative' },
   image: { width: '100%', height: '100%' },
   body: { padding: 16, flex: 1 },
-  cardTitle: { color: '#0f172a', fontSize: 16, fontWeight: '700' },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4, marginBottom: 6 },
+  cardTitle: { color: '#0f172a', fontSize: 16, fontWeight: '700', lineHeight: 22 },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+    marginBottom: 6
+  },
   locationText: { color: '#64748b', fontSize: 12, fontWeight: '600', flex: 1 },
   cardDescription: { color: '#64748b', fontSize: 12, lineHeight: 17, marginBottom: 12 },
   divider: { borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 8, marginBottom: 8 },
@@ -323,7 +347,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 8
   },
   footerMeta: { color: '#94a3b8', fontSize: 12, fontWeight: '500', flex: 1 },
   footerAction: { flexDirection: 'row', alignItems: 'center' },
@@ -337,11 +361,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderWidth: 2,
     borderColor: '#0f172a',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff'
   },
   compareButtonSelected: {
     backgroundColor: '#059669',
-    borderColor: '#059669',
+    borderColor: '#059669'
   },
   compareButtonText: { color: '#0f172a', fontSize: 12, fontWeight: '700' },
   compareButtonTextSelected: { color: '#ffffff' },
@@ -355,7 +379,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15,23,42,0.7)',
     borderRadius: 999,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 4
   },
   distanceBadgeText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
   genderBadge: {
@@ -364,7 +388,7 @@ const styles = StyleSheet.create({
     right: 12,
     borderRadius: 999,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 4
   },
   femaleBadge: { backgroundColor: 'rgba(219,39,119,0.9)' },
   maleBadge: { backgroundColor: 'rgba(37,99,235,0.9)' },
@@ -383,7 +407,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 2
   },
   pricePillText: { color: '#0f172a', fontSize: 12, fontWeight: '700' },
   // Popular overlays
@@ -398,7 +422,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.2)'
   },
   rankText: { color: '#ffffff', fontSize: 12, fontWeight: '900' },
   viewsPill: {
@@ -411,7 +435,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 4
   },
   viewsText: { color: '#334155', fontSize: 12, fontWeight: '700' },
   emeraldPricePill: {
@@ -421,7 +445,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(5,150,105,0.92)',
     borderRadius: 8,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 4
   },
   emeraldPriceText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
   popularLocationRow: {
@@ -429,18 +453,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginBottom: 4,
-    marginTop: 2,
+    marginTop: 2
   },
-  popularLocationText: { color: '#94a3b8', fontSize: 11, fontWeight: '600', flex: 1 },
-  popularDescription: { color: '#64748b', fontSize: 13, lineHeight: 18, marginTop: 6, marginBottom: 8, flex: 1 },
+  popularLocationText: {
+    color: '#94a3b8',
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: '600',
+    flex: 1
+  },
+  popularDescription: {
+    color: '#64748b',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 6,
+    marginBottom: 8,
+    flex: 1
+  },
   popularFooter: {
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
     paddingTop: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+    justifyContent: 'space-between'
+  }
 });
 
 // Re-export so SaveButton usages can reference the same heart colour scheme.

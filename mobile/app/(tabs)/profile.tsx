@@ -7,13 +7,29 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
-  TextInput,
+  TextInput
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { User, Phone, Mail, GraduationCap, Check, LogOut, Loader2, Lock, CheckCircle2, MapPin, Heart, ShieldCheck, KeyRound, Bell, ChevronRight } from 'lucide-react-native';
+import {
+  User,
+  Phone,
+  Mail,
+  GraduationCap,
+  Check,
+  LogOut,
+  Loader2,
+  Lock,
+  CheckCircle2,
+  MapPin,
+  Heart,
+  ShieldCheck,
+  KeyRound,
+  Bell,
+  ChevronRight
+} from 'lucide-react-native';
 import { apiFetch } from '../../lib/api/client';
 import type { Campus, Profile, ProfileUpdate } from '../../lib/api/schema';
 import { fetchCampuses } from '../../lib/api/campuses';
@@ -22,27 +38,50 @@ import { useCampusStore } from '../../stores/campus';
 import { useAuthActions } from '../../features/auth/use-auth';
 import { palette, radii } from '../../lib/theme';
 
+function getInitials(name?: string, email?: string) {
+  const source = (name || email || '').trim();
+  if (!source) {
+    return 'R';
+  }
+
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('')
+      .slice(0, 2);
+  }
+
+  return source.slice(0, 2).toUpperCase();
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { user, isAuthenticated, setUser } = useSessionStore();
-  const { selectedCampusId, selectedCampusName, selectedCampusSlug, setSelectedCampus } = useCampusStore();
+  const { selectedCampusId, selectedCampusName, selectedCampusSlug, setSelectedCampus } =
+    useCampusStore();
   const { signOut } = useAuthActions();
   const [profileDraft, setProfileDraft] = React.useState<{ fullName?: string; phone?: string }>({});
 
   const { data: profile } = useQuery<Profile>({
     queryKey: ['my-profile'],
     queryFn: () => apiFetch('/profiles/me'),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated
   });
 
   const fullName = profileDraft.fullName ?? profile?.full_name ?? user?.full_name ?? '';
   const phone = profileDraft.phone ?? profile?.phone ?? user?.phone ?? '';
+  const [avatarError, setAvatarError] = React.useState(false);
+  const displayName =
+    profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Guest Student';
+  const avatarInitials = getInitials(displayName, user?.email);
 
   const { data: campuses, isLoading: loadingCampuses } = useQuery({
     queryKey: ['campuses'],
-    queryFn: fetchCampuses,
+    queryFn: fetchCampuses
   });
 
   const applyProfileToSession = (updated: Profile) => {
@@ -59,7 +98,7 @@ export default function ProfileScreen() {
       avatar_url: updated.avatar_url ?? undefined,
       home_campus_id: updated.home_campus_id ?? undefined,
       home_campus_name: updated.home_campus_name ?? undefined,
-      home_campus_confirmed: updated.home_campus_confirmed,
+      home_campus_confirmed: updated.home_campus_confirmed
     });
   };
 
@@ -67,12 +106,12 @@ export default function ProfileScreen() {
     mutationFn: () => {
       const payload: ProfileUpdate = {
         full_name: fullName.trim() || null,
-        phone: phone.trim() || null,
+        phone: phone.trim() || null
       };
 
       return apiFetch<Profile>('/profiles/me', {
         method: 'PATCH',
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
     },
     onSuccess: (updated) => {
@@ -80,14 +119,14 @@ export default function ProfileScreen() {
       applyProfileToSession(updated);
       setProfileDraft({});
       Alert.alert('Profile updated', 'Your profile details have been saved.');
-    },
+    }
   });
 
   const campusMutation = useMutation({
     mutationFn: (campus: Campus) =>
       apiFetch('/profiles/me/campus', {
         method: 'POST',
-        body: JSON.stringify({ campus_id: campus.id, campus_name: campus.name }),
+        body: JSON.stringify({ campus_id: campus.id, campus_name: campus.name })
       }),
     onSuccess: (updated) => {
       queryClient.setQueryData(['my-profile'], updated);
@@ -95,7 +134,7 @@ export default function ProfileScreen() {
     },
     onError: () => {
       Alert.alert('Campus saved locally', 'Could not sync this campus to your account right now.');
-    },
+    }
   });
 
   const handleSelectCampus = (campus: Campus) => {
@@ -107,35 +146,47 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-    Alert.alert('Leave Rumia?', 'You will need to sign in again to access your wishlist and tour bookings.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log Out',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          Alert.alert('Signed out', 'You have been signed out successfully.');
-        },
-      },
-    ]);
+    Alert.alert(
+      'Leave Rumia?',
+      'You will need to sign in again to access your wishlist and tour bookings.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            Alert.alert('Signed out', 'You have been signed out successfully.');
+          }
+        }
+      ]
+    );
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+    >
       <Text style={styles.title}>Account Profile</Text>
       <Text style={styles.subtitle}>Manage your details and home university.</Text>
 
       {/* User Info Card */}
       <View style={styles.cardRow}>
         <View style={styles.avatar}>
-          {user?.avatar_url ? (
-            <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} contentFit="cover" />
+          {user?.avatar_url && !avatarError ? (
+            <Image
+              source={{ uri: user.avatar_url }}
+              style={styles.avatarImage}
+              contentFit="cover"
+              onError={() => setAvatarError(true)}
+            />
           ) : (
-            <User size={26} color={palette.slate[500]} />
+            <Text style={styles.avatarInitials}>{avatarInitials}</Text>
           )}
         </View>
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{profile?.full_name || user?.email?.split('@')[0] || 'Guest Student'}</Text>
+          <Text style={styles.userName}>{displayName}</Text>
           <Text style={styles.userEmail}>{user?.email || 'Not signed in'}</Text>
           {profile?.role ? (
             <View style={styles.roleBadge}>
@@ -170,7 +221,10 @@ export default function ProfileScreen() {
           <Text style={styles.shortcutLabel}>Find Me a Hostel</Text>
           <ChevronRight size={16} color={palette.slate[400]} />
         </Pressable>
-        <Pressable style={[styles.shortcutRow, styles.shortcutRowLast]} onPress={() => router.push('/notifications')}>
+        <Pressable
+          style={[styles.shortcutRow, styles.shortcutRowLast]}
+          onPress={() => router.push('/notifications')}
+        >
           <View style={styles.shortcutIcon}>
             <Bell size={16} color={palette.slate[500]} />
           </View>
@@ -183,7 +237,9 @@ export default function ProfileScreen() {
       {isAuthenticated ? (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Personal Information</Text>
-          <Text style={styles.cardSubtitle}>Update your contact details for hostel tour bookings.</Text>
+          <Text style={styles.cardSubtitle}>
+            Update your contact details for hostel tour bookings.
+          </Text>
 
           <Text style={styles.inputLabel}>Full Name</Text>
           <View style={styles.inputWrap}>
@@ -191,7 +247,9 @@ export default function ProfileScreen() {
             <TextInput
               style={styles.input}
               value={fullName}
-              onChangeText={(value) => setProfileDraft((current) => ({ ...current, fullName: value }))}
+              onChangeText={(value) =>
+                setProfileDraft((current) => ({ ...current, fullName: value }))
+              }
               placeholder="John Doe"
               placeholderTextColor={palette.slate[400]}
             />
@@ -217,7 +275,10 @@ export default function ProfileScreen() {
           </View>
 
           <Pressable
-            style={({ pressed }) => [styles.saveButton, (pressed || profileMutation.isPending) && styles.buttonDisabled]}
+            style={({ pressed }) => [
+              styles.saveButton,
+              (pressed || profileMutation.isPending) && styles.buttonDisabled
+            ]}
             onPress={() => profileMutation.mutate()}
             disabled={profileMutation.isPending}
           >
@@ -234,7 +295,9 @@ export default function ProfileScreen() {
       ) : (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Personal Information</Text>
-          <Text style={styles.cardSubtitle}>Sign in to update your profile, build your wishlist and book tours.</Text>
+          <Text style={styles.cardSubtitle}>
+            Sign in to update your profile, build your wishlist and book tours.
+          </Text>
           <Pressable
             style={({ pressed }) => [styles.signInButton, pressed && styles.buttonDisabled]}
             onPress={() => router.push('/(auth)/login')}
@@ -248,7 +311,9 @@ export default function ProfileScreen() {
       {/* Home Campus */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Home Campus</Text>
-        <Text style={styles.cardSubtitle}>Your home university, used to tailor listings and tours.</Text>
+        <Text style={styles.cardSubtitle}>
+          Your home university, used to tailor listings and tours.
+        </Text>
 
         {loadingCampuses ? (
           <View style={styles.loadingRow}>
@@ -259,7 +324,11 @@ export default function ProfileScreen() {
             const selected = campus.id === selectedCampusId || campus.slug === selectedCampusSlug;
 
             return (
-              <Pressable key={campus.id} style={styles.settingRow} onPress={() => handleSelectCampus(campus)}>
+              <Pressable
+                key={campus.id}
+                style={styles.settingRow}
+                onPress={() => handleSelectCampus(campus)}
+              >
                 <View style={styles.rowLeft}>
                   {selected ? (
                     <CheckCircle2 size={20} color={palette.emerald[600]} />
@@ -267,7 +336,9 @@ export default function ProfileScreen() {
                     <GraduationCap size={20} color={palette.slate[400]} />
                   )}
                   <View>
-                    <Text style={[styles.rowLabel, selected && styles.rowLabelSelected]}>{campus.name}</Text>
+                    <Text style={[styles.rowLabel, selected && styles.rowLabelSelected]}>
+                      {campus.name}
+                    </Text>
                     <View style={styles.rowMetaRow}>
                       <MapPin size={12} color={palette.slate[400]} />
                       <Text style={styles.rowMeta}>{campus.city}</Text>
@@ -290,7 +361,9 @@ export default function ProfileScreen() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Account Session</Text>
         <Text style={styles.cardSubtitle}>
-          {isAuthenticated ? 'Sign out of your account on this device.' : 'Sign in to access your account.'}
+          {isAuthenticated
+            ? 'Sign out of your account on this device.'
+            : 'Sign in to access your account.'}
         </Text>
         {isAuthenticated ? (
           <Pressable
@@ -328,7 +401,7 @@ const styles = StyleSheet.create({
     borderColor: palette.slate[200],
     borderRadius: radii['2xl'],
     padding: 16,
-    marginTop: 6,
+    marginTop: 6
   },
   avatar: {
     width: 56,
@@ -339,9 +412,15 @@ const styles = StyleSheet.create({
     borderColor: palette.slate[200],
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   avatarImage: { width: '100%', height: '100%' },
+  avatarInitials: {
+    color: palette.slate[700],
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.5
+  },
   userInfo: { flex: 1 },
   userName: { color: palette.slate[900], fontSize: 17, fontWeight: '700' },
   userEmail: { color: palette.slate[500], fontSize: 13, marginTop: 2 },
@@ -353,7 +432,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 2,
     borderRadius: radii.full,
-    marginTop: 6,
+    marginTop: 6
   },
   roleText: { color: palette.emerald[700], fontSize: 10, fontWeight: '700', letterSpacing: 0.4 },
   card: {
@@ -361,7 +440,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.slate[200],
     borderRadius: radii['2xl'],
-    padding: 18,
+    padding: 18
   },
   cardTitle: { color: palette.slate[900], fontSize: 14, fontWeight: '700' },
   cardSubtitle: { color: palette.slate[500], fontSize: 12, marginTop: 3, marginBottom: 14 },
@@ -371,7 +450,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.slate[100],
+    borderBottomColor: palette.slate[100]
   },
   shortcutRowLast: { borderBottomWidth: 0, paddingBottom: 0 },
   shortcutIcon: {
@@ -380,7 +459,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: palette.slate[50],
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   shortcutLabel: { flex: 1, color: palette.slate[700], fontSize: 14, fontWeight: '600' },
   inputLabel: {
@@ -388,7 +467,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginTop: 12,
-    marginBottom: 6,
+    marginBottom: 6
   },
   inputWrap: {
     flexDirection: 'row',
@@ -397,10 +476,10 @@ const styles = StyleSheet.create({
     borderColor: palette.slate[200],
     borderRadius: radii.xl,
     backgroundColor: palette.white,
-    paddingHorizontal: 12,
+    paddingHorizontal: 12
   },
   inputWrapDisabled: {
-    backgroundColor: palette.slate[50],
+    backgroundColor: palette.slate[50]
   },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, paddingVertical: 11, color: palette.slate[900], fontSize: 14 },
@@ -415,7 +494,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     marginTop: 20,
     alignSelf: 'flex-start',
-    paddingHorizontal: 18,
+    paddingHorizontal: 18
   },
   saveButtonText: { color: palette.white, fontWeight: '600', fontSize: 13 },
   buttonDisabled: { opacity: 0.6 },
@@ -429,7 +508,7 @@ const styles = StyleSheet.create({
     borderColor: palette.slate[200],
     borderRadius: radii.xl,
     padding: 14,
-    marginBottom: 8,
+    marginBottom: 8
   },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowLabel: { color: palette.slate[700], fontSize: 14, fontWeight: '600' },
@@ -447,7 +526,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.xl,
     paddingVertical: 13,
     alignSelf: 'flex-start',
-    paddingHorizontal: 16,
+    paddingHorizontal: 16
   },
   signOutText: { color: palette.red[600], fontWeight: '600', fontSize: 13 },
   signInButton: {
@@ -459,7 +538,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.xl,
     paddingVertical: 13,
     paddingHorizontal: 18,
-    alignSelf: 'flex-start',
+    alignSelf: 'flex-start'
   },
-  signInText: { color: palette.white, fontWeight: '600', fontSize: 13 },
+  signInText: { color: palette.white, fontWeight: '600', fontSize: 13 }
 });

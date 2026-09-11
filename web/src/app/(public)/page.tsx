@@ -2,7 +2,10 @@ import { Metadata } from 'next';
 import { listingsApi } from '@/lib/api/listings';
 
 import { JsonLd } from '@/components/seo/json-ld';
-import { ExploreDiscovery, type ExploreZone } from '@/components/home/explore-discovery';
+import {
+  ExploreDiscovery,
+  type ExploreZone,
+} from '@/components/home/explore-discovery';
 import { ListingSection } from '@/components/home/listing-section';
 import type { ExploreListing } from '@/components/home/explore-listing-card';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
@@ -25,7 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
     'Explore verified hostels, apartments and short stays in Nyeri. Browse by category, save favourites and contact agents directly on WhatsApp.';
 
   return {
-    title: campus.seo_title ?? 'Rumia — Explore Hostels, Apartments & Short Stays in Kenya',
+    title:
+      campus.seo_title ??
+      'Rumia — Explore Hostels, Apartments & Short Stays in Kenya',
     description,
     alternates: { canonical: baseUrl },
     openGraph: {
@@ -44,7 +49,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function buildPageSchemas(campus: Campus, listings: ExploreListing[]): Record<string, unknown> {
+function buildPageSchemas(
+  campus: Campus,
+  listings: ExploreListing[],
+): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -53,7 +61,11 @@ function buildPageSchemas(campus: Campus, listings: ExploreListing[]): Record<st
         name: 'Rumia',
         url: baseUrl,
         description: `Verified places to stay near ${campus.name}, ${campus.city}, Kenya.`,
-        areaServed: { '@type': 'City', name: campus.city, addressCountry: 'KE' },
+        areaServed: {
+          '@type': 'City',
+          name: campus.city,
+          addressCountry: 'KE',
+        },
       },
       {
         '@type': 'WebSite',
@@ -99,11 +111,13 @@ function toExploreListing(item: Listing): ExploreListing {
     room_type: item.room_type,
     bathroom_type: item.bathroom_type,
     wifi_included: item.wifi_included,
-    rating: typeof item.rating === 'number' ? item.rating : (Number(item.rating) || 0),
+    rating:
+      typeof item.rating === 'number' ? item.rating : Number(item.rating) || 0,
     views: item.views,
     created_at: item.created_at,
     image_url: firstImage?.r2_url ?? null,
     blur_data_url: firstImage?.blur_data_url ?? null,
+    verified: item.verified ?? null,
   };
 }
 
@@ -118,14 +132,12 @@ function dedupeById(listings: ExploreListing[]): ExploreListing[] {
   return result;
 }
 
-async function fetchFeed(
-  params: {
-    limit?: number;
-    sort?: 'views' | 'newest';
-    property_type?: string;
-    campus_slug?: string;
-  },
-): Promise<ExploreListing[]> {
+async function fetchFeed(params: {
+  limit?: number;
+  sort?: 'views' | 'newest';
+  property_type?: string;
+  campus_slug?: string;
+}): Promise<ExploreListing[]> {
   try {
     const feed = await listingsApi.getFeedServer({
       limit: params.limit ?? FEED_LIMIT,
@@ -144,19 +156,25 @@ async function fetchFeed(
 export default async function HomePage() {
   const campus = await getCampusBySlug('dekut');
   const campusSlug = isFallbackCampus(campus) ? undefined : campus.slug;
-  const campusName = campus.short_name ?? campus.name;
   const city = campus.city ?? 'Nyeri';
 
-  const [campusZones, activeAnnouncements, allFeed, apartFeed, shortStayFeed, popularFeed, newestFeed] =
-    await Promise.all([
-      getZonesByCampusSlug(campus.slug),
-      getActiveAnnouncements(isFallbackCampus(campus) ? null : campus.id),
-      fetchFeed({ limit: 24, campus_slug: campusSlug }),
-      fetchFeed({ property_type: 'apartment', campus_slug: campusSlug }),
-      fetchFeed({ property_type: 'short_stay', campus_slug: campusSlug }),
-      fetchFeed({ sort: 'views', campus_slug: campusSlug }),
-      fetchFeed({ sort: 'newest', campus_slug: campusSlug }),
-    ]);
+  const [
+    campusZones,
+    activeAnnouncements,
+    allFeed,
+    apartFeed,
+    shortStayFeed,
+    popularFeed,
+    newestFeed,
+  ] = await Promise.all([
+    getZonesByCampusSlug(campus.slug),
+    getActiveAnnouncements(isFallbackCampus(campus) ? null : campus.id),
+    fetchFeed({ limit: 24, campus_slug: campusSlug }),
+    fetchFeed({ property_type: 'apartment', campus_slug: campusSlug }),
+    fetchFeed({ property_type: 'short_stay', campus_slug: campusSlug }),
+    fetchFeed({ sort: 'views', campus_slug: campusSlug }),
+    fetchFeed({ sort: 'newest', campus_slug: campusSlug }),
+  ]);
 
   const allPool = dedupeById([
     ...allFeed,
@@ -166,37 +184,28 @@ export default async function HomePage() {
     ...newestFeed,
   ]);
 
-  const exploreItems = dedupeById([
-    ...allFeed,
-    ...apartFeed,
-    ...shortStayFeed,
-  ]);
+  const exploreItems = dedupeById([...allFeed, ...apartFeed, ...shortStayFeed]);
 
-  // Derived intent sections from real database listings
-  const bedsitterFeed = dedupeById(
-    allPool.filter((item) => {
-      const room = (item.room_type ?? '').toLowerCase();
-      const title = (item.title ?? '').toLowerCase();
-      return (
-        room.includes('bed') ||
-        room.includes('self-contained') ||
-        title.includes('bedsitter') ||
-        title.includes('bed-sitter') ||
-        title.includes('bed sitter')
-      );
-    }),
-  ).slice(0, FEED_LIMIT);
+  const excludeIds = (source: ExploreListing[], exclude: Set<string>) =>
+    source.filter((item) => !exclude.has(item.id));
 
-  const affordableFeed = dedupeById(
-    allPool
-      .filter((item) => (item.property_type ?? 'hostel') !== 'short_stay' && item.price > 0)
-      .sort((a, b) => a.price - b.price),
-  ).slice(0, FEED_LIMIT);
+  const popularUnique = dedupeById(popularFeed).slice(0, FEED_LIMIT);
+  const popularIds = new Set(popularUnique.map((i) => i.id));
 
-  const highlyRatedFeed = dedupeById(
-    allPool
-      .filter((item) => (item.rating ?? 0) >= 4)
-      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
+  const newestUnique = dedupeById(excludeIds(newestFeed, popularIds)).slice(
+    0,
+    FEED_LIMIT,
+  );
+  const newestIds = new Set(newestUnique.map((i) => i.id));
+
+  const affordablePool = allPool
+    .filter(
+      (item) =>
+        (item.property_type ?? 'hostel') !== 'short_stay' && item.price > 0,
+    )
+    .sort((a, b) => a.price - b.price);
+  const affordableUnique = dedupeById(
+    excludeIds(affordablePool, new Set([...popularIds, ...newestIds])),
   ).slice(0, FEED_LIMIT);
 
   // Consolidate real accommodation zones from campus_zones and listings feed
@@ -235,7 +244,8 @@ export default async function HomePage() {
   return (
     <main id="main-content" className="flex flex-col min-h-screen bg-white">
       <h1 className="sr-only">
-        Student Accommodation, Hostels, Bedsitters & Apartments near {campus.name}
+        Student Accommodation, Hostels, Bedsitters & Apartments near{' '}
+        {campus.name}
       </h1>
       <JsonLd data={buildPageSchemas(campus, exploreItems)} />
 
@@ -245,77 +255,56 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Primary Discovery Hero: Property Types + Zone Discovery + Immediate Listing Rail */}
       <ExploreDiscovery
         city={city}
-        campusName={campusName}
+        campus={campus}
         zones={zones}
         items={exploreItems}
       />
 
-      {/* Intent-Driven Discovery Sections (Auto-hidden when empty) */}
-      <div className="pb-12 space-y-2">
-        {/* 1. Bedsitters & Self-contained */}
+      <div className="pb-10 pt-2">
         <ListingSection
-          title={`Bedsitters near ${campusName}`}
-          subtitle="Self-contained and single bedsitter rooms for students"
-          seeAllHref="/hostels?q=bedsitter"
-          seeAllLabel="See bedsitters"
-          items={bedsitterFeed}
-        />
-
-        {/* 2. Popular */}
-        <ListingSection
-          title={`Popular near ${campusName}`}
-          subtitle="Most-viewed places on Rumia"
+          title={
+            <>
+              <span className="md:hidden">
+                Popular near{' '}
+                {campus.short_name ??
+                  (campus.slug === 'dekut' ? 'DeKUT' : campus.name)}
+              </span>
+              <span className="hidden md:inline">
+                Popular near {campus.name}
+              </span>
+            </>
+          }
+          subtitle="Most viewed this week"
           seeAllHref="/hostels"
-          seeAllLabel="See all popular"
-          items={popularFeed}
+          seeAllLabel="See all"
+          items={popularUnique}
         />
-
-        {/* 3. Affordable */}
-        <ListingSection
-          title="Affordable student stays"
-          subtitle="Budget-friendly rooms and hostels"
-          seeAllHref="/hostels?maxPrice=6500"
-          seeAllLabel="See budget stays"
-          items={affordableFeed}
-        />
-
-        {/* 4. Highly Rated (shown only if ratings exist in data) */}
-        <ListingSection
-          title="Highly rated"
-          subtitle="Top-rated accommodation reviewed by students"
-          seeAllHref="/hostels"
-          seeAllLabel="See top rated"
-          items={highlyRatedFeed}
-        />
-
-        {/* 5. New Listings */}
         <ListingSection
           title="New on Rumia"
-          subtitle="Fresh listings recently added"
+          subtitle="Fresh listings"
           seeAllHref="/hostels"
-          seeAllLabel="See new listings"
-          items={newestFeed}
+          seeAllLabel="See all"
+          items={newestUnique}
         />
-
-        {/* 6. Apartments */}
         <ListingSection
-          title={`Apartments in ${city}`}
-          subtitle="Self-contained units for monthly stays"
-          seeAllHref="/hostels?type=apartment"
-          seeAllLabel="See apartments"
-          items={apartFeed}
-        />
-
-        {/* 7. Short Stays */}
-        <ListingSection
-          title={`Short stays in ${city}`}
-          subtitle="Nightly-priced stays for short visits"
-          seeAllHref="/hostels?type=short_stay"
-          seeAllLabel="See short stays"
-          items={shortStayFeed}
+          title={
+            <>
+              <span className="md:hidden">
+                Affordable near{' '}
+                {campus.short_name ??
+                  (campus.slug === 'dekut' ? 'DeKUT' : campus.name)}
+              </span>
+              <span className="hidden md:inline">
+                Affordable near {campus.name}
+              </span>
+            </>
+          }
+          subtitle="Budget-friendly hostels"
+          seeAllHref="/hostels?maxPrice=6500"
+          seeAllLabel="See all"
+          items={affordableUnique}
         />
       </div>
     </main>

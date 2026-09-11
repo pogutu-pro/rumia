@@ -1,7 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import { getManagerUser } from '@/app/actions/manager';
-import { getManagerUserContext, checkManagerCampusScope } from '@/lib/utils/manager';
+import {
+  getManagerUserContext,
+  checkManagerCampusScope,
+} from '@/lib/utils/manager';
 import { ManagerEditForm } from './manager-edit-form';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -27,7 +30,7 @@ export default async function ManagerEditListingPage({
   const { data: listing, error } = await supabaseAdmin
     .from('listings')
     .select(
-      `id, title, description, price, location, youtube_id, is_youtube_shorts, room_type,
+      `id, title, description, property_type, price, location, youtube_id, is_youtube_shorts, room_type,
       amenities, bathroom_type, distance_to_campus,
       security_type, water_included, electricity_included, wifi_included, hot_water_included, cooking_gas_included,
       latitude, longitude, gender, proximity_description, is_active,
@@ -35,7 +38,7 @@ export default async function ManagerEditListingPage({
       specific_location, price_single, price_sharing, mpesa_details, distance_category,
       landlord_phone, campus_id, agent_id,
       listing_images ( id, r2_url, category, display_order, blur_data_url ),
-      agents ( id, name, phone, whatsapp )`
+      agents ( id, name, phone, whatsapp )`,
     )
     .eq('id', id)
     .single();
@@ -61,7 +64,7 @@ export default async function ManagerEditListingPage({
   const { data: roomTypes } = await supabaseAdmin
     .from('listing_room_types')
     .select(
-      'id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size'
+      'id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size',
     )
     .eq('listing_id', id);
 

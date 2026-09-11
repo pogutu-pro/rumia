@@ -8,31 +8,17 @@ import {
   MapPin,
   Eye,
   X,
-  SlidersHorizontal,
   GitCompareArrows,
   Check,
-  Tag,
-  CalendarCheck,
 } from 'lucide-react';
-import { ListingSearchInput } from '@/components/ui/listing-search-input';
 import { toast } from 'sonner';
-import { useDebounce } from '@/hooks/use-debounce';
 import { createClient } from '@/lib/supabase/client';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { useFilterStore, type FilterState } from '@/stores/filter-store';
 import { useCompareStore } from '@/stores/compare-store';
-import { FilterSidebar } from '@/components/ui/filter/filter-sidebar';
-import { FilterBottomSheet } from '@/components/ui/filter/filter-bottom-sheet';
 import { ActiveFilterChips } from '@/components/ui/filter/active-filter-chips';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { clientSearch } from '@/lib/search/client-search';
 import type {
   SearchListing,
@@ -41,8 +27,6 @@ import type {
 
 export type Listing = SearchListing;
 
-// Generic soft placeholder for listings that have no blur_data_url — prevents
-// the grey flash when a card mounts before its image finishes loading.
 const FALLBACK_BLUR =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDUwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQ1MCIgZmlsbD0iI2UyZThmMCIvPjwvc3ZnPg==';
 
@@ -87,20 +71,9 @@ export default function HostelsSearch({
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const hydrationDone = useRef(false);
 
-  const initialQuery = searchParams.get('q') ?? '';
-  const [query, setQuery] = useState(initialQuery);
-  const debouncedQuery = useDebounce(query, 200);
-  // URL sync is deferred to explicit commits so typing never triggers a
-  // router navigation per keystroke.
-  const [committedQuery, setCommittedQuery] = useState(initialQuery);
-  const [desktopFilterOpen, setDesktopFilterOpen] = useState(false);
-
-  // Synchronize state with URL query when it changes (e.g. from navbar search or back/forward navigation)
+  // The search query is now driven entirely by the navbar — we read it from the
+  // URL param and use it directly for client-side filtering.
   const qParamFromUrl = searchParams.get('q') ?? '';
-  useEffect(() => {
-    setQuery(qParamFromUrl);
-    setCommittedQuery(qParamFromUrl);
-  }, [qParamFromUrl]);
 
   // Optional category pre-filter from Home Explore "See all" links (?type=).
   const propertyType = searchParams.get('type');
@@ -232,10 +205,11 @@ export default function HostelsSearch({
   );
 
   // ── Client-side search ─────────────────────────────────────────────────────
+  // searchText is now driven by the URL param (navbar updates it via router.replace)
 
   const combinedFilters = useMemo<CombinedFilters>(
     () => ({
-      searchText: debouncedQuery,
+      searchText: qParamFromUrl,
       genders,
       amenities,
       roomTypes,
@@ -243,10 +217,9 @@ export default function HostelsSearch({
       maxPrice,
       zones,
     }),
-    [debouncedQuery, genders, amenities, roomTypes, minPrice, maxPrice, zones],
+    [qParamFromUrl, genders, amenities, roomTypes, minPrice, maxPrice, zones],
   );
 
-  // Client-side search — fully synchronous, derived via useMemo
   const allFiltered = useMemo(
     () =>
       clientSearch(allListings, combinedFilters, allListings.length, 0)
@@ -254,8 +227,6 @@ export default function HostelsSearch({
     [allListings, combinedFilters],
   );
 
-  // Category pre-filter (?type=hostel|apartment|short_stay) layered on top of
-  // the search snapshot. Legacy rows without a property_type default to hostel.
   const typedListings = useMemo(() => {
     if (!propertyType) return allFiltered;
     return allFiltered.filter(
@@ -269,7 +240,7 @@ export default function HostelsSearch({
   const INITIAL_DISPLAY_COUNT = 12;
   const BATCH_SIZE = 12;
   const displayFilterKey = JSON.stringify([
-    debouncedQuery,
+    qParamFromUrl,
     genders,
     amenities,
     roomTypes,
@@ -318,14 +289,11 @@ export default function HostelsSearch({
     return typedListings.slice(0, displayLimit);
   }, [typedListings, displayLimit]);
 
-  // ── URL sync ───────────────────────────────────────────────────────────────
-  // Runs on filter changes and committed queries (Enter / blur / clear) so the
-  // search box never triggers a navigation while the user is still typing.
-
+  // ── URL sync (filter changes only — query sync is now owned by the navbar) ──
   useEffect(() => {
     const filterParams = toParams();
-    const qParam = committedQuery
-      ? `q=${encodeURIComponent(committedQuery)}`
+    const qParam = qParamFromUrl
+      ? `q=${encodeURIComponent(qParamFromUrl)}`
       : '';
     const filterStr = filterParams.toString();
     const url =
@@ -334,7 +302,7 @@ export default function HostelsSearch({
         : basePath;
     router.replace(url, { scroll: false });
   }, [
-    committedQuery,
+    qParamFromUrl,
     genders,
     amenities,
     roomTypes,
@@ -348,38 +316,16 @@ export default function HostelsSearch({
 
   const handleClearAll = useCallback(() => {
     reset();
-    setQuery('');
-    setCommittedQuery('');
     if (propertyType) {
       const rest = new URLSearchParams(searchParams.toString());
       rest.delete('type');
+      rest.delete('q');
       router.replace(
         `${basePath}${rest.toString() ? `?${rest.toString()}` : ''}`,
         { scroll: false },
       );
     }
   }, [reset, propertyType, searchParams, basePath, router]);
-
-  const handleMobileApply = useCallback(
-    (draft: FilterState) => {
-      setGenders(draft.genders);
-      setAmenities(draft.amenities);
-      setRoomTypes(draft.roomTypes);
-      setPriceRange(draft.minPrice, draft.maxPrice);
-      setZones(draft.zones);
-      setMaxDistance(draft.maxDistance);
-      setSortByNearest(draft.sortByNearest);
-    },
-    [
-      setGenders,
-      setAmenities,
-      setRoomTypes,
-      setPriceRange,
-      setZones,
-      setMaxDistance,
-      setSortByNearest,
-    ],
-  );
 
   const activeFilterCount =
     genders.length +
@@ -388,151 +334,13 @@ export default function HostelsSearch({
     (minPrice || maxPrice ? 1 : 0) +
     zones.length;
 
-  const priceFilterActive = minPrice || maxPrice ? 1 : 0;
-
-  const hasAnyFilters = activeFilterCount > 0 || debouncedQuery.length > 0;
+  const hasAnyFilters = activeFilterCount > 0 || qParamFromUrl.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50/50 pt-0 pb-8 lg:pb-10">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        {/* Search zone — elevated container bridging navbar and content */}
-        <div className="bg-white rounded-2xl shadow-[0_1px_14px_rgba(0,0,0,0.06)] border border-slate-100 p-3 sm:p-4 mb-4">
-          <ListingSearchInput
-            value={query}
-            onChange={(v) => setQuery(v)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') setCommittedQuery(query);
-            }}
-            onBlur={() => setCommittedQuery(query)}
-            onClear={() => {
-              setQuery('');
-              setCommittedQuery('');
-            }}
-          />
 
-          {/* Controls row */}
-          <div className="flex flex-nowrap items-center gap-2 mt-3 overflow-x-auto scrollbar-none">
-            {isDesktop ? (
-              <Sheet
-                open={desktopFilterOpen}
-                onOpenChange={setDesktopFilterOpen}
-              >
-                <SheetTrigger asChild>
-                  <button
-                    type="button"
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
-                  >
-                    <SlidersHorizontal className="h-3.5 w-3.5" />
-                    Filters
-                    {activeFilterCount > 0 && (
-                      <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold leading-none">
-                        {activeFilterCount}
-                      </span>
-                    )}
-                  </button>
-                </SheetTrigger>
-                <SheetContent
-                  side="left"
-                  className="w-[320px] p-0 overflow-y-auto"
-                >
-                  <SheetHeader className="px-5 py-4 border-b border-slate-100">
-                    <SheetTitle className="text-left text-base font-bold text-slate-900">
-                      Filters
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="p-5">
-                    <FilterSidebar
-                      filters={{
-                        genders,
-                        amenities,
-                        roomTypes,
-                        minPrice,
-                        maxPrice,
-                        zones,
-                        maxDistance,
-                        sortByNearest,
-                      }}
-                      onSetGenders={setGenders}
-                      onSetAmenities={setAmenities}
-                      onSetRoomTypes={setRoomTypes}
-                      onSetPriceRange={setPriceRange}
-                      onSetZones={setZones}
-                      onSetMaxDistance={setMaxDistance}
-                      onSetSortByNearest={setSortByNearest}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            ) : (
-              <FilterBottomSheet
-                currentFilters={{
-                  genders,
-                  amenities,
-                  roomTypes,
-                  minPrice,
-                  maxPrice,
-                  zones,
-                  maxDistance,
-                  sortByNearest,
-                }}
-                onApply={handleMobileApply}
-                trigger={
-                  <button
-                    type="button"
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
-                  >
-                    <SlidersHorizontal className="h-3.5 w-3.5" />
-                    Filters
-                    {activeFilterCount > 0 && (
-                      <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold leading-none">
-                        {activeFilterCount}
-                      </span>
-                    )}
-                  </button>
-                }
-              />
-            )}
-
-            <FilterBottomSheet
-              currentFilters={{
-                genders,
-                amenities,
-                roomTypes,
-                minPrice,
-                maxPrice,
-                zones,
-                maxDistance,
-                sortByNearest,
-              }}
-              mode="price"
-              onApply={(d) => setPriceRange(d.minPrice, d.maxPrice)}
-              trigger={
-                <button
-                  type="button"
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-rose-500 text-white shadow-sm shadow-rose-200 hover:bg-rose-600"
-                >
-                  <Tag className="h-3.5 w-3.5" />
-                  Price
-                  {priceFilterActive > 0 && (
-                    <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/20 px-1.5 text-xs font-bold leading-none">
-                      {priceFilterActive}
-                    </span>
-                  )}
-                </button>
-              }
-            />
-
-            <Link
-              href={isLoggedIn ? '/account/book-tour' : '/book-tour'}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <CalendarCheck className="h-3.5 w-3.5" />
-              Book a Tour
-            </Link>
-          </div>
-        </div>
-
-        {/* Active filter chips */}
+        {/* Active filter chips — rendered directly, no search card wrapper */}
         <ActiveFilterChips
           filters={{
             genders,
@@ -603,7 +411,7 @@ export default function HostelsSearch({
           )}
         </div>
 
-        {/* Listing Grid — progressive rendering for silky smooth mobile scrolling */}
+        {/* Listing Grid */}
         {typedListings.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

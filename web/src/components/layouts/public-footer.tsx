@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { FaInstagram, FaTiktok, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6';
 import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
@@ -13,11 +14,14 @@ interface FooterProps {
 
 export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+  const isBnbPage = pathname === '/bnb' || pathname.startsWith('/bnb/');
 
   // Keep the original wa.me/254… (no leading +) format for byte-identical output.
   const waDigits = (whatsappNumber ?? '+254114845619').replace(/\D/g, '');
-  const waMessage =
-    'Hi Rumia, I found you on your website. I\u0027m looking for a hostel near DeKUT.';
+  const waMessage = isBnbPage
+    ? 'Hi Rumia, I found you on your website. I\u0027m looking for a short-stay property.'
+    : 'Hi Rumia, I found you on your website. I\u0027m looking for a hostel near DeKUT.';
   const waHref = `https://wa.me/${waDigits}?text=${encodeURIComponent(waMessage)}`;
 
   // Contacting Rumia via the footer requires a signed-in visitor (transferred
@@ -47,14 +51,16 @@ export const Footer = React.memo(function Footer({ whatsappNumber }: FooterProps
               <span className="font-black text-2xl text-white tracking-tight">RUMIA</span>
             </Link>
             <p className="text-sm text-slate-500 font-medium text-center md:text-left">
-              Verified campus accommodations and simplified lead generation.
+              {isBnbPage
+                ? 'Comfortable short stays and direct host connections.'
+                : 'Verified campus accommodations and simplified lead generation.'}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="flex justify-center gap-8 text-sm font-bold">
-            <Link href="/hostels" className="hover:text-white transition-colors">
-              Browse Hostels
+            <Link href={isBnbPage ? '/bnb' : '/hostels'} className="hover:text-white transition-colors">
+              {isBnbPage ? 'Browse RumiaBnB' : 'Browse Hostels'}
             </Link>
             <Link href="/auth/login" className="hover:text-white transition-colors">
               Login

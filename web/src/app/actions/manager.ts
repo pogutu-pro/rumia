@@ -3,7 +3,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
-import { getManagerUserContext, type ManagerUserContext, checkManagerCampusScope } from '@/lib/utils/manager';
+import {
+  getManagerUserContext,
+  type ManagerUserContext,
+  checkManagerCampusScope,
+} from '@/lib/utils/manager';
 import { cleanPhone, isValidKenyanPhone } from '@/lib/utils/phone';
 import { generateAgentSlug, uniqueSlug } from '@/lib/utils/string';
 import { normalizeCampusAreaSelection } from '@/lib/utils/campus-zones';
@@ -60,7 +64,8 @@ export async function getManagerApplicationsAction() {
 
   let query = supabase
     .from('agent_applications')
-    .select(`
+    .select(
+      `
       id,
       user_id,
       campus_id,
@@ -80,7 +85,8 @@ export async function getManagerApplicationsAction() {
         name,
         slug
       )
-    `)
+    `,
+    )
     .order('created_at', { ascending: false });
 
   // Explicit campus/region scoping for managers
@@ -89,9 +95,12 @@ export async function getManagerApplicationsAction() {
     if (context.managedCampusId) {
       allowedCampusIds = [context.managedCampusId];
     } else if (context.managedRegionId) {
-      const { data: campuses } = await supabase.from('campuses').select('id').eq('region_id', context.managedRegionId);
+      const { data: campuses } = await supabase
+        .from('campuses')
+        .select('id')
+        .eq('region_id', context.managedRegionId);
       if (campuses) {
-        allowedCampusIds = campuses.map(c => c.id);
+        allowedCampusIds = campuses.map((c) => c.id);
       }
     }
 
@@ -114,7 +123,7 @@ export async function getManagerApplicationsAction() {
  * 4. Marks `agent_applications` status = 'approved'.
  */
 export async function approveAgentApplicationAction(
-  applicationId: string
+  applicationId: string,
 ): Promise<ManagerActionResult> {
   const manager = await getManagerUser();
   if (!manager) {
@@ -140,11 +149,16 @@ export async function approveAgentApplicationAction(
 
   // Campus/Region Scope Authorization Check
   if (!context.isSuperAdmin) {
-    const isAuthorized = await checkManagerCampusScope(supabaseAdmin, context, app.campus_id);
+    const isAuthorized = await checkManagerCampusScope(
+      supabaseAdmin,
+      context,
+      app.campus_id,
+    );
     if (!isAuthorized) {
       return {
         success: false,
-        error: 'Forbidden: You cannot approve applications for a campus you do not manage',
+        error:
+          'Forbidden: You cannot approve applications for a campus you do not manage',
       };
     }
   }
@@ -164,20 +178,23 @@ export async function approveAgentApplicationAction(
     });
 
     // 1. Create row in `agents` table
-    const { error: agentInsertError } = await supabaseAdmin.from('agents').insert({
-      user_id: app.user_id,
-      campus_id: app.campus_id,
-      name: app.full_name,
-      phone: normalizedPhone,
-      whatsapp: normalizedPhone,
-      status: 'active',
-      slug,
-    });
+    const { error: agentInsertError } = await supabaseAdmin
+      .from('agents')
+      .insert({
+        user_id: app.user_id,
+        campus_id: app.campus_id,
+        name: app.full_name,
+        phone: normalizedPhone,
+        whatsapp: normalizedPhone,
+        status: 'active',
+        slug,
+      });
 
     if (agentInsertError) {
       return {
         success: false,
-        error: agentInsertError.message || 'Failed to create agent profile record',
+        error:
+          agentInsertError.message || 'Failed to create agent profile record',
       };
     }
 
@@ -189,7 +206,10 @@ export async function approveAgentApplicationAction(
       .eq('id', app.user_id);
 
     if (roleError) {
-      return { success: false, error: roleError.message || 'Failed to update user role' };
+      return {
+        success: false,
+        error: roleError.message || 'Failed to update user role',
+      };
     }
 
     // 3. Mark application as approved
@@ -220,7 +240,8 @@ export async function approveAgentApplicationAction(
 
     return { success: true };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Unexpected error during approval';
+    const msg =
+      err instanceof Error ? err.message : 'Unexpected error during approval';
     return { success: false, error: msg };
   }
 }
@@ -231,7 +252,7 @@ export async function approveAgentApplicationAction(
  */
 export async function rejectAgentApplicationAction(
   applicationId: string,
-  rejectionReason: string
+  rejectionReason: string,
 ): Promise<ManagerActionResult> {
   const manager = await getManagerUser();
   if (!manager) {
@@ -261,11 +282,16 @@ export async function rejectAgentApplicationAction(
 
   // Campus/Region Scope Authorization Check
   if (!context.isSuperAdmin) {
-    const isAuthorized = await checkManagerCampusScope(supabaseAdmin, context, app.campus_id);
+    const isAuthorized = await checkManagerCampusScope(
+      supabaseAdmin,
+      context,
+      app.campus_id,
+    );
     if (!isAuthorized) {
       return {
         success: false,
-        error: 'Forbidden: You cannot reject applications for a campus you do not manage',
+        error:
+          'Forbidden: You cannot reject applications for a campus you do not manage',
       };
     }
   }
@@ -311,7 +337,8 @@ export async function getManagerAgentsAction() {
 
   let query = supabase
     .from('agents')
-    .select(`
+    .select(
+      `
       id,
       user_id,
       campus_id,
@@ -329,7 +356,8 @@ export async function getManagerAgentsAction() {
         name,
         slug
       )
-    `)
+    `,
+    )
     .order('created_at', { ascending: false });
 
   if (!context.isSuperAdmin) {
@@ -337,9 +365,12 @@ export async function getManagerAgentsAction() {
     if (context.managedCampusId) {
       allowedCampusIds = [context.managedCampusId];
     } else if (context.managedRegionId) {
-      const { data: campuses } = await supabase.from('campuses').select('id').eq('region_id', context.managedRegionId);
+      const { data: campuses } = await supabase
+        .from('campuses')
+        .select('id')
+        .eq('region_id', context.managedRegionId);
       if (campuses) {
-        allowedCampusIds = campuses.map(c => c.id);
+        allowedCampusIds = campuses.map((c) => c.id);
       }
     }
 
@@ -365,7 +396,8 @@ export async function getManagerListingsAction() {
 
   let query = supabase
     .from('listings')
-    .select(`
+    .select(
+      `
       id,
       slug,
       title,
@@ -397,7 +429,8 @@ export async function getManagerListingsAction() {
         name,
         slug
       )
-    `)
+    `,
+    )
     .order('created_at', { ascending: false });
 
   if (!context.isSuperAdmin) {
@@ -405,9 +438,12 @@ export async function getManagerListingsAction() {
     if (context.managedCampusId) {
       allowedCampusIds = [context.managedCampusId];
     } else if (context.managedRegionId) {
-      const { data: campuses } = await supabase.from('campuses').select('id').eq('region_id', context.managedRegionId);
+      const { data: campuses } = await supabase
+        .from('campuses')
+        .select('id')
+        .eq('region_id', context.managedRegionId);
       if (campuses) {
-        allowedCampusIds = campuses.map(c => c.id);
+        allowedCampusIds = campuses.map((c) => c.id);
       }
     }
 
@@ -443,11 +479,13 @@ export async function getManagerHostelsAction(): Promise<{
       .order('hostel_name', { ascending: true }),
     (supabaseAdmin as any)
       .from('listings')
-      .select(`
+      .select(
+        `
         id, title, location, price, is_active, verified, is_full, created_at, landlord_phone,
         mpesa_details, specific_location, county, area, slug,
         agents ( id, name, phone, whatsapp, verified )
-      `)
+      `,
+      )
       .order('created_at', { ascending: false }),
   ]);
 
@@ -477,34 +515,36 @@ export async function getManagerHostelsAction(): Promise<{
 
   const agentListings = (rawListings as any[]).map(
     (l: any): AgentListingHostel => ({
-    id: l.id,
-    title: l.title,
-    location: l.location || l.area || 'DeKUT',
-    price: l.price,
-    is_active: l.is_active,
-    verified:
-      l.verified ||
-      (Array.isArray(l.agents) ? l.agents[0]?.verified : l.agents?.verified) ||
-      false,
-    is_full: l.is_full ?? false,
-    created_at: l.created_at,
-    landlord_phone: l.landlord_phone || '',
-    mpesa_details: l.mpesa_details || '',
-    specific_location: l.specific_location || '',
-    county: l.county || 'nyeri',
-    area: l.area || 'dekut',
-    slug: l.slug,
-    agent_name: Array.isArray(l.agents)
-      ? l.agents[0]?.name || 'Agent'
-      : l.agents?.name || 'Agent',
-    agent_phone: Array.isArray(l.agents)
-      ? l.agents[0]?.phone || ''
-      : l.agents?.phone || '',
-    agent_whatsapp: Array.isArray(l.agents)
-      ? l.agents[0]?.whatsapp || ''
-      : l.agents?.whatsapp || '',
-  })
-);
+      id: l.id,
+      title: l.title,
+      location: l.location || l.area || 'DeKUT',
+      price: l.price,
+      is_active: l.is_active,
+      verified:
+        l.verified ||
+        (Array.isArray(l.agents)
+          ? l.agents[0]?.verified
+          : l.agents?.verified) ||
+        false,
+      is_full: l.is_full ?? false,
+      created_at: l.created_at,
+      landlord_phone: l.landlord_phone || '',
+      mpesa_details: l.mpesa_details || '',
+      specific_location: l.specific_location || '',
+      county: l.county || 'nyeri',
+      area: l.area || 'dekut',
+      slug: l.slug,
+      agent_name: Array.isArray(l.agents)
+        ? l.agents[0]?.name || 'Agent'
+        : l.agents?.name || 'Agent',
+      agent_phone: Array.isArray(l.agents)
+        ? l.agents[0]?.phone || ''
+        : l.agents?.phone || '',
+      agent_whatsapp: Array.isArray(l.agents)
+        ? l.agents[0]?.whatsapp || ''
+        : l.agents?.whatsapp || '',
+    }),
+  );
 
   return {
     officialHostels: (officialHostels as OfficialHostel[]) || [],
@@ -524,7 +564,7 @@ export async function getManagerHostelsAction(): Promise<{
 export async function updateAgentStatusByManagerAction(
   agentId: string,
   status: 'active' | 'suspended',
-  suspensionReason?: string
+  suspensionReason?: string,
 ): Promise<ManagerActionResult> {
   const manager = await getManagerUser();
   if (!manager) {
@@ -554,11 +594,16 @@ export async function updateAgentStatusByManagerAction(
 
   // Cross-campus Scoping Guard
   if (!context.isSuperAdmin) {
-    const isAuthorized = await checkManagerCampusScope(supabaseAdmin, context, agent.campus_id);
+    const isAuthorized = await checkManagerCampusScope(
+      supabaseAdmin,
+      context,
+      agent.campus_id,
+    );
     if (!isAuthorized) {
       return {
         success: false,
-        error: 'Forbidden: You cannot modify agent standing outside your campus',
+        error:
+          'Forbidden: You cannot modify agent standing outside your campus',
       };
     }
   }
@@ -586,9 +631,10 @@ export async function updateAgentStatusByManagerAction(
     const label = status === 'active' ? 'reinstated' : 'suspended';
     sendPushToUser(agent.user_id, {
       title: `Account Standing Update`,
-      body: status === 'active'
-        ? 'Your agent account standing has been reinstated by your campus manager.'
-        : `Your account has been suspended: ${suspensionReason}`,
+      body:
+        status === 'active'
+          ? 'Your agent account standing has been reinstated by your campus manager.'
+          : `Your account has been suspended: ${suspensionReason}`,
       url: '/dashboard',
       tag: `agent-standing-${agentId}`,
     }).catch(() => {});
@@ -604,6 +650,7 @@ interface ManagedListing {
   slug: string | null;
   county: string | null;
   area: string | null;
+  property_type: 'hostel' | 'apartment' | 'short_stay' | null;
   campus_id: string;
   agent_id: string | null;
 }
@@ -622,7 +669,7 @@ async function authorizeManagerListingAccess(
 ): Promise<{ listing: ManagedListing } | { error: string }> {
   const { data: listing, error } = await supabaseAdmin
     .from('listings')
-    .select('id, slug, county, area, campus_id, agent_id')
+    .select('id, slug, county, area, property_type, campus_id, agent_id')
     .eq('id', listingId)
     .single();
 
@@ -811,7 +858,10 @@ export async function updateListingByManagerAction(
   }
 
   const { context } = manager;
-  const auth = await authorizeManagerListingAccess(formData.listing_id, context);
+  const auth = await authorizeManagerListingAccess(
+    formData.listing_id,
+    context,
+  );
   if ('error' in auth) return { success: false, error: auth.error };
   const existing = auth.listing;
 
@@ -837,13 +887,20 @@ export async function updateListingByManagerAction(
 
   const payload = {
     title: formData.title,
+    property_type: ['hostel', 'apartment', 'short_stay'].includes(
+      formData.property_type,
+    )
+      ? formData.property_type
+      : existing.property_type || 'hostel',
     county: formData.county || 'nyeri',
     area: normalizedArea,
     description: formData.description,
     price:
       typeof formData.price === 'number'
         ? formData.price
-        : parseFloat(formData.price || formData.price_single || formData.price_sharing) || null,
+        : parseFloat(
+            formData.price || formData.price_single || formData.price_sharing,
+          ) || null,
     location: formData.location,
     agent_id: agentId,
     youtube_id: formData.youtube_id || null,

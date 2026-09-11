@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.features.admin import admin_router
 from app.features.agents import agents_router
+from app.features.bnb import bnb_router
 from app.features.analytics import analytics_router
 from app.features.announcements import announcements_router
 from app.features.campuses import campuses_router
@@ -43,6 +44,7 @@ api_router.include_router(legal_router)
 api_router.include_router(announcements_router)
 api_router.include_router(admin_router)
 api_router.include_router(images_router)
+api_router.include_router(bnb_router)
 
 
 

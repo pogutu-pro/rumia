@@ -45,6 +45,8 @@ import {
   ChevronUp,
   ChevronDown,
   AlertCircle,
+  BedDouble,
+  Building2,
 } from 'lucide-react';
 
 import {
@@ -224,7 +226,13 @@ const OCCUPANCY_OPTIONS = [
   { value: 6, label: '6 people sharing' },
 ] as const;
 
-const UTILITIES = ['Water', 'Electricity', 'WiFi', 'Hot Water', 'Cooking Gas'] as const;
+const UTILITIES = [
+  'Water',
+  'Electricity',
+  'WiFi',
+  'Hot Water',
+  'Cooking Gas',
+] as const;
 
 const AMENITIES_LIST = [
   'Parking',
@@ -463,12 +471,15 @@ async function mapLimit<T>(
   fn: (item: T, index: number) => Promise<void>,
 ) {
   let next = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (next < items.length) {
-      const index = next++;
-      await fn(items[index], index);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (next < items.length) {
+        const index = next++;
+        await fn(items[index], index);
+      }
+    },
+  );
   await Promise.all(workers);
 }
 
@@ -476,8 +487,13 @@ function friendlyUploadError(error: any): string {
   const message = error?.message || error?.name || '';
   const lower = message.toLowerCase();
 
-  if (lower.includes('too small')) return 'Image is too small (minimum 100x100).';
-  if (lower.includes('exceeds') || lower.includes('too large') || lower.includes('413'))
+  if (lower.includes('too small'))
+    return 'Image is too small (minimum 100x100).';
+  if (
+    lower.includes('exceeds') ||
+    lower.includes('too large') ||
+    lower.includes('413')
+  )
     return 'Image is too large. Try a smaller photo.';
   if (lower.includes('unsupported') || lower.includes('format'))
     return 'Unsupported image format.';
@@ -503,32 +519,64 @@ export function NewListingForm({
   const isEditing = mode === 'edit' && !!initialListing;
 
   const [title, setTitle] = useState(initialListing?.title || '');
-  const [propertyType, setPropertyType] = useState<'hostel' | 'apartment' | 'short_stay'>(
-    ['apartment', 'short_stay', 'hostel'].includes(initialListing?.property_type ?? '')
+  const [propertyType, setPropertyType] = useState<
+    'hostel' | 'apartment' | 'short_stay'
+  >(
+    ['apartment', 'short_stay', 'hostel'].includes(
+      initialListing?.property_type ?? '',
+    )
       ? (initialListing?.property_type as 'hostel' | 'apartment' | 'short_stay')
       : 'hostel',
   );
-  const [description, setDescription] = useState(initialListing?.description || '');
+  const [description, setDescription] = useState(
+    initialListing?.description || '',
+  );
   const [location, setLocation] = useState(initialListing?.location || '');
   const [youtubeId, setYoutubeId] = useState(initialListing?.youtube_id || '');
-  const [isYoutubeShort, setIsYoutubeShort] = useState(!!initialListing?.is_youtube_shorts);
+  const [isYoutubeShort, setIsYoutubeShort] = useState(
+    !!initialListing?.is_youtube_shorts,
+  );
   const [whatsappNumber, setWhatsappNumber] = useState(agentWhatsapp || '');
-  const [landlordPhone, setLandlordPhone] = useState(initialListing?.landlord_phone || '');
+  const [landlordPhone, setLandlordPhone] = useState(
+    initialListing?.landlord_phone || '',
+  );
   const [whatsappError, setWhatsappError] = useState('');
   const [landlordPhoneError, setLandlordPhoneError] = useState('');
-  const [images, setImages] = useState<UploadedImage[]>(() => initialImages(initialListing));
+  const [images, setImages] = useState<UploadedImage[]>(() =>
+    initialImages(initialListing),
+  );
   const [area, setArea] = useState(initialListing?.area || '');
   const [availableAreas] = useState<CampusAreaOption[]>(campusZones);
-  const [specificLocation, setSpecificLocation] = useState(initialListing?.specific_location || '');
-  const [mpesaDetails, setMpesaDetails] = useState(initialListing?.mpesa_details || '');
-  const [distanceCategory, setDistanceCategory] = useState(initialListing?.distance_category || '');
-  const [bathroomType, setBathroomType] = useState(initialListing?.bathroom_type || 'Shared');
-  const [distanceToCampus, setDistanceToCampus] = useState(initialListing?.distance_to_campus || '');
-  const [securityType, setSecurityType] = useState(initialListing?.security_type || '');
-  const [latitude, setLatitude] = useState<number | null>(() => toNullableNumber(initialListing?.latitude));
-  const [longitude, setLongitude] = useState<number | null>(() => toNullableNumber(initialListing?.longitude));
-  const [gender, setGender] = useState<'mixed' | 'male' | 'female'>(initialListing?.gender || 'mixed');
-  const [roomTypes, setRoomTypes] = useState<FormRoomType[]>(() => initialRoomTypes(initialListing));
+  const [specificLocation, setSpecificLocation] = useState(
+    initialListing?.specific_location || '',
+  );
+  const [mpesaDetails, setMpesaDetails] = useState(
+    initialListing?.mpesa_details || '',
+  );
+  const [distanceCategory, setDistanceCategory] = useState(
+    initialListing?.distance_category || '',
+  );
+  const [bathroomType, setBathroomType] = useState(
+    initialListing?.bathroom_type || 'Shared',
+  );
+  const [distanceToCampus, setDistanceToCampus] = useState(
+    initialListing?.distance_to_campus || '',
+  );
+  const [securityType, setSecurityType] = useState(
+    initialListing?.security_type || '',
+  );
+  const [latitude, setLatitude] = useState<number | null>(() =>
+    toNullableNumber(initialListing?.latitude),
+  );
+  const [longitude, setLongitude] = useState<number | null>(() =>
+    toNullableNumber(initialListing?.longitude),
+  );
+  const [gender, setGender] = useState<'mixed' | 'male' | 'female'>(
+    initialListing?.gender || 'mixed',
+  );
+  const [roomTypes, setRoomTypes] = useState<FormRoomType[]>(() =>
+    initialRoomTypes(initialListing),
+  );
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDraft, setIsDraft] = useState(false);
@@ -544,7 +592,13 @@ export function NewListingForm({
   });
   const [amenities, setAmenities] = useState<string[]>(() => {
     const raw = initialListing?.amenities || [];
-    const UTILITY_NAMES = ['Water', 'Electricity', 'WiFi', 'Hot Water', 'Cooking Gas'];
+    const UTILITY_NAMES = [
+      'Water',
+      'Electricity',
+      'WiFi',
+      'Hot Water',
+      'Cooking Gas',
+    ];
     return raw.filter((a: string) => !UTILITY_NAMES.includes(a));
   });
 
@@ -558,9 +612,7 @@ export function NewListingForm({
 
   const toggleUtility = (util: string) => {
     setIncludedUtilities((prev) =>
-      prev.includes(util)
-        ? prev.filter((u) => u !== util)
-        : [...prev, util],
+      prev.includes(util) ? prev.filter((u) => u !== util) : [...prev, util],
     );
   };
 
@@ -756,21 +808,29 @@ export function NewListingForm({
     if (isSaving || isUploading) return;
 
     if (!title || !area || !whatsappNumber) {
-      toast.error('Please fill in all required fields: Title, Area, and WhatsApp number');
+      toast.error(
+        'Please fill in all required fields: Title, Area, and WhatsApp number',
+      );
       return;
     }
 
     if (!isValidKenyanPhone(whatsappNumber)) {
-      toast.error('Please enter a valid Kenyan WhatsApp number (e.g. 0712 345 678)');
+      toast.error(
+        'Please enter a valid Kenyan WhatsApp number (e.g. 0712 345 678)',
+      );
       return;
     }
 
     if (landlordPhone && !isValidKenyanPhone(landlordPhone)) {
-      toast.error('Please enter a valid Kenyan phone number for the Hostel Owner');
+      toast.error(
+        'Please enter a valid Kenyan phone number for the Hostel Owner',
+      );
       return;
     }
 
-    const validRoomTypes = roomTypes.filter((rt) => (rt.category || rt.room_type) && rt.price);
+    const validRoomTypes = roomTypes.filter(
+      (rt) => (rt.category || rt.room_type) && rt.price,
+    );
     if (validRoomTypes.length === 0) {
       toast.error('Please add at least one room type with a price');
       return;
@@ -780,7 +840,8 @@ export function NewListingForm({
     setIsDraft(asDraft);
 
     try {
-      const { createListingAction, updateListingAction } = await import('@/app/actions/listings');
+      const { createListingAction, updateListingAction } =
+        await import('@/app/actions/listings');
 
       const firstRoom = validRoomTypes[0];
 
@@ -809,7 +870,9 @@ export function NewListingForm({
       }
 
       const mainListingPrice =
-        derivedPriceSingle ?? derivedPriceSharing ?? (Number(firstRoom.price) || 0);
+        derivedPriceSingle ??
+        derivedPriceSharing ??
+        (Number(firstRoom.price) || 0);
 
       const payload = {
         listing_id: initialListing?.id,
@@ -859,12 +922,21 @@ export function NewListingForm({
         throw new Error(result.error || 'Failed to insert listing');
       }
 
-      const resultListingId = 'listingId' in result ? result.listingId : undefined;
+      const resultListingId =
+        'listingId' in result ? result.listingId : undefined;
       if (isEditing) {
-        posthog.capture('listing_updated', { listing_id: String(resultListingId ?? initialListing?.id ?? ''), area, is_draft: asDraft });
+        posthog.capture('listing_updated', {
+          listing_id: String(resultListingId ?? initialListing?.id ?? ''),
+          area,
+          is_draft: asDraft,
+        });
         toast.success('Listing updated successfully!');
       } else {
-        posthog.capture('listing_created', { listing_id: String(resultListingId ?? ''), area, is_draft: asDraft });
+        posthog.capture('listing_created', {
+          listing_id: String(resultListingId ?? ''),
+          area,
+          is_draft: asDraft,
+        });
         toast.success('Listing created successfully!');
       }
       router.push(successRedirectPath);
@@ -882,25 +954,92 @@ export function NewListingForm({
       {/* SECTION 1: Basics */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Basic Information</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">What kind of property is this?</p>
+          <h2 className="text-xl font-bold text-slate-900">
+            Basic Information
+          </h2>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">
+            What kind of property is this?
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="title">Listing Title *</Label>
-            <Input id="title" type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Spacious 1-Bedroom Hostel Near JKUAT" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+            <Input
+              id="title"
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Spacious 1-Bedroom Hostel Near JKUAT"
+              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <Label htmlFor="propertyType">Property Type *</Label>
-            <select id="propertyType" value={propertyType} onChange={(e) => setPropertyType(e.target.value as any)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-              <option value="hostel">Hostel — long-stay student rooms (monthly)</option>
-              <option value="apartment">Apartment — self-contained monthly rental</option>
-              <option value="short_stay">Short stay — nightly-priced stays</option>
-            </select>
+            <Label>Property Type *</Label>
+            <div
+              className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+              role="group"
+              aria-label="Property type"
+            >
+              {[
+                {
+                  value: 'hostel' as const,
+                  title: 'Hostel',
+                  description: 'Long-stay student rooms billed monthly.',
+                  Icon: BedDouble,
+                },
+                {
+                  value: 'apartment' as const,
+                  title: 'Apartment',
+                  description: 'Self-contained monthly accommodation.',
+                  Icon: Building2,
+                },
+              ].map(({ value, title, description, Icon }) => {
+                const selected = propertyType === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setPropertyType(value)}
+                    className={cn(
+                      'flex min-h-[88px] items-start gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+                      selected
+                        ? 'border-emerald-600 bg-emerald-50 ring-1 ring-emerald-600'
+                        : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                        selected
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-white text-slate-500 ring-1 ring-slate-200',
+                      )}
+                    >
+                      <Icon className="h-5 w-5" strokeWidth={1.9} />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-bold text-slate-900">
+                        {title}
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">
+                        {description}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="gender">Who Can Stay? *</Label>
-            <select id="gender" value={gender} onChange={(e) => setGender(e.target.value as any)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            <select
+              id="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value as any)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            >
               <option value="mixed">Mixed (All students)</option>
               <option value="female">Female Only</option>
               <option value="male">Male Only</option>
@@ -908,18 +1047,53 @@ export function NewListingForm({
           </div>
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="area">Hostel Area *</Label>
-            <select id="area" required value={area} onChange={(e) => handleAreaChange(e.target.value)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-              <option value="">{campusZones.length > 0 ? 'Select an area...' : 'No areas configured yet'}</option>
-              {campusZones.map((zone) => (<option key={zone.id || zone.name} value={zone.name}>{zone.name}</option>))}
+            <select
+              id="area"
+              required
+              value={area}
+              onChange={(e) => handleAreaChange(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            >
+              <option value="">
+                {campusZones.length > 0
+                  ? 'Select an area...'
+                  : 'No areas configured yet'}
+              </option>
+              {campusZones.map((zone) => (
+                <option key={zone.id || zone.name} value={zone.name}>
+                  {zone.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <Label htmlFor="specificLocation">Specific Location <span className="text-slate-400 font-normal">(optional)</span></Label>
-            <Input id="specificLocation" type="text" maxLength={60} value={specificLocation} onChange={(e) => setSpecificLocation(e.target.value.slice(0, 60))} placeholder="e.g. opposite the petrol station" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+            <Label htmlFor="specificLocation">
+              Specific Location{' '}
+              <span className="text-slate-400 font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="specificLocation"
+              type="text"
+              maxLength={60}
+              value={specificLocation}
+              onChange={(e) => setSpecificLocation(e.target.value.slice(0, 60))}
+              placeholder="e.g. opposite the petrol station"
+              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <Label htmlFor="description">Description <span className="text-slate-400 font-normal">(optional)</span></Label>
-            <Textarea id="description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the hostel, nearby landmarks, what makes it special..." className="bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm resize-none" />
+            <Label htmlFor="description">
+              Description{' '}
+              <span className="text-slate-400 font-normal">(optional)</span>
+            </Label>
+            <Textarea
+              id="description"
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe the hostel, nearby landmarks, what makes it special..."
+              className="bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm resize-none"
+            />
           </div>
         </div>
       </div>
@@ -928,13 +1102,26 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Property Photos</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Upload images to showcase the hostel. Drag to reorder.</p>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">
+            Upload images to showcase the hostel. Drag to reorder.
+          </p>
         </div>
         <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/20 rounded-2xl p-8 transition-colors flex flex-col items-center justify-center text-center cursor-pointer relative">
-          <input type="file" multiple accept="image/*" onChange={handleFileChange} disabled={isUploading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleFileChange}
+            disabled={isUploading}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
           <UploadCloud className="h-10 w-10 text-slate-400 mb-3" />
-          <p className="text-sm font-bold text-slate-700">{isUploading ? 'Uploading...' : 'Click or drag photos here'}</p>
-          <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, or WEBP up to 10MB each</p>
+          <p className="text-sm font-bold text-slate-700">
+            {isUploading ? 'Uploading...' : 'Click or drag photos here'}
+          </p>
+          <p className="text-xs text-slate-400 mt-1 font-medium">
+            PNG, JPG, or WEBP up to 10MB each
+          </p>
         </div>
         {isUploading && (
           <div className="flex items-center justify-center gap-2 text-emerald-600 text-xs font-bold py-2">
@@ -948,11 +1135,28 @@ export function NewListingForm({
               <GripVertical className="h-3 w-3" />
               Drag to reorder. First image = cover photo.
             </p>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={images.map((img) => img.id)} strategy={rectSortingStrategy}>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={images.map((img) => img.id)}
+                strategy={rectSortingStrategy}
+              >
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
                   {images.map((img, idx) => (
-                    <SortableImageCard key={img.id} img={img} idx={idx} totalImages={images.length} onRemove={handleRemoveImage} onSetCover={handleSetCover} onMoveUp={handleMoveUp} onMoveDown={handleMoveDown} onCategoryChange={handleCategoryChange} />
+                    <SortableImageCard
+                      key={img.id}
+                      img={img}
+                      idx={idx}
+                      totalImages={images.length}
+                      onRemove={handleRemoveImage}
+                      onSetCover={handleSetCover}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
+                      onCategoryChange={handleCategoryChange}
+                    />
                   ))}
                 </div>
               </SortableContext>
@@ -965,63 +1169,159 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Rooms & Pricing</h2>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">Add each room type with its price. At least one required.</p>
+            <h2 className="text-xl font-bold text-slate-900">
+              Rooms & Pricing
+            </h2>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">
+              Add each room type with its price. At least one required.
+            </p>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={addRoomTypeField} className="h-9 px-3 rounded-lg border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 flex items-center gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addRoomTypeField}
+            className="h-9 px-3 rounded-lg border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 flex items-center gap-1"
+          >
             <Plus className="h-3.5 w-3.5" />
             Add Room
           </Button>
         </div>
         <div className="space-y-4">
           {roomTypes.map((rt, idx) => {
-            const hasStructuredFields = !!(rt.category || rt.occupancy || rt.floor || rt.size);
-            const label = hasStructuredFields ? generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, rt.size) : rt.room_type;
+            const hasStructuredFields = !!(
+              rt.category ||
+              rt.occupancy ||
+              rt.floor ||
+              rt.size
+            );
+            const label = hasStructuredFields
+              ? generateRoomTypeLabel(
+                  rt.category,
+                  rt.occupancy,
+                  rt.floor,
+                  rt.size,
+                )
+              : rt.room_type;
             const furnishingLabel = deriveFurnishingLevel(rt.furnishing_items);
             return (
-              <div key={idx} className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/80 space-y-4">
+              <div
+                key={idx}
+                className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/80 space-y-4"
+              >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700">Room {idx + 1}</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Room {idx + 1}
+                  </span>
                   {roomTypes.length > 1 && (
-                    <button type="button" onClick={() => removeRoomTypeField(idx)} className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg transition-colors" title="Remove">
+                    <button
+                      type="button"
+                      onClick={() => removeRoomTypeField(idx)}
+                      className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg transition-colors"
+                      title="Remove"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>
                 {label && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Label: </span>
-                    <span className="text-sm font-semibold text-emerald-900">{label}</span>
+                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                      Label:{' '}
+                    </span>
+                    <span className="text-sm font-semibold text-emerald-900">
+                      {label}
+                    </span>
                   </div>
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Room Type *</Label>
-                    <select value={rt.category} onChange={(e) => {
-                      const newCat = e.target.value;
-                      const targetOcc = (newCat === 'shared' && Number(rt.occupancy) <= 1) ? 2 : rt.occupancy;
-                      updateRoomTypeField(idx, 'category', newCat);
-                      if (targetOcc !== rt.occupancy) {
-                        updateRoomTypeField(idx, 'occupancy', targetOcc);
-                      }
-                      if (newCat) {
-                        const genLabel = generateRoomTypeLabel(newCat, targetOcc, rt.floor, rt.size);
-                        if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel);
-                      }
-                    }} className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Room Type *
+                    </Label>
+                    <select
+                      value={rt.category}
+                      onChange={(e) => {
+                        const newCat = e.target.value;
+                        const targetOcc =
+                          newCat === 'shared' && Number(rt.occupancy) <= 1
+                            ? 2
+                            : rt.occupancy;
+                        updateRoomTypeField(idx, 'category', newCat);
+                        if (targetOcc !== rt.occupancy) {
+                          updateRoomTypeField(idx, 'occupancy', targetOcc);
+                        }
+                        if (newCat) {
+                          const genLabel = generateRoomTypeLabel(
+                            newCat,
+                            targetOcc,
+                            rt.floor,
+                            rt.size,
+                          );
+                          if (genLabel)
+                            updateRoomTypeField(idx, 'room_type', genLabel);
+                        }
+                      }}
+                      className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
                       <option value="">Select...</option>
-                      {CATEGORY_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+                      {CATEGORY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Occupancy *</Label>
-                    <select value={rt.occupancy} onChange={(e) => { const v = Number(e.target.value); updateRoomTypeField(idx, 'occupancy', v); if (rt.category) { const genLabel = generateRoomTypeLabel(rt.category, v, rt.floor, rt.size); if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel); } }} className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                      {OCCUPANCY_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Occupancy *
+                    </Label>
+                    <select
+                      value={rt.occupancy}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        updateRoomTypeField(idx, 'occupancy', v);
+                        if (rt.category) {
+                          const genLabel = generateRoomTypeLabel(
+                            rt.category,
+                            v,
+                            rt.floor,
+                            rt.size,
+                          );
+                          if (genLabel)
+                            updateRoomTypeField(idx, 'room_type', genLabel);
+                        }
+                      }}
+                      className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                      {OCCUPANCY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Floor</Label>
-                    <select value={rt.floor} onChange={(e) => { updateRoomTypeField(idx, 'floor', e.target.value); if (rt.category) { const genLabel = generateRoomTypeLabel(rt.category, rt.occupancy, e.target.value, rt.size); if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel); } }} className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Floor
+                    </Label>
+                    <select
+                      value={rt.floor}
+                      onChange={(e) => {
+                        updateRoomTypeField(idx, 'floor', e.target.value);
+                        if (rt.category) {
+                          const genLabel = generateRoomTypeLabel(
+                            rt.category,
+                            rt.occupancy,
+                            e.target.value,
+                            rt.size,
+                          );
+                          if (genLabel)
+                            updateRoomTypeField(idx, 'room_type', genLabel);
+                        }
+                      }}
+                      className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
                       <option value="">Select...</option>
                       <option value="ground">Ground floor</option>
                       <option value="upper">Upper floor</option>
@@ -1029,8 +1329,26 @@ export function NewListingForm({
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Size</Label>
-                    <select value={rt.size} onChange={(e) => { updateRoomTypeField(idx, 'size', e.target.value); if (rt.category) { const genLabel = generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, e.target.value); if (genLabel) updateRoomTypeField(idx, 'room_type', genLabel); } }} className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Size
+                    </Label>
+                    <select
+                      value={rt.size}
+                      onChange={(e) => {
+                        updateRoomTypeField(idx, 'size', e.target.value);
+                        if (rt.category) {
+                          const genLabel = generateRoomTypeLabel(
+                            rt.category,
+                            rt.occupancy,
+                            rt.floor,
+                            e.target.value,
+                          );
+                          if (genLabel)
+                            updateRoomTypeField(idx, 'room_type', genLabel);
+                        }
+                      }}
+                      className="flex h-10 w-full items-center justify-between rounded-md border bg-white border-slate-200 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
                       <option value="">Select...</option>
                       <option value="standard">Standard</option>
                       <option value="smaller">Smaller</option>
@@ -1040,31 +1358,104 @@ export function NewListingForm({
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Rent (KES/mo) *</Label>
-                    <Input type="number" required value={rt.price} onChange={(e) => updateRoomTypeField(idx, 'price', e.target.value)} placeholder="e.g. 7500" className="h-10 bg-white border-slate-200" />
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Rent (KES/mo) *
+                    </Label>
+                    <Input
+                      type="number"
+                      required
+                      value={rt.price}
+                      onChange={(e) =>
+                        updateRoomTypeField(idx, 'price', e.target.value)
+                      }
+                      placeholder="e.g. 7500"
+                      className="h-10 bg-white border-slate-200"
+                    />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">Deposit (KES) <span className="text-slate-300 font-normal">optional</span></Label>
-                    <Input type="number" min={0} value={rt.deposit} onChange={(e) => updateRoomTypeField(idx, 'deposit', e.target.value)} placeholder="e.g. 3000" className="h-10 bg-white border-slate-200" />
+                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                      Deposit (KES){' '}
+                      <span className="text-slate-300 font-normal">
+                        optional
+                      </span>
+                    </Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={rt.deposit}
+                      onChange={(e) =>
+                        updateRoomTypeField(idx, 'deposit', e.target.value)
+                      }
+                      placeholder="e.g. 3000"
+                      className="h-10 bg-white border-slate-200"
+                    />
                   </div>
                   <div className="flex items-end pb-1">
                     <div className="flex items-center gap-2">
-                      <input type="checkbox" id={`avail-${idx}`} checked={rt.is_available} onChange={(e) => updateRoomTypeField(idx, 'is_available', e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600" />
-                      <Label htmlFor={`avail-${idx}`} className="text-xs font-semibold text-slate-600 cursor-pointer">Available</Label>
+                      <input
+                        type="checkbox"
+                        id={`avail-${idx}`}
+                        checked={rt.is_available}
+                        onChange={(e) =>
+                          updateRoomTypeField(
+                            idx,
+                            'is_available',
+                            e.target.checked,
+                          )
+                        }
+                        className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                      />
+                      <Label
+                        htmlFor={`avail-${idx}`}
+                        className="text-xs font-semibold text-slate-600 cursor-pointer"
+                      >
+                        Available
+                      </Label>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-400 font-bold uppercase">Furnishing <span className="text-slate-300 font-normal">(optional)</span></Label>
+                  <Label className="text-xs text-slate-400 font-bold uppercase">
+                    Furnishing{' '}
+                    <span className="text-slate-300 font-normal">
+                      (optional)
+                    </span>
+                  </Label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {FURNISHING_ITEMS.map((item) => (
                       <div key={item} className="flex items-center space-x-2">
-                        <input type="checkbox" id={`furnishing-${idx}-${item}`} checked={rt.furnishing_items.includes(item)} onChange={(e) => { const newItems = e.target.checked ? [...rt.furnishing_items, item] : rt.furnishing_items.filter((f: string) => f !== item); updateRoomTypeField(idx, 'furnishing_items', newItems); }} className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600" />
-                        <Label htmlFor={`furnishing-${idx}-${item}`} className="text-xs font-medium leading-none cursor-pointer text-slate-600">{item}</Label>
+                        <input
+                          type="checkbox"
+                          id={`furnishing-${idx}-${item}`}
+                          checked={rt.furnishing_items.includes(item)}
+                          onChange={(e) => {
+                            const newItems = e.target.checked
+                              ? [...rt.furnishing_items, item]
+                              : rt.furnishing_items.filter(
+                                  (f: string) => f !== item,
+                                );
+                            updateRoomTypeField(
+                              idx,
+                              'furnishing_items',
+                              newItems,
+                            );
+                          }}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                        />
+                        <Label
+                          htmlFor={`furnishing-${idx}-${item}`}
+                          className="text-xs font-medium leading-none cursor-pointer text-slate-600"
+                        >
+                          {item}
+                        </Label>
                       </div>
                     ))}
                   </div>
-                  {furnishingLabel && <p className="text-xs font-bold text-emerald-600 mt-1">{furnishingLabel}</p>}
+                  {furnishingLabel && (
+                    <p className="text-xs font-bold text-emerald-600 mt-1">
+                      {furnishingLabel}
+                    </p>
+                  )}
                 </div>
               </div>
             );
@@ -1076,31 +1467,65 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Property Details</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Details that help students find and choose your hostel.</p>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">
+            Details that help students find and choose your hostel.
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="bathroomType">Bathroom Type *</Label>
-            <select id="bathroomType" value={bathroomType} onChange={(e) => setBathroomType(e.target.value)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            <select
+              id="bathroomType"
+              value={bathroomType}
+              onChange={(e) => setBathroomType(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            >
               <option value="Shared">Shared</option>
               <option value="Private">Private (en-suite)</option>
             </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="distanceCategory">Distance from Campus *</Label>
-            <select id="distanceCategory" value={distanceCategory} onChange={(e) => setDistanceCategory(e.target.value)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            <select
+              id="distanceCategory"
+              value={distanceCategory}
+              onChange={(e) => setDistanceCategory(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            >
               <option value="">Select...</option>
-              {DISTANCE_CATEGORY_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+              {DISTANCE_CATEGORY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="distanceToCampus">Distance Description <span className="text-slate-400 font-normal">(optional)</span></Label>
-            <Input id="distanceToCampus" type="text" value={distanceToCampus} onChange={(e) => setDistanceToCampus(e.target.value)} placeholder="e.g. 5 minutes walk from DeKUT gate" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-            <p className="text-[11px] text-slate-400 font-medium">Shown below the listing title. e.g. “Near Main Gate” or “10 minutes walk from DeKUT”</p>
+            <Label htmlFor="distanceToCampus">
+              Distance Description{' '}
+              <span className="text-slate-400 font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="distanceToCampus"
+              type="text"
+              value={distanceToCampus}
+              onChange={(e) => setDistanceToCampus(e.target.value)}
+              placeholder="e.g. 5 minutes walk from DeKUT gate"
+              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
+            <p className="text-[11px] text-slate-400 font-medium">
+              Shown below the listing title. e.g. “Near Main Gate” or “10
+              minutes walk from DeKUT”
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="securityType">Security</Label>
-            <select id="securityType" value={securityType} onChange={(e) => setSecurityType(e.target.value)} className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            <select
+              id="securityType"
+              value={securityType}
+              onChange={(e) => setSecurityType(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            >
               <option value="">Select...</option>
               <option value="24/7 CCTV & Guards">24/7 CCTV & Guards</option>
               <option value="Guard Only">Guard Only</option>
@@ -1110,8 +1535,19 @@ export function NewListingForm({
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="mpesaDetails">M-Pesa Details <span className="text-slate-400 font-normal">(optional)</span></Label>
-            <Input id="mpesaDetails" type="text" maxLength={100} value={mpesaDetails} onChange={(e) => setMpesaDetails(e.target.value.slice(0, 100))} placeholder="e.g. Paybill 247247, A/C 435800" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+            <Label htmlFor="mpesaDetails">
+              M-Pesa Details{' '}
+              <span className="text-slate-400 font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="mpesaDetails"
+              type="text"
+              maxLength={100}
+              value={mpesaDetails}
+              onChange={(e) => setMpesaDetails(e.target.value.slice(0, 100))}
+              placeholder="e.g. Paybill 247247, A/C 435800"
+              className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+            />
           </div>
         </div>
       </div>
@@ -1120,7 +1556,9 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-5">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Included in Rent</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Check what is already covered by the rent price.</p>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">
+            Check what is already covered by the rent price.
+          </p>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
           {UTILITIES.map((util) => {
@@ -1128,13 +1566,31 @@ export function NewListingForm({
             const Icon = meta.icon;
             const selected = includedUtilities.includes(util);
             return (
-              <label key={util} htmlFor={`util-${util}`} className="group cursor-pointer">
-                <input type="checkbox" id={`util-${util}`} checked={selected} onChange={() => toggleUtility(util)} className="sr-only" />
-                <div className={`flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150 ${selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}>
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}>
+              <label
+                key={util}
+                htmlFor={`util-${util}`}
+                className="group cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  id={`util-${util}`}
+                  checked={selected}
+                  onChange={() => toggleUtility(util)}
+                  className="sr-only"
+                />
+                <div
+                  className={`flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150 ${selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
+                >
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}
+                  >
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className={`text-xs font-bold leading-tight text-center ${selected ? 'text-emerald-700' : 'text-slate-600'}`}>{util}</span>
+                  <span
+                    className={`text-xs font-bold leading-tight text-center ${selected ? 'text-emerald-700' : 'text-slate-600'}`}
+                  >
+                    {util}
+                  </span>
                 </div>
               </label>
             );
@@ -1146,7 +1602,9 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-5">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Amenities</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Additional facilities available at this hostel.</p>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">
+            Additional facilities available at this hostel.
+          </p>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {AMENITIES_LIST.map((amenity) => {
@@ -1154,13 +1612,31 @@ export function NewListingForm({
             const Icon = meta.icon;
             const selected = amenities.includes(amenity);
             return (
-              <label key={amenity} htmlFor={`amenity-${amenity}`} className="group cursor-pointer">
-                <input type="checkbox" id={`amenity-${amenity}`} checked={selected} onChange={() => toggleAmenity(amenity)} className="sr-only" />
-                <div className={`flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150 ${selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}>
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}>
+              <label
+                key={amenity}
+                htmlFor={`amenity-${amenity}`}
+                className="group cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  id={`amenity-${amenity}`}
+                  checked={selected}
+                  onChange={() => toggleAmenity(amenity)}
+                  className="sr-only"
+                />
+                <div
+                  className={`flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150 ${selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
+                >
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}
+                  >
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className={`text-xs font-bold leading-tight text-center ${selected ? 'text-emerald-700' : 'text-slate-600'}`}>{amenity}</span>
+                  <span
+                    className={`text-xs font-bold leading-tight text-center ${selected ? 'text-emerald-700' : 'text-slate-600'}`}
+                  >
+                    {amenity}
+                  </span>
                 </div>
               </label>
             );
@@ -1171,20 +1647,86 @@ export function NewListingForm({
       {/* SECTION 7: Contact */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Contact Information</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">How students reach you and the hostel owner.</p>
+          <h2 className="text-xl font-bold text-slate-900">
+            Contact Information
+          </h2>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">
+            How students reach you and the hostel owner.
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="agentWhatsapp">Your WhatsApp *</Label>
-            <Input id="agentWhatsapp" type="tel" required value={whatsappNumber} onChange={(e) => { const val = e.target.value; setWhatsappNumber(val); if (val.trim().length >= 9) { setWhatsappError(isValidKenyanPhone(val) ? '' : 'Please enter a valid Kenyan number (07xx or 01xx)'); } else { setWhatsappError(''); } }} placeholder="e.g. 0712 345 678" className={cn('h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm', whatsappError && 'border-rose-400 focus-visible:ring-rose-400')} />
-            {whatsappError && (<p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium"><AlertCircle className="h-3.5 w-3.5 shrink-0" />{whatsappError}</p>)}
+            <Input
+              id="agentWhatsapp"
+              type="tel"
+              required
+              value={whatsappNumber}
+              onChange={(e) => {
+                const val = e.target.value;
+                setWhatsappNumber(val);
+                if (val.trim().length >= 9) {
+                  setWhatsappError(
+                    isValidKenyanPhone(val)
+                      ? ''
+                      : 'Please enter a valid Kenyan number (07xx or 01xx)',
+                  );
+                } else {
+                  setWhatsappError('');
+                }
+              }}
+              placeholder="e.g. 0712 345 678"
+              className={cn(
+                'h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm',
+                whatsappError && 'border-rose-400 focus-visible:ring-rose-400',
+              )}
+            />
+            {whatsappError && (
+              <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {whatsappError}
+              </p>
+            )}
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <Label htmlFor="landlordPhone">Hostel Owner Phone <span className="text-slate-400 font-normal">(optional)</span></Label>
-            <Input id="landlordPhone" type="tel" value={landlordPhone} onChange={(e) => { const val = e.target.value; setLandlordPhone(val); if (val.trim().length >= 9) { setLandlordPhoneError(isValidKenyanPhone(val) ? '' : 'Please enter a valid Kenyan number'); } else { setLandlordPhoneError(''); } }} placeholder="e.g. 0712 345 678" className={cn('h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm', landlordPhoneError && 'border-rose-400 focus-visible:ring-rose-400')} />
-            {landlordPhoneError && (<p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium"><AlertCircle className="h-3.5 w-3.5 shrink-0" />{landlordPhoneError}</p>)}
-            <p className="text-[11px] text-slate-400 font-medium">When a student chooses “Hostel Owner”, they contact this number directly. Falls back to your number if empty.</p>
+            <Label htmlFor="landlordPhone">
+              Hostel Owner Phone{' '}
+              <span className="text-slate-400 font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="landlordPhone"
+              type="tel"
+              value={landlordPhone}
+              onChange={(e) => {
+                const val = e.target.value;
+                setLandlordPhone(val);
+                if (val.trim().length >= 9) {
+                  setLandlordPhoneError(
+                    isValidKenyanPhone(val)
+                      ? ''
+                      : 'Please enter a valid Kenyan number',
+                  );
+                } else {
+                  setLandlordPhoneError('');
+                }
+              }}
+              placeholder="e.g. 0712 345 678"
+              className={cn(
+                'h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm',
+                landlordPhoneError &&
+                  'border-rose-400 focus-visible:ring-rose-400',
+              )}
+            />
+            {landlordPhoneError && (
+              <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {landlordPhoneError}
+              </p>
+            )}
+            <p className="text-[11px] text-slate-400 font-medium">
+              When a student chooses “Hostel Owner”, they contact this number
+              directly. Falls back to your number if empty.
+            </p>
           </div>
         </div>
       </div>
@@ -1192,14 +1734,44 @@ export function NewListingForm({
       {/* SECTION 8: YouTube */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Video Tour <span className="text-slate-400 font-normal text-base">(optional)</span></h2>
+          <h2 className="text-xl font-bold text-slate-900">
+            Video Tour{' '}
+            <span className="text-slate-400 font-normal text-base">
+              (optional)
+            </span>
+          </h2>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="youtubeId" className="flex items-center gap-1"><Youtube className="h-4 w-4 text-red-600" />YouTube Link</Label>
-          <Input id="youtubeId" type="text" value={youtubeId} onChange={(e) => { const raw = e.target.value; const id = extractYoutubeId(raw); setYoutubeId(id); setIsYoutubeShort(id.length >= 10 && /\/shorts\//i.test(raw)); }} placeholder="Paste YouTube video link or 11-character ID" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+          <Label htmlFor="youtubeId" className="flex items-center gap-1">
+            <Youtube className="h-4 w-4 text-red-600" />
+            YouTube Link
+          </Label>
+          <Input
+            id="youtubeId"
+            type="text"
+            value={youtubeId}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const id = extractYoutubeId(raw);
+              setYoutubeId(id);
+              setIsYoutubeShort(id.length >= 10 && /\/shorts\//i.test(raw));
+            }}
+            placeholder="Paste YouTube video link or 11-character ID"
+            className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
+          />
           {youtubeId && youtubeId.length >= 10 && (
-            <div className={`mt-3 ${isYoutubeShort ? 'aspect-[9/16] max-w-[200px]' : 'aspect-video max-w-sm'} rounded-xl overflow-hidden border border-slate-200 shadow-xs`}>
-              <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${youtubeId}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+            <div
+              className={`mt-3 ${isYoutubeShort ? 'aspect-[9/16] max-w-[200px]' : 'aspect-video max-w-sm'} rounded-xl overflow-hidden border border-slate-200 shadow-xs`}
+            >
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${youtubeId}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
           )}
         </div>
@@ -1207,12 +1779,34 @@ export function NewListingForm({
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" disabled={isSaving || isUploading} onClick={(e) => handleSubmit(e, true)} className="rounded-xl font-bold h-11 border-slate-200 text-slate-600 hover:bg-slate-50">
-          {isSaving && isDraft ? (<Loader2 className="h-4.5 w-4.5 animate-spin mr-1.5" />) : null}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isSaving || isUploading}
+          onClick={(e) => handleSubmit(e, true)}
+          className="rounded-xl font-bold h-11 border-slate-200 text-slate-600 hover:bg-slate-50"
+        >
+          {isSaving && isDraft ? (
+            <Loader2 className="h-4.5 w-4.5 animate-spin mr-1.5" />
+          ) : null}
           Save Draft
         </Button>
-        <Button type="submit" onClick={(e) => handleSubmit(e, false)} disabled={isSaving || isUploading} className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-8 border-0 shadow-md shadow-emerald-600/10">
-          {isSaving && !isDraft ? (<><Loader2 className="h-4.5 w-4.5 animate-spin mr-1.5" />Publishing...</>) : isEditing ? 'Update Listing' : 'Publish Listing'}
+        <Button
+          type="submit"
+          onClick={(e) => handleSubmit(e, false)}
+          disabled={isSaving || isUploading}
+          className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-8 border-0 shadow-md shadow-emerald-600/10"
+        >
+          {isSaving && !isDraft ? (
+            <>
+              <Loader2 className="h-4.5 w-4.5 animate-spin mr-1.5" />
+              Publishing...
+            </>
+          ) : isEditing ? (
+            'Update Listing'
+          ) : (
+            'Publish Listing'
+          )}
         </Button>
       </div>
     </form>

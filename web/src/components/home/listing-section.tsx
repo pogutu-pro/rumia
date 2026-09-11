@@ -6,7 +6,7 @@ import {
 } from './explore-listing-card';
 
 interface ListingSectionProps {
-  title: string;
+  title: React.ReactNode;
   subtitle?: string;
   seeAllHref?: string;
   seeAllLabel?: string;
@@ -21,16 +21,15 @@ export function ListingSection({
   items,
 }: ListingSectionProps) {
   if (items.length === 0) return null;
-
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-4 sm:py-6 lg:px-8">
-      <div className="mb-2.5 sm:mb-3.5 flex items-baseline justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base font-extrabold tracking-tight text-slate-900 xs:text-lg sm:text-xl truncate">
+    <section className="mx-auto w-full max-w-6xl px-4 lg:px-8">
+      <div className="flex items-start justify-between gap-4 pb-4 pt-8">
+        <div className="flex-1">
+          <h2 className="text-lg font-bold leading-7 tracking-tight text-slate-900 text-balance sm:text-xl">
             {title}
           </h2>
           {subtitle && (
-            <p className="mt-0.5 text-xs sm:text-sm font-medium text-slate-500 truncate">
+            <p className="mt-2 text-sm font-medium leading-5 text-slate-500">
               {subtitle}
             </p>
           )}
@@ -38,15 +37,16 @@ export function ListingSection({
         {seeAllHref && (
           <Link
             href={seeAllHref}
-            className="inline-flex shrink-0 items-center gap-1 py-1 px-1 -mr-1 text-xs sm:text-sm font-semibold text-emerald-700 transition-colors hover:text-emerald-800 touch-manipulation"
+            className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full px-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
           >
-            {seeAllLabel}
-            <ArrowRight className="h-3.5 w-3.5" />
+            {seeAllLabel} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         )}
       </div>
-
-      <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1 pb-2.5 sm:mx-0 sm:gap-4 sm:px-0 overscroll-x-contain">
+      <div
+        aria-label="Scrollable property listings"
+        className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pr-4 sm:gap-4 lg:px-0"
+      >
         {items.map((item) => (
           <ExploreListingCard key={item.id} item={item} />
         ))}

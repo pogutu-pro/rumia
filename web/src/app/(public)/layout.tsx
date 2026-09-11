@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { PublicHeader } from '@/components/layouts/public-header';
 import { Footer } from '@/components/layouts/public-footer';
-import { getCampusBySlug, getAllCampuses } from '@/lib/data/campuses';
+import { getCampusBySlug } from '@/lib/data/campuses';
 import { CampusProvider } from '@/lib/campus-context';
 
 interface LayoutProps {
@@ -9,15 +9,12 @@ interface LayoutProps {
 }
 
 export default async function PublicLayout({ children }: LayoutProps) {
-  const [campus, campuses] = await Promise.all([
-    getCampusBySlug('dekut'),
-    getAllCampuses(),
-  ]);
+  const campus = await getCampusBySlug('dekut');
 
   return (
     <CampusProvider campus={campus}>
       <div className="flex min-h-screen flex-col">
-        <PublicHeader campuses={campuses} />
+        <PublicHeader />
         <main className="flex-1">{children}</main>
         <Footer whatsappNumber={campus.whatsapp_number} />
       </div>
