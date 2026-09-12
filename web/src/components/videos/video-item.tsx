@@ -104,6 +104,7 @@ export const VideoItem = React.memo(function VideoItem({
             isActive={isInWindow ? isActive : false}
             isMuted={isMuted}
             title={listing.title}
+            priority={index < 2}
           />
         ) : (
           /* No video — show placeholder */

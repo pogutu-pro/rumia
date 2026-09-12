@@ -12,11 +12,11 @@ const SECURITY_HEADERS: [string, string][] = [
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://apis.google.com https://*.posthog.com https://static.cloudflareinsights.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://apis.google.com https://*.posthog.com https://static.cloudflareinsights.com https://www.youtube.com https://*.youtube.com https://*.ytimg.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
-       "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://rumia.co.ke https://www.rumia.co.ke https://*.supabase.co wss://*.supabase.co https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com https://*.i.posthog.com https://*.posthog.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io",
+       "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://rumia.co.ke https://www.rumia.co.ke https://*.supabase.co wss://*.supabase.co https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com https://*.i.posthog.com https://*.posthog.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://www.youtube.com https://*.youtube.com https://*.ytimg.com",
       "frame-src 'self' https://www.youtube.com",
       "object-src 'none'",
       "base-uri 'self'",

@@ -10,6 +10,7 @@ interface YouTubeEmbedProps {
   isActive: boolean;
   isMuted: boolean;
   title?: string;
+  priority?: boolean;
 }
 
 const THUMB_FALLBACKS = [
@@ -34,6 +35,7 @@ export function YouTubeEmbed({
   isActive,
   isMuted,
   title = 'Property video',
+  priority = false,
 }: YouTubeEmbedProps) {
   const [thumbIndex, setThumbIndex] = React.useState(0);
   const [thumbError, setThumbError] = React.useState(false);
@@ -67,7 +69,6 @@ export function YouTubeEmbed({
     if (playerRef.current) {
       try {
         playerRef.current.playVideo();
-        setIsPaused(false);
       } catch { /* noop */ }
       return;
     }
@@ -131,8 +132,6 @@ export function YouTubeEmbed({
       try {
         playerRef.current.pauseVideo();
       } catch { /* noop */ }
-      setIsPlaying(false);
-      setIsPaused(false);
     }
   }, [isActive]);
 
@@ -185,7 +184,7 @@ export function YouTubeEmbed({
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 480px"
-            priority={false}
+            priority={priority}
             onError={() => {
               setThumbIndex((prev) => {
                 const next = prev + 1;
