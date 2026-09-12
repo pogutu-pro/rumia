@@ -4,7 +4,7 @@ export default function Loading() {
   return (
     <div className="relative w-full bg-muted">
       <div
-        className="mx-auto h-[calc(100dvh-56px)] w-full overflow-y-scroll md:max-w-[480px]"
+        className="mx-auto h-[calc(100dvh_-_64px_-_env(safe-area-inset-bottom))] w-full overflow-y-scroll md:h-[100dvh] md:max-w-[480px]"
         style={{
           scrollSnapType: 'y mandatory',
           scrollBehavior: 'smooth',
@@ -16,7 +16,7 @@ export default function Loading() {
           <div
             key={i}
             className="snap-start md:py-1"
-            style={{ height: 'calc(100dvh - 56px)', scrollSnapAlign: 'start' }}
+            style={{ height: '100%', scrollSnapAlign: 'start' }}
           >
             <div className="relative h-full w-full flex-shrink-0 snap-start overflow-hidden bg-card md:rounded-2xl md:shadow-xl md:border md:border-border">
               <Skeleton className="absolute inset-0 h-full w-full rounded-none" />

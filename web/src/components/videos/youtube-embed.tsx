@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { Pause, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { loadYouTubeAPI } from '@/lib/youtube-api-loader';
 
 interface YouTubeEmbedProps {
@@ -11,6 +11,7 @@ interface YouTubeEmbedProps {
   isMuted: boolean;
   title?: string;
   priority?: boolean;
+  onToggleMute: () => void;
 }
 
 const THUMB_FALLBACKS = [
@@ -21,14 +22,15 @@ const THUMB_FALLBACKS = [
 ];
 
 /**
- * YouTubeEmbed — Premium video player using the YouTube IFrame Player API.
+ * YouTubeEmbed — native-feeling Rumia video player on top of YouTube.
  *
- * Key performance optimisations:
- * 1. Shows a hi-res thumbnail instantly (no iframe until API is ready)
- * 2. Loads the YouTube IFrame API script once via singleton loader
- * 3. Creates YT.Player programmatically — no iframe URL changes or re-mounts
- * 4. Fades the thumbnail out only after the player fires PLAYING state
- * 5. Play/pause/mute controlled via direct API calls (no URL recalculation)
+ * - The YouTube iframe is rendered with pointer-events disabled so YouTube's
+ *   own chrome (Shorts speaker icon, "Shorts"/title bar, mic, logo, controls)
+ *   can NEVER appear or intercept taps — it feels like it comes from Rumia.
+ * - Autoplays muted by default; tapping the video toggles mute/unmute.
+ * - Player audio volume is pinned to 100 so the device/hardware volume keys
+ *   fully control loudness.
+ * - Thumbnail covers the player until PLAYING fires (no black screen).
  */
 export function YouTubeEmbed({
   youtubeId,
@@ -36,27 +38,38 @@ export function YouTubeEmbed({
   isMuted,
   title = 'Property video',
   priority = false,
+  onToggleMute,
 }: YouTubeEmbedProps) {
   const [thumbIndex, setThumbIndex] = React.useState(0);
   const [thumbError, setThumbError] = React.useState(false);
-  const [isPaused, setIsPaused] = React.useState(false);
   const [isPlaying, setIsPlaying] = React.useState(false);
-  const [apiReady, setApiReady] = React.useState(false);
+  const [apiState, setApiState] = React.useState<'loading' | 'ready' | 'failed'>('loading');
 
   const playerRef = React.useRef<YT.Player | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const videoIdRef = React.useRef(youtubeId);
 
+  const useFallback = apiState === 'failed';
   const thumbSrc = THUMB_FALLBACKS[Math.min(thumbIndex, THUMB_FALLBACKS.length - 1)](youtubeId);
 
-  // ── Load the YT API once ───────────────────────────────────────────
+  // ── Load the YT API once (singleton) ───────────────────────────────
   React.useEffect(() => {
-    loadYouTubeAPI().then(() => setApiReady(true));
+    let active = true;
+    loadYouTubeAPI()
+      .then(() => {
+        if (active) setApiState('ready');
+      })
+      .catch(() => {
+        if (active) setApiState('failed');
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  // ── Create / destroy the YT.Player ─────────────────────────────────
+  // ── Create / reuse the YT.Player for the active video ──────────────
   React.useEffect(() => {
-    if (!apiReady || !isActive || !containerRef.current) return;
+    if (apiState !== 'ready' || !isActive || !containerRef.current) return;
 
     // If the video ID changed, destroy the old player
     if (playerRef.current && videoIdRef.current !== youtubeId) {
@@ -103,6 +116,7 @@ export function YouTubeEmbed({
       },
       events: {
         onReady: (e: YT.PlayerEvent) => {
+          e.target.setVolume(100);
           if (isMuted) e.target.mute();
           else e.target.unMute();
           e.target.playVideo();
@@ -110,9 +124,6 @@ export function YouTubeEmbed({
         onStateChange: (e: YT.OnStateChangeEvent) => {
           if (e.data === window.YT.PlayerState.PLAYING) {
             setIsPlaying(true);
-            setIsPaused(false);
-          } else if (e.data === window.YT.PlayerState.PAUSED) {
-            setIsPaused(true);
           }
         },
       },
@@ -124,7 +135,7 @@ export function YouTubeEmbed({
       // Don't destroy on cleanup — we reuse when scrolling back
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiReady, isActive, youtubeId]);
+  }, [apiState, isActive, youtubeId]);
 
   // ── Stop when scrolled away ────────────────────────────────────────
   React.useEffect(() => {
@@ -135,45 +146,70 @@ export function YouTubeEmbed({
     }
   }, [isActive]);
 
-  // ── Sync mute state via API ────────────────────────────────────────
+  // ── Sync mute state + pin volume to 100 via API ────────────────────
   React.useEffect(() => {
-    if (!playerRef.current || !isActive) return;
+    if (!playerRef.current || !isActive || useFallback) return;
     try {
-      if (isMuted) playerRef.current.mute();
-      else playerRef.current.unMute();
-    } catch { /* noop */ }
-  }, [isMuted, isActive]);
-
-  // ── Pause / resume via API ─────────────────────────────────────────
-  const togglePause = React.useCallback(() => {
-    if (!playerRef.current) return;
-    try {
-      if (isPaused) {
-        playerRef.current.playVideo();
+      if (isMuted) {
+        playerRef.current.mute();
       } else {
-        playerRef.current.pauseVideo();
+        playerRef.current.unMute();
+        playerRef.current.setVolume(100);
+        playerRef.current.playVideo();
       }
     } catch { /* noop */ }
-  }, [isPaused]);
+  }, [isMuted, isActive, useFallback]);
 
-  // ── Thumbnail (inactive state or loading cover) ────────────────────
-  const showThumbnail = !isActive || !isPlaying;
+  // ── Thumbnail cover (inactive, or until the player starts) ─────────
+  const showThumbnail = !isActive || (!isPlaying && !useFallback);
+
+  const fallbackSrc = React.useMemo(() => {
+    const params = new URLSearchParams({
+      autoplay: '1',
+      mute: isMuted ? '1' : '0',
+      controls: '0',
+      rel: '0',
+      modestbranding: '1',
+      playsinline: '1',
+      loop: '1',
+      playlist: youtubeId,
+      iv_load_policy: '3',
+      fs: '0',
+      disablekb: '1',
+      origin: typeof window !== 'undefined' ? window.location.origin : 'https://rumia.co.ke',
+    });
+    return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`;
+  }, [youtubeId, isMuted]);
 
   return (
     <div
       className="absolute inset-0 overflow-hidden bg-muted"
-      onClick={isActive ? togglePause : undefined}
+      onClick={isActive ? onToggleMute : undefined}
     >
-      {/* YT.Player mount point */}
-      <div
-        ref={containerRef}
-        className="absolute inset-0 [&>div]:absolute [&>div]:inset-0 [&>div>iframe]:absolute [&>div>iframe]:inset-0 [&>div>iframe]:h-full [&>div>iframe]:w-full [&>div>iframe]:border-0"
-      />
+      {/* Primary player mount point — pointer-events off so YouTube chrome never shows */}
+      {!useFallback && (
+        <div
+          ref={containerRef}
+          className="pointer-events-none absolute inset-0 [&>div]:absolute [&>div]:inset-0 [&>div>iframe]:absolute [&>div>iframe]:inset-0 [&>div>iframe]:h-full [&>div>iframe]:w-full [&>div>iframe]:border-0"
+        />
+      )}
+
+      {/* Resilience fallback — only when the IFrame API is fully blocked */}
+      {useFallback && isActive && (
+        <iframe
+          key={String(isMuted)}
+          src={fallbackSrc}
+          title={title}
+          className="pointer-events-none absolute inset-0 h-full w-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      )}
 
       {/* Thumbnail cover — shown while loading or inactive */}
       <div
         className={[
-          'absolute inset-0 z-[2] transition-opacity duration-300',
+          'absolute inset-0 z-[2] transition-opacity duration-200',
           showThumbnail ? 'opacity-100' : 'opacity-0 pointer-events-none',
         ].join(' ')}
       >
@@ -208,22 +244,6 @@ export function YouTubeEmbed({
           </div>
         )}
       </div>
-
-      {/* Pause / Play overlay */}
-      {isActive && isPaused && (
-        <div className="absolute inset-0 z-[3] flex items-center justify-center bg-black/15 pointer-events-none">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-xl">
-            <Play className="h-7 w-7 ml-1" fill="currentColor" />
-          </span>
-        </div>
-      )}
-      {isActive && !isPaused && isPlaying && (
-        <div className="absolute inset-0 z-[3] flex items-center justify-center opacity-0 pointer-events-none">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/30 text-white">
-            <Pause className="h-6 w-6" />
-          </span>
-        </div>
-      )}
     </div>
   );
 }

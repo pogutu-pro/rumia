@@ -1,10 +1,4 @@
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import withSerwistInit from "@serwist/next";
 import { withSentryConfig } from '@sentry/nextjs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -83,13 +77,11 @@ const nextConfig = {
       {
         source: '/sw.js',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+          // The SW must be revalidated on every update check, and the scope
+          // header lets it control every route (including /auth/login).
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate, no-transform' },
           { key: 'Service-Worker-Allowed', value: '/' },
         ],
-      },
-      {
-        source: '/sw.js.map',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
       },
       {
         source: '/manifest.webmanifest',
@@ -124,23 +116,12 @@ const nextConfig = {
 
 };
 
-const withSerwist = withSerwistInit({
-  swSrc: 'src/app/sw.ts',
-  swDest: 'public/sw.js',
-  // Disabled in development so the SW never interferes with HMR or auth flows
-  // during local development. It is always built in production.
-  disable: process.env.NODE_ENV !== 'production',
-  // Only precache hashed immutable assets. Route JS chunks are included
-  // automatically by Serwist via __SW_MANIFEST. We do NOT precache HTML pages.
-  additionalPrecacheEntries: [],
-});
-
 // Only wrap with Sentry config if auth token is present — avoids build failures
 // when Sentry is not yet configured on the server.
 const sentryEnabled = !!process.env.SENTRY_AUTH_TOKEN;
 
 export default sentryEnabled
-  ? withSentryConfig(withSerwist(nextConfig), {
+  ? withSentryConfig(nextConfig, {
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -150,5 +131,5 @@ export default sentryEnabled
       },
       telemetry: false,
     })
-  : withSerwist(nextConfig);
+  : nextConfig;
 

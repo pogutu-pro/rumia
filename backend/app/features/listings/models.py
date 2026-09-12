@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import ARRAY, BOOLEAN, DateTime, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy import ARRAY, BOOLEAN, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -25,6 +25,14 @@ class Agent(Base):
 
 class Listing(Base):
     __tablename__ = "listings"
+    __table_args__ = (
+        Index(
+            "idx_listings_campus_active_type",
+            "campus_id",
+            "is_active",
+            "property_type",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid())
     title: Mapped[str] = mapped_column(String, nullable=False)

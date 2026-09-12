@@ -43,38 +43,48 @@ class ListingService:
         is_active: bool = True,
         sort: Optional[str] = None,
     ) -> Tuple[List[Listing], int, dict]:
-        stmt = select(Listing).where(Listing.is_active == is_active)
+        conditions = [Listing.is_active == is_active]
+        join_specs: List[Tuple] = []
 
         if campus_id:
-            stmt = stmt.where(Listing.campus_id == campus_id)
+            conditions.append(Listing.campus_id == campus_id)
         elif campus_slug:
-            stmt = stmt.join(Campus, Listing.campus_id == Campus.id).where(Campus.slug == campus_slug)
+            join_specs.append((Campus, Listing.campus_id == Campus.id))
+            conditions.append(Campus.slug == campus_slug)
 
         if zone_id:
-            stmt = stmt.where(Listing.zone_id == zone_id)
+            conditions.append(Listing.zone_id == zone_id)
         elif zone_slug:
-            stmt = stmt.join(CampusZone, Listing.zone_id == CampusZone.id).where(CampusZone.slug == zone_slug)
+            join_specs.append((CampusZone, Listing.zone_id == CampusZone.id))
+            conditions.append(CampusZone.slug == zone_slug)
 
         if area:
-            stmt = stmt.where(Listing.area.ilike(f"%{area}%"))
+            conditions.append(Listing.area.ilike(f"%{area}%"))
         if county:
-            stmt = stmt.where(Listing.county.ilike(f"%{county}%"))
+            conditions.append(Listing.county.ilike(f"%{county}%"))
         if property_type:
-            stmt = stmt.where(Listing.property_type == property_type)
+            conditions.append(Listing.property_type == property_type)
 
         if has_video is True:
-            stmt = stmt.where(Listing.youtube_id.is_not(None))
+            conditions.append(Listing.youtube_id.is_not(None))
         elif has_video is False:
-            stmt = stmt.where(Listing.youtube_id.is_(None))
+            conditions.append(Listing.youtube_id.is_(None))
 
         if min_price is not None:
-            stmt = stmt.where(Listing.price >= min_price)
+            conditions.append(Listing.price >= min_price)
         if max_price is not None:
-            stmt = stmt.where(Listing.price <= max_price)
+            conditions.append(Listing.price <= max_price)
 
-        count_stmt = select(func.count()).select_from(stmt.subquery())
+        count_stmt = select(func.count(Listing.id)).select_from(Listing)
+        for target, onclause in join_specs:
+            count_stmt = count_stmt.join(target, onclause)
+        count_stmt = count_stmt.where(*conditions)
         total_result = await db.execute(count_stmt)
         total = total_result.scalar_one()
+
+        stmt = select(Listing).where(*conditions)
+        for target, onclause in join_specs:
+            stmt = stmt.join(target, onclause)
 
         if sort == "views":
             view_sub = (

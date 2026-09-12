@@ -8,6 +8,7 @@ import {
   ExploreListingCard,
   type ExploreListing,
 } from './explore-listing-card';
+import { RumiaBnbComingSoon } from './rumiabnb-coming-soon';
 
 export interface ExploreZone {
   name: string;
@@ -66,6 +67,7 @@ export function ExploreDiscovery({
     (campusName ? { name: campusName, short_name: campusName } : null);
   const [category, setCategory] = useState<CategoryKey>('hostel');
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
+  const [rumiaBnbOpen, setRumiaBnbOpen] = useState(false);
 
   const filtered = useMemo(() => {
     let result = items.filter(
@@ -131,7 +133,13 @@ export function ExploreDiscovery({
               <button
                 key={key}
                 type="button"
-                onClick={() => setCategory(key)}
+                onClick={() => {
+                  if (key === 'short_stay') {
+                    setRumiaBnbOpen(true);
+                    return;
+                  }
+                  setCategory(key);
+                }}
                 aria-pressed={active}
                 className={cn(
                   'inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border px-3 py-3 text-sm font-semibold transition-colors sm:flex-none sm:px-4',
@@ -254,6 +262,11 @@ export function ExploreDiscovery({
           </div>
         )}
       </div>
+
+      <RumiaBnbComingSoon
+        open={rumiaBnbOpen}
+        onOpenChange={setRumiaBnbOpen}
+      />
     </section>
   );
 }

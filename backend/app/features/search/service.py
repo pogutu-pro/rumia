@@ -33,32 +33,35 @@ class SearchService:
             ts, cached = _SEARCH_CACHE[cache_key]
             if now - ts < _SEARCH_CACHE_TTL:
                 return cached
-        stmt = select(Listing).where(Listing.is_active.is_(True))
+        conditions = [Listing.is_active.is_(True)]
+        join_specs: List[Tuple] = []
 
         if campus_slug:
-            stmt = stmt.join(Campus, Listing.campus_id == Campus.id).where(Campus.slug == campus_slug)
+            join_specs.append((Campus, Listing.campus_id == Campus.id))
+            conditions.append(Campus.slug == campus_slug)
 
         if zone_slug:
-            stmt = stmt.join(CampusZone, Listing.zone_id == CampusZone.id).where(CampusZone.slug == zone_slug)
+            join_specs.append((CampusZone, Listing.zone_id == CampusZone.id))
+            conditions.append(CampusZone.slug == zone_slug)
 
         if area:
-            stmt = stmt.where(Listing.area.ilike(f"%{area}%"))
+            conditions.append(Listing.area.ilike(f"%{area}%"))
 
         if property_type:
-            stmt = stmt.where(Listing.property_type == property_type)
+            conditions.append(Listing.property_type == property_type)
 
         if min_price is not None:
-            stmt = stmt.where(Listing.price >= min_price)
+            conditions.append(Listing.price >= min_price)
 
         if max_price is not None:
-            stmt = stmt.where(Listing.price <= max_price)
+            conditions.append(Listing.price <= max_price)
 
         relevance_order = None
         if q and q.strip():
             term = f"%{q.strip()}%"
             raw = q.strip()
             lower_raw = raw.lower()
-            stmt = stmt.where(
+            conditions.append(
                 or_(
                     Listing.title.ilike(term),
                     Listing.description.ilike(term),
@@ -75,10 +78,16 @@ class SearchService:
                 else_=5,
             )
 
-        # Count total
-        count_stmt = select(func.count()).select_from(stmt.subquery())
+        count_stmt = select(func.count(Listing.id)).select_from(Listing)
+        for target, onclause in join_specs:
+            count_stmt = count_stmt.join(target, onclause)
+        count_stmt = count_stmt.where(*conditions)
         total_result = await db.execute(count_stmt)
         total = total_result.scalar_one()
+
+        stmt = select(Listing).where(*conditions)
+        for target, onclause in join_specs:
+            stmt = stmt.join(target, onclause)
 
         # Apply ordering and pagination — relevance first, then editorial pinning
         if relevance_order is not None:

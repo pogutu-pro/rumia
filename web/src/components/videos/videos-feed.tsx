@@ -39,16 +39,6 @@ export function VideosFeed({
 
   const toggleMute = React.useCallback(() => setIsMuted((m) => !m), []);
 
-  React.useEffect(() => {
-    const onFirstGesture = () => setIsMuted(false);
-    window.addEventListener('touchstart', onFirstGesture, { once: true, passive: true });
-    window.addEventListener('click', onFirstGesture, { once: true });
-    return () => {
-      window.removeEventListener('touchstart', onFirstGesture);
-      window.removeEventListener('click', onFirstGesture);
-    };
-  }, []);
-
   const retryInitialLoad = React.useCallback(async () => {
     setIsLoadingMore(true);
     try {
@@ -161,14 +151,16 @@ export function VideosFeed({
       {/* Desktop: center the feed in a narrow column */}
       <div
         ref={scrollContainerRef}
-        className="mx-auto h-[calc(100dvh-56px)] w-full overflow-y-scroll md:max-w-[480px]"
+        className="mx-auto h-[calc(100dvh_-_64px_-_env(safe-area-inset-bottom))] w-full overflow-y-scroll md:h-[100dvh] md:max-w-[480px]"
         style={{
           scrollSnapType: 'y mandatory',
+          scrollSnapStop: 'always',
           scrollBehavior: 'smooth',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
           willChange: 'transform',
+          overscrollBehavior: 'contain',
         }}
       >
         {listings.map((listing, index) => (
@@ -179,7 +171,7 @@ export function VideosFeed({
             }}
             data-index={index}
             className="snap-start md:py-1"
-            style={{ height: 'calc(100dvh - 56px)', scrollSnapAlign: 'start' }}
+            style={{ height: '100%', scrollSnapAlign: 'start' }}
           >
             <VideoItem
               listing={listing}

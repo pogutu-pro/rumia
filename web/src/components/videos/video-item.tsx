@@ -105,6 +105,7 @@ export const VideoItem = React.memo(function VideoItem({
             isMuted={isMuted}
             title={listing.title}
             priority={index < 2}
+            onToggleMute={onToggleMute}
           />
         ) : (
           /* No video — show placeholder */
@@ -129,7 +130,7 @@ export const VideoItem = React.memo(function VideoItem({
         type="button"
         onClick={onToggleMute}
         aria-label={isMuted ? 'Unmute' : 'Mute'}
-        className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-sm backdrop-blur-xl border border-white/50 transition-colors hover:bg-white/95"
+        className="absolute top-[calc(1rem_+_env(safe-area-inset-top))] right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-sm backdrop-blur-xl border border-white/50 transition-colors hover:bg-white/95"
       >
         {isMuted ? (
           <VolumeX className="h-4 w-4" />
@@ -139,7 +140,7 @@ export const VideoItem = React.memo(function VideoItem({
       </button>
 
       {/* ── Right-side action column — frosted glass buttons ──────────── */}
-      <div className="absolute right-3 bottom-36 z-20 flex flex-col items-center gap-4 md:bottom-40">
+      <div className="absolute right-3 bottom-36 z-20 flex flex-col items-center gap-4 [@media(max-height:700px)]:bottom-24 [@media(max-height:700px)]:gap-3 md:bottom-40">
         {/* Save */}
         <div className="flex flex-col items-center gap-1">
           <SaveButton
@@ -211,7 +212,20 @@ export const VideoItem = React.memo(function VideoItem({
       </div>
 
       {/* ── Property overlay (bottom) ─────────────────────────────────── */}
-      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-6 pr-20 md:pb-8">
+      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-6 pr-20 [@media(max-height:700px)]:pb-4 md:pb-8">
+        {/* Tap for sound — Instagram/Reels style */}
+        {isActive && isMuted && (
+          <button
+            type="button"
+            onClick={onToggleMute}
+            aria-label="Tap for sound"
+            className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/80 px-3 py-1.5 text-[11px] font-bold text-slate-800 shadow-sm backdrop-blur-xl transition-colors hover:bg-white/95"
+          >
+            <VolumeX className="h-3.5 w-3.5" />
+            Tap for sound
+          </button>
+        )}
+
         {/* Property type badge */}
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wide mb-2 ${badge.className}`}
