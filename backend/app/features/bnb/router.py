@@ -32,6 +32,7 @@ def _to_read(listing, bnb) -> BnbListingRead:
         longitude=listing_read.longitude,
         amenities=listing_read.amenities,
         is_active=listing_read.is_active,
+        verified=listing.verified,
         rating=listing_read.rating,
         views=listing_read.views,
         agent_id=listing_read.agent.id if listing_read.agent else listing.agent_id,
@@ -42,6 +43,7 @@ def _to_read(listing, bnb) -> BnbListingRead:
             {
                 "id": img.id,
                 "r2_url": img.r2_url,
+                "image_upload_id": img.image_upload_id,
                 "display_order": img.display_order,
                 "category": img.category,
                 "blur_data_url": img.blur_data_url,
@@ -56,6 +58,7 @@ def _to_read(listing, bnb) -> BnbListingRead:
             "name": listing_read.agent.name,
             "phone": listing_read.agent.phone,
             "whatsapp": listing_read.agent.whatsapp,
+            "slug": listing_read.agent.slug,
         } if listing_read.agent else None,
         bnb=bnb,
     )
@@ -159,6 +162,25 @@ async def get_my_bnb_listings(
     return PaginatedResponse.create(
         items=items, total=total, page=pagination.page, limit=pagination.limit
     )
+
+
+@router.get(
+    "/my/{listing_id}",
+    response_model=BnbListingRead,
+    status_code=status.HTTP_200_OK,
+    summary="Get a BnB Listing for Editing",
+)
+async def get_my_bnb_listing_for_edit(
+    listing_id: str,
+    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    db: AsyncSession = Depends(get_db_session),
+) -> BnbListingRead:
+    listing, bnb = await BnbService.get_bnb_listing_for_edit(
+        db=db,
+        listing_id=listing_id,
+        user=user,
+    )
+    return _to_read(listing, bnb)
 
 
 @router.get(

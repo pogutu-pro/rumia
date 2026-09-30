@@ -23,7 +23,7 @@ export default async function EditBnbListingPage({ params }: { params: Promise<{
 
   let listing: any;
   try {
-    listing = await bnbApi.getByIdServer(id);
+    listing = await bnbApi.getForEditServer(id);
   } catch {
     notFound();
   }

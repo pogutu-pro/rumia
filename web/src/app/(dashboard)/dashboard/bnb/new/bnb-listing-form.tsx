@@ -52,6 +52,7 @@ export interface BnbInitialData {
     id?: string; r2_url: string; category?: string | null;
     display_order?: number | null; blur_data_url?: string | null;
     width?: number | null; height?: number | null; format?: string | null;
+    image_upload_id?: string | null;
   }>;
   bnb?: {
     listing_type?: string;
@@ -81,6 +82,7 @@ interface UploadedImage {
   id: string; url: string; name: string; category: string;
   blurDataUrl?: string; width?: number; height?: number;
   format?: string;
+  imageUploadId?: string | null;
 }
 
 interface BnbListingFormProps {
@@ -170,6 +172,7 @@ function initImages(data?: BnbInitialData): UploadedImage[] {
       width: img.width ?? undefined,
       height: img.height ?? undefined,
       format: img.format ?? undefined,
+      imageUploadId: img.image_upload_id ?? undefined,
     }));
 }
 
@@ -348,7 +351,8 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp }: 
       try {
         const r = await processAndUploadImage(file, 'listing');
         next.push({ id: crypto.randomUUID(), url: r.url, name: file.name, category: 'Room',
-          blurDataUrl: r.blurUrl, width: r.width, height: r.height, format: r.format });
+          blurDataUrl: r.blurUrl, width: r.width, height: r.height, format: r.format,
+          imageUploadId: r.imageUploadId });
         ok++;
       } catch (err: any) { fail++; toast.error(`${file.name}: ${friendlyError(err)}`); }
     });
@@ -383,6 +387,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp }: 
         is_active: isActive,
         images: images.map((img, idx) => ({
           r2_url: img.url, display_order: idx, category: img.category,
+          image_upload_id: img.imageUploadId ?? null,
           blur_data_url: img.blurDataUrl ?? null,
           width: img.width ?? null, height: img.height ?? null, format: img.format ?? null,
         })),

@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import DateTime, Integer, String, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -9,7 +10,9 @@ from app.core.database import Base
 class ImageUpload(Base):
     __tablename__ = "image_uploads"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(
+        PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     original_filename: Mapped[str] = mapped_column(String, nullable=False)
     width: Mapped[int] = mapped_column(Integer, nullable=False)
     height: Mapped[int] = mapped_column(Integer, nullable=False)

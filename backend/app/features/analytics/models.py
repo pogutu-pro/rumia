@@ -20,6 +20,6 @@ class ListingView(Base):
 class ListingViewDailyRollup(Base):
     __tablename__ = "listing_view_daily_rollup"
 
-    listing_id: Mapped[str] = mapped_column(String, ForeignKey("listings.id", ondelete="CASCADE"), primary_key=True)
+    listing_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("listings.id", ondelete="CASCADE"), primary_key=True)
     view_date: Mapped[date] = mapped_column(Date, primary_key=True)
     view_count: Mapped[int] = mapped_column(BigInteger, nullable=False, server_default="0")

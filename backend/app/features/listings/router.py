@@ -3,9 +3,14 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.errors import NotFoundException
+from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginatedResponse, PaginationParams
-from app.core.security import AuthenticatedUser, get_optional_current_user, require_roles
+from app.core.security import (
+    AuthenticatedUser,
+    check_ownership,
+    get_optional_current_user,
+    require_roles,
+)
 from app.core.tasks.worker import enqueue_wishlist_event
 from app.features.listings.schemas import (
     ListingCreate,
@@ -93,6 +98,15 @@ async def get_listing(
     listing = await ListingService.get_listing_by_id_or_slug(db, id_or_slug=id_or_slug)
     if not listing:
         raise NotFoundException(f"Listing '{id_or_slug}' not found")
+    if not listing.is_active:
+        if user is None:
+            raise NotFoundException(f"Listing '{id_or_slug}' not found")
+        owner_user_id = listing.agent.user_id if listing.agent else None
+        try:
+            check_ownership(user, owner_user_id or listing.agent_id)
+        except ForbiddenException:
+            # Keep inactive listings indistinguishable from missing listings to non-owners.
+            raise NotFoundException(f"Listing '{id_or_slug}' not found")
     read = ListingRead.model_validate(listing)
     if user:
         saved_ids = await ProfileService.get_saved_listing_ids(db, user, [str(listing.id)])

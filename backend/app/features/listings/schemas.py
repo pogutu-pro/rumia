@@ -18,6 +18,7 @@ class AgentRead(BaseModel):
 class ListingImageRead(BaseModel):
     id: str
     r2_url: str
+    image_upload_id: Optional[str] = None
     display_order: int
     category: Optional[str] = None
     blur_data_url: Optional[str] = None
@@ -30,6 +31,7 @@ class ListingImageRead(BaseModel):
 
 class ListingImageCreate(BaseModel):
     r2_url: str
+    image_upload_id: Optional[str] = None
     display_order: int = 0
     category: Optional[str] = None
     blur_data_url: Optional[str] = None
@@ -141,6 +143,7 @@ class ListingCreate(BaseModel):
     price_sharing: Optional[float] = None
     pays_commission: bool = False
     amenities: List[str] = []
+    is_active: bool = True
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     campus_id: Optional[str] = None

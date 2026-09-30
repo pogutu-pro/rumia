@@ -59,6 +59,8 @@ export const bnbApi = {
 
   getByIdServer: (id: string) => fetchPublicApi<any>(`/bnb/${id}`),
 
+  getForEditServer: (id: string) => serverApi.get<any>(`/bnb/my/${id}`),
+
   getMyListings: (page = 1, limit = 20) =>
     serverApi.get<any>(`/bnb/my?page=${page}&limit=${limit}`),
 
