@@ -6,32 +6,38 @@ Supabase; a pg17 dump will not load into 16). Auth stays on Supabase until step 
 ## Status
 - [x] Step 1 prep: compose `postgres` service, `db/00_supabase_shim.sql`, replay script, backup script
 - [x] Dry-run: live `public` schema dumped + restored to a scratch pg17; backend boots and serves feeds against it
-- [ ] Cutover (below), then step 2 (frontend direct DB calls -> FastAPI), step 3 (custom Google auth), step 4 (remove Supabase)
+- [x] Frontend has no database access (all via FastAPI); own Google auth implemented (backend `/auth/*`, web cookies, mobile SecureStore + one-time-code deep link)
+- [ ] Cutover (below), then remove Supabase usage once the new stack is proven
 
 ## Known drift (live has it, migrations don't — restore from dump, don't replay)
 `agent_messages` table, `agents.suspension_reason`, `listings.zone_id`; migrations create
 `listing_verifications`, which live lacks. Reconcile in a follow-up migration.
 
-## Cutover runbook (short maintenance window)
-1. On the VM: add `POSTGRES_PASSWORD` (+ optional `POSTGRES_USER`/`POSTGRES_DB`) to the compose env, then
-   `docker compose up -d postgres` and wait for healthy.
-2. Create the shim: `psql ... -f db/00_supabase_shim.sql` (roles, `auth.users`, `auth.uid()`).
-3. Stop writes: `docker compose stop backend web`.
-4. Dump live (session pooler, port 5432):
-   `pg_dump -h aws-0-eu-west-1.pooler.supabase.com -p 5432 -U postgres.<ref> -d postgres -Fc --no-owner --no-privileges --schema=public -f rumia.dump`
-5. Copy ids/emails for FK targets:
-   `\copy (select id,email,phone,raw_user_meta_data,raw_app_meta_data,created_at from auth.users) to users.csv csv`
-   then load into the local `auth.users` BEFORE restoring (so `auth.users(id)` foreign keys hold).
-6. Restore: `pg_restore -d rumia --no-owner rumia.dump`; verify row counts vs Supabase.
-7. Point `backend/.env` `DATABASE_URL=postgresql+asyncpg://rumia:<pw>@postgres:5432/rumia`.
-   Keep `SUPABASE_URL`/keys (auth still Supabase).
-8. `docker compose up -d backend web`; smoke test `/api/v1/listings`, `/campuses`, a login.
-9. Rollback: restore the old `DATABASE_URL` and restart; Supabase data is untouched until step 4.
+## Cutover runbook (own Postgres + own Google auth, one maintenance window)
+Everything below is scripted by `scripts/migrate-supabase-to-selfhosted.sh` (read-only against
+Supabase; recreates database `rumia_new` on the VM each run and compares row counts of every table).
+
+Rehearse first (no user impact): run the script, inspect the counts, repeat as needed.
+
+Window (a few minutes):
+1. `docker compose stop backend web` on the VM (stops writes).
+2. Re-run the migration script (final copy, counts must match), then on the VM swap databases:
+   `ALTER DATABASE rumia RENAME TO rumia_empty; ALTER DATABASE rumia_new RENAME TO rumia;`
+   (connect to `postgres`; nothing else is connected while the apps are stopped).
+3. Backend env (`backend/.env`): `DATABASE_URL=postgresql+asyncpg://rumia:<POSTGRES_PASSWORD>@postgres:5432/rumia`,
+   `AUTH_MODE=custom`, `AUTH_JWT_SECRET=$(openssl rand -hex 32)`, `GOOGLE_CLIENT_ID/SECRET`,
+   `GOOGLE_REDIRECT_URI=https://rumia.co.ke/auth/google/callback`, `ENVIRONMENT=production`.
+4. Deploy the new code (`git push` -> CD, or `scripts/deploy.sh` on the VM).
+5. Smoke test: `/api/v1/health`, listings feed, Google sign-in end to end, an agent dashboard, an admin page.
+6. Rollback: set `DATABASE_URL` back to the Supabase pooler and `AUTH_MODE=supabase`, redeploy the
+   previous commit. Writes made after cutover exist only in the new database, so keep the window short
+   and decide quickly. The Supabase project is never modified by any step and must be kept until the
+   new stack has run cleanly for a while.
+
+Sessions: existing Supabase sessions are not carried over; everyone signs in with Google once.
+Password sign-in no longer exists (all staff and managers have Gmail addresses).
 
 ## Notes
 - `pg_cron` is not installed; the nightly view-archive job falls back to the insert trigger
   (migrations guard this). Add a host cron calling `archive_listing_views()` if desired.
-- The web app still talks to Supabase directly (~86 call sites) — those keep hitting Supabase
-  until step 2, so **writes via the web app will diverge from the new DB**. Do step 2 before
-  or together with cutover, or cut over only after the web's direct calls are moved.
 - Backups: `scripts/backup-db.sh` (needs R2 creds in `.backup.env`; restore-test once configured).
