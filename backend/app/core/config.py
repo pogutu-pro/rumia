@@ -21,6 +21,19 @@ class Settings(BaseSettings):
     # Needed only to create login identities (admin 'add agent'); removed with Supabase Auth.
     SUPABASE_SERVICE_ROLE_KEY: str = ""
 
+    # Own authentication (replaces Supabase Auth). Until cutover AUTH_MODE stays "supabase" and the
+    # /auth endpoints refuse to run; tokens signed by us are accepted by the verifier either way.
+    AUTH_MODE: str = "supabase"  # "supabase" | "custom"
+    AUTH_JWT_SECRET: str = ""    # >= 32 random bytes; signs our access tokens and OAuth state
+    AUTH_ACCESS_TTL_SECONDS: int = 1800
+    AUTH_REFRESH_TTL_DAYS: int = 30
+    AUTH_ALLOWED_APP_REDIRECTS: List[str] = ["rumia://"]  # mobile deep links allowed after login
+    AUTH_COOKIE_SECURE: bool = True
+    AUTH_DEV_LOGIN: bool = False  # development only: /auth/dev-login without Google
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = ""  # must match the URI registered in Google Cloud Console
+
     # CORS Configuration
     # Web app (Next.js on :3000), mobile (Expo web dev on :8081 / legacy :19006),
     # and the public rumia.co.ke domain.

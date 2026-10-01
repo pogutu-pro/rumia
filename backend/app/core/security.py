@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 from fastapi import Depends, Header
 from jose import JWTError, jwt
+
+from app.core.tokens import decode_own_access_token, is_own_token
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -143,6 +145,18 @@ def decode_jwt_token(token: str) -> TokenData:
     public signing keys, fetched from GoTrue's JWKS endpoint and cached.
     """
     try:
+        # Tokens minted by our own auth service are verified with our key; everything else is a
+        # Supabase token (kept working until Supabase is switched off).
+        if is_own_token(token):
+            payload = decode_own_access_token(token)
+            user_id = payload.get("sub")
+            if not user_id:
+                raise UnauthorizedException("Invalid token claims: missing sub")
+            return TokenData(
+                user_id=user_id, email=payload.get("email"), role=payload.get("role", "authenticated"),
+                exp=payload.get("exp"), iss=payload.get("iss"),
+            )
+
         header = jwt.get_unverified_headers(token)
         algorithm = header.get("alg", "HS256")
 

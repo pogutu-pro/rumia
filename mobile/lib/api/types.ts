@@ -913,6 +913,91 @@ export interface paths {
         patch: operations["update_announcement_api_v1_announcements__announcement_id__patch"];
         trace?: never;
     };
+    "/api/v1/auth/dev-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Development-only login without Google */
+        post: operations["dev_login_api_v1_auth_dev_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Finish Google sign-in */
+        post: operations["google_callback_api_v1_auth_google_callback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Begin Google sign-in */
+        post: operations["google_start_api_v1_auth_google_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke a session */
+        post: operations["logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh a session or redeem a mobile one-time code */
+        post: operations["token_api_v1_auth_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bnb": {
         parameters: {
             query?: never;
@@ -4364,6 +4449,13 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** DevLoginRequest */
+        DevLoginRequest: {
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name?: string | null;
+        };
         /** DeviceTokenActionResponse */
         DeviceTokenActionResponse: {
             /** Is Active */
@@ -4423,6 +4515,36 @@ export interface components {
             full_name?: string | null;
             /** Id */
             id: string;
+        };
+        /** GoogleCallbackRequest */
+        GoogleCallbackRequest: {
+            /** Code */
+            code: string;
+            /** State */
+            state: string;
+        };
+        /** GoogleStartRequest */
+        GoogleStartRequest: {
+            /**
+             * App Redirect
+             * @description Mobile deep link (must be allow-listed)
+             */
+            app_redirect?: string | null;
+            /**
+             * Next
+             * @description Relative path to land on after login
+             */
+            next?: string | null;
+        };
+        /** GoogleStartResponse */
+        GoogleStartResponse: {
+            /**
+             * State
+             * @description Client must keep this (cookie / memory) and send it back unchanged
+             */
+            state: string;
+            /** Url */
+            url: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -5373,6 +5495,11 @@ export interface components {
             needs_profile_completion: boolean;
             /** Role */
             role: string;
+        };
+        /** LogoutRequest */
+        LogoutRequest: {
+            /** Refresh Token */
+            refresh_token: string;
         };
         /** ManagedAgentRead */
         ManagedAgentRead: {
@@ -6421,6 +6548,29 @@ export interface components {
             /** Message */
             message: string;
         };
+        /** SessionTokens */
+        SessionTokens: {
+            /** Access Token */
+            access_token: string;
+            /** App Redirect */
+            app_redirect?: string | null;
+            /** Expires In */
+            expires_in: number;
+            /** Next */
+            next?: string | null;
+            /** Otc */
+            otc?: string | null;
+            /** Refresh Token */
+            refresh_token: string;
+            /**
+             * Token Type
+             * @default bearer
+             * @constant
+             */
+            token_type: "bearer";
+            /** User Id */
+            user_id: string;
+        };
         /** SetHomeCampusRequest */
         SetHomeCampusRequest: {
             /**
@@ -6558,6 +6708,18 @@ export interface components {
             id: string;
             /** Title */
             title: string;
+        };
+        /** TokenRequest */
+        TokenRequest: {
+            /** Code */
+            code?: string | null;
+            /**
+             * Grant Type
+             * @enum {string}
+             */
+            grant_type: "refresh_token" | "otc";
+            /** Refresh Token */
+            refresh_token?: string | null;
         };
         /** TourAgentBrief */
         TourAgentBrief: {
@@ -8880,6 +9042,169 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnnouncementRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dev_login_api_v1_auth_dev_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DevLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    google_callback_api_v1_auth_google_callback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleCallbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    google_start_api_v1_auth_google_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleStartRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoogleStartResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_api_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogoutRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    token_api_v1_auth_token_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
                 };
             };
             /** @description Validation Error */

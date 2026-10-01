@@ -6,6 +6,7 @@ from app.features.official_hostels import official_hostels_router
 from app.features.public import public_router
 from app.features.agents import agents_router
 from app.features.bnb import bnb_router
+from app.features.auth import auth_router
 from app.features.analytics import analytics_router
 from app.features.announcements import announcements_router
 from app.features.campuses import campuses_router
@@ -29,6 +30,7 @@ api_router = APIRouter()
 
 # Register vertical feature slice routers
 api_router.include_router(health_router)
+api_router.include_router(auth_router)
 api_router.include_router(analytics_router)
 api_router.include_router(campuses_router)
 api_router.include_router(zones_router)
