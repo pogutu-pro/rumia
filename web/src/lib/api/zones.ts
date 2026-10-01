@@ -1,4 +1,5 @@
 import { api } from './client';
+import { fetchPublicApi } from './config';
 
 export interface CampusZone {
   id: string;
@@ -11,6 +12,9 @@ export interface CampusZone {
 }
 
 export const zonesApi = {
+  /** Every campus's zones (public, cookie-free; for Server Components). */
+  listAllServer: () => fetchPublicApi<CampusZone[]>('/zones'),
+
   /** Zones for one campus, or every campus when no id is given. Public. */
   list: (campusId?: string) => {
     const params = new URLSearchParams();

@@ -19,6 +19,6 @@ class OfficialHostel(Base):
     zone: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     contacts: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     payments: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    source: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    verified_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    source: Mapped[Optional[str]] = mapped_column(String, nullable=False, server_default="DeKUT Official Housing List")
+    verified_date: Mapped[Optional[date]] = mapped_column(Date, nullable=False, server_default=func.current_date())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

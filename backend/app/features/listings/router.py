@@ -8,11 +8,10 @@ from app.core.errors import BadRequestException, ForbiddenException, NotFoundExc
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.security import (
     AuthenticatedUser,
-    check_ownership,
     get_optional_current_user,
-    require_roles,
+    get_current_user,
 )
-from app.core.tasks.worker import enqueue_wishlist_event
+from app.core.tasks.worker import enqueue_wishlist_event, send_push_to_user
 from app.features.listings.schemas import (
     ListingCreate,
     ListingRead,
@@ -118,9 +117,8 @@ async def get_listing(
     if not listing.is_active:
         if user is None:
             raise NotFoundException(f"Listing '{id_or_slug}' not found")
-        owner_user_id = listing.agent.user_id if listing.agent else None
         try:
-            check_ownership(user, owner_user_id or listing.agent_id)
+            await ListingService.assert_can_manage(db, user, listing)
         except ForbiddenException:
             # Keep inactive listings indistinguishable from missing listings to non-owners.
             raise NotFoundException(f"Listing '{id_or_slug}' not found")
@@ -140,7 +138,7 @@ async def get_listing(
 )
 async def create_listing(
     data: ListingCreate,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.create_listing(db=db, user=user, data=data)
@@ -158,7 +156,7 @@ async def update_listing(
     listing_id: str,
     data: ListingUpdate,
     background_tasks: BackgroundTasks,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     before = await ListingService.get_listing_by_id_or_slug(db, listing_id)
@@ -191,7 +189,7 @@ async def toggle_listing_full(
     listing_id: str,
     payload: ListingToggleFull,
     background_tasks: BackgroundTasks,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     before = await ListingService.get_listing_by_id_or_slug(db, listing_id)
@@ -225,12 +223,21 @@ async def toggle_listing_full(
 async def toggle_listing_active(
     listing_id: str,
     payload: ListingToggleActive,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    background_tasks: BackgroundTasks,
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.toggle_listing_active(
         db=db, listing_id=listing_id, user=user, is_active=payload.is_active
     )
+    owner_user_id = str(listing.agent.user_id) if listing.agent and listing.agent.user_id else None
+    # Tell the owning agent when someone else (a manager/admin) suspends their listing.
+    if not payload.is_active and owner_user_id and owner_user_id != user.id:
+        background_tasks.add_task(
+            send_push_to_user, owner_user_id, "Listing Suspended",
+            "One of your hostels has been suspended by your campus manager. Contact them for details.",
+            {"url": "/dashboard", "type": "listing"},
+        )
     return ListingRead.model_validate(listing)
 
 
@@ -244,7 +251,7 @@ async def toggle_listing_active(
 async def toggle_listing_commission(
     listing_id: str,
     payload: ListingToggleCommission,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.toggle_listing_commission(
@@ -261,7 +268,7 @@ async def toggle_listing_commission(
 )
 async def delete_listing(
     listing_id: str,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await ListingService.delete_listing(db=db, listing_id=listing_id, user=user)

@@ -27,13 +27,18 @@ async def main() -> int:
     missing_tables: list[str] = []
     async with engine.connect() as conn:
         rows = (await conn.execute(text(
-            "select table_name, column_name, data_type from information_schema.columns where table_schema='public'"
+            "select table_name, column_name, data_type, is_nullable, column_default "
+            "from information_schema.columns where table_schema='public'"
         ))).all()
     db: dict[str, set[str]] = {}
     db_types: dict[tuple[str, str], str] = {}
-    for table, column, data_type in rows:
+    db_notnull_default: set[tuple[str, str]] = set()
+    for table, column, data_type, is_nullable, column_default in rows:
         db.setdefault(table, set()).add(column)
         db_types[(table, column)] = data_type
+        if is_nullable == "NO" and column_default is not None:
+            db_notnull_default.add((table, column))
+    null_inserts: list[str] = []
     type_mismatches: list[str] = []
 
     for name, table in sorted(Base.metadata.tables.items()):
@@ -45,6 +50,11 @@ async def main() -> int:
             db_type = db_types.get((name, col.name))
             if db_type is None:
                 continue
+            if (name, col.name) in db_notnull_default and not col.primary_key \
+                    and col.default is None and col.server_default is None:
+                # DB is NOT NULL with a default, but the ORM has none: an INSERT that does not set
+                # this attribute sends NULL and fails with a NotNullViolation.
+                null_inserts.append(f"{name}.{col.name}")
             model_is_uuid = isinstance(col.type, PG_UUID)
             model_is_text = isinstance(col.type, (String, Text))  # String covers Text
             # uuid <-> text mixes make `uuid = varchar` comparisons fail at query time
@@ -67,10 +77,15 @@ async def main() -> int:
         print("   " + line)
     if not type_mismatches:
         print("   none")
+    print("== NOT NULL columns with a DB default but no model default (INSERT sends NULL unless set):")
+    for line in null_inserts:
+        print("   " + line)
+    if not null_inserts:
+        print("   none")
     print("== DB columns not mapped by the model (informational):")
     for t, cols in unmapped_cols.items():
         print(f"   {t}: {', '.join(cols)}")
-    return 1 if (missing_cols or missing_tables or type_mismatches) else 0
+    return 1 if (missing_cols or missing_tables or type_mismatches or null_inserts) else 0
 
 
 if __name__ == "__main__":

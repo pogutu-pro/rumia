@@ -30,3 +30,11 @@ class CampusRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CampusManagerRead(CampusRead):
+    """A campus with its operational contact details, for managers/admins."""
+
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    social_links: Optional[Dict[str, Any]] = None

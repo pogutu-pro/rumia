@@ -20,7 +20,7 @@ export async function createAnnouncementAction(
   input: AnnouncementInput,
 ): Promise<AnnouncementActionResult> {
   try {
-    await announcementsApi.create({
+    await announcementsApi.createServer({
       campus_id: input.campusId,
       title: input.title.trim(),
       message: input.message.trim(),
@@ -41,7 +41,7 @@ export async function updateAnnouncementAction(
   input: AnnouncementInput,
 ): Promise<AnnouncementActionResult> {
   try {
-    await announcementsApi.create({
+    await announcementsApi.updateServer(announcementId, {
       campus_id: input.campusId,
       title: input.title.trim(),
       message: input.message.trim(),
@@ -61,7 +61,7 @@ export async function deleteAnnouncementAction(
   announcementId: string,
 ): Promise<AnnouncementActionResult> {
   try {
-    await announcementsApi.delete(announcementId);
+    await announcementsApi.deleteServer(announcementId);
     revalidatePath('/');
     revalidatePath('/hostels');
     return { success: true };

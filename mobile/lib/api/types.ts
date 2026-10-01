@@ -261,9 +261,69 @@ export interface paths {
         };
         /**
          * Get Current Agent Profile
-         * @description Fetch current authenticated user's agent profile.
+         * @description The signed-in user's own agent record, including private fields. 404 if they are not an agent.
          */
         get: operations["get_my_agent_profile_api_v1_agents_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/me/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Agent Dashboard Summary
+         * @description Headline numbers for the agent dashboard: listings, leads, pending tours, tour earnings.
+         */
+        get: operations["my_dashboard_api_v1_agents_me_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/me/ensure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ensure Agent Record
+         * @description Admins and managers get an agent record created on first dashboard visit; others must apply (403).
+         */
+        post: operations["ensure_my_agent_api_v1_agents_me_ensure_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/me/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Listings
+         * @description All of the agent's listings (active or not) with lead counts, newest first.
+         */
+        get: operations["my_listings_api_v1_agents_me_listings_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -305,7 +365,7 @@ export interface paths {
         };
         /**
          * Agent Listing Analytics
-         * @description Get view analytics per listing for a given agent. Agent or Admin only.
+         * @description View analytics per listing for an agent: the agent themself, or an admin.
          */
         get: operations["get_agent_analytics_api_v1_analytics_agent__agent_id__get"];
         put?: never;
@@ -417,7 +477,11 @@ export interface paths {
         delete: operations["delete_announcement_api_v1_announcements__announcement_id__delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Announcement
+         * @description Edit an announcement for a campus you manage. Manager or Admin only.
+         */
+        patch: operations["update_announcement_api_v1_announcements__announcement_id__patch"];
         trace?: never;
     };
     "/api/v1/bnb": {
@@ -1145,6 +1209,353 @@ export interface paths {
         patch: operations["toggle_listing_full_api_v1_listings__listing_id__toggle_full_patch"];
         trace?: never;
     };
+    "/api/v1/manager/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agents In Scope */
+        get: operations["list_agents_api_v1_manager_agents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/agents/{agent_id}/standing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Suspend / Reinstate Agent
+         * @description Changes only status and suspension_reason; a reason is required to suspend.
+         */
+        patch: operations["set_agent_standing_api_v1_manager_agents__agent_id__standing_patch"];
+        trace?: never;
+    };
+    "/api/v1/manager/announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Announcements In Scope
+         * @description All announcements (including expired) for the campuses in scope.
+         */
+        get: operations["list_announcements_api_v1_manager_announcements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agent Applications In Scope */
+        get: operations["list_applications_api_v1_manager_applications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/applications/{application_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve Application
+         * @description Creates the agent record, promotes the applicant to 'agent', notifies them. 409 if already processed.
+         */
+        post: operations["approve_application_api_v1_manager_applications__application_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/applications/{application_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject Application
+         * @description Rejects with a reason and notifies the applicant.
+         */
+        post: operations["reject_application_api_v1_manager_applications__application_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/campuses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Campuses I Manage
+         * @description Full campus rows for the campuses in scope (all for admins).
+         */
+        get: operations["list_campuses_api_v1_manager_campuses_get"];
+        put?: never;
+        /**
+         * Create Campus (Admin)
+         * @description Starts as coming_soon with placeholder branding. 409 if the slug exists.
+         */
+        post: operations["create_campus_api_v1_manager_campuses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/campuses/{campus_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Campus Settings
+         * @description Managers: contact/branding/fees of campuses they manage (needs ≥1 zone). Admins: also name/slug/region/status.
+         */
+        patch: operations["update_campus_settings_api_v1_manager_campuses__campus_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/manager/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Manager Context
+         * @description Who the caller is as a manager/admin: scope, campus name, display name.
+         */
+        get: operations["get_context_api_v1_manager_context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/hostels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hostels In Scope
+         * @description Official records plus the in-scope listings, for cross-checking.
+         */
+        get: operations["hostels_api_v1_manager_hostels_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listings In Scope */
+        get: operations["list_listings_api_v1_manager_listings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/listings/{listing_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listing For Editing
+         * @description A listing in the manager's scope (404 otherwise), including inactive ones.
+         */
+        get: operations["get_managed_listing_api_v1_manager_listings__listing_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/listings/{listing_id}/owner-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Owner Phone */
+        patch: operations["set_owner_phone_api_v1_manager_listings__listing_id__owner_phone_patch"];
+        trace?: never;
+    };
+    "/api/v1/manager/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Manager Overview
+         * @description Counts for the manager home page, limited to the campuses in scope.
+         */
+        get: operations["get_overview_api_v1_manager_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/staff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Staff (Admin) */
+        get: operations["list_staff_api_v1_manager_staff_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/staff/find": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find User By Email (Admin) */
+        get: operations["find_user_api_v1_manager_staff_find_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/staff/search-agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search Agents To Promote (Admin) */
+        get: operations["search_agents_api_v1_manager_staff_search_agents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manager/staff/{target_user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Assign Manager Role (Admin)
+         * @description Sets role manager with a campus OR region scope (not both).
+         */
+        put: operations["assign_manager_api_v1_manager_staff__target_user_id__put"];
+        post?: never;
+        /**
+         * Remove Manager Role (Admin)
+         * @description Downgrades the manager back to agent.
+         */
+        delete: operations["remove_manager_api_v1_manager_staff__target_user_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -1327,6 +1738,46 @@ export interface paths {
          * @description Mark single notification as read. Authenticated.
          */
         patch: operations["mark_read_api_v1_notifications__notification_id__read_patch"];
+        trace?: never;
+    };
+    "/api/v1/official-hostels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Official Hostel Records
+         * @description The official DeKUT housing records. Agents, managers and admins.
+         */
+        get: operations["list_official_hostels_api_v1_official_hostels_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/official-hostels/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Official Records vs Platform Listings
+         * @description Official records alongside every platform listing's contact/payment details, for cross-checking. Agents, managers and admins.
+         */
+        get: operations["official_hostels_overview_api_v1_official_hostels_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/profiles/check-email": {
@@ -1834,7 +2285,7 @@ export interface paths {
         };
         /**
          * List Tour Bookings
-         * @description Fetch tour bookings. Agent sees own, Admin sees all.
+         * @description Bookings for the signed-in agent (admins: all), each embedding its listing and agent. `sort`: created_desc (default) | upcoming | date_desc.
          */
         get: operations["list_bookings_api_v1_tours_get"];
         put?: never;
@@ -1930,7 +2381,11 @@ export interface paths {
          */
         get: operations["list_zones_api_v1_zones_get"];
         put?: never;
-        post?: never;
+        /**
+         * Create Zone
+         * @description Managers (for campuses they manage) and admins.
+         */
+        post: operations["create_zone_api_v1_zones_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1955,6 +2410,30 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/zones/{zone_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Zone
+         * @description Refused while listings on the campus still use the area.
+         */
+        delete: operations["delete_zone_api_v1_zones__zone_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Zone
+         * @description Renames re-generate the slug. Managers for their campuses, and admins.
+         */
+        patch: operations["update_zone_api_v1_zones__zone_id__patch"];
         trace?: never;
     };
 }
@@ -2019,10 +2498,260 @@ export interface components {
             /** Status */
             status: string;
         };
+        /**
+         * AgentDashboardRead
+         * @description Headline numbers for the agent dashboard home.
+         */
+        AgentDashboardRead: {
+            /** Active Listing Count */
+            active_listing_count: number;
+            agent: components["schemas"]["AgentSelfRead"];
+            /** Has Payment Details */
+            has_payment_details: boolean;
+            /** Leads This Month */
+            leads_this_month: number;
+            /** Listing Count */
+            listing_count: number;
+            /** Pending Tours */
+            pending_tours: number;
+            /** Total Leads */
+            total_leads: number;
+            /** Tour Earnings */
+            tour_earnings: number;
+        };
+        /**
+         * AgentListingHostel
+         * @description A platform listing as compared against the official records.
+         */
+        AgentListingHostel: {
+            /**
+             * Agent Name
+             * @default Agent
+             */
+            agent_name: string;
+            /**
+             * Agent Phone
+             * @default
+             */
+            agent_phone: string;
+            /**
+             * Agent Whatsapp
+             * @default
+             */
+            agent_whatsapp: string;
+            /**
+             * Area
+             * @default dekut
+             */
+            area: string;
+            /**
+             * County
+             * @default nyeri
+             */
+            county: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /**
+             * Is Full
+             * @default false
+             */
+            is_full: boolean;
+            /**
+             * Landlord Phone
+             * @default
+             */
+            landlord_phone: string;
+            /** Location */
+            location: string;
+            /**
+             * Mpesa Details
+             * @default
+             */
+            mpesa_details: string;
+            /** Price */
+            price?: number | null;
+            /** Slug */
+            slug?: string | null;
+            /**
+             * Specific Location
+             * @default
+             */
+            specific_location: string;
+            /** Title */
+            title: string;
+            /** Verified */
+            verified: boolean;
+        };
+        /**
+         * AgentListingRead
+         * @description A listing as shown in its owner's dashboard.
+         */
+        AgentListingRead: {
+            agent?: components["schemas"]["app__features__listings__schemas__AgentRead"] | null;
+            /** Amenities */
+            amenities?: string[] | null;
+            /** Area */
+            area?: string | null;
+            /** Bathroom Type */
+            bathroom_type?: string | null;
+            /** Campus Id */
+            campus_id?: string | null;
+            /**
+             * Commission Locked By Admin
+             * @default false
+             */
+            commission_locked_by_admin: boolean;
+            /**
+             * Cooking Gas Included
+             * @default false
+             */
+            cooking_gas_included: boolean;
+            /** County */
+            county?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string;
+            /** Distance Category */
+            distance_category?: string | null;
+            /** Distance To Campus */
+            distance_to_campus?: string | null;
+            /**
+             * Electricity Included
+             * @default false
+             */
+            electricity_included: boolean;
+            /** Gender */
+            gender?: string | null;
+            /**
+             * Hot Water Included
+             * @default false
+             */
+            hot_water_included: boolean;
+            /** Id */
+            id: string;
+            /**
+             * Images
+             * @default []
+             */
+            images: components["schemas"]["ListingImageRead"][];
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * Is Full
+             * @default false
+             */
+            is_full: boolean;
+            /**
+             * Is Saved
+             * @default false
+             */
+            is_saved: boolean;
+            /**
+             * Is Youtube Shorts
+             * @default false
+             */
+            is_youtube_shorts: boolean;
+            /** Landlord Phone */
+            landlord_phone?: string | null;
+            /** Latitude */
+            latitude?: number | null;
+            /**
+             * Lead Count
+             * @default 0
+             */
+            lead_count: number;
+            /** Location */
+            location: string;
+            /** Longitude */
+            longitude?: number | null;
+            /** Mpesa Details */
+            mpesa_details?: string | null;
+            /**
+             * Pays Commission
+             * @default false
+             */
+            pays_commission: boolean;
+            /** Price */
+            price: number;
+            /** Price Sharing */
+            price_sharing?: number | null;
+            /** Price Single */
+            price_single?: number | null;
+            /**
+             * Property Type
+             * @default hostel
+             */
+            property_type: string;
+            /** Proximity Description */
+            proximity_description?: string | null;
+            /**
+             * Rating
+             * @default 0
+             */
+            rating: number;
+            /** Room Type */
+            room_type?: string | null;
+            /** Room Type Enum */
+            room_type_enum?: string | null;
+            /**
+             * Room Types
+             * @default []
+             */
+            room_types: components["schemas"]["ListingRoomTypeRead"][];
+            /** Security Type */
+            security_type?: string | null;
+            /** Slug */
+            slug?: string | null;
+            /** Sort Position */
+            sort_position?: number | null;
+            /** Specific Location */
+            specific_location?: string | null;
+            /** Title */
+            title: string;
+            /** Updated At */
+            updated_at?: string | null;
+            /**
+             * Views
+             * @default 0
+             */
+            views: number;
+            /**
+             * Water Included
+             * @default false
+             */
+            water_included: boolean;
+            /**
+             * Wifi Included
+             * @default false
+             */
+            wifi_included: boolean;
+            /** Youtube Id */
+            youtube_id?: string | null;
+            /** Zone Id */
+            zone_id?: string | null;
+        };
         /** AgentListingViewEntry */
         AgentListingViewEntry: {
             /** All Time Count */
             all_time_count: number;
+            /** Area */
+            area?: string | null;
+            /** County */
+            county?: string | null;
             /** Listing Id */
             listing_id: string;
             /** Listing Slug */
@@ -2035,6 +2764,81 @@ export interface components {
             today_count: number;
             /** Week Count */
             week_count: number;
+        };
+        /**
+         * AgentSelfRead
+         * @description An agent's own record, including private fields (balance, payment details).
+         */
+        AgentSelfRead: {
+            /** Bio */
+            bio?: string | null;
+            /** Campus Id */
+            campus_id?: string | null;
+            /**
+             * Commission Balance
+             * @default 0
+             */
+            commission_balance: number;
+            /** Cover Image Url */
+            cover_image_url?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Expected Name */
+            expected_name?: string | null;
+            /** Helping Since */
+            helping_since?: number | null;
+            /** Id */
+            id: string;
+            /** Instagram */
+            instagram?: string | null;
+            /** Instagram Public */
+            instagram_public?: boolean | null;
+            /** Is Featured */
+            is_featured?: boolean | null;
+            /** Is Founder */
+            is_founder?: boolean | null;
+            /** Is Support */
+            is_support?: boolean | null;
+            /** Languages */
+            languages?: string[] | null;
+            /** Linkedin */
+            linkedin?: string | null;
+            /** Linkedin Public */
+            linkedin_public?: boolean | null;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Pochi La Biashara Number */
+            pochi_la_biashara_number?: string | null;
+            /** Portfolio Url */
+            portfolio_url?: string | null;
+            /** Profile Photo Url */
+            profile_photo_url?: string | null;
+            /** Service Areas */
+            service_areas?: string[] | null;
+            /** Slug */
+            slug?: string | null;
+            /** Status */
+            status: string;
+            /** Suspension Reason */
+            suspension_reason?: string | null;
+            /** User Id */
+            user_id?: string | null;
+            /** Verified */
+            verified?: boolean | null;
+            /** Whatsapp */
+            whatsapp: string;
+        };
+        /** AgentStandingUpdate */
+        AgentStandingUpdate: {
+            /** Status */
+            status: string;
+            /** Suspension Reason */
+            suspension_reason?: string | null;
         };
         /** AgentStatusUpdate */
         AgentStatusUpdate: {
@@ -2107,6 +2911,19 @@ export interface components {
              */
             updated_at: string;
         };
+        /** AnnouncementUpdate */
+        AnnouncementUpdate: {
+            /** Campus Id */
+            campus_id?: string | null;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Message */
+            message?: string | null;
+            /** Title */
+            title?: string | null;
+            /** Type */
+            type?: string | null;
+        };
         /** AppNotificationRead */
         AppNotificationRead: {
             /** Body */
@@ -2139,6 +2956,11 @@ export interface components {
             url?: string | null;
             /** User Id */
             user_id: string;
+        };
+        /** ApplicationRejection */
+        ApplicationRejection: {
+            /** Reason */
+            reason: string;
         };
         /** BedConfig */
         BedConfig: {
@@ -2448,6 +3270,87 @@ export interface components {
             /** Whatsapp Number */
             whatsapp_number: string;
         };
+        /**
+         * CampusManagerRead
+         * @description A campus with its operational contact details, for managers/admins.
+         */
+        CampusManagerRead: {
+            /** City */
+            city: string;
+            /** Consultation Fee */
+            consultation_fee?: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email?: string | null;
+            /** Feature Flags */
+            feature_flags?: {
+                [key: string]: unknown;
+            };
+            /** Hero Headline */
+            hero_headline: string;
+            /** Hero Image */
+            hero_image?: string | null;
+            /** Hero Subtext */
+            hero_subtext?: string | null;
+            /** Hostel Finding Fee */
+            hostel_finding_fee?: number | null;
+            /** Id */
+            id: string;
+            /** Manifest Description */
+            manifest_description?: string | null;
+            /** Manifest Name */
+            manifest_name?: string | null;
+            /** Name */
+            name: string;
+            /** Og Description */
+            og_description?: string | null;
+            /** Og Title */
+            og_title?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Primary Color */
+            primary_color: string;
+            /** Region Id */
+            region_id?: string | null;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Keywords */
+            seo_keywords?: string[];
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Short Name */
+            short_name?: string | null;
+            /** Slug */
+            slug: string;
+            /** Social Links */
+            social_links?: {
+                [key: string]: unknown;
+            } | null;
+            /** Status */
+            status: string;
+            /** Twitter Description */
+            twitter_description?: string | null;
+            /** Whatsapp Number */
+            whatsapp_number: string;
+        };
+        /**
+         * CampusQuickCreate
+         * @description Minimal campus creation: it starts as 'coming_soon' with placeholder branding to refine later.
+         */
+        CampusQuickCreate: {
+            /** Hero Image */
+            hero_image?: string | null;
+            /** Name */
+            name: string;
+            /** Region Id */
+            region_id?: string | null;
+            /** Slug */
+            slug?: string | null;
+        };
         /** CampusRead */
         CampusRead: {
             /** City */
@@ -2503,6 +3406,55 @@ export interface components {
             twitter_description?: string | null;
             /** Whatsapp Number */
             whatsapp_number: string;
+        };
+        /**
+         * CampusSettingsUpdate
+         * @description Fields a manager may change on a campus they manage. `name/slug/region_id/status` are admin-only
+         *     (silently ignored for managers). Only the fields actually sent are applied (null clears).
+         */
+        CampusSettingsUpdate: {
+            /** Consultation Fee */
+            consultation_fee?: number | null;
+            /** Email */
+            email?: string | null;
+            /** Hero Headline */
+            hero_headline?: string | null;
+            /** Hero Image */
+            hero_image?: string | null;
+            /** Hero Subtext */
+            hero_subtext?: string | null;
+            /** Hostel Finding Fee */
+            hostel_finding_fee?: number | null;
+            /** Name */
+            name?: string | null;
+            /** Og Description */
+            og_description?: string | null;
+            /** Og Title */
+            og_title?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Primary Color */
+            primary_color?: string | null;
+            /** Region Id */
+            region_id?: string | null;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Short Name */
+            short_name?: string | null;
+            /** Slug */
+            slug?: string | null;
+            /** Social Links */
+            social_links?: {
+                [key: string]: unknown;
+            } | null;
+            /** Status */
+            status?: string | null;
+            /** Twitter Description */
+            twitter_description?: string | null;
+            /** Whatsapp Number */
+            whatsapp_number?: string | null;
         };
         /** CampusStatusUpdate */
         CampusStatusUpdate: {
@@ -2620,6 +3572,15 @@ export interface components {
             user_id: string;
             /** User Name */
             user_name?: string | null;
+        };
+        /** FoundUser */
+        FoundUser: {
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name?: string | null;
+            /** Id */
+            id: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -3110,6 +4071,8 @@ export interface components {
             location: string;
             /** Longitude */
             longitude?: number | null;
+            /** Mpesa Details */
+            mpesa_details?: string | null;
             /**
              * Pays Commission
              * @default false
@@ -3126,6 +4089,8 @@ export interface components {
              * @default hostel
              */
             property_type: string;
+            /** Proximity Description */
+            proximity_description?: string | null;
             /** Room Type */
             room_type?: string | null;
             /**
@@ -3291,6 +4256,8 @@ export interface components {
              * @default hostel
              */
             property_type: string;
+            /** Proximity Description */
+            proximity_description?: string | null;
             /**
              * Rating
              * @default 0
@@ -3453,6 +4420,8 @@ export interface components {
             location?: string | null;
             /** Longitude */
             longitude?: number | null;
+            /** Mpesa Details */
+            mpesa_details?: string | null;
             /** Pays Commission */
             pays_commission?: boolean | null;
             /** Price */
@@ -3463,6 +4432,8 @@ export interface components {
             price_single?: number | null;
             /** Property Type */
             property_type?: string | null;
+            /** Proximity Description */
+            proximity_description?: string | null;
             /** Room Type */
             room_type?: string | null;
             /** Room Types */
@@ -3511,6 +4482,103 @@ export interface components {
             needs_profile_completion: boolean;
             /** Role */
             role: string;
+        };
+        /** ManagedAgentRead */
+        ManagedAgentRead: {
+            campus?: components["schemas"]["HostelRequestCampus"] | null;
+            /** Campus Id */
+            campus_id?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Is Featured */
+            is_featured?: boolean | null;
+            /** Is Founder */
+            is_founder?: boolean | null;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Slug */
+            slug?: string | null;
+            /** Status */
+            status: string;
+            /** User Id */
+            user_id?: string | null;
+            /** Verified */
+            verified?: boolean | null;
+            /** Whatsapp */
+            whatsapp: string;
+        };
+        /** ManagedAnnouncementRead */
+        ManagedAnnouncementRead: {
+            campus?: components["schemas"]["HostelRequestCampus"] | null;
+            /** Campus Id */
+            campus_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by?: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Id */
+            id: string;
+            /** Message */
+            message: string;
+            /** Title */
+            title: string;
+            /** Type */
+            type: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ManagedApplicationRead */
+        ManagedApplicationRead: {
+            campus?: components["schemas"]["HostelRequestCampus"] | null;
+            /** Campus Id */
+            campus_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Full Name */
+            full_name: string;
+            /** Hostel Name */
+            hostel_name: string;
+            /** Id */
+            id: string;
+            /** Id Number */
+            id_number: string;
+            /** Owner Contact */
+            owner_contact?: string | null;
+            /** Phone */
+            phone: string;
+            /** Rejection Reason */
+            rejection_reason?: string | null;
+            /** Relationship To Hostel */
+            relationship_to_hostel: string;
+            /** Reviewed At */
+            reviewed_at?: string | null;
+            /** Reviewed By */
+            reviewed_by?: string | null;
+            /** Status */
+            status: string;
+            /** User Id */
+            user_id: string;
         };
         /**
          * ManagedHostelRequestRead
@@ -3561,6 +4629,80 @@ export interface components {
             /** User Id */
             user_id: string;
         };
+        /** ManagedListingAgent */
+        ManagedListingAgent: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** User Id */
+            user_id?: string | null;
+        };
+        /** ManagedListingImage */
+        ManagedListingImage: {
+            /**
+             * Display Order
+             * @default 0
+             */
+            display_order: number;
+            /** R2 Url */
+            r2_url: string;
+        };
+        /** ManagedListingRead */
+        ManagedListingRead: {
+            agent?: components["schemas"]["ManagedListingAgent"] | null;
+            /** Area */
+            area?: string | null;
+            campus?: components["schemas"]["HostelRequestCampus"] | null;
+            /** Campus Id */
+            campus_id?: string | null;
+            /**
+             * Commission Locked By Admin
+             * @default false
+             */
+            commission_locked_by_admin: boolean;
+            /** County */
+            county?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /**
+             * Images
+             * @default []
+             */
+            images: components["schemas"]["ManagedListingImage"][];
+            /** Is Active */
+            is_active: boolean;
+            /** Landlord Phone */
+            landlord_phone?: string | null;
+            /**
+             * Lead Count
+             * @default 0
+             */
+            lead_count: number;
+            /** Location */
+            location: string;
+            /**
+             * Pays Commission
+             * @default false
+             */
+            pays_commission: boolean;
+            /** Price */
+            price: number;
+            /** Slug */
+            slug?: string | null;
+            /** Title */
+            title: string;
+            /**
+             * Verified
+             * @default false
+             */
+            verified: boolean;
+        };
         /** ManagerAssign */
         ManagerAssign: {
             /** Managed Campus Id */
@@ -3569,6 +4711,52 @@ export interface components {
             managed_region_id?: string | null;
             /** User Id */
             user_id: string;
+        };
+        /** ManagerAssignment */
+        ManagerAssignment: {
+            /** Managed Campus Id */
+            managed_campus_id?: string | null;
+            /** Managed Region Id */
+            managed_region_id?: string | null;
+        };
+        /** ManagerContext */
+        ManagerContext: {
+            /** Campus Name */
+            campus_name: string;
+            /** Has Agent Record */
+            has_agent_record: boolean;
+            /** Is Super Admin */
+            is_super_admin: boolean;
+            /** Managed Campus Id */
+            managed_campus_id?: string | null;
+            /** Managed Region Id */
+            managed_region_id?: string | null;
+            /** Role */
+            role: string;
+            /** User Email */
+            user_email?: string | null;
+            /** User Id */
+            user_id: string;
+            /** User Name */
+            user_name: string;
+        };
+        /**
+         * ManagerOverview
+         * @description Counts for the manager home page, limited to the campuses in scope.
+         */
+        ManagerOverview: {
+            /** Agents */
+            agents: number;
+            /** Has Campuses */
+            has_campuses: boolean;
+            /** Listings */
+            listings: number;
+            /** Official Hostels */
+            official_hostels: number;
+            /** Pending Applications */
+            pending_applications: number;
+            /** Waiting Hostel Requests */
+            waiting_hostel_requests: number;
         };
         /** ManagerRead */
         ManagerRead: {
@@ -3662,6 +4850,37 @@ export interface components {
             wishlist_email_enabled?: boolean | null;
             /** Wishlist Push Enabled */
             wishlist_push_enabled?: boolean | null;
+        };
+        /** OfficialHostelRead */
+        OfficialHostelRead: {
+            /** Contacts */
+            contacts?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Hostel Name */
+            hostel_name: string;
+            /** Id */
+            id: string;
+            /** Payments */
+            payments?: string | null;
+            /** Source */
+            source?: string | null;
+            /** Verified Date */
+            verified_date?: string | null;
+            /** Zone */
+            zone?: string | null;
+        };
+        /** OfficialHostelsOverview */
+        OfficialHostelsOverview: {
+            /** Listings */
+            listings: components["schemas"]["AgentListingHostel"][];
+            /** Official Hostels */
+            official_hostels: components["schemas"]["OfficialHostelRead"][];
+        };
+        /** OwnerPhoneUpdate */
+        OwnerPhoneUpdate: {
+            /** Landlord Phone */
+            landlord_phone?: string | null;
         };
         /** PaginatedResponse[AgentApplicationRead] */
         PaginatedResponse_AgentApplicationRead_: {
@@ -3863,10 +5082,10 @@ export interface components {
              */
             total: number;
         };
-        /** PaginatedResponse[TourBookingRead] */
-        PaginatedResponse_TourBookingRead_: {
+        /** PaginatedResponse[StaffTourBookingRead] */
+        PaginatedResponse_StaffTourBookingRead_: {
             /** Items */
-            items: components["schemas"]["TourBookingRead"][];
+            items: components["schemas"]["StaffTourBookingRead"][];
             /**
              * Limit
              * @example 20
@@ -3977,6 +5196,17 @@ export interface components {
             home_campus_name?: string | null;
             /** Phone */
             phone?: string | null;
+        };
+        /** PromotableAgent */
+        PromotableAgent: {
+            /** Campus Name */
+            campus_name: string;
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /** Id */
+            id: string;
         };
         /**
          * PublicAgent
@@ -4308,6 +5538,82 @@ export interface components {
             /** Listings */
             listings: components["schemas"]["SitemapListing"][];
         };
+        /** StaffMember */
+        StaffMember: {
+            /** Email */
+            email?: string | null;
+            /** Full Name */
+            full_name?: string | null;
+            /** Id */
+            id: string;
+            /** Managed Campus Id */
+            managed_campus_id?: string | null;
+            /** Managed Region Id */
+            managed_region_id?: string | null;
+            /** Role */
+            role: string;
+        };
+        /**
+         * StaffTourBookingRead
+         * @description A booking as shown to its agent / admins: embeds the listing and the agent.
+         */
+        StaffTourBookingRead: {
+            agent?: components["schemas"]["TourAgentBrief"] | null;
+            /** Agent Id */
+            agent_id?: string | null;
+            /** Amount */
+            amount: number;
+            /**
+             * Contacted
+             * @default false
+             */
+            contacted: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Linked User Id */
+            linked_user_id?: string | null;
+            listing?: components["schemas"]["TourListingBrief"] | null;
+            /** Listing Id */
+            listing_id?: string | null;
+            /** Phone */
+            phone: string;
+            /**
+             * Preferred Date
+             * Format: date
+             */
+            preferred_date: string;
+            /** Preferred Time */
+            preferred_time: string;
+            /** Status */
+            status: string;
+            /** Student Name */
+            student_name: string;
+            /** Tour Type */
+            tour_type: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Zone */
+            zone: string;
+        };
+        /** TourAgentBrief */
+        TourAgentBrief: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone?: string | null;
+            /** Whatsapp */
+            whatsapp?: string | null;
+        };
         /** TourBookingCreate */
         TourBookingCreate: {
             /** Agent Id */
@@ -4565,6 +5871,26 @@ export interface components {
             saved: {
                 [key: string]: boolean;
             };
+        };
+        /** ZoneCreate */
+        ZoneCreate: {
+            /** Campus Id */
+            campus_id: string;
+            /** Distance Category */
+            distance_category?: string | null;
+            /** Full Search Price */
+            full_search_price: number;
+            /** Name */
+            name: string;
+        };
+        /** ZoneWrite */
+        ZoneWrite: {
+            /** Distance Category */
+            distance_category?: string | null;
+            /** Full Search Price */
+            full_search_price: number;
+            /** Name */
+            name: string;
         };
         /** _BnbDetailsBase */
         _BnbDetailsBase: {
@@ -5192,7 +6518,102 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__features__agents__schemas__AgentRead"];
+                    "application/json": components["schemas"]["AgentSelfRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_dashboard_api_v1_agents_me_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentDashboardRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ensure_my_agent_api_v1_agents_me_ensure_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSelfRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_listings_api_v1_agents_me_listings_get: {
+        parameters: {
+            query?: {
+                property_type?: string | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentListingRead"][];
                 };
             };
             /** @description Validation Error */
@@ -5490,6 +6911,43 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_announcement_api_v1_announcements__announcement_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                announcement_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnnouncementUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementRead"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -6877,6 +8335,676 @@ export interface operations {
             };
         };
     };
+    list_agents_api_v1_manager_agents_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedAgentRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_agent_standing_api_v1_manager_agents__agent_id__standing_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentStandingUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_announcements_api_v1_manager_announcements_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedAnnouncementRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_applications_api_v1_manager_applications_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedApplicationRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_application_api_v1_manager_applications__application_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reject_application_api_v1_manager_applications__application_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationRejection"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_campuses_api_v1_manager_campuses_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusManagerRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_campus_api_v1_manager_campuses_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampusQuickCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusManagerRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_campus_settings_api_v1_manager_campuses__campus_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                campus_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampusSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusManagerRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_context_api_v1_manager_context_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagerContext"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hostels_api_v1_manager_hostels_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialHostelsOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_listings_api_v1_manager_listings_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedListingRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_managed_listing_api_v1_manager_listings__listing_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListingRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_owner_phone_api_v1_manager_listings__listing_id__owner_phone_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OwnerPhoneUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_overview_api_v1_manager_overview_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagerOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_staff_api_v1_manager_staff_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMember"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    find_user_api_v1_manager_staff_find_get: {
+        parameters: {
+            query: {
+                email: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FoundUser"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_agents_api_v1_manager_staff_search_agents_get: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromotableAgent"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_manager_api_v1_manager_staff__target_user_id__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                target_user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManagerAssignment"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMember"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_manager_api_v1_manager_staff__target_user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                target_user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_notifications_api_v1_notifications_get: {
         parameters: {
             query?: never;
@@ -7200,6 +9328,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AppNotificationRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_official_hostels_api_v1_official_hostels_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialHostelRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    official_hostels_overview_api_v1_official_hostels_overview_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialHostelsOverview"];
                 };
             };
             /** @description Validation Error */
@@ -8225,6 +10415,7 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string | null;
+                sort?: string;
                 /** @description Page number (1-indexed) */
                 page?: number;
                 /** @description Items per page (max 1000) */
@@ -8244,7 +10435,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TourBookingRead_"];
+                    "application/json": components["schemas"]["PaginatedResponse_StaffTourBookingRead_"];
                 };
             };
             /** @description Validation Error */
@@ -8502,6 +10693,41 @@ export interface operations {
             };
         };
     };
+    create_zone_api_v1_zones_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ZoneCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusZoneRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_tour_price_api_v1_zones_tour_price_get: {
         parameters: {
             query: {
@@ -8522,6 +10748,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TourPriceRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_zone_api_v1_zones__zone_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                zone_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_zone_api_v1_zones__zone_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                zone_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ZoneWrite"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusZoneRead"];
                 };
             };
             /** @description Validation Error */

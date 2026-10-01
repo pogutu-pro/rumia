@@ -592,6 +592,17 @@
             "title": "Property Type",
             "type": "string"
           },
+          "proximity_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proximity Description"
+          },
           "rating": {
             "default": 0.0,
             "title": "Rating",
@@ -1095,6 +1106,32 @@
         "title": "AgentSelfRead",
         "type": "object"
       },
+      "AgentStandingUpdate": {
+        "properties": {
+          "status": {
+            "pattern": "^(active|suspended)$",
+            "title": "Status",
+            "type": "string"
+          },
+          "suspension_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspension Reason"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "AgentStandingUpdate",
+        "type": "object"
+      },
       "AgentStatusUpdate": {
         "properties": {
           "status": {
@@ -1291,6 +1328,71 @@
         "title": "AnnouncementRead",
         "type": "object"
       },
+      "AnnouncementUpdate": {
+        "properties": {
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "minLength": 5,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "pattern": "^(info|warning|encouragement)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          }
+        },
+        "title": "AnnouncementUpdate",
+        "type": "object"
+      },
       "AppNotificationRead": {
         "properties": {
           "body": {
@@ -1349,6 +1451,21 @@
           "created_at"
         ],
         "title": "AppNotificationRead",
+        "type": "object"
+      },
+      "ApplicationRejection": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ApplicationRejection",
         "type": "object"
       },
       "BedConfig": {
@@ -2421,6 +2538,300 @@
         "title": "CampusCreate",
         "type": "object"
       },
+      "CampusManagerRead": {
+        "description": "A campus with its operational contact details, for managers/admins.",
+        "properties": {
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultation Fee"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "feature_flags": {
+            "additionalProperties": true,
+            "title": "Feature Flags",
+            "type": "object"
+          },
+          "hero_headline": {
+            "title": "Hero Headline",
+            "type": "string"
+          },
+          "hero_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Image"
+          },
+          "hero_subtext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Subtext"
+          },
+          "hostel_finding_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostel Finding Fee"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "manifest_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manifest Description"
+          },
+          "manifest_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manifest Name"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "og_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Og Description"
+          },
+          "og_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Og Title"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "primary_color": {
+            "title": "Primary Color",
+            "type": "string"
+          },
+          "region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Id"
+          },
+          "seo_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Description"
+          },
+          "seo_keywords": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Seo Keywords",
+            "type": "array"
+          },
+          "seo_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Title"
+          },
+          "short_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Name"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Social Links"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "twitter_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twitter Description"
+          },
+          "whatsapp_number": {
+            "title": "Whatsapp Number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "city",
+          "hero_headline",
+          "whatsapp_number",
+          "primary_color",
+          "status",
+          "created_at"
+        ],
+        "title": "CampusManagerRead",
+        "type": "object"
+      },
+      "CampusQuickCreate": {
+        "description": "Minimal campus creation: it starts as 'coming_soon' with placeholder branding to refine later.",
+        "properties": {
+          "hero_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Image"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Id"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CampusQuickCreate",
+        "type": "object"
+      },
       "CampusRead": {
         "properties": {
           "city": {
@@ -2628,6 +3039,237 @@
           "created_at"
         ],
         "title": "CampusRead",
+        "type": "object"
+      },
+      "CampusSettingsUpdate": {
+        "description": "Fields a manager may change on a campus they manage. `name/slug/region_id/status` are admin-only\n(silently ignored for managers). Only the fields actually sent are applied (null clears).",
+        "properties": {
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultation Fee"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "hero_headline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Headline"
+          },
+          "hero_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Image"
+          },
+          "hero_subtext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Subtext"
+          },
+          "hostel_finding_fee": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostel Finding Fee"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "og_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Og Description"
+          },
+          "og_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Og Title"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "primary_color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Color"
+          },
+          "region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Id"
+          },
+          "seo_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Description"
+          },
+          "seo_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Title"
+          },
+          "short_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Name"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Social Links"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "pattern": "^(active|coming_soon)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "twitter_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twitter Description"
+          },
+          "whatsapp_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Number"
+          }
+        },
+        "title": "CampusSettingsUpdate",
         "type": "object"
       },
       "CampusStatusUpdate": {
@@ -2970,6 +3612,35 @@
           "created_at"
         ],
         "title": "FeedbackRead",
+        "type": "object"
+      },
+      "FoundUser": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email"
+        ],
+        "title": "FoundUser",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -4265,6 +4936,17 @@
             ],
             "title": "Longitude"
           },
+          "mpesa_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Details"
+          },
           "pays_commission": {
             "default": false,
             "title": "Pays Commission",
@@ -4302,6 +4984,17 @@
             "pattern": "^(hostel|apartment|short_stay)$",
             "title": "Property Type",
             "type": "string"
+          },
+          "proximity_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proximity Description"
           },
           "room_type": {
             "anyOf": [
@@ -4807,6 +5500,17 @@
             "default": "hostel",
             "title": "Property Type",
             "type": "string"
+          },
+          "proximity_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proximity Description"
           },
           "rating": {
             "default": 0.0,
@@ -5432,6 +6136,17 @@
             ],
             "title": "Longitude"
           },
+          "mpesa_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Details"
+          },
           "pays_commission": {
             "anyOf": [
               {
@@ -5488,6 +6203,17 @@
               }
             ],
             "title": "Property Type"
+          },
+          "proximity_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proximity Description"
           },
           "room_type": {
             "anyOf": [
@@ -5665,6 +6391,307 @@
         "title": "LoginSyncResponse",
         "type": "object"
       },
+      "ManagedAgentRead": {
+        "properties": {
+          "campus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostelRequestCampus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "is_founder": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Founder"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          },
+          "whatsapp": {
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "whatsapp",
+          "status",
+          "created_at"
+        ],
+        "title": "ManagedAgentRead",
+        "type": "object"
+      },
+      "ManagedAnnouncementRead": {
+        "properties": {
+          "campus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostelRequestCampus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "campus_id": {
+            "title": "Campus Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "campus_id",
+          "title",
+          "message",
+          "type",
+          "created_at",
+          "updated_at",
+          "expires_at"
+        ],
+        "title": "ManagedAnnouncementRead",
+        "type": "object"
+      },
+      "ManagedApplicationRead": {
+        "properties": {
+          "campus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostelRequestCampus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "campus_id": {
+            "title": "Campus Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "hostel_name": {
+            "title": "Hostel Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "id_number": {
+            "title": "Id Number",
+            "type": "string"
+          },
+          "owner_contact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Contact"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason"
+          },
+          "relationship_to_hostel": {
+            "title": "Relationship To Hostel",
+            "type": "string"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "campus_id",
+          "full_name",
+          "phone",
+          "id_number",
+          "hostel_name",
+          "relationship_to_hostel",
+          "status",
+          "created_at"
+        ],
+        "title": "ManagedApplicationRead",
+        "type": "object"
+      },
       "ManagedHostelRequestRead": {
         "description": "A request as shown to campus managers/admins, with its campus.",
         "properties": {
@@ -5801,6 +6828,195 @@
         "title": "ManagedHostelRequestRead",
         "type": "object"
       },
+      "ManagedListingAgent": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ManagedListingAgent",
+        "type": "object"
+      },
+      "ManagedListingImage": {
+        "properties": {
+          "display_order": {
+            "default": 0,
+            "title": "Display Order",
+            "type": "integer"
+          },
+          "r2_url": {
+            "title": "R2 Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "r2_url"
+        ],
+        "title": "ManagedListingImage",
+        "type": "object"
+      },
+      "ManagedListingRead": {
+        "properties": {
+          "agent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ManagedListingAgent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "campus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostelRequestCampus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "commission_locked_by_admin": {
+            "default": false,
+            "title": "Commission Locked By Admin",
+            "type": "boolean"
+          },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "images": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ManagedListingImage"
+            },
+            "title": "Images",
+            "type": "array"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "landlord_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landlord Phone"
+          },
+          "lead_count": {
+            "default": 0,
+            "title": "Lead Count",
+            "type": "integer"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "pays_commission": {
+            "default": false,
+            "title": "Pays Commission",
+            "type": "boolean"
+          },
+          "price": {
+            "title": "Price",
+            "type": "number"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "default": false,
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "price",
+          "location",
+          "is_active",
+          "created_at"
+        ],
+        "title": "ManagedListingRead",
+        "type": "object"
+      },
       "ManagerAssign": {
         "properties": {
           "managed_campus_id": {
@@ -5834,6 +7050,144 @@
           "user_id"
         ],
         "title": "ManagerAssign",
+        "type": "object"
+      },
+      "ManagerAssignment": {
+        "properties": {
+          "managed_campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Campus Id"
+          },
+          "managed_region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Region Id"
+          }
+        },
+        "title": "ManagerAssignment",
+        "type": "object"
+      },
+      "ManagerContext": {
+        "properties": {
+          "campus_name": {
+            "title": "Campus Name",
+            "type": "string"
+          },
+          "has_agent_record": {
+            "title": "Has Agent Record",
+            "type": "boolean"
+          },
+          "is_super_admin": {
+            "title": "Is Super Admin",
+            "type": "boolean"
+          },
+          "managed_campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Campus Id"
+          },
+          "managed_region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Region Id"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "user_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Email"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "user_name": {
+            "title": "User Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "role",
+          "is_super_admin",
+          "campus_name",
+          "user_name",
+          "has_agent_record"
+        ],
+        "title": "ManagerContext",
+        "type": "object"
+      },
+      "ManagerOverview": {
+        "description": "Counts for the manager home page, limited to the campuses in scope.",
+        "properties": {
+          "agents": {
+            "title": "Agents",
+            "type": "integer"
+          },
+          "has_campuses": {
+            "title": "Has Campuses",
+            "type": "boolean"
+          },
+          "listings": {
+            "title": "Listings",
+            "type": "integer"
+          },
+          "official_hostels": {
+            "title": "Official Hostels",
+            "type": "integer"
+          },
+          "pending_applications": {
+            "title": "Pending Applications",
+            "type": "integer"
+          },
+          "waiting_hostel_requests": {
+            "title": "Waiting Hostel Requests",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "has_campuses",
+          "pending_applications",
+          "agents",
+          "listings",
+          "waiting_hostel_requests",
+          "official_hostels"
+        ],
+        "title": "ManagerOverview",
         "type": "object"
       },
       "ManagerRead": {
@@ -6189,6 +7543,24 @@
           "listings"
         ],
         "title": "OfficialHostelsOverview",
+        "type": "object"
+      },
+      "OwnerPhoneUpdate": {
+        "properties": {
+          "landlord_phone": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landlord Phone"
+          }
+        },
+        "title": "OwnerPhoneUpdate",
         "type": "object"
       },
       "PaginatedResponse_AgentApplicationRead_": {
@@ -6868,6 +8240,34 @@
           }
         },
         "title": "ProfileUpdate",
+        "type": "object"
+      },
+      "PromotableAgent": {
+        "properties": {
+          "campus_name": {
+            "title": "Campus Name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "campus_name"
+        ],
+        "title": "PromotableAgent",
         "type": "object"
       },
       "PublicAgent": {
@@ -8039,6 +9439,68 @@
         "title": "SitemapResponse",
         "type": "object"
       },
+      "StaffMember": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "managed_campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Campus Id"
+          },
+          "managed_region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Region Id"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "role"
+        ],
+        "title": "StaffMember",
+        "type": "object"
+      },
       "StaffTourBookingRead": {
         "description": "A booking as shown to its agent / admins: embeds the listing and the agent.",
         "properties": {
@@ -8923,6 +10385,77 @@
           "saved"
         ],
         "title": "WishlistBatchCheckResponse",
+        "type": "object"
+      },
+      "ZoneCreate": {
+        "properties": {
+          "campus_id": {
+            "title": "Campus Id",
+            "type": "string"
+          },
+          "distance_category": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Category"
+          },
+          "full_search_price": {
+            "minimum": 0.0,
+            "title": "Full Search Price",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "full_search_price",
+          "campus_id"
+        ],
+        "title": "ZoneCreate",
+        "type": "object"
+      },
+      "ZoneWrite": {
+        "properties": {
+          "distance_category": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Category"
+          },
+          "full_search_price": {
+            "minimum": 0.0,
+            "title": "Full Search Price",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "full_search_price"
+        ],
+        "title": "ZoneWrite",
         "type": "object"
       },
       "_BnbDetailsBase": {
@@ -10892,6 +12425,73 @@
           }
         },
         "summary": "Delete Announcement",
+        "tags": [
+          "Announcements"
+        ]
+      },
+      "patch": {
+        "description": "Edit an announcement for a campus you manage. Manager or Admin only.",
+        "operationId": "update_announcement_api_v1_announcements__announcement_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "announcement_id",
+            "required": true,
+            "schema": {
+              "title": "Announcement Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnouncementUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Announcement",
         "tags": [
           "Announcements"
         ]
@@ -13498,6 +15098,1177 @@
         "summary": "Toggle Listing Availability (Full / Available)",
         "tags": [
           "Listings"
+        ]
+      }
+    },
+    "/api/v1/manager/agents": {
+      "get": {
+        "operationId": "list_agents_api_v1_manager_agents_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ManagedAgentRead"
+                  },
+                  "title": "Response List Agents Api V1 Manager Agents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agents In Scope",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/agents/{agent_id}/standing": {
+      "patch": {
+        "description": "Changes only status and suspension_reason; a reason is required to suspend.",
+        "operationId": "set_agent_standing_api_v1_manager_agents__agent_id__standing_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentStandingUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Agent Standing Api V1 Manager Agents  Agent Id  Standing Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Suspend / Reinstate Agent",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/announcements": {
+      "get": {
+        "description": "All announcements (including expired) for the campuses in scope.",
+        "operationId": "list_announcements_api_v1_manager_announcements_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ManagedAnnouncementRead"
+                  },
+                  "title": "Response List Announcements Api V1 Manager Announcements Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Announcements In Scope",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/applications": {
+      "get": {
+        "operationId": "list_applications_api_v1_manager_applications_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ManagedApplicationRead"
+                  },
+                  "title": "Response List Applications Api V1 Manager Applications Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agent Applications In Scope",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/applications/{application_id}/approve": {
+      "post": {
+        "description": "Creates the agent record, promotes the applicant to 'agent', notifies them. 409 if already processed.",
+        "operationId": "approve_application_api_v1_manager_applications__application_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Application Api V1 Manager Applications  Application Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Application",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/applications/{application_id}/reject": {
+      "post": {
+        "description": "Rejects with a reason and notifies the applicant.",
+        "operationId": "reject_application_api_v1_manager_applications__application_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationRejection"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Application Api V1 Manager Applications  Application Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reject Application",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/campuses": {
+      "get": {
+        "description": "Full campus rows for the campuses in scope (all for admins).",
+        "operationId": "list_campuses_api_v1_manager_campuses_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CampusManagerRead"
+                  },
+                  "title": "Response List Campuses Api V1 Manager Campuses Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Campuses I Manage",
+        "tags": [
+          "Manager"
+        ]
+      },
+      "post": {
+        "description": "Starts as coming_soon with placeholder branding. 409 if the slug exists.",
+        "operationId": "create_campus_api_v1_manager_campuses_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampusQuickCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusManagerRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Campus (Admin)",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/campuses/{campus_id}": {
+      "patch": {
+        "description": "Managers: contact/branding/fees of campuses they manage (needs \u22651 zone). Admins: also name/slug/region/status.",
+        "operationId": "update_campus_settings_api_v1_manager_campuses__campus_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campus_id",
+            "required": true,
+            "schema": {
+              "title": "Campus Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampusSettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusManagerRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Campus Settings",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/context": {
+      "get": {
+        "description": "Who the caller is as a manager/admin: scope, campus name, display name.",
+        "operationId": "get_context_api_v1_manager_context_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerContext"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Manager Context",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/hostels": {
+      "get": {
+        "description": "Official records plus the in-scope listings, for cross-checking.",
+        "operationId": "hostels_api_v1_manager_hostels_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialHostelsOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Hostels In Scope",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/listings": {
+      "get": {
+        "operationId": "list_listings_api_v1_manager_listings_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ManagedListingRead"
+                  },
+                  "title": "Response List Listings Api V1 Manager Listings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listings In Scope",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/listings/{listing_id}": {
+      "get": {
+        "description": "A listing in the manager's scope (404 otherwise), including inactive ones.",
+        "operationId": "get_managed_listing_api_v1_manager_listings__listing_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listing For Editing",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/listings/{listing_id}/owner-phone": {
+      "patch": {
+        "operationId": "set_owner_phone_api_v1_manager_listings__listing_id__owner_phone_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OwnerPhoneUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Owner Phone Api V1 Manager Listings  Listing Id  Owner Phone Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Owner Phone",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/overview": {
+      "get": {
+        "description": "Counts for the manager home page, limited to the campuses in scope.",
+        "operationId": "get_overview_api_v1_manager_overview_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Manager Overview",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/staff": {
+      "get": {
+        "operationId": "list_staff_api_v1_manager_staff_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StaffMember"
+                  },
+                  "title": "Response List Staff Api V1 Manager Staff Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Staff (Admin)",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/staff/find": {
+      "get": {
+        "operationId": "find_user_api_v1_manager_staff_find_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "minLength": 3,
+              "title": "Email",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundUser"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Find User By Email (Admin)",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/staff/search-agents": {
+      "get": {
+        "operationId": "search_agents_api_v1_manager_staff_search_agents_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 100,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PromotableAgent"
+                  },
+                  "title": "Response Search Agents Api V1 Manager Staff Search Agents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Agents To Promote (Admin)",
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/v1/manager/staff/{target_user_id}": {
+      "delete": {
+        "description": "Downgrades the manager back to agent.",
+        "operationId": "remove_manager_api_v1_manager_staff__target_user_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_user_id",
+            "required": true,
+            "schema": {
+              "title": "Target User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Manager Role (Admin)",
+        "tags": [
+          "Manager"
+        ]
+      },
+      "put": {
+        "description": "Sets role manager with a campus OR region scope (not both).",
+        "operationId": "assign_manager_api_v1_manager_staff__target_user_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_user_id",
+            "required": true,
+            "schema": {
+              "title": "Target User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManagerAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffMember"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Assign Manager Role (Admin)",
+        "tags": [
+          "Manager"
         ]
       }
     },
@@ -16582,6 +19353,64 @@
         "tags": [
           "Campus Zones"
         ]
+      },
+      "post": {
+        "description": "Managers (for campuses they manage) and admins.",
+        "operationId": "create_zone_api_v1_zones_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZoneCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusZoneRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Zone",
+        "tags": [
+          "Campus Zones"
+        ]
       }
     },
     "/api/v1/zones/tour-price": {
@@ -16642,6 +19471,125 @@
           }
         },
         "summary": "Zone Tour Price",
+        "tags": [
+          "Campus Zones"
+        ]
+      }
+    },
+    "/api/v1/zones/{zone_id}": {
+      "delete": {
+        "description": "Refused while listings on the campus still use the area.",
+        "operationId": "delete_zone_api_v1_zones__zone_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "zone_id",
+            "required": true,
+            "schema": {
+              "title": "Zone Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Zone",
+        "tags": [
+          "Campus Zones"
+        ]
+      },
+      "patch": {
+        "description": "Renames re-generate the slug. Managers for their campuses, and admins.",
+        "operationId": "update_zone_api_v1_zones__zone_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "zone_id",
+            "required": true,
+            "schema": {
+              "title": "Zone Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZoneWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusZoneRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Zone",
         "tags": [
           "Campus Zones"
         ]

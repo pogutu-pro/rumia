@@ -1,5 +1,6 @@
 import { getManagerUser } from '@/app/actions/manager';
-import { createClient } from '@/lib/supabase/server';
+import { managerApi } from '@/lib/api/manager';
+import { announcementsApi } from '@/lib/api/announcements';
 import { AnnouncementsClient } from './announcements-client';
 
 export const metadata = {
@@ -17,39 +18,16 @@ export default async function ManagerAnnouncementsPage() {
     );
   }
 
-  const supabase = await createClient();
-  let campuses: any[] = [];
-
-  if (manager.context.isSuperAdmin) {
-    const { data } = await supabase
-      .from('campuses')
-      .select('id, name, slug')
-      .order('name');
-    campuses = data || [];
-  } else if (manager.context.managedRegionId) {
-    const { data } = await supabase
-      .from('campuses')
-      .select('id, name, slug')
-      .eq('region_id', manager.context.managedRegionId)
-      .order('name');
-    campuses = data || [];
-  } else if (manager.context.managedCampusId) {
-    const { data } = await supabase
-      .from('campuses')
-      .select('id, name, slug')
-      .eq('id', manager.context.managedCampusId);
-    campuses = data || [];
-  }
-
-  // RLS scopes rows to the campuses this manager is authorized for (active and
-  // expired announcements both come back so the dashboard can show history).
-  const { data: announcements } = await supabase
-    .from('announcements')
-    .select(
-      `id, campus_id, title, message, type, created_by, created_at, updated_at, expires_at,
-       campuses ( id, name, slug )`,
-    )
-    .order('created_at', { ascending: false });
+  const [campusRows, announcementRows] = await Promise.all([
+    managerApi.campuses().catch(() => []),
+    announcementsApi.listManagedServer().catch(() => []),
+  ]);
+  const campuses = campusRows.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
+  // The client reads the embedded campus as `campuses` (legacy shape).
+  const announcements = announcementRows.map(({ campus, ...rest }) => ({
+    ...rest,
+    campuses: campus ?? null,
+  }));
 
   return (
     <div className="space-y-6">

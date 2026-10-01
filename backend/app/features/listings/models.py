@@ -57,6 +57,7 @@ class Listing(Base):
     verified: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
     commission_locked_by_admin: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
     bathroom_type: Mapped[Optional[str]] = mapped_column(String, server_default="Shared")
+    proximity_description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     distance_to_campus: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     distance_category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     security_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)

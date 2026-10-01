@@ -1,9 +1,5 @@
 # Legacy files with direct DB access. Shrink only. See docs/PLAN_FRONTEND_DB_DECOUPLING.md
 web/src/app/actions/admin.ts
-web/src/app/actions/campus-settings.ts
-web/src/app/actions/manager.ts
-web/src/app/actions/staff.ts
-web/src/app/actions/zones.ts
 web/src/app/(admin)/admin/agents/[id]/page.tsx
 web/src/app/(admin)/admin/agents/page.tsx
 web/src/app/(admin)/admin/analytics/page.tsx
@@ -24,15 +20,6 @@ web/src/app/(admin)/admin/tours/page.tsx
 web/src/app/(admin)/admin/transfers/page.tsx
 web/src/app/(admin)/admin/users/page.tsx
 web/src/app/(admin)/layout.tsx
-web/src/app/api/campuses/create/route.ts
-web/src/app/(manager)/layout.tsx
-web/src/app/(manager)/manager/announcements/page.tsx
-web/src/app/(manager)/manager/listings/edit/[id]/page.tsx
-web/src/app/(manager)/manager/page.tsx
-web/src/app/(manager)/manager/payments/page.tsx
-web/src/app/(manager)/manager/settings/page.tsx
-web/src/app/(manager)/manager/staff/page.tsx
-web/src/app/(manager)/manager/zones/page.tsx
 web/src/lib/push.ts
 web/src/lib/supabase/admin.ts
 web/src/lib/supabase/public.ts

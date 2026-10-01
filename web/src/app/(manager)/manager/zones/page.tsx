@@ -1,5 +1,6 @@
 import { getManagerUser } from '@/app/actions/manager';
-import { createClient } from '@/lib/supabase/server';
+import { managerApi } from '@/lib/api/manager';
+import { zonesApi } from '@/lib/api/zones';
 import { ZonesClient } from './zones-client';
 
 export const metadata = {
@@ -17,21 +18,11 @@ export default async function ManagerZonesPage() {
     );
   }
 
-  const supabase = await createClient();
-  let campuses: any[] = [];
-  
-  if (manager.context.isSuperAdmin) {
-    const { data } = await supabase.from('campuses').select('id, name, slug').order('name');
-    campuses = data || [];
-  } else if (manager.context.managedRegionId) {
-    const { data } = await supabase.from('campuses').select('id, name, slug').eq('region_id', manager.context.managedRegionId).order('name');
-    campuses = data || [];
-  } else if (manager.context.managedCampusId) {
-    const { data } = await supabase.from('campuses').select('id, name, slug').eq('id', manager.context.managedCampusId);
-    campuses = data || [];
-  }
-
-  const { data: allZones } = await supabase.from('campus_zones').select('*').order('name');
+  const [campusRows, allZones] = await Promise.all([
+    managerApi.campuses().catch(() => []),
+    zonesApi.listAllServer().catch(() => []),
+  ]);
+  const campuses = campusRows.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
 
   return (
     <div className="space-y-6">
@@ -47,7 +38,7 @@ export default async function ManagerZonesPage() {
       <ZonesClient
         campuses={campuses}
         isSuperAdmin={manager.context.isSuperAdmin}
-        allZones={allZones || []}
+        allZones={allZones}
       />
     </div>
   );

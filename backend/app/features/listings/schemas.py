@@ -79,6 +79,8 @@ class ListingRead(BaseModel):
     area: Optional[str] = None
     specific_location: Optional[str] = None
     landlord_phone: Optional[str] = None
+    mpesa_details: Optional[str] = None
+    proximity_description: Optional[str] = None
     youtube_id: Optional[str] = None
     is_youtube_shorts: bool = False
     is_full: bool = False
@@ -96,7 +98,6 @@ class ListingRead(BaseModel):
     cooking_gas_included: bool = False
     room_type: Optional[str] = None
     room_type_enum: Optional[str] = None
-    mpesa_details: Optional[str] = None
     gender: Optional[str] = None
     price_single: Optional[float] = None
     price_sharing: Optional[float] = None
@@ -128,6 +129,8 @@ class ListingCreate(BaseModel):
     area: Optional[str] = "dekut"
     specific_location: Optional[str] = None
     landlord_phone: Optional[str] = None
+    mpesa_details: Optional[str] = None
+    proximity_description: Optional[str] = None
     youtube_id: Optional[str] = None
     is_youtube_shorts: bool = False
     bathroom_type: Optional[str] = "Shared"
@@ -168,6 +171,8 @@ class ListingUpdate(BaseModel):
     area: Optional[str] = None
     specific_location: Optional[str] = None
     landlord_phone: Optional[str] = None
+    mpesa_details: Optional[str] = None
+    proximity_description: Optional[str] = None
     youtube_id: Optional[str] = None
     is_youtube_shorts: Optional[bool] = None
     is_full: Optional[bool] = None

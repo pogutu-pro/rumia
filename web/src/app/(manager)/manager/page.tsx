@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { getManagerHostelsAction, getManagerUser } from '@/app/actions/manager';
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { managerApi } from '@/lib/api/manager';
 import { OfficialHostelsTableClient } from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
 import {
   FileCheck2,
@@ -31,94 +30,33 @@ export default async function ManagerDashboardPage() {
     );
   }
 
-  const { context } = manager;
-  const supabase = await createClient();
+  const overview = await managerApi.overview().catch(() => null);
 
-  let allowedCampusIds: string[] = [];
-
-  // Scoped count queries
-  let pendingAppsQuery = supabase
-    .from('agent_applications')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'pending');
-
-  let agentsQuery = supabase
-    .from('agents')
-    .select('id', { count: 'exact', head: true });
-
-  let listingsQuery = supabase
-    .from('listings')
-    .select('id', { count: 'exact', head: true });
-
-  let hostelRequestsQuery = supabase
-    .from('hostel_requests')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'waiting');
-
-  let officialHostelsQuery = (supabaseAdmin as any)
-    .from('dekut_official_hostels')
-    .select('id', { count: 'exact', head: true });
-
-  let allListingsQuery = (supabaseAdmin as any)
-    .from('listings')
-    .select('id', { count: 'exact', head: true });
-
-  if (!context.isSuperAdmin) {
-    if (context.managedCampusId) {
-      allowedCampusIds = [context.managedCampusId];
-    } else if (context.managedRegionId) {
-      const { data: campuses } = await supabase
-        .from('campuses')
-        .select('id')
-        .eq('region_id', context.managedRegionId);
-      if (campuses) {
-        allowedCampusIds = campuses.map((c) => c.id);
-      }
-    }
-
-    if (allowedCampusIds.length > 0) {
-      pendingAppsQuery = pendingAppsQuery.in('campus_id', allowedCampusIds);
-      agentsQuery = agentsQuery.in('campus_id', allowedCampusIds);
-      listingsQuery = listingsQuery.in('campus_id', allowedCampusIds);
-      hostelRequestsQuery = hostelRequestsQuery.in('campus_id', allowedCampusIds);
-      allListingsQuery = allListingsQuery.in('campus_id', allowedCampusIds);
-    } else {
-      // If no campuses allowed, return zero for all
-      return (
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Campus Operations Overview
-            </h1>
-            <p className="text-sm text-slate-500">
-              Manage prospective agent applications, agent standing, and campus
-              listings.
-            </p>
-          </div>
-          <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 text-sm">
-            No campuses assigned to your region yet.
-          </div>
+  if (!overview || !overview.has_campuses) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Campus Operations Overview
+          </h1>
+          <p className="text-sm text-slate-500">
+            Manage prospective agent applications, agent standing, and campus
+            listings.
+          </p>
         </div>
-      );
-    }
+        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 text-sm">
+          No campuses assigned to your region yet.
+        </div>
+      </div>
+    );
   }
 
-  const [appsCountRes, agentsCountRes, listingsCountRes, hostelRequestsCountRes, officialHostelsCountRes, allListingsCountRes] =
-    await Promise.all([
-      pendingAppsQuery,
-      agentsQuery,
-      listingsQuery,
-      hostelRequestsQuery,
-      officialHostelsQuery,
-      allListingsQuery,
-    ]);
-
-  const pendingAppsCount = appsCountRes.count ?? 0;
-  const totalAgentsCount = agentsCountRes.count ?? 0;
-  const totalListingsCount = listingsCountRes.count ?? 0;
-  const waitingHostelRequestsCount = hostelRequestsCountRes.count ?? 0;
-  const officialHostelsCount = officialHostelsCountRes.count ?? 0;
-  const allCampusListingsCount = allListingsCountRes.count ?? 0;
+  const pendingAppsCount = overview.pending_applications;
+  const totalAgentsCount = overview.agents;
+  const totalListingsCount = overview.listings;
+  const waitingHostelRequestsCount = overview.waiting_hostel_requests;
+  const officialHostelsCount = overview.official_hostels;
+  const allCampusListingsCount = overview.listings;
   const totalHostelsCount = officialHostelsCount + allCampusListingsCount;
 
   const hostelsData = await getManagerHostelsAction();

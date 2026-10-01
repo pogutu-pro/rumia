@@ -11,6 +11,14 @@ class AnnouncementCreate(BaseModel):
     expires_at: datetime
 
 
+class AnnouncementUpdate(BaseModel):
+    campus_id: Optional[str] = None
+    title: Optional[str] = Field(None, min_length=2)
+    message: Optional[str] = Field(None, min_length=5)
+    type: Optional[str] = Field(None, pattern="^(info|warning|encouragement)$")
+    expires_at: Optional[datetime] = None
+
+
 class AnnouncementRead(BaseModel):
     id: str
     campus_id: str

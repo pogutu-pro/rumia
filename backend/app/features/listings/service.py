@@ -7,11 +7,12 @@ from sqlalchemy import func, select, union_all
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import ForbiddenException, NotFoundException
+from app.core.errors import BadRequestException, ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
-from app.core.security import AuthenticatedUser, check_ownership
+from app.core.security import AuthenticatedUser, check_campus_scope
 from app.features.analytics.models import ListingView, ListingViewDailyRollup
 from app.features.campuses.models import Campus
+from app.features.profiles.models import UserProfile
 from app.features.listings.models import Agent, Listing, ListingImage, ListingRoomType
 from app.features.listings.schemas import ListingCreate, ListingImageCreate, ListingRoomTypeCreate, ListingUpdate
 from app.features.listings.verification import verify_listing
@@ -26,6 +27,16 @@ def slugify(text: str) -> str:
 
 
 class ListingService:
+    @staticmethod
+    async def assert_can_manage(db: AsyncSession, user: AuthenticatedUser, listing: Listing) -> None:
+        """The listing's owning agent, an admin, or a manager whose campus/region covers it."""
+        owner_user_id = listing.agent.user_id if listing.agent else None
+        if user.is_admin or (owner_user_id and str(owner_user_id) == user.id):
+            return
+        if user.role == "manager" and listing.campus_id and await check_campus_scope(user, str(listing.campus_id), db):
+            return
+        raise ForbiddenException("You do not have permission to manage this listing")
+
     @staticmethod
     def _all_time_view_counts(listing_ids: Optional[List[str]] = None):
         live_counts = select(
@@ -187,14 +198,20 @@ class ListingService:
             agent = any_result.scalar_one_or_none()
 
         if not agent:
-            # Create default agent record for agent user
+            # Only staff get an agent record on demand; everyone else must be approved as an agent.
+            if user.role not in ("manager", "admin", "super_admin"):
+                raise ForbiddenException("Only approved agents can manage listings")
+            profile_campus = (await db.execute(
+                select(UserProfile.campus_id).where(UserProfile.id == user.id)
+            )).scalar_one_or_none()
             agent = Agent(
                 id=str(uuid.uuid4()),
                 name=user.email.split("@")[0] if user.email else "Agent",
                 phone="+254700000000",
                 whatsapp="+254700000000",
                 user_id=user.id,
-                campus_id=user.managed_campus_id,
+                # agents.campus_id is NOT NULL
+                campus_id=user.managed_campus_id or (str(profile_campus) if profile_campus else None),
             )
             db.add(agent)
             await db.flush()
@@ -327,6 +344,8 @@ class ListingService:
             area=data.area,
             specific_location=data.specific_location,
             landlord_phone=data.landlord_phone,
+            mpesa_details=data.mpesa_details,
+            proximity_description=data.proximity_description,
             youtube_id=data.youtube_id,
             is_youtube_shorts=data.is_youtube_shorts,
             bathroom_type=data.bathroom_type,
@@ -347,7 +366,8 @@ class ListingService:
             latitude=data.latitude,
             longitude=data.longitude,
             agent_id=agent.id,
-            campus_id=data.campus_id or user.managed_campus_id,
+            # Agents list only into their own campus; the client-sent campus_id is honoured for admins.
+            campus_id=(data.campus_id if user.is_admin and data.campus_id else (agent.campus_id or user.managed_campus_id)),
             zone_id=data.zone_id,
             is_active=data.is_active,
             is_full=False,
@@ -391,15 +411,30 @@ class ListingService:
             raise NotFoundException(f"Listing '{listing_id}' not found")
 
         # Verify owner or admin
+        await ListingService.assert_can_manage(db, user, listing)
+
+        # A manager editing someone else's listing may only pick the campus's configured areas.
         owner_user_id = listing.agent.user_id if listing.agent else None
-        check_ownership(user, owner_user_id or listing.agent_id)
+        is_manager_edit = (not user.is_admin) and user.role == "manager" and str(owner_user_id or "") != user.id
+        if is_manager_edit and data.area is not None:
+            from app.features.zones.models import CampusZone
+
+            zones = (await db.execute(select(CampusZone.name).where(CampusZone.campus_id == listing.campus_id))).scalars().all()
+            canonical = next((z for z in zones if z.strip().lower() == data.area.strip().lower()), None)
+            if canonical is None:
+                raise BadRequestException(
+                    "Please choose a valid hostel area for this campus. Only the manager-configured areas are allowed."
+                )
+            data.area = canonical.strip()
 
         # Update agent WhatsApp if provided
         if data.agent_whatsapp and data.agent_whatsapp.strip() and listing.agent:
             listing.agent.whatsapp = data.agent_whatsapp.strip()
 
         # Extract nested relations before applying scalar fields
-        update_data = data.model_dump(exclude_unset=True, exclude={"images", "room_types", "agent_whatsapp"})
+        # Moving a listing to another campus is admin-only.
+        excluded = {"images", "room_types", "agent_whatsapp"} | (set() if user.is_admin else {"campus_id"})
+        update_data = data.model_dump(exclude_unset=True, exclude=excluded)
         for field_name, val in update_data.items():
             setattr(listing, field_name, val)
 
@@ -432,8 +467,7 @@ class ListingService:
         if not listing:
             raise NotFoundException(f"Listing '{listing_id}' not found")
 
-        owner_user_id = listing.agent.user_id if listing.agent else None
-        check_ownership(user, owner_user_id or listing.agent_id)
+        await ListingService.assert_can_manage(db, user, listing)
 
         listing.is_full = is_full
         await db.flush()
@@ -450,8 +484,7 @@ class ListingService:
         if not listing:
             raise NotFoundException(f"Listing '{listing_id}' not found")
 
-        owner_user_id = listing.agent.user_id if listing.agent else None
-        check_ownership(user, owner_user_id or listing.agent_id)
+        await ListingService.assert_can_manage(db, user, listing)
 
         listing.is_active = is_active
         await db.flush()
@@ -468,8 +501,9 @@ class ListingService:
         if not listing:
             raise NotFoundException(f"Listing '{listing_id}' not found")
 
-        owner_user_id = listing.agent.user_id if listing.agent else None
-        check_ownership(user, owner_user_id or listing.agent_id)
+        await ListingService.assert_can_manage(db, user, listing)
+        if listing.commission_locked_by_admin and not user.is_admin:
+            raise ForbiddenException("This listing's commission setting is locked by an administrator")
 
         listing.pays_commission = pays_commission
         await db.flush()
@@ -485,8 +519,7 @@ class ListingService:
         if not listing:
             raise NotFoundException(f"Listing '{listing_id}' not found")
 
-        owner_user_id = listing.agent.user_id if listing.agent else None
-        check_ownership(user, owner_user_id or listing.agent_id)
+        await ListingService.assert_can_manage(db, user, listing)
 
         if listing.property_type == "short_stay":
             from app.features.images.service import ImageService

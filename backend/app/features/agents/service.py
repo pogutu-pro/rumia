@@ -36,12 +36,16 @@ class AgentService:
             return agent
         if user.role not in ("admin", "manager", "super_admin"):
             raise ForbiddenException("Apply to become an agent first")
-        phone_res = await db.execute(select(UserProfile.phone, UserProfile.full_name).where(UserProfile.id == user.id))
+        phone_res = await db.execute(
+            select(UserProfile.phone, UserProfile.full_name, UserProfile.campus_id).where(UserProfile.id == user.id)
+        )
         row = phone_res.first()
         phone = (row.phone if row and row.phone else DEFAULT_AGENT_PHONE)
         agent = AgentProfile(
             id=str(uuid.uuid4()), user_id=user.id, name=(display_name or (row.full_name if row else None) or "New Agent"),
             phone=phone, whatsapp=phone, commission_balance=0, status="active",
+            # agents.campus_id is NOT NULL: use the staff member's scope, else their profile campus.
+            campus_id=user.managed_campus_id or (str(row.campus_id) if row and row.campus_id else None),
             created_at=datetime.now(timezone.utc),
         )
         db.add(agent)

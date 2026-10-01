@@ -1,6 +1,6 @@
 import { getManagerUser } from '@/app/actions/manager';
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { managerApi } from '@/lib/api/manager';
+import { regionsApi } from '@/lib/api/regions';
 import { StaffClient } from './staff-client';
 import { redirect } from 'next/navigation';
 
@@ -16,34 +16,16 @@ export default async function ManagerStaffPage() {
     redirect('/manager');
   }
 
-  const supabase = await createClient();
-
-  // Fetch all staff members (manager, admin)
-  const { data: staffProfiles } = await supabaseAdmin
-    .from('profiles')
-    .select(`
-      id,
-      full_name,
-      role,
-      managed_campus_id,
-      managed_region_id
-    `)
-    .in('role', ['manager', 'admin'])
-    .order('created_at', { ascending: false });
-
-  // Fetch emails from auth.users (requires admin)
-  const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
-  
-  const staff = (staffProfiles || []).map(profile => {
-    const authUser = users.find(u => u.id === profile.id);
-    return {
-      ...profile,
-      email: authUser?.email || 'Unknown',
-    };
-  });
-
-  const { data: campuses } = await supabaseAdmin.from('campuses').select('id, name').order('name');
-  const { data: regions } = await supabaseAdmin.from('regions').select('id, name').order('name');
+  const [staffRows, campuses, regions] = await Promise.all([
+    managerApi.staff().catch(() => []),
+    managerApi.campuses().catch(() => []),
+    regionsApi.listServer().catch(() => []),
+  ]);
+  const staff = staffRows.map((m) => ({
+    ...m,
+    full_name: m.full_name ?? '',
+    email: m.email || 'Unknown',
+  }));
 
   return (
     <div className="space-y-6">
@@ -58,8 +40,8 @@ export default async function ManagerStaffPage() {
 
       <StaffClient 
         staff={staff} 
-        campuses={campuses || []} 
-        regions={regions || []} 
+        campuses={campuses.map((c) => ({ id: c.id, name: c.name }))}
+        regions={regions.map((r) => ({ id: r.id, name: r.name }))}
       />
     </div>
   );

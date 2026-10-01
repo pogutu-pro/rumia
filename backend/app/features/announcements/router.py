@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.security import AuthenticatedUser, get_current_user, require_roles
-from app.features.announcements.schemas import AnnouncementCreate, AnnouncementRead
+from app.features.announcements.schemas import AnnouncementCreate, AnnouncementRead, AnnouncementUpdate
 from app.features.announcements.service import AnnouncementService
 
 router = APIRouter(prefix="/announcements", tags=["Announcements"])
@@ -53,3 +53,20 @@ async def delete_announcement(
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await AnnouncementService.delete_announcement(db, user, announcement_id)
+
+
+@router.patch(
+    "/{announcement_id}",
+    response_model=AnnouncementRead,
+    status_code=status.HTTP_200_OK,
+    summary="Update Announcement",
+    description="Edit an announcement for a campus you manage. Manager or Admin only.",
+)
+async def update_announcement(
+    announcement_id: str,
+    data: AnnouncementUpdate,
+    user: AuthenticatedUser = Depends(require_roles("manager", "admin")),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> AnnouncementRead:
+    ann = await AnnouncementService.update_announcement(db, user, announcement_id, data)
+    return AnnouncementRead.model_validate(ann)

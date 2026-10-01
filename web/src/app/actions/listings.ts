@@ -2,107 +2,16 @@
 
 import { revalidatePath } from 'next/cache';
 import { listingsApi } from '@/lib/api/listings';
+import {
+  listingPayload,
+  mapListingImages,
+  mapRoomTypes,
+} from '@/lib/utils/listing-payload';
 import type {
   OfficialHostel,
   AgentListingHostel,
 } from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
 import { officialHostelsApi } from '@/lib/api/official-hostels';
-
-function nullableCoordinate(value: unknown) {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function listingPayload(formData: any, agentId?: string) {
-  return {
-    title: formData.title,
-    county: formData.county || 'nyeri',
-    area: formData.area || 'dekut',
-    description: formData.description,
-    property_type:
-      ['apartment', 'short_stay', 'hostel'].includes(formData.property_type)
-        ? formData.property_type
-        : 'hostel',
-    price:
-      typeof formData.price === 'number'
-        ? formData.price
-        : parseFloat(formData.price || formData.price_single || formData.price_sharing) || 0,
-    location: formData.location,
-    youtube_id: formData.youtube_id || null,
-    is_youtube_shorts: !!formData.is_youtube_shorts,
-    landlord_phone: formData.landlord_phone || null,
-    room_type: formData.room_type,
-    amenities: Array.isArray(formData.amenities) ? formData.amenities : [],
-    bathroom_type: formData.bathroom_type,
-    distance_to_campus: formData.distance_to_campus,
-    security_type: formData.security_type,
-    electricity_included: !!formData.electricity_included,
-    water_included: !!formData.water_included,
-    wifi_included: !!formData.wifi_included,
-    hot_water_included: !!formData.hot_water_included,
-    cooking_gas_included: !!formData.cooking_gas_included,
-    latitude: nullableCoordinate(formData.latitude),
-    longitude: nullableCoordinate(formData.longitude),
-    gender: formData.gender || 'mixed',
-    proximity_description: formData.proximity_description || '',
-    specific_location: formData.specific_location || null,
-    price_single:
-      formData.price_single && parseInt(String(formData.price_single)) > 0
-        ? parseInt(String(formData.price_single))
-        : null,
-    price_sharing:
-      formData.price_sharing && parseInt(String(formData.price_sharing)) > 0
-        ? parseInt(String(formData.price_sharing))
-        : null,
-    mpesa_details: formData.mpesa_details || null,
-    distance_category: formData.distance_category || null,
-  };
-}
-
-function generateRoomTypeLabel(
-  category?: string,
-  occupancy?: string | number,
-  floor?: string,
-  size?: string,
-): string {
-  if (!category) return '';
-
-  const categoryMap: Record<string, string> = {
-    single: 'Single Room',
-    double: 'Double Room',
-    bedsitter: 'Bedsitter',
-    self_contained_bedsitter: 'Self-Contained Bedsitter',
-    one_bedroom: '1 Bedroom',
-    two_bedroom: '2 Bedroom',
-    three_bedroom: '3 Bedroom',
-    shared: 'Shared Room',
-    other: 'Other',
-  };
-
-  let label = categoryMap[category] || category;
-
-  const parts: string[] = [];
-  if (floor && floor !== 'na') {
-    parts.push(floor === 'ground' ? 'Ground floor' : 'Upper floor');
-  }
-  if (size && size !== 'standard') {
-    parts.push(size === 'smaller' ? 'Smaller' : 'Larger');
-  }
-
-  const numOccupancy = typeof occupancy === 'string' ? parseInt(occupancy, 10) : occupancy;
-  if (numOccupancy && numOccupancy === 1) {
-    parts.push('1 person');
-  } else if (numOccupancy && numOccupancy > 1) {
-    parts.push(`${numOccupancy} people sharing`);
-  }
-
-  if (parts.length > 0) {
-    label += ' - ' + parts.join(', ');
-  }
-
-  return label;
-}
 
 function revalidateListingSurfaces(
   county = 'nyeri',
@@ -121,45 +30,8 @@ function revalidateListingSurfaces(
 
 export async function createListingAction(formData: any) {
   try {
-    const images = (formData.images || []).map((img: any, idx: number) => ({
-      r2_url: img.url || img.r2_url,
-      display_order: idx,
-      category: img.category || 'Room',
-      blur_data_url: img.blurDataUrl || img.blur_data_url || null,
-      width: img.width || null,
-      height: img.height || null,
-      format: img.format || null,
-    }));
-
-    const room_types = (formData.roomTypes || [])
-      .filter((rt: any) => (rt.room_type || rt.category) && rt.price)
-      .map((rt: any) => {
-        const hasStructuredFields = !!(
-          rt.category ||
-          rt.occupancy ||
-          rt.floor ||
-          rt.size
-        );
-        const label = hasStructuredFields
-          ? generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, rt.size) ||
-            rt.room_type
-          : rt.room_type;
-
-        return {
-          room_type: label,
-          price: Math.round(parseFloat(rt.price)),
-          is_available: rt.is_available ?? true,
-          deposit:
-            rt.deposit && parseInt(rt.deposit) > 0 ? parseInt(rt.deposit) : null,
-          furnishing_items: rt.furnishing_items?.length
-            ? rt.furnishing_items
-            : [],
-          category: rt.category || null,
-          occupancy: rt.occupancy != null ? String(rt.occupancy) : null,
-          floor: rt.floor || null,
-          size: rt.size || null,
-        };
-      });
+    const images = mapListingImages(formData.images);
+    const room_types = mapRoomTypes(formData.roomTypes);
 
     const payload = {
       ...listingPayload(formData, formData.agent_id),
@@ -204,49 +76,8 @@ export async function updateListingAction(formData: any) {
       agent_whatsapp: formData.agent_whatsapp || null,
     };
 
-    if (formData.images) {
-      payload.images = (formData.images || []).map((img: any, idx: number) => ({
-        r2_url: img.url || img.r2_url,
-        display_order: idx,
-        category: img.category || 'Room',
-        blur_data_url: img.blurDataUrl || img.blur_data_url || null,
-        width: img.width || null,
-        height: img.height || null,
-        format: img.format || null,
-      }));
-    }
-
-    if (formData.roomTypes) {
-      payload.room_types = (formData.roomTypes || [])
-        .filter((rt: any) => (rt.room_type || rt.category) && rt.price)
-        .map((rt: any) => {
-          const hasStructuredFields = !!(
-            rt.category ||
-            rt.occupancy ||
-            rt.floor ||
-            rt.size
-          );
-          const label = hasStructuredFields
-            ? generateRoomTypeLabel(rt.category, rt.occupancy, rt.floor, rt.size) ||
-              rt.room_type
-            : rt.room_type;
-
-          return {
-            room_type: label,
-            price: Math.round(parseFloat(rt.price)),
-            is_available: rt.is_available ?? true,
-            deposit:
-              rt.deposit && parseInt(rt.deposit) > 0 ? parseInt(rt.deposit) : null,
-            furnishing_items: rt.furnishing_items?.length
-              ? rt.furnishing_items
-              : [],
-            category: rt.category || null,
-            occupancy: rt.occupancy != null ? String(rt.occupancy) : null,
-            floor: rt.floor || null,
-            size: rt.size || null,
-          };
-        });
-    }
+    if (formData.images) payload.images = mapListingImages(formData.images);
+    if (formData.roomTypes) payload.room_types = mapRoomTypes(formData.roomTypes);
 
     const listing = await listingsApi.updateServer(formData.listing_id, payload);
 

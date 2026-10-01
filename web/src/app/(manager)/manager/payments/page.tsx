@@ -1,5 +1,5 @@
 import { getManagerUser } from '@/app/actions/manager';
-import { createClient } from '@/lib/supabase/server';
+import { managerApi } from '@/lib/api/manager';
 import { PaymentsCard } from '../payments-card';
 
 export const metadata = {
@@ -17,26 +17,7 @@ export default async function ManagerPaymentsPage() {
     );
   }
 
-  const supabase = await createClient();
-  let campuses = [];
-
-  if (manager.context.isSuperAdmin) {
-    const { data } = await supabase.from('campuses').select('*').order('name');
-    campuses = data || [];
-  } else if (manager.context.managedRegionId) {
-    const { data } = await supabase
-      .from('campuses')
-      .select('*')
-      .eq('region_id', manager.context.managedRegionId)
-      .order('name');
-    campuses = data || [];
-  } else if (manager.context.managedCampusId) {
-    const { data } = await supabase
-      .from('campuses')
-      .select('*')
-      .eq('id', manager.context.managedCampusId);
-    campuses = data || [];
-  }
+  const campuses = await managerApi.campuses().catch(() => []);
 
   return (
     <div className="space-y-6">

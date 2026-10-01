@@ -29,19 +29,20 @@ async def test_students_cannot_self_create_an_agent_record():
 
 @pytest.mark.asyncio
 async def test_manager_gets_an_agent_record_on_first_visit_using_profile_phone():
-    manager = SimpleNamespace(id="u1", role="manager")
-    phone_row = SimpleNamespace(phone="+254700111222", full_name="Mgr Name")
+    manager = SimpleNamespace(id="u1", role="manager", managed_campus_id=None)
+    phone_row = SimpleNamespace(phone="+254700111222", full_name="Mgr Name", campus_id="campus-9")
     phone_res = MagicMock()
     phone_res.first.return_value = phone_row
     db = _db(MockResult(single=None), phone_res)
     db.add = MagicMock()
     agent = await AgentService.ensure_agent(db, manager, None)
     assert agent.name == "Mgr Name" and agent.phone == "+254700111222" and agent.status == "active"
+    assert agent.campus_id == "campus-9"   # agents.campus_id is NOT NULL
 
 
 @pytest.mark.asyncio
 async def test_manager_without_phone_falls_back_to_placeholder():
-    manager = SimpleNamespace(id="u1", role="admin")
+    manager = SimpleNamespace(id="u1", role="admin", managed_campus_id=None)
     phone_res = MagicMock()
     phone_res.first.return_value = None
     db = _db(MockResult(single=None), phone_res)

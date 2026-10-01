@@ -120,6 +120,7 @@ def _make_mock_listing(**kwargs):
     listing.room_type = None
     listing.room_type_enum = None
     listing.mpesa_details = None
+    listing.proximity_description = None
     listing.gender = "mixed"
     listing.price_single = None
     listing.price_sharing = None

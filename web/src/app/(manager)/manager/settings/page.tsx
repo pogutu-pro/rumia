@@ -1,5 +1,7 @@
 import { getManagerUser } from '@/app/actions/manager';
-import { createClient } from '@/lib/supabase/server';
+import { managerApi } from '@/lib/api/manager';
+import { regionsApi } from '@/lib/api/regions';
+import { zonesApi } from '@/lib/api/zones';
 import { SettingsClient } from './settings-client';
 
 export const metadata = {
@@ -17,22 +19,11 @@ export default async function ManagerSettingsPage() {
     );
   }
 
-  const supabase = await createClient();
-  let campuses = [];
-  
-  if (manager.context.isSuperAdmin) {
-    const { data } = await supabase.from('campuses').select('*').order('name');
-    campuses = data || [];
-  } else if (manager.context.managedRegionId) {
-    const { data } = await supabase.from('campuses').select('*').eq('region_id', manager.context.managedRegionId).order('name');
-    campuses = data || [];
-  } else if (manager.context.managedCampusId) {
-    const { data } = await supabase.from('campuses').select('*').eq('id', manager.context.managedCampusId);
-    campuses = data || [];
-  }
-
-  const { data: regions } = await supabase.from('regions').select('*').order('name');
-  const { data: allZones } = await supabase.from('campus_zones').select('*').order('name');
+  const [campuses, regions, allZones] = await Promise.all([
+    managerApi.campuses().catch(() => []),
+    regionsApi.listServer().catch(() => []),
+    zonesApi.listAllServer().catch(() => []),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -48,8 +39,8 @@ export default async function ManagerSettingsPage() {
       <SettingsClient 
         campuses={campuses} 
         isSuperAdmin={manager.context.isSuperAdmin} 
-        regions={regions || []}
-        allZones={allZones || []}
+        regions={regions}
+        allZones={allZones}
       />
     </div>
   );
