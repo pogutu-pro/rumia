@@ -6,7 +6,13 @@ from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, decode_jwt_token, get_current_user
-from app.features.tours.schemas import TourBookingCreate, TourBookingRead, TourBookingUpdateStatus
+from app.features.tours.schemas import (
+    MyTourBookingRead,
+    TourBookingCreate,
+    TourBookingRead,
+    TourBookingUpdateStatus,
+    TourListingBrief,
+)
 from app.features.tours.service import TourService
 
 router = APIRouter(prefix="/tours", tags=["Tours"])
@@ -41,18 +47,30 @@ async def create_booking(
 
 @router.get(
     "/me",
-    response_model=PaginatedResponse[TourBookingRead],
+    response_model=PaginatedResponse[MyTourBookingRead],
     status_code=status.HTTP_200_OK,
     summary="List My Tour Bookings",
-    description="Fetch tour bookings linked to current student user. Authenticated.",
+    description=(
+        "Fetch tour bookings linked to current student user, each with a brief of its listing "
+        "(title, area, county, slug, images). `sort=upcoming` orders by preferred date/time ascending; "
+        "default is newest-created first. Authenticated."
+    ),
 )
 async def list_my_tours(
     pagination: PaginationParams = Depends(),
+    sort: str = Query("created_desc", pattern="^(created_desc|upcoming)$"),
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> PaginatedResponse[TourBookingRead]:
-    items, total = await TourService.list_my_tours(db, user, pagination=pagination)
-    validated = [TourBookingRead.model_validate(b) for b in items]
+) -> PaginatedResponse[MyTourBookingRead]:
+    items, total = await TourService.list_my_tours(db, user, pagination=pagination, sort=sort)
+    listings = await TourService.get_listings_by_id(db, [b.listing_id for b in items if b.listing_id])
+    validated = []
+    for booking in items:
+        row = MyTourBookingRead.model_validate(booking)
+        listing = listings.get(str(booking.listing_id)) if booking.listing_id else None
+        if listing is not None:
+            row.listing = TourListingBrief.model_validate(listing)
+        validated.append(row)
     return PaginatedResponse.create(items=validated, total=total, page=pagination.page, limit=pagination.limit)
 
 
@@ -96,7 +114,7 @@ async def get_booking(
     response_model=TourBookingRead,
     status_code=status.HTTP_200_OK,
     summary="Update Booking Status",
-    description="Update booking status or contacted flag. Agent or Admin.",
+    description="Update booking status (use status `contacted` once the student has been messaged). Agent or Admin.",
 )
 async def update_booking_status(
     booking_id: str,

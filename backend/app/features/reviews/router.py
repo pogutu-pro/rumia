@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.ratelimit import limiter
-from app.core.security import AuthenticatedUser, get_current_user, require_roles
+from app.core.errors import ForbiddenException, NotFoundException
+from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user, require_roles
 from app.features.reviews.schemas import (
     ReviewCreate,
     ReviewModerationAction,
@@ -20,10 +21,11 @@ from app.features.reviews.service import ReviewService
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
-def _to_review_read(r) -> ReviewRead:
+def _to_review_read(r, viewer_id: Optional[str] = None) -> ReviewRead:
     replies_read = [ReviewReplyRead.model_validate(reply) for reply in (r.replies or [])]
     data = ReviewRead.model_validate(r)
     data.like_count = len(r.likes or [])
+    data.liked_by_me = bool(viewer_id) and any(like.user_id == viewer_id for like in (r.likes or []))
     data.reply_count = len(r.replies or [])
     data.replies = replies_read
     return data
@@ -40,10 +42,15 @@ async def list_reviews(
     listing_id: Optional[str] = Query(None, description="Filter by listing ID"),
     status_filter: str = Query("published", alias="status"),
     pagination: PaginationParams = Depends(),
+    user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> PaginatedResponse[ReviewRead]:
+    # Only moderators may list anything other than published reviews.
+    if status_filter != "published" and not (user and user.is_manager):
+        raise ForbiddenException("Only moderators can list reviews that are not published")
     items, total = await ReviewService.list_reviews(db, listing_id=listing_id, status_filter=status_filter, pagination=pagination)
-    validated = [_to_review_read(r) for r in items]
+    viewer_id = user.id if user else None
+    validated = [_to_review_read(r, viewer_id) for r in items]
     return PaginatedResponse.create(items=validated, total=total, page=pagination.page, limit=pagination.limit)
 
 
@@ -66,9 +73,16 @@ async def get_review_summary(listing_id: str, db: AsyncSession = Depends(get_db_
     summary="Get Review Details",
     description="Fetch single review by ID. Public.",
 )
-async def get_review(review_id: str, db: AsyncSession = Depends(get_db_session)) -> ReviewRead:
+async def get_review(
+    review_id: str,
+    user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> ReviewRead:
     r = await ReviewService.get_review_by_id(db, review_id)
-    return _to_review_read(r)
+    # Unpublished reviews are visible only to their author and moderators (404, not 403, to avoid leaking existence).
+    if r.status != "published" and not (user and (user.is_manager or user.id == r.user_id)):
+        raise NotFoundException(f"Review with id '{review_id}' not found")
+    return _to_review_read(r, user.id if user else None)
 
 
 @router.post(

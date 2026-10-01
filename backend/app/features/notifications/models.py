@@ -12,8 +12,8 @@ class PushSubscription(Base):
     __tablename__ = "push_subscriptions"
     __table_args__ = {"extend_existing": True}
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     endpoint: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     p256dh: Mapped[str] = mapped_column(String, nullable=False)
     auth: Mapped[str] = mapped_column(String, nullable=False)
@@ -34,7 +34,7 @@ class AppNotification(Base):
     __table_args__ = {"extend_existing": True}
 
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False, name="body")
     url: Mapped[Optional[str]] = mapped_column(String, nullable=True, name="url")
@@ -55,8 +55,8 @@ class DeviceToken(Base):
     __tablename__ = "device_tokens"
     __table_args__ = {"extend_existing": True}
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     platform: Mapped[str] = mapped_column(String, default="android", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

@@ -31,7 +31,9 @@ async def get_my_profile(
     db: AsyncSession = Depends(get_db_session),
 ) -> ProfileRead:
     profile = await ProfileService.get_or_create_profile(db, user)
-    return ProfileRead.model_validate(profile)
+    result = ProfileRead.model_validate(profile)
+    result.agent_id = await ProfileService.get_agent_id(db, user.id)
+    return result
 
 
 @router.patch(

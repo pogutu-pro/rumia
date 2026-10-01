@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -16,8 +16,7 @@ class TourBookingCreate(BaseModel):
 
 
 class TourBookingUpdateStatus(BaseModel):
-    status: str = Field(..., pattern="^(pending_payment|confirmed|paid|completed|no_show|cancelled)$")
-    contacted: Optional[bool] = None
+    status: str = Field(..., pattern="^(pending_payment|confirmed|paid|contacted|completed|no_show|cancelled)$")
 
 
 class TourBookingRead(BaseModel):
@@ -38,3 +37,27 @@ class TourBookingRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TourListingImage(BaseModel):
+    r2_url: str
+    display_order: int = 0
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TourListingBrief(BaseModel):
+    id: str
+    title: str
+    area: Optional[str] = None
+    county: Optional[str] = None
+    slug: Optional[str] = None
+    images: List[TourListingImage] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MyTourBookingRead(TourBookingRead):
+    """A student's own booking with a brief of the toured listing embedded."""
+
+    listing: Optional[TourListingBrief] = None

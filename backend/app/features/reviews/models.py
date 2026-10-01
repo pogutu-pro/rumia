@@ -16,8 +16,7 @@ class Review(Base):
     user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
     rating: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
-    stay_start: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    stay_end: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    # NOTE: the live table has no stay_start/stay_end columns; nothing collects stay dates.
     school_verified_at_review_time: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     status: Mapped[str] = mapped_column(String, default="published", nullable=False)
     author_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)

@@ -71,9 +71,13 @@ class ListingService:
         max_price: Optional[float] = None,
         is_active: bool = True,
         sort: Optional[str] = None,
+        ids: Optional[List[str]] = None,
     ) -> Tuple[List[Listing], int, dict]:
         conditions = [Listing.is_active == is_active]
         join_specs: List[Tuple] = []
+
+        if ids is not None:
+            conditions.append(Listing.id.in_(ids))
 
         if campus_id:
             conditions.append(Listing.campus_id == campus_id)

@@ -10,7 +10,7 @@ from app.core.database import Base
 class ListingView(Base):
     __tablename__ = "listing_views"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, server_default=func.gen_random_uuid())
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid())
     listing_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("listings.id", ondelete="CASCADE"), nullable=True, index=True)
     user_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
     ip_hash: Mapped[Optional[str]] = mapped_column(String, nullable=True)

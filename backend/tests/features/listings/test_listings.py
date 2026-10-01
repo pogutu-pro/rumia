@@ -278,3 +278,24 @@ async def test_toggle_listing_full(client: AsyncClient):
         assert data["is_full"] is True
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_listings_feed_ids_filter_passes_validated_uuids(client: AsyncClient):
+    first = "8f853c92-36bf-455d-b21f-14471ec16311"
+    second = "9a1b2c3d-36bf-455d-b21f-14471ec16312"
+    with patch(
+        "app.features.listings.service.ListingService.get_listings_feed",
+        new_callable=AsyncMock,
+        return_value=([], 0, {}),
+    ) as feed:
+        response = await client.get(f"/api/v1/listings?ids={first.upper()},{second}")
+
+    assert response.status_code == 200
+    assert feed.await_args.kwargs["ids"] == [first, second]
+
+
+@pytest.mark.asyncio
+async def test_listings_feed_ids_filter_rejects_non_uuid(client: AsyncClient):
+    response = await client.get("/api/v1/listings?ids=not-a-uuid")
+    assert response.status_code == 400

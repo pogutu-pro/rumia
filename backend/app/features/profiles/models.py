@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
@@ -25,6 +25,8 @@ class UserProfile(Base):
     # confirms a campus by setting home_campus_confirmed_at (NULL = not
     # confirmed). Expose a derived boolean for the API response/schema.
     home_campus_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Derived from the Google OAuth email on each login (see migration 20260818000000).
+    school_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false", default=False)
 
     @hybrid_property
     def home_campus_confirmed(self) -> bool:

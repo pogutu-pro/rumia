@@ -52,8 +52,6 @@ class ReviewService:
             user_id=user.id,
             rating=data.rating,
             text=data.text,
-            stay_start=data.stay_start,
-            stay_end=data.stay_end,
             school_verified_at_review_time=False,
             status="published",  # Default auto-publish in backend service
             author_name=data.author_name or "Anonymous Student",

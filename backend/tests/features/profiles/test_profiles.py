@@ -58,3 +58,34 @@ async def test_set_home_campus_rejects_invalid_uuid(client: AsyncClient):
         assert response.status_code == 422
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_get_profile_includes_agent_id_for_agent_owner(client: AsyncClient):
+    from unittest.mock import AsyncMock, patch
+
+    user = AuthenticatedUser(id="agent-user-1", email="a@rumia.app", role="agent")
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        with patch(
+            "app.features.profiles.service.ProfileService.get_agent_id",
+            new_callable=AsyncMock,
+            return_value="agent-record-1",
+        ):
+            response = await client.get("/api/v1/profiles/me")
+        assert response.status_code == 200
+        assert response.json()["agent_id"] == "agent-record-1"
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_get_profile_agent_id_is_null_for_non_agent(client: AsyncClient):
+    user = AuthenticatedUser(id="student-1", email="student@rumia.app", role="student")
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        response = await client.get("/api/v1/profiles/me")
+        assert response.status_code == 200
+        assert response.json()["agent_id"] is None
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)

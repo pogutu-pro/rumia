@@ -95,6 +95,8 @@ class ListingRead(BaseModel):
     hot_water_included: bool = False
     cooking_gas_included: bool = False
     room_type: Optional[str] = None
+    room_type_enum: Optional[str] = None
+    mpesa_details: Optional[str] = None
     gender: Optional[str] = None
     price_single: Optional[float] = None
     price_sharing: Optional[float] = None

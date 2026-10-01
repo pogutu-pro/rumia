@@ -11,6 +11,7 @@ class ReviewReplyRead(BaseModel):
     author_name: Optional[str] = None
     author_avatar_url: Optional[str] = None
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -44,6 +45,8 @@ class ReviewRead(BaseModel):
     rating_value: Optional[int] = None
 
     like_count: int = 0
+    # True when the (optionally authenticated) caller has liked this review.
+    liked_by_me: bool = False
     reply_count: int = 0
     replies: List[ReviewReplyRead] = []
 

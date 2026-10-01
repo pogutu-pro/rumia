@@ -10,7 +10,9 @@ class CampusService:
     async def get_campuses(db: AsyncSession, status: Optional[str] = "active") -> List[Campus]:
         stmt = select(Campus)
         if status:
-            stmt = stmt.where(Campus.status == status)
+            # Comma-separated list (e.g. "active,coming_soon") selects several statuses.
+            statuses = [part.strip() for part in status.split(",") if part.strip()]
+            stmt = stmt.where(Campus.status.in_(statuses))
         stmt = stmt.order_by(Campus.name.asc())
         result = await db.execute(stmt)
         return list(result.scalars().all())

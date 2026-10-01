@@ -19,6 +19,9 @@ class ProfileRead(BaseModel):
     home_campus_name: Optional[str] = None
     home_campus_confirmed: bool = False
     home_campus_confirmed_at: Optional[datetime] = None
+    school_verified: bool = False
+    # Set on GET /profiles/me when the user owns an agent record (drives post-login routing).
+    agent_id: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

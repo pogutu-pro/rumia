@@ -66,6 +66,7 @@ class Listing(Base):
     gender: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     price_single: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
     price_sharing: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
+    room_type_enum: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     mpesa_details: Mapped[Optional[dict]] = mapped_column(String, nullable=True) # It's a text/json in DB, treating as string here maybe or leave as dict if JSONB
     pays_commission: Mapped[bool] = mapped_column(BOOLEAN, server_default="false")
     amenities: Mapped[Optional[List[str]]] = mapped_column(ARRAY(String), server_default="{}")

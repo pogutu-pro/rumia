@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import Optional
 
 from sqlalchemy import Date, DateTime, Numeric, String, Text, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -15,11 +16,11 @@ class HostelRequest(Base):
 
     __tablename__ = "hostel_requests"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False, index=True)
     student_name: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)
-    campus_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    campus_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False, index=True)
     preferred_zone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     budget_range: Mapped[str] = mapped_column(String, nullable=False)
     gender: Mapped[str] = mapped_column(String, default="no_preference", nullable=False)

@@ -1,9 +1,10 @@
+import uuid
 from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.errors import ForbiddenException, NotFoundException
+from app.core.errors import BadRequestException, ForbiddenException, NotFoundException
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.security import (
     AuthenticatedUser,
@@ -44,11 +45,19 @@ async def get_listings(
     has_video: Optional[bool] = Query(None, description="Filter to listings with a YouTube video (youtube_id IS NOT NULL)"),
     min_price: Optional[float] = Query(None, ge=0, description="Minimum price filter"),
     max_price: Optional[float] = Query(None, ge=0, description="Maximum price filter"),
+    ids: Optional[str] = Query(None, description="Comma-separated listing UUIDs (max 20), e.g. for the compare view"),
     sort: Optional[str] = Query(None, description="Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order"),
     pagination: PaginationParams = Depends(),
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> PaginatedResponse[ListingRead]:
+    id_list = None
+    if ids is not None:
+        id_list = [part.strip() for part in ids.split(",") if part.strip()][:20]
+        try:
+            id_list = [str(uuid.UUID(part)) for part in id_list]
+        except ValueError:
+            raise BadRequestException("ids must be comma-separated listing UUIDs")
     listings, total, view_counts = await ListingService.get_listings_feed(
         db=db,
         pagination=pagination,
@@ -63,6 +72,7 @@ async def get_listings(
         min_price=min_price,
         max_price=max_price,
         sort=sort,
+        ids=id_list,
     )
     saved_ids = (
         await ProfileService.get_saved_listing_ids(db, user, [str(item.id) for item in listings])

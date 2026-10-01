@@ -9,12 +9,19 @@ from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
 from app.core.telemetry import capture_error, capture_event
 from app.features.campuses.models import Campus
-from app.features.listings.models import Listing
+from app.features.listings.models import Agent, Listing
 from app.features.profiles.models import UserProfile, Wishlist
 from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, WishlistActionResponse
 
 
 class ProfileService:
+    @staticmethod
+    async def get_agent_id(db: AsyncSession, user_id: str) -> str | None:
+        """Return the id of the agent record owned by this user, if any."""
+        result = await db.execute(select(Agent.id).where(Agent.user_id == user_id))
+        agent_id = result.scalar_one_or_none()
+        return str(agent_id) if agent_id else None
+
     @staticmethod
     async def get_or_create_profile(db: AsyncSession, user: AuthenticatedUser) -> UserProfile:
         res = await db.execute(select(UserProfile).where(UserProfile.id == user.id))
@@ -37,6 +44,7 @@ class ProfileService:
                 managed_campus_id=user.managed_campus_id,
                 managed_region_id=user.managed_region_id,
                 campus_id=campus_id,
+                school_verified=False,
                 created_at=datetime.now(timezone.utc),
             )
             db.add(profile)

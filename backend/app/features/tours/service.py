@@ -8,6 +8,7 @@ from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
 from app.features.agents.models import AgentProfile
+from app.features.listings.models import Listing
 from app.features.tours.models import TourBooking
 from app.features.tours.schemas import TourBookingCreate, TourBookingUpdateStatus
 
@@ -41,7 +42,6 @@ class TourService:
             status="pending_payment",
             linked_user_id=user.id if user else None,
             agent_id=data.agent_id,
-            contacted=False,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
@@ -80,6 +80,7 @@ class TourService:
         db: AsyncSession,
         user: AuthenticatedUser,
         pagination: Optional[PaginationParams] = None,
+        sort: str = "created_desc",
     ) -> Tuple[List[TourBooking], int]:
         if pagination is None:
             pagination = PaginationParams(page=1, limit=20)
@@ -89,9 +90,22 @@ class TourService:
         total_res = await db.execute(count_stmt)
         total = total_res.scalar_one()
 
-        stmt = stmt.order_by(TourBooking.created_at.desc()).offset(pagination.offset).limit(pagination.limit)
+        if sort == "upcoming":
+            order = (TourBooking.preferred_date.asc(), TourBooking.preferred_time.asc())
+        else:
+            order = (TourBooking.created_at.desc(),)
+        stmt = stmt.order_by(*order).offset(pagination.offset).limit(pagination.limit)
         res = await db.execute(stmt)
         return list(res.scalars().all()), total
+
+    @staticmethod
+    async def get_listings_by_id(db: AsyncSession, listing_ids: List[str]) -> dict:
+        """Map listing id -> Listing (images eager-loaded) for embedding in booking reads."""
+        ids = [i for i in set(listing_ids) if i]
+        if not ids:
+            return {}
+        res = await db.execute(select(Listing).where(Listing.id.in_(ids)))
+        return {str(listing.id): listing for listing in res.scalars().all()}
 
     @staticmethod
     async def get_booking_by_id(db: AsyncSession, user: AuthenticatedUser, booking_id: str) -> TourBooking:
@@ -123,8 +137,6 @@ class TourService:
             raise ForbiddenException("Not authorized to update this booking")
 
         booking.status = data.status
-        if data.contacted is not None:
-            booking.contacted = data.contacted
         booking.updated_at = datetime.now(timezone.utc)
 
         await db.flush()
