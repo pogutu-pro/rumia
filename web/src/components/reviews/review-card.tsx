@@ -215,9 +215,9 @@ export function ReviewCard({
   const isAuthor = currentUserId === review.user_id;
   const isModerator = currentUserRole === 'admin' || currentUserRole === 'manager';
 
-  const likeCount = review.review_likes?.length ?? 0;
-  const likedByMe = !!review.review_likes?.some((l) => l.user_id === currentUserId);
-  const replies = review.review_replies ?? [];
+  const likeCount = review.like_count ?? 0;
+  const likedByMe = !!currentUserId && !!review.liked_by_me;
+  const replies = review.replies ?? [];
 
   const handleLike = async () => {
     if (!currentUserId) {

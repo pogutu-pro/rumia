@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
-import { createClient } from '@/lib/supabase/client';
+import { profilesApi } from '@/lib/api/profiles';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
 import type { TourTimeWindow, TourBooking } from '@/types';
 import posthog from 'posthog-js';
@@ -165,12 +165,7 @@ export function BookTourForm({
         setIsLoggedIn(true);
         setLinkedUserId(session.user.id);
 
-        const supabase = createClient();
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, phone')
-          .eq('id', session.user.id)
-          .single();
+        const profile = await profilesApi.getMe().catch(() => null);
 
         if (!cancelled && profile) {
           if (profile.full_name) setStudentName(profile.full_name);

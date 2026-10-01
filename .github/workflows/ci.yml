@@ -64,6 +64,9 @@ jobs:
           cd web
           pnpm install --frozen-lockfile
 
+      - name: Guard - no direct database access from web
+        run: scripts/check-no-direct-db.sh
+
       - name: Run TypeScript Typecheck
         run: |
           cd web

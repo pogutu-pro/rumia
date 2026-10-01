@@ -1,6 +1,6 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { parseQuery, ROOM_TYPES } from './parse-query';
-import type { SearchListing, CombinedFilters } from './cascade-search';
+import type { SearchListing, CombinedFilters } from './types';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

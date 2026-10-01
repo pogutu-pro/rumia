@@ -1,5 +1,5 @@
 import { clientSearch } from '../client-search';
-import type { SearchListing, CombinedFilters } from '../cascade-search';
+import type { SearchListing, CombinedFilters } from '../types';
 
 function listing(overrides: Partial<SearchListing> & { id: string; title: string }): SearchListing {
   return {

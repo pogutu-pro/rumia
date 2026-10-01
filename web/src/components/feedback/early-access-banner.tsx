@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { listingsClientApi } from '@/lib/api/listings-client';
 import { getSession } from '@/lib/supabase/auth';
 import { ArrowRight, Lightbulb } from 'lucide-react';
 
@@ -31,11 +31,11 @@ export function EarlyAccessBanner({ hostelCount }: EarlyAccessBannerProps) {
     }
 
     (async () => {
-      const supabase = createClient();
-      const { count } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
+      // Active listing total (limit 1: only the count is needed).
+      const count = await listingsClientApi
+        .getFeed({ limit: 1 })
+        .then((res) => res.total)
+        .catch(() => null);
 
       if (count !== null && count < MAX_HOSTELS) {
         const { session } = await getSession();

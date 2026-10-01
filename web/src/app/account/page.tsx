@@ -3,6 +3,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { campusesApi } from '@/lib/api/campuses';
+import { listingsClientApi } from '@/lib/api/listings-client';
+import { profilesApi, type UserProfile } from '@/lib/api/profiles';
+import { toursApi } from '@/lib/api/tours';
 import { signInWithGoogle } from '@/lib/supabase/auth';
 import { apiClient } from '@/lib/api/client';
 import posthog from 'posthog-js';
@@ -145,20 +149,13 @@ export default function AccountPage() {
 
       const [
         profileRes,
-        agentRes,
         appsRes,
         savedRes,
         toursRes,
       ] = await Promise.all([
-        // Use maybeSingle() because a `profiles` row may not exist yet for
-        // newly authenticated users. Treat missing profile gracefully
-        // instead of letting a thrown error crash the account page.
-        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
-        supabase
-          .from('agents')
-          .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle(),
+        // A missing/failed profile (e.g. brand-new user) must not crash the page;
+        // the API creates the profile on first read, but degrade gracefully anyway.
+        profilesApi.getMe().catch(() => null),
         getMyAgentApplicationsAction().catch(() => [] as unknown[]),
         // A 401 here (backend failing to validate the Supabase session token)
         // must never reject the whole Promise.all — otherwise setLoading(false)
@@ -176,17 +173,13 @@ export default function AccountPage() {
           }[];
           total: number;
         }>('/profiles/me/wishlist?limit=5').catch(() => null),
-        supabase
-          .from('tour_bookings')
-          .select(
-            `id, status, preferred_date, preferred_time, amount, listings(id, title, area, slug, county)`,
-          )
-          .eq('linked_user_id', user.id)
-          .order('preferred_date', { ascending: true }),
+        toursApi
+          .listMine({ sort: 'upcoming', limit: 100 })
+          .catch(() => null),
       ]);
 
       if (!cancelled) {
-        const profileData = profileRes?.data ?? {};
+        const profileData = profileRes ?? ({} as Partial<UserProfile>);
         const resolvedProfile = {
           id: profileData.id ?? user.id,
           email: (profileData.email as string) || user.email || '',
@@ -203,7 +196,7 @@ export default function AccountPage() {
           role: resolvedProfile.role ?? undefined,
         });
         setProfile(resolvedProfile);
-        setHasAgent(!!agentRes.data);
+        setHasAgent(!!profileRes?.agent_id);
         setHasPendingAgentApplication(
           (appsRes as any[])?.some((app) => app.status === 'pending') ?? false,
         );
@@ -231,8 +224,8 @@ export default function AccountPage() {
           );
         }
 
-        if (toursRes.data) {
-          const tours = toursRes.data as unknown as OverviewUpcomingTour[];
+        if (toursRes) {
+          const tours = toursRes.items as unknown as OverviewUpcomingTour[];
           const activeTours = tours.filter(
             (b) =>
               b.status !== 'cancelled' &&
@@ -254,30 +247,20 @@ export default function AccountPage() {
     // list used by the settings/application forms. These never block the
     // initial render.
     async function loadDeferred() {
-      const supabase = createClient();
-      const [platformRes, campusesRes] = await Promise.all([
-        supabase
-          .from('listings')
-          .select('title')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1),
-        supabase
-          .from('campuses')
-          .select('*')
-          .in('status', ['active', 'coming_soon'])
-          .order('name', { ascending: true }),
+      const [latestRes, campusesRes] = await Promise.all([
+        listingsClientApi.getFeed({ limit: 1, sort: 'newest' }).catch(() => null),
+        campusesApi.list('active,coming_soon').catch(() => null),
       ]);
 
       if (cancelled) return;
 
-      if (campusesRes.data) {
-        setCampuses(campusesRes.data as Campus[]);
+      if (campusesRes) {
+        setCampuses(campusesRes as unknown as Campus[]);
       }
 
-      if (platformRes.data && platformRes.data.length > 0) {
+      if (latestRes && latestRes.items.length > 0) {
         setPlatformData({
-          latestListingTitle: platformRes.data[0]?.title,
+          latestListingTitle: latestRes.items[0]?.title,
         });
       }
     }

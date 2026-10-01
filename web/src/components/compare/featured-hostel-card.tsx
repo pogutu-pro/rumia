@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { MapPin, ArrowRight, GitCompareArrows, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCompareStore, type CompareSelection } from '@/stores/compare-store';
-import { createClient } from '@/lib/supabase/client';
+import { listingsClientApi } from '@/lib/api/listings-client';
+import { listingToCompareSelection, type CompareListingSource } from '@/lib/compare/to-selection';
 
 interface Listing {
   id: string;
@@ -64,61 +65,11 @@ export function FeaturedHostelCard({
       try {
         let selection: CompareSelection;
         try {
-          const supabase = createClient();
-          const { data } = await supabase
-            .from('listings')
-            .select(
-              `id, title, price, price_single, price_sharing, slug, county, area, gender, specific_location,
-               distance_category, distance_to_campus, mpesa_details,
-               amenities, room_type, room_type_enum, bathroom_type,
-               wifi_included, water_included, electricity_included, security_type,
-               latitude, longitude,
-               listing_images(r2_url, display_order),
-                listing_room_types(deposit, furnishing_items, room_type),
-               agents(name, phone, whatsapp)`,
-            )
-            .eq('id', item.id)
-            .eq('is_active', true)
-            .single();
+          const { items } = await listingsClientApi.getFeed({ ids: [item.id], limit: 1 });
+          const data = items[0] as unknown as CompareListingSource | undefined;
 
           if (data) {
-            const sorted = [...(data.listing_images || [])].sort(
-              (a: any, b: any) => a.display_order - b.display_order,
-            );
-            const roomTypes = data.listing_room_types || [];
-            const firstRoom = roomTypes[0] || {};
-            selection = {
-              id: data.id,
-              title: data.title,
-              price: data.price,
-              price_single: data.price_single,
-              price_sharing: data.price_sharing,
-              imageUrl: sorted[0]?.r2_url || imageUrl,
-              slug: data.slug,
-              county: data.county,
-              area: data.area,
-              agentName: data.agents?.name ?? null,
-              agentPhone: data.agents?.phone ?? null,
-              agentWhatsapp: data.agents?.whatsapp ?? null,
-              amenities: data.amenities,
-              roomType: data.room_type,
-              roomTypeEnum: data.room_type_enum,
-              bathroomType: data.bathroom_type,
-              distanceCategory: data.distance_category,
-              distanceToCampus: data.distance_to_campus,
-              gender: data.gender,
-              wifiIncluded: data.wifi_included,
-              waterIncluded: data.water_included,
-              electricityIncluded: data.electricity_included,
-              securityType: data.security_type,
-              specificLocation: data.specific_location,
-              latitude: data.latitude,
-              longitude: data.longitude,
-              mpesaDetails: data.mpesa_details,
-              deposit: firstRoom.deposit ?? null,
-              furnishingItems: firstRoom.furnishing_items ?? null,
-              roomTypeLabel: firstRoom.room_type ?? null,
-            };
+            selection = listingToCompareSelection(data, imageUrl);
           } else {
             // Fallback to basic data if fetch fails
             selection = {

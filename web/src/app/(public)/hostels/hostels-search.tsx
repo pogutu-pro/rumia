@@ -23,7 +23,7 @@ import { clientSearch } from '@/lib/search/client-search';
 import type {
   SearchListing,
   CombinedFilters,
-} from '@/lib/search/cascade-search';
+} from '@/lib/search/types';
 
 export type Listing = SearchListing;
 

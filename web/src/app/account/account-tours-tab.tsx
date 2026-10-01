@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
+import { toursApi } from '@/lib/api/tours';
 import {
   CalendarCheck,
   MapPin,
@@ -26,13 +26,13 @@ import { EditTourModal } from './edit-tour-modal';
 import type { TourBooking, TourTimeWindow } from '@/types';
 
 interface TourBookingWithListing extends TourBooking {
-  listings?: {
+  listing?: {
     id: string;
     title: string;
     area: string | null;
     slug: string | null;
     county: string | null;
-    listing_images?: { r2_url: string; display_order: number }[];
+    images?: { r2_url: string; display_order: number }[];
   } | null;
 }
 
@@ -66,27 +66,11 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
   const [activeFilter, setActiveFilter] = useState<TourFilter>('upcoming');
 
   const fetchBookings = useCallback(async () => {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const { data } = await supabase
-      .from('tour_bookings')
-      .select(
-        `*, listings(id, title, area, slug, county, listing_images(r2_url, display_order))`,
-      )
-      .eq('linked_user_id', user.id)
-      .order('preferred_date', { ascending: true })
-      .order('preferred_time', { ascending: true });
-
-    if (data) {
-      setBookings(data as unknown as TourBookingWithListing[]);
+    try {
+      const { items } = await toursApi.listMine({ sort: 'upcoming', limit: 100 });
+      setBookings(items as unknown as TourBookingWithListing[]);
+    } catch {
+      // Signed out or API unavailable: show the empty state.
     }
     setLoading(false);
   }, []);
@@ -298,8 +282,8 @@ function TourRow({
   onCancel?: () => void;
   isCancelling?: boolean;
 }) {
-  const listing = booking.listings;
-  const image = listing?.listing_images?.sort(
+  const listing = booking.listing;
+  const image = listing?.images?.slice().sort(
     (a, b) => a.display_order - b.display_order,
   )[0];
 

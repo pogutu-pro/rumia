@@ -35,7 +35,8 @@ import { cn } from '@/lib/utils/cn';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createClient } from '@/lib/supabase/client';
+import { listingsClientApi } from '@/lib/api/listings-client';
+import { listingToCompareSelection, type CompareListingSource } from '@/lib/compare/to-selection';
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
@@ -1219,63 +1220,14 @@ function ComparePageContent() {
   const fetchListingsFromSupabase = useCallback(
     async (ids: string[]) => {
       if (ids.length === 0) return;
-      const supabase = createClient();
-      const { data } = await supabase
-        .from('listings')
-        .select(
-          `id, title, price, price_single, price_sharing, slug, county, area, gender, specific_location,
-           distance_category, distance_to_campus, mpesa_details,
-           amenities, room_type, room_type_enum, bathroom_type,
-           wifi_included, water_included, electricity_included, security_type,
-           latitude, longitude,
-           listing_images(r2_url, display_order),
-            listing_room_types(deposit, furnishing_items, room_type),
-           agents(name, phone, whatsapp)`,
-        )
-        .in('id', ids)
-        .eq('is_active', true);
-
-      if (!data || data.length === 0) return;
+      const { items } = await listingsClientApi
+        .getFeed({ ids, limit: ids.length })
+        .catch(() => ({ items: [] as CompareListingSource[] }));
+      if (items.length === 0) return;
 
       const remoteSelections: Record<string, CompareSelection> = {};
-      (data as any[]).forEach((item) => {
-        const sorted = [...(item.listing_images || [])].sort(
-          (a: any, b: any) => a.display_order - b.display_order,
-        );
-        const roomTypes = item.listing_room_types || [];
-        const firstRoom = roomTypes[0] || {};
-        remoteSelections[item.id] = {
-          id: item.id,
-          title: item.title,
-          price: item.price,
-          price_single: item.price_single,
-          price_sharing: item.price_sharing,
-          imageUrl: sorted[0]?.r2_url,
-          slug: item.slug,
-          county: item.county,
-          area: item.area,
-          agentName: item.agents?.name ?? null,
-          agentPhone: item.agents?.phone ?? null,
-          agentWhatsapp: item.agents?.whatsapp ?? null,
-          amenities: item.amenities,
-          roomType: item.room_type,
-          roomTypeEnum: item.room_type_enum,
-          bathroomType: item.bathroom_type,
-          distanceCategory: item.distance_category,
-          distanceToCampus: item.distance_to_campus,
-          gender: item.gender,
-          wifiIncluded: item.wifi_included,
-          waterIncluded: item.water_included,
-          electricityIncluded: item.electricity_included,
-          securityType: item.security_type,
-          specificLocation: item.specific_location,
-          latitude: item.latitude,
-          longitude: item.longitude,
-          mpesaDetails: item.mpesa_details,
-          deposit: firstRoom.deposit ?? null,
-          furnishingItems: firstRoom.furnishing_items ?? null,
-          roomTypeLabel: firstRoom.room_type ?? null,
-        };
+      (items as unknown as CompareListingSource[]).forEach((item) => {
+        remoteSelections[item.id] = listingToCompareSelection(item);
       });
 
       loadFromIds(ids, remoteSelections);

@@ -19,6 +19,17 @@ export interface TourBooking {
   updated_at?: string | null;
 }
 
+export interface MyTourBooking extends TourBooking {
+  listing?: {
+    id: string;
+    title: string;
+    area: string | null;
+    county: string | null;
+    slug: string | null;
+    images: { r2_url: string; display_order: number }[];
+  } | null;
+}
+
 export interface TourBookingCreate {
   student_name: string;
   phone: string;
@@ -32,6 +43,15 @@ export interface TourBookingCreate {
 }
 
 export const toursApi = {
+  /** The signed-in student's own bookings, each with a brief of its listing. */
+  listMine: (params?: { sort?: 'created_desc' | 'upcoming'; page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.page) searchParams.set('page', params.page.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    return api.get<{ items: MyTourBooking[]; total: number }>(`/tours/me?${searchParams.toString()}`);
+  },
+
   create: (data: TourBookingCreate) => {
     return api.post<TourBooking>('/tours', data);
   },

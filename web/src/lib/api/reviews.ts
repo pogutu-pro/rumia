@@ -75,6 +75,11 @@ export const reviewsApi = {
     return serverApi.get<{ items: Review[]; total: number }>(`/reviews?${params.toString()}`);
   },
 
+  /** One review by id (published only unless you are its author or a moderator). */
+  getById: (id: string) => {
+    return api.get<Review>(`/reviews/${id}`);
+  },
+
   getSummary: (listingId: string) => {
     return api.get<ReviewSummary>(`/reviews/summary/${listingId}`);
   },

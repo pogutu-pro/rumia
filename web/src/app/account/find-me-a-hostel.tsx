@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { campusesApi } from '@/lib/api/campuses';
+import { zonesApi } from '@/lib/api/zones';
 import { signInWithGoogle } from '@/lib/supabase/auth';
 import {
   createHostelRequestAction,
@@ -129,34 +131,28 @@ export function FindMeAHostel({
 
     async function load() {
       setLoadingRequests(true);
-      const [zonesRes, reqs, feeRes] = await Promise.all([
+      const [zoneRows, reqs, feeCampus] = await Promise.all([
         hasCampus
-          ? supabase
-              .from('campus_zones')
-              .select('id, name')
-              .eq('campus_id', campusId!)
-              .order('name', { ascending: true })
-          : Promise.resolve({ data: null as unknown }),
+          ? zonesApi.list(campusId!).catch(() => null)
+          : Promise.resolve(null),
         isHome
           ? Promise.resolve([] as HostelRequest[])
           : getMyHostelRequestsAction(),
         !campusFeeProp && campusId
-          ? supabase
-              .from('campuses')
-              .select('hostel_finding_fee')
-              .eq('id', campusId)
-              .maybeSingle()
-          : Promise.resolve({ data: null as { hostel_finding_fee: number | null } | null }),
+          ? campusesApi
+              .list('active,coming_soon')
+              .then((all) => all.find((c) => c.id === campusId) ?? null)
+              .catch(() => null)
+          : Promise.resolve(null),
       ]);
       if (cancelled) return;
 
-      const zoneData = zonesRes.data as Array<{ id: string; name: string }> | null;
-      if (zoneData) setZones(zoneData);
+      if (zoneRows) setZones(zoneRows.map((z) => ({ id: z.id, name: z.name })));
       setRequests(reqs);
 
       // Resolve the campus fee from DB if not provided as a prop.
-      if (!campusFeeProp && feeRes.data) {
-        setCampusFee(feeRes.data.hostel_finding_fee ?? HOSTEL_REQUEST_FEE);
+      if (!campusFeeProp && feeCampus) {
+        setCampusFee(feeCampus.hostel_finding_fee ?? HOSTEL_REQUEST_FEE);
       } else if (!campusFeeProp) {
         setCampusFee(HOSTEL_REQUEST_FEE);
       }

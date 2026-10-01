@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { campusesApi } from '@/lib/api/campuses';
+import { profilesApi } from '@/lib/api/profiles';
 import { signInWithGoogle, hasStoredSessionCookie } from '@/lib/supabase/auth';
 import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
@@ -86,16 +88,10 @@ export default function LoginPage() {
 
       // Fetch "coming soon" campuses for display on the login sheet
       try {
-        const supabase = createClient();
-        const { data: campuses } = await supabase
-          .from('campuses')
-          .select('id, name, slug, status')
-          .eq('status', 'coming_soon')
-          .order('name', { ascending: true })
-          .limit(10);
+        const campuses = await campusesApi.list('coming_soon');
 
         if (campuses) {
-          setComingCampuses(campuses as any);
+          setComingCampuses(campuses.slice(0, 10) as any);
         }
       } catch (e) {
         // ignore fetch errors — campus list is optional
@@ -145,11 +141,7 @@ export default function LoginPage() {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .maybeSingle();
+      const profile = await profilesApi.getMe().catch(() => null);
 
       if (profile?.role === 'admin') {
         posthog.identify(userId);
@@ -160,11 +152,7 @@ export default function LoginPage() {
         return;
       }
 
-      const { data: agent } = await supabase
-        .from('agents')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
+      const agent = profile?.agent_id ?? null;
 
       if (agent) {
         posthog.identify(userId);

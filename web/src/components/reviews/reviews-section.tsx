@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Star, AlertTriangle, RefreshCw, ChevronDown, Share2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { profilesApi } from '@/lib/api/profiles';
+import { reviewsApi } from '@/lib/api/reviews';
 import { signInWithGoogle } from '@/lib/supabase/auth';
 import { RatingSummary } from './rating-summary';
 import { ReviewComposer } from './review-composer';
@@ -30,16 +32,6 @@ function buildEmptySummary(): ReviewSummary {
 }
 
 const PAGE_SIZE = 10;
-const REVIEW_SELECT = `
-  id, listing_id, user_id, rating, text, author_name, author_avatar_url,
-  school_verified_at_review_time, status, created_at, updated_at,
-  rating_cleanliness, rating_security, rating_water, rating_wifi,
-  rating_facilities, rating_location, rating_management, rating_value,
-  review_likes ( id, user_id ),
-  review_replies (
-    id, review_id, user_id, text, author_name, author_avatar_url, created_at, updated_at
-  )
-`;
 
 function sortReviews(rows: Review[], mode: SortMode): Review[] {
   const copy = [...rows];
@@ -81,12 +73,9 @@ export function ReviewsSection({
 
   const loadSummary = useCallback(async () => {
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_review_summary', {
-        p_listing_id: listingId,
-      });
-      if (rpcError) throw rpcError;
+      const data = await reviewsApi.getSummary(listingId);
       if (data) {
-        const parsed = (typeof data === 'string' ? JSON.parse(data) : data) as {
+        const parsed = data as unknown as {
           average_rating?: number | null;
           total_reviews?: number | null;
           distribution?: { rating: number; count: number }[] | null;
@@ -107,32 +96,25 @@ export function ReviewsSection({
     } catch {
       // Summary is best-effort; the reviews list drives the empty/error states.
     }
-  }, [listingId, supabase]);
+  }, [listingId]);
 
   const loadData = useCallback(
     async (mode: SortMode, startOffset: number) => {
       try {
         const [reviewsRes] = await Promise.all([
-          supabase
-            .from('reviews')
-            .select(REVIEW_SELECT)
-            .eq('listing_id', listingId)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false })
-            .range(startOffset, startOffset + PAGE_SIZE - 1),
+          reviewsApi.getFeed(listingId, 'published', Math.floor(startOffset / PAGE_SIZE) + 1, PAGE_SIZE),
           loadSummary(),
         ]);
 
-        if (reviewsRes.error) throw reviewsRes.error;
-
-        setReviews(sortReviews(reviewsRes.data ?? [], mode));
-        setHasMore((reviewsRes.data ?? []).length === PAGE_SIZE);
-        setOffset(startOffset + (reviewsRes.data ?? []).length);
+        const rows = reviewsRes.items as unknown as Review[];
+        setReviews(sortReviews(rows, mode));
+        setHasMore(rows.length === PAGE_SIZE);
+        setOffset(startOffset + rows.length);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load reviews.');
       }
     },
-    [listingId, supabase, loadSummary],
+    [listingId, loadSummary],
   );
 
   useEffect(() => {
@@ -145,11 +127,7 @@ export function ReviewsSection({
         } = await supabase.auth.getSession();
         if (session?.user) {
           setCurrentUserId(session.user.id);
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role, school_verified')
-            .eq('id', session.user.id)
-            .maybeSingle();
+          const profile = await profilesApi.getMe().catch(() => null);
           setCurrentUserRole(profile?.role ?? null);
           setSchoolVerified(profile?.school_verified ?? false);
         }
@@ -196,23 +174,20 @@ export function ReviewsSection({
     if (reviews.some((r) => r.id === highlightReviewId)) return;
     if (!hasMore) return; // already all loaded and not found
     (async () => {
-      const { data, error: fetchError } = await supabase
-        .from('reviews')
-        .select(REVIEW_SELECT)
-        .eq('id', highlightReviewId)
-        .eq('status', 'published')
-        .maybeSingle();
-      if (fetchError || !data) {
+      const data = (await reviewsApi
+        .getById(highlightReviewId)
+        .catch(() => null)) as unknown as Review | null;
+      if (!data) {
         setHighlightReviewId(null);
         return;
       }
       setReviews((prev) => {
         if (prev.some((r) => r.id === data.id)) return prev;
-        return sortReviews([data as unknown as Review, ...prev], sort);
+        return sortReviews([data, ...prev], sort);
       });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [highlightReviewId, loading, hasMore, reviews, supabase]);
+  }, [highlightReviewId, loading, hasMore, reviews]);
 
   const handleSortChange = async (mode: SortMode) => {
     setSort(mode);
@@ -222,19 +197,18 @@ export function ReviewsSection({
   const handleLoadMore = async () => {
     setLoadingMore(true);
     try {
-      const { data, error: fetchError } = await supabase
-        .from('reviews')
-        .select(REVIEW_SELECT)
-        .eq('listing_id', listingId)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + PAGE_SIZE - 1);
+      const res = await reviewsApi.getFeed(
+        listingId,
+        'published',
+        Math.floor(offset / PAGE_SIZE) + 1,
+        PAGE_SIZE,
+      );
+      const data = res.items as unknown as Review[];
 
-      if (fetchError) throw fetchError;
       const appended = sortReviews([...reviews, ...(data ?? [])], sort);
       setReviews(appended);
-      setHasMore((data ?? []).length === PAGE_SIZE);
-      setOffset((prev) => prev + (data ?? []).length);
+      setHasMore(data.length === PAGE_SIZE);
+      setOffset((prev) => prev + data.length);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load more reviews.');
     } finally {

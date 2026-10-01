@@ -12,3 +12,4 @@ export * from './profiles';
 export * from './agents';
 export * from './legal';
 export * from './admin';
+export * from './zones';

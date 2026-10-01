@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { campusesApi } from '@/lib/api/campuses';
+import { zonesApi } from '@/lib/api/zones';
 
 export interface TourZoneOption {
   value: string;
@@ -17,18 +18,6 @@ export interface CampusTourSection {
   campusSlug: string;
   campusName: string;
   zones: TourZoneOption[];
-}
-
-interface CampusRowPick {
-  id: string;
-  slug: string;
-  name: string;
-}
-
-interface CampusZoneRow {
-  campus_id: string;
-  name: string;
-  full_search_price: number;
 }
 
 /**
@@ -49,28 +38,15 @@ export function useTourZones() {
 
     async function load() {
       try {
-        const supabase = createClient();
-        const campusRes = (await supabase
-          .from('campuses')
-          .select('id, slug, name')
-          .eq('status', 'active')
-          .order('slug', { ascending: true })) as {
-          data: CampusRowPick[] | null;
-        };
-
-        const campuses = campusRes.data ?? [];
+        const campuses = (await campusesApi.list('active')).sort((x, y) =>
+          x.slug.localeCompare(y.slug),
+        );
         if (cancelled || campuses.length === 0) return;
 
-        const zoneRes = (await supabase
-          .from('campus_zones')
-          .select('campus_id, name, full_search_price')
-          .in('campus_id', campuses.map((c) => c.id))
-          .order('name', { ascending: true })) as {
-          data: CampusZoneRow[] | null;
-        };
-
+        const rows = await zonesApi.list();
         if (cancelled) return;
-        const rows = zoneRes.data ?? [];
+        const activeIds = new Set(campuses.map((c) => c.id));
+        const zoneRows = rows.filter((z) => activeIds.has(z.campus_id));
 
         setSections(
           campuses
@@ -78,7 +54,7 @@ export function useTourZones() {
               campusId: c.id,
               campusSlug: c.slug,
               campusName: c.name,
-              zones: rows
+              zones: zoneRows
                 .filter((z) => z.campus_id === c.id)
                 .map((z) => ({
                   value: z.name,

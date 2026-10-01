@@ -11,6 +11,13 @@ export interface UserProfile {
   managed_region_id?: string | null;
   home_campus_name?: string | null;
   home_campus_confirmed: boolean;
+  home_campus_confirmed_at?: string | null;
+  school_verified?: boolean;
+  full_name?: string | null;
+  phone?: string | null;
+  avatar_url?: string | null;
+  /** Present when the user owns an agent record. */
+  agent_id?: string | null;
   created_at: string;
 }
 

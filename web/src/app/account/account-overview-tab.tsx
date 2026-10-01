@@ -32,7 +32,7 @@ export interface OverviewUpcomingTour {
   preferred_time: string;
   status: string;
   amount: number;
-  listings?: {
+  listing?: {
     id: string;
     title: string;
     area: string | null;
@@ -158,7 +158,7 @@ export function AccountOverviewTab({
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs font-bold text-slate-900 truncate">
-                  {upcomingTour.listings?.title || 'Guided Tour'}
+                  {upcomingTour.listing?.title || 'Guided Tour'}
                 </p>
                 <TourCountdown
                   preferredDate={upcomingTour.preferred_date}

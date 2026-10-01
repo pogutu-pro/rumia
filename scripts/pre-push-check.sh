@@ -17,7 +17,8 @@ fi
 cd ..
 echo "✓ Backend tests passed!"
 
-echo "=== [2/3] Running Frontend TypeScript Typecheck ==="
+echo "=== [2/3] Direct-DB guard + Frontend TypeScript Typecheck ==="
+scripts/check-no-direct-db.sh
 cd web
 npx tsc --noEmit
 cd ..

@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
-import { createClient } from '@/lib/supabase/client';
+import { profilesApi } from '@/lib/api/profiles';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
 import posthog from 'posthog-js';
 
@@ -209,12 +209,7 @@ export function ContactModal({
         const { session } = await getSession();
         let name: string | undefined;
         if (session?.user) {
-          const supabase = createClient();
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', session.user.id)
-            .single();
+          const profile = await profilesApi.getMe().catch(() => null);
           name = profile?.full_name ?? undefined;
         }
 
@@ -346,12 +341,7 @@ export function ContactModal({
           return;
         }
 
-        const supabase = createClient();
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('phone')
-          .eq('id', session.user.id)
-          .single();
+        const profile = await profilesApi.getMe().catch(() => null);
 
         if (!profile?.phone || !isValidKenyanPhone(profile.phone)) {
           setIsLoading(false);
@@ -411,13 +401,7 @@ export function ContactModal({
           return;
         }
 
-        const supabase = createClient();
-        const { error } = await supabase
-          .from('profiles')
-          .update({ phone: phone.trim(), updated_at: new Date().toISOString() })
-          .eq('id', session.user.id);
-
-        if (error) throw error;
+        await profilesApi.updateMe({ phone: phone.trim() });
 
         setSavingPhone(false);
         await continueRef.current(contactType!, phone.trim(), false);
@@ -433,13 +417,7 @@ export function ContactModal({
   // ── Step 3 (optional): Fee disclosure accepted ───────────────────────────────
   const handleFeeAccepted = useCallback(async () => {
     posthog.capture('fee_disclosure_accepted', { listing_id: listingId });
-    const { session } = await getSession();
-    const supabase = createClient();
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('phone')
-      .eq('id', session?.user?.id ?? '')
-      .single();
+    const profile = await profilesApi.getMe().catch(() => null);
 
     await continueRef.current(contactType!, profile?.phone ?? '', true);
   }, [contactType, listingId]);

@@ -568,9 +568,11 @@ export interface Review {
   rating_location?: number | null;
   rating_management?: number | null;
   rating_value?: number | null;
-  // Join fields (populated by queries)
-  review_likes?: { id: string; user_id: string }[] | null;
-  review_replies?: ReviewReply[] | null;
+  // Aggregates computed by the API (GET /reviews)
+  like_count?: number;
+  /** True when the signed-in caller has liked this review. */
+  liked_by_me?: boolean;
+  replies?: ReviewReply[] | null;
 }
 
 export interface ReviewLike {
@@ -588,7 +590,7 @@ export interface ReviewReply {
   author_name?: string | null;
   author_avatar_url?: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string | null;
 }
 
 export interface ReviewModerationLog {
