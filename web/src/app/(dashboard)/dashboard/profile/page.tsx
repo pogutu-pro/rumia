@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { AgentProfileClient } from './agent-profile-client';
 import { ArrowLeft } from 'lucide-react';
@@ -10,11 +11,7 @@ export default async function AgentProfilePage() {
 
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) redirect('/dashboard');
 

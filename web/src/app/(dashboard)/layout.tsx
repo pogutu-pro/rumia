@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AgentHeader } from './agent-header';
-import { isAdminUser } from '@/lib/utils/admin';
+import { profilesApi } from '@/lib/api/profiles';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 
 export const revalidate = 0;
 
@@ -19,26 +20,19 @@ export default async function DashboardLayout({
     redirect('/auth/login');
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
+  const [profile, agent] = await Promise.all([
+    profilesApi.getMeServer().catch(() => null),
+    agentDashboardApi.getSelf().catch(() => null),
+  ]);
 
   const isAdmin = profile?.role === 'admin';
   const isManager = profile?.role === 'manager' || isAdmin;
-
-  const { data: agent } = await (supabase as any)
-    .from('agents')
-    .select('name')
-    .eq('user_id', user.id)
-    .maybeSingle();
 
   if (!agent && !isAdmin && !isManager) {
     redirect('/account');
   }
 
-  const agentName = agent.name || user.email || '';
+  const agentName = agent?.name || user.email || '';
 
   return (
     <div className="min-h-screen bg-white">

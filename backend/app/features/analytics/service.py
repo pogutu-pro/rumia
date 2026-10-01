@@ -75,6 +75,8 @@ class AnalyticsService:
                 listing_id=str(r.listing_id),
                 listing_title=r.listing_title,
                 listing_slug=r.listing_slug,
+                county=getattr(r, "county", None),
+                area=getattr(r, "area", None),
                 today_count=r.today_count or 0,
                 week_count=r.week_count or 0,
                 month_count=r.month_count or 0,

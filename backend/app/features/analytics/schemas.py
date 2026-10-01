@@ -21,6 +21,8 @@ class AgentListingViewEntry(BaseModel):
     listing_id: str
     listing_title: Optional[str] = None
     listing_slug: Optional[str] = None
+    county: Optional[str] = None
+    area: Optional[str] = None
     today_count: int
     week_count: int
     month_count: int

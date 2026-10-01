@@ -124,7 +124,8 @@ export interface Lead {
   listing_id: string | number;
   agent_id: string | number;
   clicked_at: string;
-  ip_hash: string;
+  /** Never exposed to agents by the API; only present for admin tools. */
+  ip_hash?: string;
   contact_type?: 'hostel_owner' | 'rumia_agent' | null;
   name?: string | null;
   phone?: string | null;

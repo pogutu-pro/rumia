@@ -6,6 +6,9 @@ from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.security import AuthenticatedUser, get_current_user, require_roles
 from app.features.agents.schemas import (
+    AgentDashboardRead,
+    AgentListingRead,
+    AgentSelfRead,
     AgentApplicationCreate,
     AgentApplicationRead,
     AgentApplicationReview,
@@ -100,17 +103,68 @@ async def submit_application(
 
 @router.get(
     "/me",
-    response_model=AgentRead,
+    response_model=AgentSelfRead,
     status_code=status.HTTP_200_OK,
     summary="Get Current Agent Profile",
-    description="Fetch current authenticated user's agent profile.",
+    description="The signed-in user's own agent record, including private fields. 404 if they are not an agent.",
 )
 async def get_my_agent_profile(
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
-) -> AgentRead:
+) -> AgentSelfRead:
     agent = await AgentService.get_agent_by_user_id(db, user.id)
-    return AgentRead.model_validate(agent)
+    return AgentSelfRead.model_validate(agent)
+
+
+@router.post(
+    "/me/ensure",
+    response_model=AgentSelfRead,
+    status_code=status.HTTP_200_OK,
+    summary="Ensure Agent Record",
+    description="Admins and managers get an agent record created on first dashboard visit; others must apply (403).",
+)
+async def ensure_my_agent(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> AgentSelfRead:
+    agent = await AgentService.ensure_agent(db, user, None)
+    return AgentSelfRead.model_validate(agent)
+
+
+@router.get(
+    "/me/dashboard",
+    response_model=AgentDashboardRead,
+    status_code=status.HTTP_200_OK,
+    summary="Agent Dashboard Summary",
+    description="Headline numbers for the agent dashboard: listings, leads, pending tours, tour earnings.",
+)
+async def my_dashboard(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> AgentDashboardRead:
+    return await AgentService.dashboard(db, user)
+
+
+@router.get(
+    "/me/listings",
+    response_model=List[AgentListingRead],
+    status_code=status.HTTP_200_OK,
+    summary="My Listings",
+    description="All of the agent's listings (active or not) with lead counts, newest first.",
+)
+async def my_listings(
+    property_type: Optional[str] = Query(None, pattern="^(hostel|apartment|short_stay)$"),
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> List[AgentListingRead]:
+    rows = await AgentService.my_listings(db, user, property_type)
+    out = []
+    for listing, lead_count in rows:
+        item = AgentListingRead.model_validate(listing)
+        item.lead_count = lead_count
+        item.commission_locked_by_admin = bool(listing.commission_locked_by_admin)
+        out.append(item)
+    return out
 
 
 @router.get(

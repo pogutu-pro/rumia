@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
+import { campusesApi } from '@/lib/api/campuses';
 import { redirect } from 'next/navigation';
 import { NewListingForm } from './new-listing-form';
 import { ArrowLeft } from 'lucide-react';
@@ -16,11 +18,7 @@ export default async function NewListingPage() {
     redirect('/auth/login');
   }
 
-  let { data: agent } = await supabase
-    .from('agents')
-    .select('id, phone, whatsapp, campus_id, status')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) {
     redirect('/dashboard');
@@ -30,21 +28,15 @@ export default async function NewListingPage() {
     redirect('/dashboard');
   }
 
-  const { data: campus } = await supabase
-    .from('campuses')
-    .select('status')
-    .eq('id', agent.campus_id)
-    .maybeSingle();
+  const [campuses, campusZones] = await Promise.all([
+    campusesApi.listServer('active,coming_soon,suspended').catch(() => []),
+    agentDashboardApi.zones(agent.campus_id),
+  ]);
+  const campus = campuses.find((c) => c.id === agent.campus_id);
 
   if (campus?.status === 'suspended') {
     redirect('/dashboard');
   }
-
-  const { data: campusZones } = await supabase
-    .from('campus_zones')
-    .select('id, name, slug, full_search_price, distance_category')
-    .eq('campus_id', agent.campus_id)
-    .order('name');
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

@@ -1,4 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
+import { listingsApi } from '@/lib/api/listings';
+import { toLegacyListingShape } from '@/lib/api/legacy-listing';
 import { notFound, redirect } from 'next/navigation';
 import { NewListingForm } from '../../new/new-listing-form';
 import { ArrowLeft } from 'lucide-react';
@@ -24,11 +27,7 @@ export default async function EditListingPage({
     redirect('/auth/login');
   }
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id, phone, whatsapp, campus_id, status')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) {
     redirect('/dashboard');
@@ -38,40 +37,15 @@ export default async function EditListingPage({
     redirect('/dashboard');
   }
 
-  const { data: listing, error } = await supabase
-    .from('listings')
-    .select(
-      `id, title, description, property_type, price, location, youtube_id, is_youtube_shorts, room_type,
-      amenities, bathroom_type, distance_to_campus,
-      security_type, water_included, electricity_included, wifi_included, hot_water_included, cooking_gas_included,
-      latitude, longitude, gender, proximity_description, is_active,
-      county, area,
-      specific_location, price_single, price_sharing, mpesa_details, distance_category,
-      landlord_phone,
-      listing_images ( id, r2_url, category, display_order, blur_data_url )`,
-    )
-    .eq('id', id)
-    .eq('agent_id', agent.id)
-    .single();
-
-  if (error || !listing) {
+  // Owner read: includes inactive listings (and 404s for listings that aren't theirs or missing).
+  const apiListing = await listingsApi.getByIdAuthenticatedServer(id).catch(() => null);
+  if (!apiListing || apiListing.agent?.id !== agent.id) {
     notFound();
   }
+  // The form reads the legacy `listing_images` / `listing_room_types` keys.
+  const listing = toLegacyListingShape(apiListing);
 
-  const { data: roomTypes } = await supabase
-    .from('listing_room_types')
-    .select(
-      'id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size',
-    )
-    .eq('listing_id', id);
-
-  const { data: campusZones } = await supabase
-    .from('campus_zones')
-    .select('id, name, slug, full_search_price, distance_category')
-    .eq('campus_id', agent.campus_id)
-    .order('name');
-
-  (listing as any).listing_room_types = roomTypes || [];
+  const campusZones = await agentDashboardApi.zones(agent.campus_id);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

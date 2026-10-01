@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { LeadsTable } from '../leads-table';
 import { ArrowLeft } from 'lucide-react';
@@ -13,25 +14,16 @@ export default async function AgentLeadsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) redirect('/dashboard');
 
-  const { data: listings } = await supabase
-    .from('listings')
-    .select('id, title')
-    .eq('agent_id', agent.id)
-    .order('id', { ascending: false });
-
-  const { data: leads } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('agent_id', agent.id)
-    .order('clicked_at', { ascending: false });
+  const [apiListings, leadsPage] = await Promise.all([
+    agentDashboardApi.listings().catch(() => []),
+    agentDashboardApi.leads().catch(() => ({ items: [], total: 0 })),
+  ]);
+  const listings = apiListings.map((l) => ({ id: l.id, title: l.title }));
+  const leads = leadsPage.items;
 
   const totalLeads = (leads || []).length;
 

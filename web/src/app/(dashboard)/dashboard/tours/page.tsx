@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { ToursSection } from '../tours-section';
 import { ArrowLeft } from 'lucide-react';
@@ -11,29 +12,17 @@ export default async function AgentToursPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
   if (!agent) redirect('/dashboard');
 
-  const { data: tourBookingsRaw } = await (supabase as any)
-    .from('tour_bookings')
-    .select(`
-      *,
-      listings(id, title, area),
-      agents(id, name, whatsapp, phone)
-    `)
-    .eq('agent_id', agent.id)
-    .order('preferred_date', { ascending: true })
-    .order('preferred_time', { ascending: true });
-
-  const tourBookings = (tourBookingsRaw ?? []).map((b: any) => ({
+  const { items } = await agentDashboardApi
+    .tours('upcoming')
+    .catch(() => ({ items: [] }));
+  // The tours section reads the legacy `listings` / `agents` keys.
+  const tourBookings = items.map((b) => ({
     ...b,
-    listings: b.listings ?? null,
-    agents: b.agents ?? null,
+    listings: b.listing ?? null,
+    agents: b.agent ?? null,
   }));
 
   return (

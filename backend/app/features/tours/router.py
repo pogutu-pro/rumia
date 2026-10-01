@@ -12,6 +12,8 @@ from app.features.tours.schemas import (
     TourBookingCreate,
     TourBookingRead,
     TourBookingStudentUpdate,
+    StaffTourBookingRead,
+    TourAgentBrief,
     TourBookingUpdateStatus,
     TourListingBrief,
 )
@@ -82,21 +84,35 @@ async def list_my_tours(
 
 @router.get(
     "",
-    response_model=PaginatedResponse[TourBookingRead],
+    response_model=PaginatedResponse[StaffTourBookingRead],
     status_code=status.HTTP_200_OK,
     summary="List Tour Bookings",
-    description="Fetch tour bookings. Agent sees own, Admin sees all.",
+    description=(
+        "Bookings for the signed-in agent (admins: all), each embedding its listing and agent. "
+        "`sort`: created_desc (default) | upcoming | date_desc."
+    ),
 )
 async def list_bookings(
     status_filter: Optional[str] = Query(None, alias="status"),
+    sort: str = Query("created_desc", pattern="^(created_desc|upcoming|date_desc)$"),
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
-) -> PaginatedResponse[TourBookingRead]:
-    items, total = await TourService.list_bookings(db, user, status_filter=status_filter, pagination=pagination)
-    validated = [TourBookingRead.model_validate(b) for b in items]
-    return PaginatedResponse.create(items=validated, total=total, page=pagination.page, limit=pagination.limit)
-
+) -> PaginatedResponse[StaffTourBookingRead]:
+    items, total = await TourService.list_bookings(
+        db, user, status_filter=status_filter, pagination=pagination, sort=sort
+    )
+    listings = await TourService.get_listings_by_id(db, [b.listing_id for b in items if b.listing_id])
+    agents = await TourService.get_agents_by_id(db, [b.agent_id for b in items if b.agent_id])
+    rows = []
+    for booking in items:
+        row = StaffTourBookingRead.model_validate(booking)
+        if booking.listing_id and (listing := listings.get(str(booking.listing_id))) is not None:
+            row.listing = TourListingBrief.model_validate(listing)
+        if booking.agent_id and (agent := agents.get(str(booking.agent_id))) is not None:
+            row.agent = TourAgentBrief.model_validate(agent)
+        rows.append(row)
+    return PaginatedResponse.create(items=rows, total=total, page=pagination.page, limit=pagination.limit)
 
 
 @router.get(

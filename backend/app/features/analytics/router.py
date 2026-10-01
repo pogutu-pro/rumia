@@ -1,10 +1,13 @@
 import hashlib
 from typing import Optional
 
+from sqlalchemy import select
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
+from app.core.errors import ForbiddenException
+from app.features.agents.models import AgentProfile
 from app.core.ratelimit import _client_ip, limiter
 from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user, require_roles
 from app.features.analytics.schemas import (
@@ -61,13 +64,20 @@ async def get_view_counts(
     response_model=list[AgentListingViewEntry],
     status_code=status.HTTP_200_OK,
     summary="Agent Listing Analytics",
-    description="Get view analytics per listing for a given agent. Agent or Admin only.",
+    description="View analytics per listing for an agent: the agent themself, or an admin.",
 )
 async def get_agent_analytics(
     agent_id: str,
-    user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> list[AgentListingViewEntry]:
+    # Access follows the agent record, not the profile role (managers can be agents too). An agent may only read their own analytics (admins any).
+    if not user.is_admin:
+        owns = await db.execute(
+            select(AgentProfile.id).where(AgentProfile.id == agent_id, AgentProfile.user_id == user.id)
+        )
+        if owns.scalar_one_or_none() is None:
+            raise ForbiddenException("You can only view analytics for your own listings")
     return await AnalyticsService.get_agent_view_analytics(db=db, agent_id=agent_id)
 
 

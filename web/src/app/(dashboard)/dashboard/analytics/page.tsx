@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, Eye } from 'lucide-react';
 import Link from 'next/link';
@@ -12,32 +13,23 @@ export default async function AgentAnalyticsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) redirect('/dashboard');
 
-  const { data: listingViewAnalyticsRaw } = await (supabase as any).rpc(
-    'get_agent_listing_view_analytics',
-    { p_agent_id: agent.id }
-  );
-
-  const listingViewAnalytics = (listingViewAnalyticsRaw ?? []).map(
-    (row: any) => ({
-      listing_id: row.listing_id,
-      listing_title: row.listing_title,
-      listing_slug: row.listing_slug,
-      county: row.county || 'nyeri',
-      area: row.area || 'dekut',
-      today_count: Number(row.today_count || 0),
-      week_count: Number(row.week_count || 0),
-      month_count: Number(row.month_count || 0),
-      all_time_count: Number(row.all_time_count || 0),
-    })
-  );
+  const listingViewAnalytics = (
+    await agentDashboardApi.viewAnalytics(agent.id).catch(() => [])
+  ).map((row) => ({
+    listing_id: row.listing_id,
+    listing_title: row.listing_title,
+    listing_slug: row.listing_slug,
+    county: row.county || 'nyeri',
+    area: row.area || 'dekut',
+    today_count: Number(row.today_count || 0),
+    week_count: Number(row.week_count || 0),
+    month_count: Number(row.month_count || 0),
+    all_time_count: Number(row.all_time_count || 0),
+  }));
 
   const viewSummary = listingViewAnalytics.reduce(
     (acc: any, row: any) => ({

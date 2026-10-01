@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { ListingsList } from '../listings-list';
 import { ArrowLeft, Plus } from 'lucide-react';
@@ -13,11 +14,7 @@ export default async function AgentListingsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id, status')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) redirect('/dashboard');
 
@@ -25,26 +22,12 @@ export default async function AgentListingsPage() {
     redirect('/dashboard');
   }
 
-  const { data: listings } = await supabase
-    .from('listings')
-    .select(
-      `id, title, price, location, is_active, is_full, pays_commission,
-       commission_locked_by_admin,
-       listing_images(r2_url)`
-    )
-    .eq('agent_id', agent.id)
-    .order('id', { ascending: false });
-
-  const { data: leads } = await supabase
-    .from('leads')
-    .select('listing_id')
-    .eq('agent_id', agent.id);
-
-  const leadsCountByListing: Record<string, number> = {};
-  (leads || []).forEach((lead: any) => {
-    leadsCountByListing[lead.listing_id] =
-      (leadsCountByListing[lead.listing_id] || 0) + 1;
-  });
+  const apiListings = await agentDashboardApi.listings().catch(() => []);
+  // The list component reads the legacy `listing_images` key.
+  const listings = apiListings.map((l) => ({ ...l, listing_images: l.images }));
+  const leadsCountByListing: Record<string, number> = Object.fromEntries(
+    apiListings.map((l) => [l.id, l.lead_count]),
+  );
 
   const activeCount = listings?.filter((l: any) => l.is_active).length || 0;
 

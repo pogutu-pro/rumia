@@ -74,3 +74,18 @@ class MyTourBookingRead(TourBookingRead):
     """A student's own booking with a brief of the toured listing embedded."""
 
     listing: Optional[TourListingBrief] = None
+
+
+class TourAgentBrief(BaseModel):
+    id: str
+    name: str
+    whatsapp: Optional[str] = None
+    phone: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class StaffTourBookingRead(MyTourBookingRead):
+    """A booking as shown to its agent / admins: embeds the listing and the agent."""
+
+    agent: Optional[TourAgentBrief] = None

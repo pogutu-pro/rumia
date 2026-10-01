@@ -183,11 +183,586 @@
         "title": "AgentApplicationReview",
         "type": "object"
       },
+      "AgentDashboardRead": {
+        "description": "Headline numbers for the agent dashboard home.",
+        "properties": {
+          "active_listing_count": {
+            "title": "Active Listing Count",
+            "type": "integer"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/AgentSelfRead"
+          },
+          "has_payment_details": {
+            "title": "Has Payment Details",
+            "type": "boolean"
+          },
+          "leads_this_month": {
+            "title": "Leads This Month",
+            "type": "integer"
+          },
+          "listing_count": {
+            "title": "Listing Count",
+            "type": "integer"
+          },
+          "pending_tours": {
+            "title": "Pending Tours",
+            "type": "integer"
+          },
+          "total_leads": {
+            "title": "Total Leads",
+            "type": "integer"
+          },
+          "tour_earnings": {
+            "title": "Tour Earnings",
+            "type": "number"
+          }
+        },
+        "required": [
+          "agent",
+          "has_payment_details",
+          "listing_count",
+          "active_listing_count",
+          "leads_this_month",
+          "total_leads",
+          "pending_tours",
+          "tour_earnings"
+        ],
+        "title": "AgentDashboardRead",
+        "type": "object"
+      },
+      "AgentListingHostel": {
+        "description": "A platform listing as compared against the official records.",
+        "properties": {
+          "agent_name": {
+            "default": "Agent",
+            "title": "Agent Name",
+            "type": "string"
+          },
+          "agent_phone": {
+            "default": "",
+            "title": "Agent Phone",
+            "type": "string"
+          },
+          "agent_whatsapp": {
+            "default": "",
+            "title": "Agent Whatsapp",
+            "type": "string"
+          },
+          "area": {
+            "default": "dekut",
+            "title": "Area",
+            "type": "string"
+          },
+          "county": {
+            "default": "nyeri",
+            "title": "County",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "is_full": {
+            "default": false,
+            "title": "Is Full",
+            "type": "boolean"
+          },
+          "landlord_phone": {
+            "default": "",
+            "title": "Landlord Phone",
+            "type": "string"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "mpesa_details": {
+            "default": "",
+            "title": "Mpesa Details",
+            "type": "string"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "specific_location": {
+            "default": "",
+            "title": "Specific Location",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "location",
+          "is_active",
+          "verified",
+          "created_at"
+        ],
+        "title": "AgentListingHostel",
+        "type": "object"
+      },
+      "AgentListingRead": {
+        "description": "A listing as shown in its owner's dashboard.",
+        "properties": {
+          "agent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/app__features__listings__schemas__AgentRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "amenities": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amenities"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "bathroom_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bathroom Type"
+          },
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "commission_locked_by_admin": {
+            "default": false,
+            "title": "Commission Locked By Admin",
+            "type": "boolean"
+          },
+          "cooking_gas_included": {
+            "default": false,
+            "title": "Cooking Gas Included",
+            "type": "boolean"
+          },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "distance_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Category"
+          },
+          "distance_to_campus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance To Campus"
+          },
+          "electricity_included": {
+            "default": false,
+            "title": "Electricity Included",
+            "type": "boolean"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "hot_water_included": {
+            "default": false,
+            "title": "Hot Water Included",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "images": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ListingImageRead"
+            },
+            "title": "Images",
+            "type": "array"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "is_full": {
+            "default": false,
+            "title": "Is Full",
+            "type": "boolean"
+          },
+          "is_saved": {
+            "default": false,
+            "title": "Is Saved",
+            "type": "boolean"
+          },
+          "is_youtube_shorts": {
+            "default": false,
+            "title": "Is Youtube Shorts",
+            "type": "boolean"
+          },
+          "landlord_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landlord Phone"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "lead_count": {
+            "default": 0,
+            "title": "Lead Count",
+            "type": "integer"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "mpesa_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Details"
+          },
+          "pays_commission": {
+            "default": false,
+            "title": "Pays Commission",
+            "type": "boolean"
+          },
+          "price": {
+            "title": "Price",
+            "type": "number"
+          },
+          "price_sharing": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Sharing"
+          },
+          "price_single": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Single"
+          },
+          "property_type": {
+            "default": "hostel",
+            "title": "Property Type",
+            "type": "string"
+          },
+          "rating": {
+            "default": 0.0,
+            "title": "Rating",
+            "type": "number"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Type"
+          },
+          "room_type_enum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Type Enum"
+          },
+          "room_types": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ListingRoomTypeRead"
+            },
+            "title": "Room Types",
+            "type": "array"
+          },
+          "security_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Security Type"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "sort_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Position"
+          },
+          "specific_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specific Location"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "views": {
+            "default": 0,
+            "title": "Views",
+            "type": "integer"
+          },
+          "water_included": {
+            "default": false,
+            "title": "Water Included",
+            "type": "boolean"
+          },
+          "wifi_included": {
+            "default": false,
+            "title": "Wifi Included",
+            "type": "boolean"
+          },
+          "youtube_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youtube Id"
+          },
+          "zone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone Id"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "price",
+          "location",
+          "created_at"
+        ],
+        "title": "AgentListingRead",
+        "type": "object"
+      },
       "AgentListingViewEntry": {
         "properties": {
           "all_time_count": {
             "title": "All Time Count",
             "type": "integer"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
           },
           "listing_id": {
             "title": "Listing Id",
@@ -236,6 +811,288 @@
           "all_time_count"
         ],
         "title": "AgentListingViewEntry",
+        "type": "object"
+      },
+      "AgentSelfRead": {
+        "description": "An agent's own record, including private fields (balance, payment details).",
+        "properties": {
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "commission_balance": {
+            "default": 0.0,
+            "title": "Commission Balance",
+            "type": "number"
+          },
+          "cover_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Image Url"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expected_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Name"
+          },
+          "helping_since": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Helping Since"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "instagram": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instagram"
+          },
+          "instagram_public": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instagram Public"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "is_founder": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Founder"
+          },
+          "is_support": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Support"
+          },
+          "languages": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languages"
+          },
+          "linkedin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linkedin"
+          },
+          "linkedin_public": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linkedin Public"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "pochi_la_biashara_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pochi La Biashara Number"
+          },
+          "portfolio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portfolio Url"
+          },
+          "profile_photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Photo Url"
+          },
+          "service_areas": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Areas"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "suspension_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspension Reason"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          },
+          "whatsapp": {
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "whatsapp",
+          "status",
+          "created_at"
+        ],
+        "title": "AgentSelfRead",
         "type": "object"
       },
       "AgentStatusUpdate": {
@@ -5224,6 +6081,116 @@
         "title": "NotificationPreferenceUpdate",
         "type": "object"
       },
+      "OfficialHostelRead": {
+        "properties": {
+          "contacts": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "hostel_name": {
+            "title": "Hostel Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "payments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payments"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "verified_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Date"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone"
+          }
+        },
+        "required": [
+          "id",
+          "hostel_name"
+        ],
+        "title": "OfficialHostelRead",
+        "type": "object"
+      },
+      "OfficialHostelsOverview": {
+        "properties": {
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/AgentListingHostel"
+            },
+            "title": "Listings",
+            "type": "array"
+          },
+          "official_hostels": {
+            "items": {
+              "$ref": "#/components/schemas/OfficialHostelRead"
+            },
+            "title": "Official Hostels",
+            "type": "array"
+          }
+        },
+        "required": [
+          "official_hostels",
+          "listings"
+        ],
+        "title": "OfficialHostelsOverview",
+        "type": "object"
+      },
       "PaginatedResponse_AgentApplicationRead_": {
         "properties": {
           "items": {
@@ -5544,11 +6511,11 @@
         "title": "PaginatedResponse[ReviewRead]",
         "type": "object"
       },
-      "PaginatedResponse_TourBookingRead_": {
+      "PaginatedResponse_StaffTourBookingRead_": {
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/TourBookingRead"
+              "$ref": "#/components/schemas/StaffTourBookingRead"
             },
             "title": "Items",
             "type": "array"
@@ -5581,7 +6548,7 @@
           "limit",
           "pages"
         ],
-        "title": "PaginatedResponse[TourBookingRead]",
+        "title": "PaginatedResponse[StaffTourBookingRead]",
         "type": "object"
       },
       "PlatformStats": {
@@ -7070,6 +8037,171 @@
           "agents"
         ],
         "title": "SitemapResponse",
+        "type": "object"
+      },
+      "StaffTourBookingRead": {
+        "description": "A booking as shown to its agent / admins: embeds the listing and the agent.",
+        "properties": {
+          "agent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TourAgentBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "number"
+          },
+          "contacted": {
+            "default": false,
+            "title": "Contacted",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "linked_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked User Id"
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TourListingBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "preferred_date": {
+            "format": "date",
+            "title": "Preferred Date",
+            "type": "string"
+          },
+          "preferred_time": {
+            "title": "Preferred Time",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "student_name": {
+            "title": "Student Name",
+            "type": "string"
+          },
+          "tour_type": {
+            "title": "Tour Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "zone": {
+            "title": "Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "student_name",
+          "phone",
+          "zone",
+          "tour_type",
+          "amount",
+          "preferred_date",
+          "preferred_time",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "StaffTourBookingRead",
+        "type": "object"
+      },
+      "TourAgentBrief": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "TourAgentBrief",
         "type": "object"
       },
       "TourBookingCreate": {
@@ -9054,7 +10186,7 @@
     },
     "/api/v1/agents/me": {
       "get": {
-        "description": "Fetch current authenticated user's agent profile.",
+        "description": "The signed-in user's own agent record, including private fields. 404 if they are not an agent.",
         "operationId": "get_my_agent_profile_api_v1_agents_me_get",
         "parameters": [
           {
@@ -9079,7 +10211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__features__agents__schemas__AgentRead"
+                  "$ref": "#/components/schemas/AgentSelfRead"
                 }
               }
             },
@@ -9097,6 +10229,177 @@
           }
         },
         "summary": "Get Current Agent Profile",
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/v1/agents/me/dashboard": {
+      "get": {
+        "description": "Headline numbers for the agent dashboard: listings, leads, pending tours, tour earnings.",
+        "operationId": "my_dashboard_api_v1_agents_me_dashboard_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDashboardRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agent Dashboard Summary",
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/v1/agents/me/ensure": {
+      "post": {
+        "description": "Admins and managers get an agent record created on first dashboard visit; others must apply (403).",
+        "operationId": "ensure_my_agent_api_v1_agents_me_ensure_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSelfRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ensure Agent Record",
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/v1/agents/me/listings": {
+      "get": {
+        "description": "All of the agent's listings (active or not) with lead counts, newest first.",
+        "operationId": "my_listings_api_v1_agents_me_listings_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "property_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(hostel|apartment|short_stay)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Property Type"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentListingRead"
+                  },
+                  "title": "Response My Listings Api V1 Agents Me Listings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Listings",
         "tags": [
           "Agents"
         ]
@@ -9214,7 +10517,7 @@
     },
     "/api/v1/analytics/agent/{agent_id}": {
       "get": {
-        "description": "Get view analytics per listing for a given agent. Agent or Admin only.",
+        "description": "View analytics per listing for an agent: the agent themself, or an admin.",
         "operationId": "get_agent_analytics_api_v1_analytics_agent__agent_id__get",
         "parameters": [
           {
@@ -12764,6 +14067,110 @@
         ]
       }
     },
+    "/api/v1/official-hostels": {
+      "get": {
+        "description": "The official DeKUT housing records. Agents, managers and admins.",
+        "operationId": "list_official_hostels_api_v1_official_hostels_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OfficialHostelRead"
+                  },
+                  "title": "Response List Official Hostels Api V1 Official Hostels Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Official Hostel Records",
+        "tags": [
+          "Official Hostels"
+        ]
+      }
+    },
+    "/api/v1/official-hostels/overview": {
+      "get": {
+        "description": "Official records alongside every platform listing's contact/payment details, for cross-checking. Agents, managers and admins.",
+        "operationId": "official_hostels_overview_api_v1_official_hostels_overview_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialHostelsOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Official Records vs Platform Listings",
+        "tags": [
+          "Official Hostels"
+        ]
+      }
+    },
     "/api/v1/profiles/check-email": {
       "get": {
         "description": "Whether a profile exists for an email. Public and rate-limited; used only to give a helpful message after a failed password sign-in.",
@@ -14610,7 +16017,7 @@
     },
     "/api/v1/tours": {
       "get": {
-        "description": "Fetch tour bookings. Agent sees own, Admin sees all.",
+        "description": "Bookings for the signed-in agent (admins: all), each embedding its listing and agent. `sort`: created_desc (default) | upcoming | date_desc.",
         "operationId": "list_bookings_api_v1_tours_get",
         "parameters": [
           {
@@ -14627,6 +16034,17 @@
                 }
               ],
               "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "created_desc",
+              "pattern": "^(created_desc|upcoming|date_desc)$",
+              "title": "Sort",
+              "type": "string"
             }
           },
           {
@@ -14678,7 +16096,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_TourBookingRead_"
+                  "$ref": "#/components/schemas/PaginatedResponse_StaffTourBookingRead_"
                 }
               }
             },

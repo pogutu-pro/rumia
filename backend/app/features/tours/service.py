@@ -157,11 +157,20 @@ class TourService:
         return booking, pushes
 
     @staticmethod
+    async def get_agents_by_id(db: AsyncSession, agent_ids: List[str]) -> dict:
+        ids = [i for i in set(agent_ids) if i]
+        if not ids:
+            return {}
+        res = await db.execute(select(Agent).where(Agent.id.in_(ids)))
+        return {str(a.id): a for a in res.scalars().all()}
+
+    @staticmethod
     async def list_bookings(
         db: AsyncSession,
         user: AuthenticatedUser,
         status_filter: Optional[str] = None,
         pagination: Optional[PaginationParams] = None,
+        sort: str = "created_desc",
     ) -> Tuple[List[TourBooking], int]:
         if pagination is None:
             pagination = PaginationParams(page=1, limit=20)
@@ -178,7 +187,12 @@ class TourService:
         total_res = await db.execute(count_stmt)
         total = total_res.scalar_one()
 
-        stmt = stmt.order_by(TourBooking.created_at.desc()).offset(pagination.offset).limit(pagination.limit)
+        orders = {
+            "created_desc": (TourBooking.created_at.desc(),),
+            "upcoming": (TourBooking.preferred_date.asc(), TourBooking.preferred_time.asc()),
+            "date_desc": (TourBooking.preferred_date.desc(), TourBooking.preferred_time.desc()),
+        }
+        stmt = stmt.order_by(*orders.get(sort, orders["created_desc"])).offset(pagination.offset).limit(pagination.limit)
         res = await db.execute(stmt)
         return list(res.scalars().all()), total
 

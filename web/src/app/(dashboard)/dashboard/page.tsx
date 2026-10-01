@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { RoleGuideBanner } from '@/components/dashboard/role-guide-banner';
 import { SuspensionBanner } from './suspension-banner';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 
 export const revalidate = 0;
 
@@ -38,102 +39,36 @@ export default async function DashboardPage() {
     redirect('/auth/login');
   }
 
-  let { data: agent, error: agentError } = await supabase
-    .from('agents')
-    .select('*')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (agentError) {
-    console.error('Error finding agent:', agentError);
-  }
-
-  if (!agent) {
-    const displayName =
-      user.user_metadata?.full_name || user.user_metadata?.name || null;
-    const agentName = displayName || 'New Agent';
-    const { data: newAgent, error: createError } = await supabase
-      .from('agents')
-      .insert({
-        user_id: user.id,
-        name: agentName,
-        phone: '+254114845619',
-        whatsapp: '+254114845619',
-        commission_balance: 0,
-        status: 'active',
-      })
-      .select()
-      .single();
-
-    if (createError) {
-      console.error('Failed to auto-create agent profile:', createError);
-      return (
-        <div className="bg-white p-8 rounded-2xl border border-rose-100 text-center text-rose-600 max-w-md mx-auto mt-12">
-          <h2 className="font-bold text-xl mb-2">Agent Access Error</h2>
-          <p className="text-sm text-slate-600">
-            Could not find or create an agent profile associated with this
-            account. Please contact administrator Paul.
-          </p>
-        </div>
-      );
+  // Admins/managers get an agent record on first visit; everyone else is sent to apply.
+  let summary = null;
+  try {
+    if (!(await agentDashboardApi.getSelf())) {
+      await agentDashboardApi.ensure();
     }
-    agent = newAgent;
+    summary = await agentDashboardApi.summary();
+  } catch (error) {
+    console.error('Failed to load the agent dashboard:', error);
   }
 
-  const { data: agentPayments } = await supabase
-    .from('agents')
-    .select('pochi_la_biashara_number, expected_name')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  const hasPochi =
-    agentPayments?.pochi_la_biashara_number &&
-    agentPayments.pochi_la_biashara_number.trim() !== '' &&
-    agentPayments?.expected_name &&
-    agentPayments.expected_name.trim() !== '';
-
-  const { data: listings } = await supabase
-    .from('listings')
-    .select('id, is_active')
-    .eq('agent_id', agent.id);
-
-  const activeListingsCount =
-    listings?.filter((l: any) => l.is_active).length || 0;
-
-  const { count: leadsThisMonthCount } = await supabase
-    .from('leads')
-    .select('*', { count: 'exact', head: true })
-    .eq('agent_id', agent.id)
-    .gte(
-      'clicked_at',
-      new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        1,
-      ).toISOString(),
+  if (!summary) {
+    return (
+      <div className="bg-white p-8 rounded-2xl border border-rose-100 text-center text-rose-600 max-w-md mx-auto mt-12">
+        <h2 className="font-bold text-xl mb-2">Agent Access Error</h2>
+        <p className="text-sm text-slate-600">
+          Could not find or create an agent profile associated with this
+          account. Please contact administrator Paul.
+        </p>
+      </div>
     );
+  }
 
-  const { count: totalLeadsCount } = await supabase
-    .from('leads')
-    .select('*', { count: 'exact', head: true })
-    .eq('agent_id', agent.id);
-
-  const { count: pendingToursCount } = await supabase
-    .from('tour_bookings')
-    .select('*', { count: 'exact', head: true })
-    .eq('agent_id', agent.id)
-    .in('status', ['pending_payment', 'confirmed', 'contacted']);
-
-  const { data: paidTours } = await supabase
-    .from('tour_bookings')
-    .select('amount')
-    .eq('agent_id', agent.id)
-    .in('status', ['paid', 'completed']);
-
-  const tourEarnings = (paidTours || []).reduce(
-    (acc: number, t: any) => acc + (t.amount || 0),
-    0,
-  );
+  const agent = summary.agent;
+  const hasPochi = summary.has_payment_details;
+  const activeListingsCount = summary.active_listing_count;
+  const leadsThisMonthCount = summary.leads_this_month;
+  const totalLeadsCount = summary.total_leads;
+  const pendingToursCount = summary.pending_tours;
+  const tourEarnings = summary.tour_earnings;
 
   const isSuspended = agent.status === 'suspended';
   const firstName = (agent.name || 'Agent').split(' ')[0];

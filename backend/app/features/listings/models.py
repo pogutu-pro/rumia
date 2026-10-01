@@ -55,6 +55,7 @@ class Listing(Base):
     rating: Mapped[float] = mapped_column(Numeric(3, 2), server_default="0.0")
     views: Mapped[int] = mapped_column(Integer, server_default="0")
     verified: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
+    commission_locked_by_admin: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
     bathroom_type: Mapped[Optional[str]] = mapped_column(String, server_default="Shared")
     distance_to_campus: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     distance_category: Mapped[Optional[str]] = mapped_column(String, nullable=True)

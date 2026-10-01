@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,20 +13,13 @@ export default async function BnbDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id, status')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent || agent.status === 'suspended') redirect('/dashboard');
 
-  const { data: listings } = await supabase
-    .from('listings')
-    .select('id, title, price, location, area, is_active, listing_images(r2_url)')
-    .eq('agent_id', agent.id)
-    .eq('property_type', 'short_stay')
-    .order('created_at', { ascending: false });
+  const apiListings = await agentDashboardApi.listings('short_stay').catch(() => []);
+  // The list reads the legacy `listing_images` key.
+  const listings = apiListings.map((l) => ({ ...l, listing_images: l.images }));
 
   return (
     <div className="space-y-6">

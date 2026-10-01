@@ -1,7 +1,6 @@
 # Legacy files with direct DB access. Shrink only. See docs/PLAN_FRONTEND_DB_DECOUPLING.md
 web/src/app/actions/admin.ts
 web/src/app/actions/campus-settings.ts
-web/src/app/actions/listings.ts
 web/src/app/actions/manager.ts
 web/src/app/actions/staff.ts
 web/src/app/actions/zones.ts
@@ -26,19 +25,6 @@ web/src/app/(admin)/admin/transfers/page.tsx
 web/src/app/(admin)/admin/users/page.tsx
 web/src/app/(admin)/layout.tsx
 web/src/app/api/campuses/create/route.ts
-web/src/app/(dashboard)/dashboard/analytics/page.tsx
-web/src/app/(dashboard)/dashboard/bnb/edit/[id]/page.tsx
-web/src/app/(dashboard)/dashboard/bnb/new/page.tsx
-web/src/app/(dashboard)/dashboard/bnb/page.tsx
-web/src/app/(dashboard)/dashboard/earnings/page.tsx
-web/src/app/(dashboard)/dashboard/edit/[id]/page.tsx
-web/src/app/(dashboard)/dashboard/leads/page.tsx
-web/src/app/(dashboard)/dashboard/listings/page.tsx
-web/src/app/(dashboard)/dashboard/new/page.tsx
-web/src/app/(dashboard)/dashboard/page.tsx
-web/src/app/(dashboard)/dashboard/profile/page.tsx
-web/src/app/(dashboard)/dashboard/tours/page.tsx
-web/src/app/(dashboard)/layout.tsx
 web/src/app/(manager)/layout.tsx
 web/src/app/(manager)/manager/announcements/page.tsx
 web/src/app/(manager)/manager/listings/edit/[id]/page.tsx

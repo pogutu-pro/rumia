@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, Wallet, CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -12,27 +13,15 @@ export default async function AgentEarningsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: agent } = await supabase
-    .from('agents')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const agent = await agentDashboardApi.getSelf().catch(() => null);
 
   if (!agent) redirect('/dashboard');
 
-  const { data: toursRaw } = await (supabase as any)
-    .from('tour_bookings')
-    .select(`
-      id, amount, status, preferred_date, preferred_time,
-      listings(id, title, area)
-    `)
-    .eq('agent_id', agent.id)
-    .order('preferred_date', { ascending: false });
-
-  const tours = (toursRaw ?? []).map((b: any) => ({
-    ...b,
-    listings: b.listings ?? null,
-  }));
+  const { items } = await agentDashboardApi
+    .tours('date_desc')
+    .catch(() => ({ items: [] }));
+  // The earnings table reads the legacy `listings` key.
+  const tours = items.map((b) => ({ ...b, listings: b.listing ?? null }));
 
   const paidTours = tours.filter(
     (t: any) => t.status === 'paid' || t.status === 'completed'

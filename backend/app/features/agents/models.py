@@ -41,6 +41,7 @@ class AgentProfile(Base):
     expected_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     support_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     is_owner: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    suspension_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
