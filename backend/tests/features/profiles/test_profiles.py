@@ -106,3 +106,89 @@ async def test_check_email_reports_existence(client: AsyncClient):
 async def test_check_email_rejects_malformed_address(client: AsyncClient):
     response = await client.get("/api/v1/profiles/check-email?email=not-an-email")
     assert response.status_code == 422
+
+
+# ── Post-login sync (replaces the OAuth callback's direct DB writes) ─────────────
+
+from types import SimpleNamespace  # noqa: E402
+from unittest.mock import AsyncMock, MagicMock  # noqa: E402
+
+from app.features.profiles.service import ProfileService  # noqa: E402
+
+
+def _profile(**kw):
+    base = dict(id="u1", role="student", phone=None, home_campus_confirmed_at=None, home_campus_id=None,
+                campus_id="c1", email=None, school_verified=False, school_email=None, full_name=None,
+                avatar_url=None, updated_at=None)
+    base.update(kw)
+    return SimpleNamespace(**base)
+
+
+def _sync_db(*rows):
+    db = MagicMock()
+    db.flush = AsyncMock()
+    results = []
+    for row in rows:
+        res = MagicMock()
+        res.fetchall.return_value = row
+        results.append(res)
+    db.execute = AsyncMock(side_effect=results)
+    return db
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("email,verified", [("Student@DKUT.ac.ke", True), ("someone@gmail.com", False)])
+async def test_school_verification_comes_from_the_token_email(email, verified):
+    from unittest.mock import patch
+
+    prof = _profile()
+    user = SimpleNamespace(id="u1", email=email)
+    with patch.object(ProfileService, "get_or_create_profile", new=AsyncMock(return_value=prof)):
+        out, linked = await ProfileService.sync_login(_sync_db(), user, "Real Name", "http://a/p.png")
+    assert out.school_verified is verified
+    assert out.school_email == (email.lower() if verified else None)
+    assert out.email == email.lower() and out.full_name == "Real Name" and out.avatar_url == "http://a/p.png"
+    assert out.home_campus_id == "c1" and linked == 0   # new users start with the default campus
+
+
+@pytest.mark.asyncio
+async def test_guest_tour_bookings_are_linked_by_trailing_phone_digits():
+    from unittest.mock import patch
+
+    prof = _profile(phone="+254 712 345 678")
+    db = _sync_db([("b1",), ("b2",)], [])
+    with patch.object(ProfileService, "get_or_create_profile", new=AsyncMock(return_value=prof)):
+        _, linked = await ProfileService.sync_login(db, SimpleNamespace(id="u1", email="a@b.c"), None, None)
+    assert linked == 2
+    select_params = db.execute.await_args_list[0].args[1]
+    assert select_params == {"digits": "712345678", "n": 9}
+
+
+@pytest.mark.asyncio
+async def test_sync_login_endpoint_reports_profile_completion(client: AsyncClient):
+    from unittest.mock import patch
+
+    user = AuthenticatedUser(id="u1", email="a@b.c", role="student")
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        with patch.object(ProfileService, "sync_login", new=AsyncMock(return_value=(_profile(), 0))):
+            response = await client.post("/api/v1/profiles/me/sync-login", json={"full_name": "A"})
+        assert response.status_code == 200
+        assert response.json() == {"role": "student", "needs_profile_completion": True, "linked_bookings": 0}
+
+        done = _profile(phone="0712345678", home_campus_confirmed_at="2026-01-01T00:00:00Z")
+        with patch.object(ProfileService, "sync_login", new=AsyncMock(return_value=(done, 1))):
+            response = await client.post("/api/v1/profiles/me/sync-login", json={})
+        assert response.json()["needs_profile_completion"] is False
+
+        staff = _profile(role="agent")  # staff are exempt from completion
+        with patch.object(ProfileService, "sync_login", new=AsyncMock(return_value=(staff, 0))):
+            response = await client.post("/api/v1/profiles/me/sync-login", json={})
+        assert response.json()["needs_profile_completion"] is False
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_sync_login_requires_authentication(client: AsyncClient):
+    assert (await client.post("/api/v1/profiles/me/sync-login", json={})).status_code == 401

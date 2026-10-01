@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProfileRead(BaseModel):
@@ -67,3 +67,17 @@ class WishlistBatchCheckResponse(BaseModel):
 
 class EmailExistsResponse(BaseModel):
     exists: bool
+
+
+class LoginSyncRequest(BaseModel):
+    """Display details from the OAuth provider (Google). Identity and email come from the JWT."""
+
+    full_name: Optional[str] = Field(None, max_length=200)
+    avatar_url: Optional[str] = Field(None, max_length=1000)
+
+
+class LoginSyncResponse(BaseModel):
+    role: str
+    # Students without a phone or a confirmed home campus must finish their profile first.
+    needs_profile_completion: bool
+    linked_bookings: int = 0

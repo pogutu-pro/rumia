@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
-from typing import Iterable, List, Set, Tuple
-from sqlalchemy import func, select
+from typing import Iterable, List, Optional, Set, Tuple
+import re
+
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -14,7 +16,65 @@ from app.features.profiles.models import UserProfile, Wishlist
 from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, WishlistActionResponse
 
 
+STAFF_ROLES = ("agent", "admin", "manager", "super_admin")
+SCHOOL_EMAIL_DOMAIN = "@dkut.ac.ke"
+
+
 class ProfileService:
+    @staticmethod
+    async def sync_login(
+        db: AsyncSession,
+        user: AuthenticatedUser,
+        full_name: Optional[str],
+        avatar_url: Optional[str],
+    ) -> Tuple[UserProfile, int]:
+        """Post-login bookkeeping (replaces the OAuth callback's direct DB writes).
+
+        - makes sure a profile row exists (new users get the default campus as home campus);
+        - re-derives school verification from the *verified token email* on every login;
+        - mirrors the provider's display name/avatar when given;
+        - links guest tour bookings whose phone matches the profile's phone.
+        Returns the profile and the number of bookings linked.
+        """
+        profile = await ProfileService.get_or_create_profile(db, user)
+        if profile.home_campus_id is None and profile.campus_id is not None and profile.home_campus_confirmed_at is None:
+            profile.home_campus_id = profile.campus_id
+
+        email = user.email.strip().lower() if user.email else None
+        is_school = bool(email) and email.endswith(SCHOOL_EMAIL_DOMAIN)
+        profile.email = email
+        profile.school_verified = is_school
+        profile.school_email = email if is_school else None
+        if full_name:
+            profile.full_name = full_name
+        if avatar_url:
+            profile.avatar_url = avatar_url
+        profile.updated_at = datetime.now(timezone.utc)
+
+        linked = 0
+        # Compare the last 9 digits so 0712…, 712… and +254712… all match the same Kenyan number.
+        digits = re.sub(r"\D", "", profile.phone or "")[-9:]
+        if len(digits) >= 7:
+            ids = await db.execute(
+                text(
+                    """
+                    SELECT id FROM public.tour_bookings
+                    WHERE linked_user_id IS NULL AND right(regexp_replace(phone, '\\D', '', 'g'), :n) = :digits
+                    ORDER BY created_at DESC LIMIT 10
+                    """
+                ),
+                {"digits": digits, "n": len(digits)},
+            )
+            booking_ids = [str(row[0]) for row in ids.fetchall()]
+            if booking_ids:
+                await db.execute(
+                    text("UPDATE public.tour_bookings SET linked_user_id = CAST(:u AS uuid) WHERE id = ANY(CAST(:ids AS uuid[]))"),
+                    {"u": user.id, "ids": booking_ids},
+                )
+                linked = len(booking_ids)
+        await db.flush()
+        return profile, linked
+
     @staticmethod
     async def email_exists(db: AsyncSession, email: str) -> bool:
         res = await db.execute(

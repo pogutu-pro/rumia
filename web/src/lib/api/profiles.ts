@@ -1,5 +1,6 @@
 import { api } from './client';
 import { serverApi } from './server';
+import { getApiUrl } from './config';
 
 export interface UserProfile {
   id: string;
@@ -30,7 +31,33 @@ export interface ProfileUpdate {
   campus_input?: string;
 }
 
+export interface LoginSyncResult {
+  role: string;
+  needs_profile_completion: boolean;
+  linked_bookings: number;
+}
+
 export const profilesApi = {
+  /**
+   * Server-only, for the OAuth callback: the session cookie is not readable yet (it was just
+   * set on the redirect response), so the fresh access token is passed explicitly.
+   */
+  syncLoginWithToken: async (
+    accessToken: string,
+    details: { full_name?: string | null; avatar_url?: string | null },
+  ): Promise<LoginSyncResult> => {
+    const response = await fetch(getApiUrl('/profiles/me/sync-login'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify(details),
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      throw new Error(`sync-login failed: ${response.status}`);
+    }
+    return response.json();
+  },
+
   getMe: () => {
     return api.get<UserProfile>('/profiles/me');
   },

@@ -26,6 +26,7 @@ class UserProfile(Base):
     # confirmed). Expose a derived boolean for the API response/schema.
     home_campus_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     # Derived from the Google OAuth email on each login (see migration 20260818000000).
+    school_email: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     school_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false", default=False)
 
     @hybrid_property

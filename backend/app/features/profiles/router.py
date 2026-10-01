@@ -8,6 +8,8 @@ from app.core.security import AuthenticatedUser, get_current_user
 from app.features.listings.schemas import ListingRead
 from app.features.profiles.schemas import (
     EmailExistsResponse,
+    LoginSyncRequest,
+    LoginSyncResponse,
     ProfileRead,
     ProfileUpdate,
     SavedHostelActionResponse,
@@ -16,7 +18,7 @@ from app.features.profiles.schemas import (
     WishlistBatchCheckRequest,
     WishlistBatchCheckResponse,
 )
-from app.features.profiles.service import ProfileService
+from app.features.profiles.service import STAFF_ROLES, ProfileService
 
 router = APIRouter(prefix="/profiles", tags=["Profiles"])
 
@@ -55,6 +57,33 @@ async def get_my_profile(
     result = ProfileRead.model_validate(profile)
     result.agent_id = await ProfileService.get_agent_id(db, user.id)
     return result
+
+
+@router.post(
+    "/me/sync-login",
+    response_model=LoginSyncResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Post-Login Profile Sync",
+    description=(
+        "Call once after OAuth sign-in: ensures the profile exists, re-derives school "
+        "verification from the token's email, mirrors the provider's name/avatar, links guest "
+        "tour bookings with the user's phone, and reports whether the profile still needs "
+        "completing. Authenticated."
+    ),
+)
+async def sync_login(
+    data: LoginSyncRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> LoginSyncResponse:
+    profile, linked = await ProfileService.sync_login(db, user, data.full_name, data.avatar_url)
+    is_staff = (profile.role or "") in STAFF_ROLES
+    incomplete = not (profile.phone or "").strip() or profile.home_campus_confirmed_at is None
+    return LoginSyncResponse(
+        role=profile.role or "student",
+        needs_profile_completion=(not is_staff) and incomplete,
+        linked_bookings=linked,
+    )
 
 
 @router.patch(

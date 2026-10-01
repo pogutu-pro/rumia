@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { profilesApi } from '@/lib/api/profiles';
 import { getPostHogClient } from '@/lib/posthog-server';
 
 /**
@@ -170,166 +170,30 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Sync Google profile metadata into the profiles table
+  // Post-login bookkeeping (profile row, school verification from the verified token email,
+  // provider name/avatar, guest tour-booking linking) lives in FastAPI. The session cookie was
+  // only just set on the response, so pass the fresh access token explicitly.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const meta: Record<string, any> = session?.user?.user_metadata ?? {};
 
-  // Ensure a profiles row exists for this user. This prevents client pages
-  // from throwing when they expect a profile to exist (profile completion
-  // modal flow relies on a profiles row). Use service-role `supabaseAdmin`
-  // to upsert the minimal identifying fields.
-  //
-  // campus_id is NOT NULL on profiles. The on_auth_user_created_profile
-  // trigger sets it to the DeKUT campus UUID, but we include it here as a
-  // safety net so the upsert never fails with a NOT NULL violation if the
-  // trigger is absent or fires after this code runs.
-  if (user?.id) {
+  if (session?.access_token) {
     try {
-      // Check whether a profile already exists before deciding what to upsert.
-      // For existing users we only update email; for new users we also stamp
-      // campus_id / home_campus_id so the NOT NULL constraint is satisfied
-      // even if the trigger hasn't fired yet.
-      const { data: existingProfile } = await supabaseAdmin
-        .from('profiles')
-        .select('id, campus_id')
-        .eq('id', user.id)
-        .maybeSingle();
+      const sync = await profilesApi.syncLoginWithToken(session.access_token, {
+        full_name: meta.full_name || meta.name || meta.given_name || null,
+        avatar_url: meta.avatar_url || meta.picture || null,
+      });
 
-      if (existingProfile) {
-        // Row exists — sync email and re-evaluate school verification on
-        // every login so account changes (e.g. new Google account) are
-        // picked up immediately.
-        const normalizedEmail = user.email ? String(user.email).toLowerCase() : null;
-        const isDkut = !!normalizedEmail && normalizedEmail.endsWith('@dkut.ac.ke');
-        await supabaseAdmin
-          .from('profiles')
-          .update({
-            email: normalizedEmail,
-            school_verified: isDkut,
-            school_email: isDkut ? normalizedEmail : null,
-          })
-          .eq('id', user.id);
-      } else {
-        // New user — fetch campus so we can satisfy the NOT NULL constraint.
-        const { data: defaultCampus } = await supabaseAdmin
-          .from('campuses')
-          .select('id')
-          .eq('slug', 'dekut')
-          .maybeSingle();
-
-        if (defaultCampus?.id) {
-          const normalizedEmail = user.email ? String(user.email).toLowerCase() : null;
-          const isDkut = !!normalizedEmail && normalizedEmail.endsWith('@dkut.ac.ke');
-          const { error: upsertError } = await supabaseAdmin
-            .from('profiles')
-            .upsert(
-              {
-                id: user.id,
-                email: normalizedEmail,
-                campus_id: defaultCampus.id,
-                home_campus_id: defaultCampus.id,
-                school_verified: isDkut,
-                school_email: isDkut ? normalizedEmail : null,
-              },
-              { onConflict: 'id', ignoreDuplicates: true },
-            );
-          if (upsertError) {
-            console.error('[auth/callback] profile upsert error', {
-              message: String(upsertError.message).slice(0, 200),
-              code: String((upsertError as any).code ?? '').slice(0, 50),
-              userId: user.id,
-            });
-          }
-        } else {
-          // Campus lookup failed — the on_auth_user_created_profile trigger
-          // should have already created the row. Log and skip; do not attempt
-          // an insert without campus_id as it will violate NOT NULL.
-          console.warn('[auth/callback] campus lookup returned null, skipping profile insert for', user.id);
-        }
-      }
-    } catch (e) {
-      console.error('[auth/callback] profile upsert exception', e);
-    }
-  }
-
-  if (user?.user_metadata) {
-    try {
-      // Different OAuth providers may populate different metadata fields.
-      const meta: any = user.user_metadata;
-      const full_name = meta.full_name || meta.name || meta.given_name || null;
-      const avatar_url = meta.avatar_url || meta.picture || null;
-
-      if (full_name || avatar_url) {
-        const updateData: Record<string, unknown> = {};
-        if (full_name) updateData.full_name = full_name;
-        if (avatar_url) updateData.avatar_url = avatar_url;
-
-        // Use update (not upsert) — the profile row was already ensured above.
-        const { error: profileError } = await supabaseAdmin
-          .from('profiles')
-          .update(updateData)
-          .eq('id', user.id);
-
-        if (profileError) {
-          console.error('[auth/callback] profile metadata sync error', {
-            message: String(profileError.message).slice(0, 200),
-            userId: user.id,
-          });
-        }
-      }
-    } catch (metaError) {
-      // Metadata sync is best-effort and must never block the login redirect.
-      console.error('[auth/callback] profile metadata sync exception', metaError);
-    }
-  }
-
-  // Link any unlinked tour bookings to this user by matching phone number.
-  // Also route students with an incomplete profile to /account so the
-  // completion flow reliably re-prompts until they add a phone and confirm
-  // their home university. Staff (agent/admin/manager) are exempt.
-  if (user?.id) {
-    try {
-      const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('phone, role, home_campus_confirmed_at')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      const isStaff =
-        !!profile?.role &&
-        ['agent', 'admin', 'manager', 'super_admin'].includes(profile.role);
-
-      if (
-        !isStaff &&
-        (!profile?.phone?.trim() || !profile?.home_campus_confirmed_at)
-      ) {
+      // Students with an incomplete profile are routed to /account so the completion flow
+      // re-prompts until they add a phone and confirm their home university.
+      if (sync.needs_profile_completion) {
         response.headers.set('location', new URL('/account', origin).toString());
         return response;
       }
-
-      if (profile?.phone) {
-        const normalizedPhone = profile.phone.replace(/\D/g, '');
-
-        // Find tour bookings with matching phone that aren't linked yet
-        const { data: unlinkedBookings } = await supabaseAdmin
-          .from('tour_bookings')
-          .select('id')
-          .is('linked_user_id', null)
-          .eq('phone', normalizedPhone)
-          .limit(10);
-
-        if (unlinkedBookings && unlinkedBookings.length > 0) {
-          const bookingIds = unlinkedBookings.map((b: { id: string }) => b.id);
-          await supabaseAdmin
-            .from('tour_bookings')
-            .update({ linked_user_id: user.id })
-            .in('id', bookingIds);
-        }
-      }
-    } catch (linkError) {
-      // Non-critical: don't fail the auth flow if linking fails
-      console.error('[auth/callback] tour booking link error', linkError);
+    } catch (syncError) {
+      // Never block sign-in on bookkeeping failures.
+      console.error('[auth/callback] post-login sync failed', syncError);
     }
   }
 

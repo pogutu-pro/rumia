@@ -1,32 +1,8 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase/admin';
 import { apiServer } from '@/lib/api/server';
 import type { ManagerActionResult } from './manager';
 import type { AppNotification } from '@/types';
-
-/**
- * Creates an in-app notification row for a user. Server-side (service role) so
- * it bypasses the insert RLS policy (which is intentionally service_role only).
- * Kept for legacy business flows (e.g. hostel requests) that write directly;
- * wishlist/listing events are created by the backend notification worker.
- */
-export async function createAppNotification(params: {
-  userId: string;
-  title: string;
-  body: string;
-  url?: string;
-}) {
-  const { error } = await supabaseAdmin.from('app_notifications').insert({
-    user_id: params.userId,
-    title: params.title,
-    body: params.body,
-    url: params.url ?? null,
-  });
-  if (error) {
-    console.error('Failed to insert in-app notification:', error.message);
-  }
-}
 
 /**
  * Returns the signed-in user's notifications (newest first, unread flagged).
