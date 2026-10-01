@@ -1,10 +1,14 @@
-from sqlalchemy import select
+import asyncio
+from pathlib import PurePosixPath
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundException
 from app.core.storage.r2 import R2StorageService
 from app.features.images.models import ImageUpload
 from app.features.images.schemas import UploadUrlRequest, UploadUrlResponse
+from app.features.listings.models import ListingImage
 
 
 class ImageService:
@@ -35,3 +39,72 @@ class ImageService:
         if not img:
             raise NotFoundException(f"Image upload record '{image_upload_id}' not found")
         return img
+
+    @staticmethod
+    async def cleanup_listing_uploads(db: AsyncSession, listing_id: str) -> None:
+        """Delete upload metadata and R2 variants exclusively referenced by a listing."""
+        image_result = await db.execute(
+            select(ListingImage.image_upload_id).where(
+                ListingImage.listing_id == listing_id,
+                ListingImage.image_upload_id.is_not(None),
+            )
+        )
+        image_upload_ids = {row for row in image_result.scalars().all() if row}
+
+        for image_upload_id in sorted(image_upload_ids):
+            upload_result = await db.execute(
+                select(ImageUpload)
+                .where(ImageUpload.id == image_upload_id)
+                .with_for_update()
+            )
+            image_upload = upload_result.scalar_one_or_none()
+            if image_upload is None:
+                continue
+
+            other_references = await db.execute(
+                select(func.count())
+                .select_from(ListingImage)
+                .where(
+                    ListingImage.image_upload_id == image_upload_id,
+                    ListingImage.listing_id != listing_id,
+                )
+            )
+            if other_references.scalar_one() > 0:
+                continue
+
+            keys = ImageService._listing_image_object_keys(image_upload)
+            await asyncio.to_thread(R2StorageService.delete_objects, keys)
+            await db.delete(image_upload)
+
+        await db.flush()
+
+    @staticmethod
+    def _listing_image_object_keys(image_upload: ImageUpload) -> list[str]:
+        variant_keys = [
+            image_upload.thumbnail_key,
+            image_upload.small_key,
+            image_upload.medium_key,
+            image_upload.large_key,
+        ]
+        base_paths = {PurePosixPath(key).parent.as_posix() for key in variant_keys}
+        expected_names = {"thumb.webp", "card.webp", "gallery.webp", "large.webp"}
+        if (
+            len(base_paths) != 1
+            or {PurePosixPath(key).name for key in variant_keys} != expected_names
+        ):
+            raise ValueError("Image upload metadata does not match the listing image pipeline")
+
+        base_path = base_paths.pop()
+        if base_path in {"", "."}:
+            raise ValueError("Image upload metadata is missing its R2 base path")
+
+        extension = {
+            "image/jpeg": "jpg",
+            "image/webp": "webp",
+            "image/avif": "avif",
+        }.get(image_upload.format, "png")
+        return [
+            *variant_keys,
+            f"{base_path}/original.{extension}",
+            f"{base_path}/blur.webp",
+        ]

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class BedConfig(BaseModel):
@@ -96,23 +96,8 @@ class BnbListingCreate(BaseModel):
     bnb: _BnbDetailsBase = Field(default_factory=_BnbDetailsBase)
 
 
-class BnbListingUpdate(BaseModel):
-    """Partial update for a BnB listing."""
-    title: Optional[str] = Field(None, min_length=3, max_length=200)
-    description: Optional[str] = Field(None, min_length=10)
-    price: Optional[float] = Field(None, ge=0)
-    location: Optional[str] = None
-    county: Optional[str] = None
-    area: Optional[str] = None
-    specific_location: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    amenities: Optional[List[str]] = None
-    is_active: Optional[bool] = None
-    images: Optional[List[Dict[str, Any]]] = None
-    agent_whatsapp: Optional[str] = None
-
-    # BnB-specific fields (all optional for partial update)
+class BnbDetailsUpdate(BaseModel):
+    """Partial nested update for BnB-only listing details."""
     listing_type: Optional[str] = Field(None, pattern="^(entire_place|private_room|shared_space)$")
     max_guests: Optional[int] = Field(None, ge=1, le=50)
     bedrooms: Optional[int] = Field(None, ge=0, le=20)
@@ -134,6 +119,39 @@ class BnbListingUpdate(BaseModel):
     guest_suitability: Optional[List[str]] = None
     nearby_landmark: Optional[str] = Field(None, max_length=200)
 
+    @model_validator(mode="after")
+    def reject_null_for_required_columns(self):
+        required_fields = {
+            "listing_type",
+            "bed_config",
+            "price_unit",
+            "min_stay_nights",
+            "house_rules",
+            "guest_suitability",
+        }
+        for field in required_fields.intersection(self.model_fields_set):
+            if getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null")
+        return self
+
+
+class BnbListingUpdate(BaseModel):
+    """Partial update for a BnB listing, with details nested under `bnb`."""
+    title: Optional[str] = Field(None, min_length=3, max_length=200)
+    description: Optional[str] = Field(None, min_length=10)
+    price: Optional[float] = Field(None, ge=0)
+    location: Optional[str] = None
+    county: Optional[str] = None
+    area: Optional[str] = None
+    specific_location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    amenities: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+    images: Optional[List[Dict[str, Any]]] = None
+    agent_whatsapp: Optional[str] = None
+    bnb: Optional[BnbDetailsUpdate] = None
+
 
 class BnbListingRead(BaseModel):
     """Combined listing + bnb_details response."""
@@ -153,6 +171,7 @@ class BnbListingRead(BaseModel):
     amenities: Optional[List[str]] = None
     is_active: bool
     is_saved: bool = False
+    verified: Optional[bool] = None
     rating: float = 0.0
     views: int = 0
     agent_id: str

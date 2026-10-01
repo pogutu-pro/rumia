@@ -3,10 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import { bnbApi, type BnbListingPayload, type BnbListingUpdatePayload } from '@/lib/api/bnb';
 
-function revalidateBnbSurfaces() {
+function revalidateBnbSurfaces(listingId?: string) {
   revalidatePath('/');
   revalidatePath('/dashboard/bnb');
   revalidatePath('/hostels');
+  revalidatePath('/bnb');
+  if (listingId) {
+    revalidatePath(`/bnb/${listingId}`);
+  }
 }
 
 export async function createBnbListingAction(
@@ -14,7 +18,7 @@ export async function createBnbListingAction(
 ): Promise<{ success: boolean; listingId?: string; error?: string }> {
   try {
     const listing = await bnbApi.createServer(payload);
-    revalidateBnbSurfaces();
+    revalidateBnbSurfaces(listing.id);
     return { success: true, listingId: listing.id };
   } catch (error: any) {
     console.error('createBnbListingAction error:', error);
@@ -28,7 +32,7 @@ export async function updateBnbListingAction(
 ): Promise<{ success: boolean; listingId?: string; error?: string }> {
   try {
     const listing = await bnbApi.updateServer(listingId, payload);
-    revalidateBnbSurfaces();
+    revalidateBnbSurfaces(listingId);
     if (listing.slug) {
       revalidatePath(`/listing/${listing.id}`);
     }
@@ -47,7 +51,7 @@ export async function toggleBnbActiveAction(
     // Reuse the existing listings toggle-active endpoint
     const { listingsApi } = await import('@/lib/api/listings');
     await listingsApi.toggleActiveServer(listingId, isActive);
-    revalidateBnbSurfaces();
+    revalidateBnbSurfaces(listingId);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to toggle status.' };
@@ -60,7 +64,7 @@ export async function deleteBnbListingAction(
   try {
     const { listingsApi } = await import('@/lib/api/listings');
     await listingsApi.deleteServer(listingId);
-    revalidateBnbSurfaces();
+    revalidateBnbSurfaces(listingId);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to delete BnB listing.' };

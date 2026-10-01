@@ -3,14 +3,14 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, union_all
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser, check_ownership
-from app.features.analytics.models import ListingView
+from app.features.analytics.models import ListingView, ListingViewDailyRollup
 from app.features.campuses.models import Campus
 from app.features.listings.models import Agent, Listing, ListingImage, ListingRoomType
 from app.features.listings.schemas import ListingCreate, ListingImageCreate, ListingRoomTypeCreate, ListingUpdate
@@ -26,6 +26,35 @@ def slugify(text: str) -> str:
 
 
 class ListingService:
+    @staticmethod
+    def _all_time_view_counts(listing_ids: Optional[List[str]] = None):
+        live_counts = select(
+            ListingView.listing_id.label("listing_id"),
+            func.count(ListingView.id).label("view_count"),
+        ).where(ListingView.listing_id.is_not(None))
+        rollup_counts = select(
+            ListingViewDailyRollup.listing_id.label("listing_id"),
+            func.sum(ListingViewDailyRollup.view_count).label("view_count"),
+        )
+
+        if listing_ids is not None:
+            live_counts = live_counts.where(ListingView.listing_id.in_(listing_ids))
+            rollup_counts = rollup_counts.where(ListingViewDailyRollup.listing_id.in_(listing_ids))
+
+        event_counts = union_all(
+            live_counts.group_by(ListingView.listing_id),
+            rollup_counts.group_by(ListingViewDailyRollup.listing_id),
+        ).subquery()
+
+        return (
+            select(
+                event_counts.c.listing_id,
+                func.sum(event_counts.c.view_count).label("view_count"),
+            )
+            .group_by(event_counts.c.listing_id)
+            .subquery()
+        )
+
     @staticmethod
     async def get_listings_feed(
         db: AsyncSession,
@@ -87,13 +116,11 @@ class ListingService:
             stmt = stmt.join(target, onclause)
 
         if sort == "views":
-            view_sub = (
-                select(ListingView.listing_id, func.count(ListingView.id).label("view_count"))
-                .group_by(ListingView.listing_id)
-                .subquery()
-            )
+            view_sub = ListingService._all_time_view_counts()
+            view_count = func.coalesce(view_sub.c.view_count, 0)
+            stmt = stmt.add_columns(view_count.label("view_count"))
             stmt = stmt.outerjoin(view_sub, view_sub.c.listing_id == Listing.id).order_by(
-                func.coalesce(view_sub.c.view_count, 0).desc(),
+                view_count.desc(),
                 Listing.created_at.desc().nulls_last(),
             )
         elif sort == "newest":
@@ -106,19 +133,20 @@ class ListingService:
 
         stmt = stmt.offset(pagination.offset).limit(pagination.limit)
 
-        result = await db.execute(stmt)
-        listings = list(result.scalars().all())
-
         view_counts: dict = {}
-        if listings:
+        result = await db.execute(stmt)
+        if sort == "views":
+            rows = result.all()
+            listings = [row[0] for row in rows]
+            view_counts = {str(row[0].id): int(row[1]) for row in rows}
+        else:
+            listings = list(result.scalars().all())
+
+        if listings and sort != "views":
             ids = [str(item.id) for item in listings]
-            counts_result = await db.execute(
-                select(ListingView.listing_id, func.count(ListingView.id).label("view_count"))
-                .where(ListingView.listing_id.in_(ids))
-                .group_by(ListingView.listing_id)
-            )
+            counts_result = await db.execute(ListingService._all_time_view_counts(ids))
             for listing_id, count in counts_result.all():
-                view_counts[str(listing_id)] = count
+                view_counts[str(listing_id)] = int(count)
 
         return listings, total, view_counts
 
@@ -185,6 +213,7 @@ class ListingService:
             image_row = ListingImage(
                 id=str(uuid.uuid4()),
                 listing_id=listing_id,
+                image_upload_id=img_data.image_upload_id,
                 r2_url=img_data.r2_url,
                 display_order=img_data.display_order if img_data.display_order else idx,
                 category=img_data.category,
@@ -312,7 +341,7 @@ class ListingService:
             agent_id=agent.id,
             campus_id=data.campus_id or user.managed_campus_id,
             zone_id=data.zone_id,
-            is_active=True,
+            is_active=data.is_active,
             is_full=False,
             rating=0.0,
             views=0,
@@ -450,6 +479,11 @@ class ListingService:
 
         owner_user_id = listing.agent.user_id if listing.agent else None
         check_ownership(user, owner_user_id or listing.agent_id)
+
+        if listing.property_type == "short_stay":
+            from app.features.images.service import ImageService
+
+            await ImageService.cleanup_listing_uploads(db, listing.id)
 
         await db.delete(listing)
         await db.flush()

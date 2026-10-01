@@ -9,7 +9,7 @@ from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser, check_ownership
 from app.features.bnb.models import BnbDetails
-from app.features.bnb.schemas import BnbListingCreate, BnbListingUpdate
+from app.features.bnb.schemas import BnbDetailsUpdate, BnbListingCreate, BnbListingUpdate
 from app.features.listings.models import Listing, ListingImage
 from app.features.listings.schemas import ListingCreate, ListingImageCreate, ListingUpdate
 from app.features.listings.service import ListingService
@@ -40,6 +40,7 @@ class BnbService:
             images=[
                 ListingImageCreate(
                     r2_url=img.get("r2_url", img.get("url", "")),
+                    image_upload_id=img.get("image_upload_id") or img.get("imageUploadId"),
                     display_order=img.get("display_order", idx),
                     category=img.get("category"),
                     blur_data_url=img.get("blur_data_url") or img.get("blurDataUrl"),
@@ -84,6 +85,7 @@ class BnbService:
             listing_update_data["images"] = [
                 ListingImageCreate(
                     r2_url=img.get("r2_url", img.get("url", "")),
+                    image_upload_id=img.get("image_upload_id") or img.get("imageUploadId"),
                     display_order=img.get("display_order", idx),
                     category=img.get("category"),
                     blur_data_url=img.get("blur_data_url") or img.get("blurDataUrl"),
@@ -103,9 +105,42 @@ class BnbService:
                 db=db, listing_id=listing_id, user=user, data=listing_update
             )
 
-        bnb = await BnbService._upsert_bnb_details(db, listing_id, data)
+        bnb = await BnbService._upsert_bnb_details(
+            db,
+            listing_id,
+            data.bnb or BnbDetailsUpdate(),
+            partial=True,
+        )
         reloaded = await ListingService.get_listing_by_id_or_slug(db, listing_id)
         return reloaded or listing, bnb
+
+    @staticmethod
+    async def get_bnb_listing_for_edit(
+        db: AsyncSession,
+        listing_id: str,
+        user: AuthenticatedUser,
+    ) -> Tuple[Listing, Optional[BnbDetails]]:
+        """Load an active or inactive BnB for its owner or an admin."""
+        from app.features.listings.models import Agent
+
+        listing = await ListingService.get_listing_by_id_or_slug(db, listing_id)
+        if not listing:
+            raise NotFoundException(f"BnB listing '{listing_id}' not found")
+        if listing.property_type != "short_stay":
+            raise NotFoundException(f"Listing '{listing_id}' is not a BnB listing")
+
+        if not user.is_admin:
+            agent_result = await db.execute(
+                select(Agent).where(Agent.user_id == user.id)
+            )
+            agent = agent_result.scalar_one_or_none()
+            if not agent or str(agent.id) != str(listing.agent_id):
+                raise ForbiddenException("You do not own this resource")
+
+        details_result = await db.execute(
+            select(BnbDetails).where(BnbDetails.listing_id == listing.id)
+        )
+        return listing, details_result.scalar_one_or_none()
 
     @staticmethod
     async def get_bnb_listing(
@@ -160,6 +195,8 @@ class BnbService:
         db: AsyncSession,
         listing_id: str,
         data: object,
+        *,
+        partial: bool = False,
     ) -> BnbDetails:
         result = await db.execute(
             select(BnbDetails).where(BnbDetails.listing_id == listing_id)
@@ -178,13 +215,19 @@ class BnbService:
             bnb = BnbDetails(listing_id=listing_id)
             db.add(bnb)
 
-        for field in bnb_fields:
-            val = getattr(data, field, None)
-            if val is None:
+        if hasattr(data, "model_dump"):
+            values = data.model_dump(exclude_unset=partial)
+        else:
+            values = {}
+
+        for field, val in values.items():
+            if field not in bnb_fields:
+                continue
+            if val is None and not partial:
                 continue
             # Pydantic models → dict for JSONB fields
             if hasattr(val, "model_dump"):
-                val = val.model_dump(exclude_none=True)
+                val = val.model_dump()
             elif isinstance(val, list) and val and hasattr(val[0], "model_dump"):
                 val = [item.model_dump() for item in val]
             setattr(bnb, field, val)

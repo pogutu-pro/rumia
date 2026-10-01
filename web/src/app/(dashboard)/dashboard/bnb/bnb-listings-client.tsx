@@ -103,7 +103,7 @@ export function BnbListingsClient({ initialListings }: { initialListings: BnbLis
                     <Edit className="h-3.5 w-3.5" /> Edit
                   </Link>
                   <div className="w-1 h-1 rounded-full bg-slate-300" />
-                  <Link href={`/listing/${item.id}`} target="_blank"
+                  <Link href={`/bnb/${item.id}`} target="_blank"
                     className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 text-sm font-semibold transition-colors">
                     <Eye className="h-3.5 w-3.5" /> View
                   </Link>

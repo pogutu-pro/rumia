@@ -76,6 +76,11 @@ export const listingsApi = {
     return fetchPublicApi<Listing>(`/listings/${id}`);
   },
 
+  /** Fetch a listing with the current user's credentials for owner workflows. */
+  getByIdAuthenticatedServer: (id: string) => {
+    return serverApi.get<Listing>(`/listings/${id}`);
+  },
+
   /**
    * Create a new listing (requires Auth) - Client side
    */

@@ -46,7 +46,7 @@ async def test_listings_feed_marks_saved_for_authenticated_user(client: AsyncCli
             patch(
                 "app.features.listings.service.ListingService.get_listings_feed",
                 new_callable=AsyncMock,
-                return_value=([listing], 1, {"listing-1": 12}),
+                return_value=([listing], 1, {"listing-1": 28}),
             ),
             patch(
                 "app.features.profiles.service.ProfileService.get_saved_listing_ids",
@@ -54,12 +54,12 @@ async def test_listings_feed_marks_saved_for_authenticated_user(client: AsyncCli
                 return_value={"listing-1"},
             ),
         ):
-            response = await client.get("/api/v1/listings?page=1&limit=10")
+            response = await client.get("/api/v1/listings?page=1&limit=10&sort=views")
 
         assert response.status_code == 200
         item = response.json()["items"][0]
         assert item["is_saved"] is True
-        assert item["views"] == 12
+        assert item["views"] == 28
     finally:
         app.dependency_overrides.pop(get_optional_current_user, None)
 
@@ -89,6 +89,107 @@ async def test_listing_detail_marks_saved_for_authenticated_user(client: AsyncCl
         assert response.json()["is_saved"] is True
     finally:
         app.dependency_overrides.pop(get_optional_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_public_listing_detail_returns_active_listing(client: AsyncClient):
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-active", slug="listing-active", is_active=True)
+    listing.agent.slug = None
+    with patch(
+        "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+        new_callable=AsyncMock,
+        return_value=listing,
+    ):
+        response = await client.get("/api/v1/listings/listing-active")
+
+    assert response.status_code == 200
+    assert response.json()["id"] == "listing-active"
+    assert response.json()["is_active"] is True
+
+
+@pytest.mark.asyncio
+async def test_public_listing_detail_hides_inactive_listing(client: AsyncClient):
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-paused", slug="listing-paused", is_active=False)
+    listing.agent.slug = None
+    with patch(
+        "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+        new_callable=AsyncMock,
+        return_value=listing,
+    ):
+        response = await client.get("/api/v1/listings/listing-paused")
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_listing_owner_can_read_own_inactive_listing():
+    from tests.conftest import _make_mock_listing
+    from app.features.listings.router import get_listing
+
+    listing = _make_mock_listing(id="listing-paused", slug="listing-paused", is_active=False)
+    listing.agent.slug = None
+    owner = _make_agent_user()
+    with (
+        patch(
+            "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+            new_callable=AsyncMock,
+            return_value=listing,
+        ),
+        patch(
+            "app.features.profiles.service.ProfileService.get_saved_listing_ids",
+            new_callable=AsyncMock,
+            return_value=set(),
+        ),
+    ):
+        response = await get_listing("listing-paused", user=owner, db=AsyncMock())
+
+    assert response.is_active is False
+
+
+@pytest.mark.asyncio
+async def test_admin_can_read_inactive_listing():
+    from tests.conftest import _make_mock_listing
+    from app.features.listings.router import get_listing
+
+    listing = _make_mock_listing(id="listing-paused", slug="listing-paused", is_active=False)
+    listing.agent.slug = None
+    admin = AuthenticatedUser(id="admin-id", email="admin@rumia.app", role="admin")
+    with (
+        patch(
+            "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+            new_callable=AsyncMock,
+            return_value=listing,
+        ),
+        patch(
+            "app.features.profiles.service.ProfileService.get_saved_listing_ids",
+            new_callable=AsyncMock,
+            return_value=set(),
+        ),
+    ):
+        response = await get_listing("listing-paused", user=admin, db=AsyncMock())
+
+    assert response.is_active is False
+
+
+@pytest.mark.asyncio
+async def test_different_user_cannot_read_inactive_listing():
+    from app.core.errors import NotFoundException
+    from app.features.listings.router import get_listing
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-paused", slug="listing-paused", is_active=False)
+    listing.agent.slug = None
+    with patch(
+        "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+        new_callable=AsyncMock,
+        return_value=listing,
+    ):
+        with pytest.raises(NotFoundException):
+            await get_listing("listing-paused", user=_make_student_user(), db=AsyncMock())
 
 
 @pytest.mark.asyncio
@@ -177,4 +278,3 @@ async def test_toggle_listing_full(client: AsyncClient):
         assert data["is_full"] is True
     finally:
         app.dependency_overrides.pop(get_current_user, None)
-

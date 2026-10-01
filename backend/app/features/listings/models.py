@@ -18,6 +18,7 @@ class Agent(Base):
     whatsapp: Mapped[str] = mapped_column(String, nullable=False)
     commission_balance: Mapped[float] = mapped_column(Numeric, server_default="0")
     status: Mapped[str] = mapped_column(String, nullable=False, server_default="active")
+    slug: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     campus_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("campuses.id"), nullable=True, index=True)
     user_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -51,6 +52,7 @@ class Listing(Base):
     sort_position: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     rating: Mapped[float] = mapped_column(Numeric(3, 2), server_default="0.0")
     views: Mapped[int] = mapped_column(Integer, server_default="0")
+    verified: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
     bathroom_type: Mapped[Optional[str]] = mapped_column(String, server_default="Shared")
     distance_to_campus: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     distance_category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -86,6 +88,11 @@ class ListingImage(Base):
 
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid())
     listing_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True)
+    image_upload_id: Mapped[Optional[str]] = mapped_column(
+        PG_UUID(as_uuid=False),
+        ForeignKey("image_uploads.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     r2_url: Mapped[str] = mapped_column(String, nullable=False)
     display_order: Mapped[int] = mapped_column(Integer, server_default="0")
     category: Mapped[Optional[str]] = mapped_column(String, nullable=True)

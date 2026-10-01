@@ -273,7 +273,7 @@ export async function toggleListingActiveAction(
   listingId: string,
 ): Promise<{ success: boolean; error?: string; isActive?: boolean }> {
   try {
-    const current = await listingsApi.getByIdServer(listingId);
+    const current = await listingsApi.getByIdAuthenticatedServer(listingId);
     const updated = await listingsApi.toggleActiveServer(listingId, !current.is_active);
 
     revalidatePath('/dashboard');
@@ -302,7 +302,7 @@ export async function toggleListingFullAction(
   listingId: string,
 ): Promise<{ success: boolean; error?: string; isFull?: boolean }> {
   try {
-    const current = await listingsApi.getByIdServer(listingId);
+    const current = await listingsApi.getByIdAuthenticatedServer(listingId);
     const updated = await listingsApi.toggleFullServer(listingId, !current.is_full);
 
     revalidatePath('/dashboard');
@@ -331,7 +331,7 @@ export async function toggleListingCommissionAction(
   listingId: string,
 ): Promise<{ success: boolean; error?: string; paysCommission?: boolean }> {
   try {
-    const current = await listingsApi.getByIdServer(listingId);
+    const current = await listingsApi.getByIdAuthenticatedServer(listingId);
     const updated = await listingsApi.toggleCommissionServer(listingId, !current.pays_commission);
 
     revalidatePath('/dashboard');

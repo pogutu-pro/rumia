@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from app.core.config import settings
 
 
@@ -64,3 +64,22 @@ class R2StorageService:
             "public_url": mock_public_url,
             "expires_in": str(expires_in),
         }
+
+    @staticmethod
+    def delete_objects(keys: List[str]) -> None:
+        """Delete known object keys; deleting a key that is already absent is safe."""
+        unique_keys = list(dict.fromkeys(key for key in keys if key))
+        if not unique_keys:
+            return
+
+        client = R2StorageService.get_s3_client()
+        if client is None:
+            raise RuntimeError("R2 storage is not configured; image cleanup cannot proceed")
+
+        response = client.delete_objects(
+            Bucket=settings.R2_BUCKET_NAME,
+            Delete={"Objects": [{"Key": key} for key in unique_keys], "Quiet": True},
+        )
+        errors = response.get("Errors", [])
+        if errors:
+            raise RuntimeError(f"R2 failed to delete {len(errors)} image object(s)")
