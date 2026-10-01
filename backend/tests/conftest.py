@@ -79,6 +79,7 @@ def _make_mock_listing(**kwargs):
     agent.phone = "+254700000000"
     agent.whatsapp = "+254700000000"
     agent.status = "active"
+    agent.slug = None
     agent.campus_id = None
     agent.user_id = kwargs.get("agent_user_id", "agent-id-1")
 
