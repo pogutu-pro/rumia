@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { toursApi } from '@/lib/api/tours';
 import type { TourStatus } from '@/types';
+import { toursServerApi } from '@/lib/api/tours.server';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -11,7 +11,7 @@ export async function updateTourBookingStatusAction(
   status: TourStatus,
 ): Promise<ActionResult> {
   try {
-    await toursApi.updateStatusServer(bookingId, status);
+    await toursServerApi.updateStatusServer(bookingId, status);
     revalidatePath('/dashboard');
     revalidatePath('/admin/tours');
     return { success: true };
@@ -24,7 +24,7 @@ export async function deleteTourBookingAction(
   bookingId: string,
 ): Promise<ActionResult> {
   try {
-    await toursApi.deleteServer(bookingId);
+    await toursServerApi.deleteServer(bookingId);
     revalidatePath('/dashboard');
     revalidatePath('/admin/tours');
     return { success: true };

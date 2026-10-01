@@ -11,11 +11,15 @@ class CampusCreate(BaseModel):
     whatsapp_number: str
     primary_color: str = "#000000"
     feature_flags: Dict[str, Any] = {}
+    region_id: Optional[str] = None
+    hero_image: Optional[str] = None
     status: str = Field("active", pattern="^(active|coming_soon|suspended)$")
 
 
 class CampusUpdate(BaseModel):
     name: Optional[str] = None
+    slug: Optional[str] = Field(None, min_length=2)
+    region_id: Optional[str] = None
     city: Optional[str] = None
     hero_headline: Optional[str] = None
     hero_subtext: Optional[str] = None

@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ALLOW=web/.direct-db-allowlist.txt
-PATTERN="supabaseAdmin|supabasePublic|\.from\(['\"][a-z_]+['\"]\)|\.rpc\(['\"][a-z_]+['\"]|\.storage\.from|auth\.admin\.|rest/v1/"
+PATTERN="supabaseAdmin|supabasePublic|\.from\(['\"][a-z_]+['\"]\)|\.rpc\(['\"][a-z_]+['\"]|\.storage\.from|auth\.admin\.|rest/v1/|SUPABASE_SERVICE_ROLE_KEY|@supabase/supabase-js"
 
 offenders=$(grep -rIlE "$PATTERN" web/src --include=*.ts --include=*.tsx \
   | grep -vE '/__tests__/|\.test\.(ts|tsx)$' | sort -u || true)

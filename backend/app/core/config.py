@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = ""
     SUPABASE_JWT_SECRET: str = ""
     SUPABASE_ANON_KEY: str = ""
+    # Needed only to create login identities (admin 'add agent'); removed with Supabase Auth.
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
 
     # CORS Configuration
     # Web app (Next.js on :3000), mobile (Expo web dev on :8081 / legacy :19006),

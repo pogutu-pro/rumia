@@ -1,6 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
-import { isAdminUser } from '@/lib/utils/admin';
-import { redirect } from 'next/navigation';
+import { regionsApi } from '@/lib/api/regions';
 import { CampusesTableClient } from './campuses-table-client';
 import { getAllCampuses } from '@/lib/data/campuses';
 
@@ -9,27 +7,12 @@ export const metadata = {
 };
 
 export default async function AdminCampusesPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  const isAdmin = await isAdminUser(supabase, user.id);
-  if (!isAdmin) {
-    redirect('/auth/login');
-  }
-
   // getAllCampuses falls back to the DeKUT campus when the campuses table is
   // missing or empty, so the admin page always renders something real.
-  const campuses = await getAllCampuses();
-
-  // Fetch all regions for the dropdown (empty until migrations are applied).
-  const { data: regions } = await supabase
-    .from('regions')
-    .select('*')
-    .order('name');
+  const [campuses, regions] = await Promise.all([
+    getAllCampuses(),
+    regionsApi.listServer().catch(() => []),
+  ]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -40,7 +23,7 @@ export default async function AdminCampusesPage() {
 
       <CampusesTableClient 
         initialCampuses={campuses} 
-        regions={regions || []} 
+        regions={regions as any[]} 
       />
     </div>
   );

@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { isAdminUser } from '@/lib/utils/admin';
+import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { AdminHeader } from './admin-header';
+import { profilesServerApi } from '@/lib/api/profiles.server';
 
 export default async function AdminLayout({
   children,
@@ -17,7 +18,11 @@ export default async function AdminLayout({
     redirect('/auth/login');
   }
 
-  const isAdmin = await isAdminUser(supabase, user.id);
+  const [profile, agent] = await Promise.all([
+    profilesServerApi.getMeServer().catch(() => null),
+    agentDashboardApi.getSelf().catch(() => null),
+  ]);
+  const isAdmin = profile?.role === 'admin';
 
   if (!isAdmin) {
     redirect('/dashboard');
@@ -25,12 +30,6 @@ export default async function AdminLayout({
 
   let userName = user.email ?? '';
   let hasAgent = false;
-  const { data: agent } = await (supabase as any)
-    .from('agents')
-    .select('name')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
   if (agent?.name) {
     userName = agent.name;
     hasAgent = true;

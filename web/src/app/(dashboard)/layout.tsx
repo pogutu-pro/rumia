@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AgentHeader } from './agent-header';
-import { profilesApi } from '@/lib/api/profiles';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
+import { profilesServerApi } from '@/lib/api/profiles.server';
 
 export const revalidate = 0;
 
@@ -21,7 +21,7 @@ export default async function DashboardLayout({
   }
 
   const [profile, agent] = await Promise.all([
-    profilesApi.getMeServer().catch(() => null),
+    profilesServerApi.getMeServer().catch(() => null),
     agentDashboardApi.getSelf().catch(() => null),
   ]);
 

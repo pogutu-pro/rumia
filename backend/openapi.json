@@ -1,6 +1,899 @@
 {
   "components": {
     "schemas": {
+      "AdminAgentCommission": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listing_id": {
+            "title": "Listing Id",
+            "type": "string"
+          },
+          "listings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TitleRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "amount",
+          "status",
+          "created_at",
+          "listing_id"
+        ],
+        "title": "AdminAgentCommission",
+        "type": "object"
+      },
+      "AdminAgentDetail": {
+        "properties": {
+          "agent": {
+            "$ref": "#/components/schemas/AdminAgentDetailAgent"
+          },
+          "commissions": {
+            "items": {
+              "$ref": "#/components/schemas/AdminAgentCommission"
+            },
+            "title": "Commissions",
+            "type": "array"
+          },
+          "leads": {
+            "items": {
+              "$ref": "#/components/schemas/AdminAgentLead"
+            },
+            "title": "Leads",
+            "type": "array"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/AdminAgentListing"
+            },
+            "title": "Listings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "agent",
+          "listings",
+          "leads",
+          "commissions"
+        ],
+        "title": "AdminAgentDetail",
+        "type": "object"
+      },
+      "AdminAgentDetailAgent": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          },
+          "whatsapp": {
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "whatsapp",
+          "status",
+          "verified",
+          "created_at"
+        ],
+        "title": "AdminAgentDetailAgent",
+        "type": "object"
+      },
+      "AdminAgentLead": {
+        "properties": {
+          "clicked_at": {
+            "format": "date-time",
+            "title": "Clicked At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listing_id": {
+            "title": "Listing Id",
+            "type": "string"
+          },
+          "listings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TitleRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "clicked_at",
+          "listing_id"
+        ],
+        "title": "AdminAgentLead",
+        "type": "object"
+      },
+      "AdminAgentListing": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "price": {
+            "title": "Price",
+            "type": "number"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "location",
+          "price",
+          "is_active"
+        ],
+        "title": "AdminAgentListing",
+        "type": "object"
+      },
+      "AdminAgentRow": {
+        "properties": {
+          "active_listings_count": {
+            "title": "Active Listings Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_featured": {
+            "title": "Is Featured",
+            "type": "boolean"
+          },
+          "is_founder": {
+            "title": "Is Founder",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "pending_commissions_sum": {
+            "title": "Pending Commissions Sum",
+            "type": "number"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "total_leads_count": {
+            "title": "Total Leads Count",
+            "type": "integer"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "whatsapp": {
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "whatsapp",
+          "status",
+          "created_at",
+          "user_id",
+          "active_listings_count",
+          "total_leads_count",
+          "pending_commissions_sum",
+          "role",
+          "is_featured",
+          "is_founder"
+        ],
+        "title": "AdminAgentRow",
+        "type": "object"
+      },
+      "AdminAnalytics": {
+        "properties": {
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "top_agents": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Top Agents",
+            "type": "array"
+          },
+          "top_listings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Top Listings",
+            "type": "array"
+          },
+          "total_students": {
+            "title": "Total Students",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "summary",
+          "total_students",
+          "top_listings",
+          "top_agents"
+        ],
+        "title": "AdminAnalytics",
+        "type": "object"
+      },
+      "AdminCommissionRow": {
+        "properties": {
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
+          "agents": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentOption"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TitleRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "amount",
+          "status",
+          "created_at"
+        ],
+        "title": "AdminCommissionRow",
+        "type": "object"
+      },
+      "AdminCommissionsPage": {
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AgentOption"
+            },
+            "title": "Agents",
+            "type": "array"
+          },
+          "commissions": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCommissionRow"
+            },
+            "title": "Commissions",
+            "type": "array"
+          },
+          "total_paid": {
+            "title": "Total Paid",
+            "type": "number"
+          },
+          "total_pending": {
+            "title": "Total Pending",
+            "type": "number"
+          }
+        },
+        "required": [
+          "commissions",
+          "agents",
+          "total_pending",
+          "total_paid"
+        ],
+        "title": "AdminCommissionsPage",
+        "type": "object"
+      },
+      "AdminLeadRow": {
+        "properties": {
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
+          "agents": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentOption"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clicked_at": {
+            "format": "date-time",
+            "title": "Clicked At",
+            "type": "string"
+          },
+          "contact_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Type"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ip_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Hash"
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
+          "listings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TitleRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "id",
+          "clicked_at"
+        ],
+        "title": "AdminLeadRow",
+        "type": "object"
+      },
+      "AdminLeadsPage": {
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AgentOption"
+            },
+            "title": "Agents",
+            "type": "array"
+          },
+          "leads": {
+            "items": {
+              "$ref": "#/components/schemas/AdminLeadRow"
+            },
+            "title": "Leads",
+            "type": "array"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/TitleRef"
+            },
+            "title": "Listings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "leads",
+          "agents",
+          "listings"
+        ],
+        "title": "AdminLeadsPage",
+        "type": "object"
+      },
+      "AdminListingRow": {
+        "properties": {
+          "agent_id": {
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "agent_name": {
+            "title": "Agent Name",
+            "type": "string"
+          },
+          "commission_locked_by_admin": {
+            "title": "Commission Locked By Admin",
+            "type": "boolean"
+          },
+          "cover_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Image"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "landlord_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landlord Phone"
+          },
+          "leads_count": {
+            "title": "Leads Count",
+            "type": "integer"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "pays_commission": {
+            "title": "Pays Commission",
+            "type": "boolean"
+          },
+          "price": {
+            "title": "Price",
+            "type": "number"
+          },
+          "sort_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Position"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "location",
+          "price",
+          "is_active",
+          "verified",
+          "created_at",
+          "leads_count",
+          "agent_name",
+          "agent_id",
+          "pays_commission",
+          "commission_locked_by_admin"
+        ],
+        "title": "AdminListingRow",
+        "type": "object"
+      },
+      "AdminListingsPage": {
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AgentOption"
+            },
+            "title": "Agents",
+            "type": "array"
+          },
+          "has_custom_order": {
+            "title": "Has Custom Order",
+            "type": "boolean"
+          },
+          "last_reorder_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Reorder At"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/AdminListingRow"
+            },
+            "title": "Listings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "listings",
+          "agents",
+          "has_custom_order"
+        ],
+        "title": "AdminListingsPage",
+        "type": "object"
+      },
+      "AdminOverview": {
+        "properties": {
+          "active_agents": {
+            "title": "Active Agents",
+            "type": "integer"
+          },
+          "active_listings": {
+            "title": "Active Listings",
+            "type": "integer"
+          },
+          "monthly_leads": {
+            "title": "Monthly Leads",
+            "type": "integer"
+          },
+          "official_hostels": {
+            "title": "Official Hostels",
+            "type": "integer"
+          },
+          "pending_commissions_kes": {
+            "title": "Pending Commissions Kes",
+            "type": "number"
+          },
+          "support_agents": {
+            "title": "Support Agents",
+            "type": "integer"
+          },
+          "total_campuses": {
+            "title": "Total Campuses",
+            "type": "integer"
+          },
+          "total_managers": {
+            "title": "Total Managers",
+            "type": "integer"
+          },
+          "total_regions": {
+            "title": "Total Regions",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "active_listings",
+          "monthly_leads",
+          "pending_commissions_kes",
+          "active_agents",
+          "total_campuses",
+          "total_regions",
+          "total_managers",
+          "support_agents",
+          "official_hostels"
+        ],
+        "title": "AdminOverview",
+        "type": "object"
+      },
+      "AdminUserRow": {
+        "properties": {
+          "agent_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Name"
+          },
+          "agent_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Slug"
+          },
+          "agent_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Status"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "has_agent": {
+            "title": "Has Agent",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "has_agent"
+        ],
+        "title": "AdminUserRow",
+        "type": "object"
+      },
       "AgentApplicationCreate": {
         "properties": {
           "campus_id": {
@@ -183,6 +1076,35 @@
         "title": "AgentApplicationReview",
         "type": "object"
       },
+      "AgentCreateRequest": {
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "maxLength": 40,
+            "minLength": 7,
+            "title": "Phone",
+            "type": "string"
+          },
+          "whatsapp": {
+            "maxLength": 40,
+            "minLength": 7,
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "whatsapp"
+        ],
+        "title": "AgentCreateRequest",
+        "type": "object"
+      },
       "AgentDashboardRead": {
         "description": "Headline numbers for the agent dashboard home.",
         "properties": {
@@ -229,6 +1151,45 @@
           "tour_earnings"
         ],
         "title": "AgentDashboardRead",
+        "type": "object"
+      },
+      "AgentFlags": {
+        "properties": {
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "is_founder": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Founder"
+          },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          }
+        },
+        "title": "AgentFlags",
         "type": "object"
       },
       "AgentListingHostel": {
@@ -824,6 +1785,114 @@
         "title": "AgentListingViewEntry",
         "type": "object"
       },
+      "AgentOption": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "AgentOption",
+        "type": "object"
+      },
+      "AgentPatch": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "minLength": 7,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "minLength": 7,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp"
+          }
+        },
+        "title": "AgentPatch",
+        "type": "object"
+      },
+      "AgentPromoteRequest": {
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "maxLength": 40,
+            "minLength": 7,
+            "title": "Phone",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "whatsapp": {
+            "maxLength": 40,
+            "minLength": 7,
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "whatsapp",
+          "user_id"
+        ],
+        "title": "AgentPromoteRequest",
+        "type": "object"
+      },
       "AgentSelfRead": {
         "description": "An agent's own record, including private fields (balance, payment details).",
         "properties": {
@@ -1146,6 +2215,46 @@
         "title": "AgentStatusUpdate",
         "type": "object"
       },
+      "AgentSupportPatch": {
+        "properties": {
+          "is_owner": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Owner"
+          },
+          "is_support": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Support"
+          },
+          "support_rank": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Rank"
+          }
+        },
+        "title": "AgentSupportPatch",
+        "type": "object"
+      },
       "AgentUpdate": {
         "properties": {
           "bio": {
@@ -1227,6 +2336,32 @@
           }
         },
         "title": "AgentUpdate",
+        "type": "object"
+      },
+      "AgentVerificationResult": {
+        "properties": {
+          "matched_hostels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matched Hostels",
+            "type": "array"
+          },
+          "shared_contact_detected": {
+            "title": "Shared Contact Detected",
+            "type": "boolean"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verified",
+          "matched_hostels",
+          "shared_contact_detected"
+        ],
+        "title": "AgentVerificationResult",
         "type": "object"
       },
       "AnnouncementCreate": {
@@ -2491,6 +3626,17 @@
             "title": "Hero Headline",
             "type": "string"
           },
+          "hero_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Image"
+          },
           "hero_subtext": {
             "anyOf": [
               {
@@ -2511,6 +3657,17 @@
             "default": "#000000",
             "title": "Primary Color",
             "type": "string"
+          },
+          "region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Id"
           },
           "slug": {
             "minLength": 2,
@@ -3355,6 +4512,29 @@
             ],
             "title": "Primary Color"
           },
+          "region_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Id"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
           "status": {
             "anyOf": [
               {
@@ -3430,6 +4610,43 @@
           "created_at"
         ],
         "title": "CampusZoneRead",
+        "type": "object"
+      },
+      "CommissionCreate": {
+        "properties": {
+          "agent_id": {
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "amount": {
+            "exclusiveMinimum": 0.0,
+            "title": "Amount",
+            "type": "number"
+          },
+          "listing_id": {
+            "title": "Listing Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "listing_id",
+          "amount"
+        ],
+        "title": "CommissionCreate",
+        "type": "object"
+      },
+      "CommissionLockToggle": {
+        "properties": {
+          "locked": {
+            "title": "Locked",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "locked"
+        ],
+        "title": "CommissionLockToggle",
         "type": "object"
       },
       "CommissionRead": {
@@ -4666,6 +5883,17 @@
               }
             ],
             "title": "Updated By"
+          },
+          "updater_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updater Email"
           }
         },
         "required": [
@@ -5256,6 +6484,113 @@
           "display_order"
         ],
         "title": "ListingImageRead",
+        "type": "object"
+      },
+      "ListingLeadRow": {
+        "properties": {
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
+          "clicked_at": {
+            "format": "date-time",
+            "title": "Clicked At",
+            "type": "string"
+          },
+          "contact_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Type"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "id",
+          "clicked_at"
+        ],
+        "title": "ListingLeadRow",
+        "type": "object"
+      },
+      "ListingLeadsPage": {
+        "properties": {
+          "agent_names": {
+            "additionalProperties": true,
+            "title": "Agent Names",
+            "type": "object"
+          },
+          "leads": {
+            "items": {
+              "$ref": "#/components/schemas/ListingLeadRow"
+            },
+            "title": "Leads",
+            "type": "array"
+          },
+          "listing": {
+            "additionalProperties": true,
+            "title": "Listing",
+            "type": "object"
+          }
+        },
+        "required": [
+          "listing",
+          "leads",
+          "agent_names"
+        ],
+        "title": "ListingLeadsPage",
+        "type": "object"
+      },
+      "ListingOrderRequest": {
+        "properties": {
+          "updates": {
+            "items": {
+              "$ref": "#/components/schemas/OrderUpdate"
+            },
+            "title": "Updates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "title": "ListingOrderRequest",
         "type": "object"
       },
       "ListingRead": {
@@ -6321,6 +7656,43 @@
           }
         },
         "title": "ListingUpdate",
+        "type": "object"
+      },
+      "ListingVerificationResult": {
+        "properties": {
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Flags",
+            "type": "array"
+          },
+          "match_type": {
+            "title": "Match Type",
+            "type": "string"
+          },
+          "matched_hostel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Hostel"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verified",
+          "match_type",
+          "flags"
+        ],
+        "title": "ListingVerificationResult",
         "type": "object"
       },
       "LivenessCheckResponse": {
@@ -7521,6 +8893,81 @@
         "title": "OfficialHostelRead",
         "type": "object"
       },
+      "OfficialHostelWrite": {
+        "properties": {
+          "contacts": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts"
+          },
+          "hostel_name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Hostel Name",
+            "type": "string"
+          },
+          "payments": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payments"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "verified_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Date"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone"
+          }
+        },
+        "required": [
+          "hostel_name"
+        ],
+        "title": "OfficialHostelWrite",
+        "type": "object"
+      },
       "OfficialHostelsOverview": {
         "properties": {
           "listings": {
@@ -7543,6 +8990,30 @@
           "listings"
         ],
         "title": "OfficialHostelsOverview",
+        "type": "object"
+      },
+      "OrderUpdate": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "sort_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Position"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "OrderUpdate",
         "type": "object"
       },
       "OwnerPhoneUpdate": {
@@ -9301,6 +10772,20 @@
         "title": "ReviewUpdate",
         "type": "object"
       },
+      "RoleChange": {
+        "properties": {
+          "role": {
+            "pattern": "^(student|agent)$",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "RoleChange",
+        "type": "object"
+      },
       "SavedHostelActionResponse": {
         "properties": {
           "is_saved": {
@@ -9624,6 +11109,120 @@
           "updated_at"
         ],
         "title": "StaffTourBookingRead",
+        "type": "object"
+      },
+      "SupportAgentRow": {
+        "properties": {
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_featured": {
+            "title": "Is Featured",
+            "type": "boolean"
+          },
+          "is_founder": {
+            "title": "Is Founder",
+            "type": "boolean"
+          },
+          "is_owner": {
+            "title": "Is Owner",
+            "type": "boolean"
+          },
+          "is_support": {
+            "title": "Is Support",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "profile_photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Photo Url"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "support_rank": {
+            "title": "Support Rank",
+            "type": "integer"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          },
+          "whatsapp": {
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "verified",
+          "whatsapp",
+          "phone",
+          "status",
+          "is_featured",
+          "is_founder",
+          "is_support",
+          "support_rank",
+          "is_owner"
+        ],
+        "title": "SupportAgentRow",
+        "type": "object"
+      },
+      "TitleRef": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "TitleRef",
         "type": "object"
       },
       "TourAgentBrief": {
@@ -10055,6 +11654,60 @@
         "title": "TrackViewResponse",
         "type": "object"
       },
+      "TransferRow": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listing_id": {
+            "title": "Listing Id",
+            "type": "string"
+          },
+          "listing_title": {
+            "title": "Listing Title",
+            "type": "string"
+          },
+          "new_owner_id": {
+            "title": "New Owner Id",
+            "type": "string"
+          },
+          "new_owner_name": {
+            "title": "New Owner Name",
+            "type": "string"
+          },
+          "previous_owner_id": {
+            "title": "Previous Owner Id",
+            "type": "string"
+          },
+          "previous_owner_name": {
+            "title": "Previous Owner Name",
+            "type": "string"
+          },
+          "transferred_at": {
+            "format": "date-time",
+            "title": "Transferred At",
+            "type": "string"
+          },
+          "transferred_by": {
+            "title": "Transferred By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "listing_id",
+          "previous_owner_id",
+          "new_owner_id",
+          "transferred_by",
+          "transferred_at",
+          "listing_title",
+          "previous_owner_name",
+          "new_owner_name"
+        ],
+        "title": "TransferRow",
+        "type": "object"
+      },
       "UnreadCountResponse": {
         "properties": {
           "count": {
@@ -10167,6 +11820,62 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifiedToggle": {
+        "properties": {
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verified"
+        ],
+        "title": "VerifiedToggle",
+        "type": "object"
+      },
+      "VerifyAllSummary": {
+        "properties": {
+          "matched": {
+            "title": "Matched",
+            "type": "integer"
+          },
+          "name_review": {
+            "title": "Name Review",
+            "type": "integer"
+          },
+          "no_match": {
+            "title": "No Match",
+            "type": "integer"
+          },
+          "official_no_listing": {
+            "title": "Official No Listing",
+            "type": "integer"
+          },
+          "phone_verified": {
+            "title": "Phone Verified",
+            "type": "integer"
+          },
+          "shared_contacts": {
+            "title": "Shared Contacts",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "matched",
+          "phone_verified",
+          "name_review",
+          "no_match",
+          "shared_contacts",
+          "official_no_listing"
+        ],
+        "title": "VerifyAllSummary",
         "type": "object"
       },
       "VerifyCandidate": {
@@ -10842,6 +12551,180 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/admin/agents": {
+      "get": {
+        "operationId": "list_agents_api_v1_admin_agents_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminAgentRow"
+                  },
+                  "title": "Response List Agents Api V1 Admin Agents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agents With Stats",
+        "tags": [
+          "Admin Console"
+        ]
+      },
+      "post": {
+        "description": "Creates a login identity and the agent record (rolled back together on failure).",
+        "operationId": "create_agent_api_v1_admin_agents_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Agent Api V1 Admin Agents Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Agent",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/agents/promote": {
+      "post": {
+        "operationId": "promote_student_api_v1_admin_agents_promote_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPromoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Promote Student Api V1 Admin Agents Promote Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Promote User To Agent",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
     "/api/v1/admin/agents/transfer": {
       "post": {
         "description": "Reassign hostel listing ownership to a different agent. Admin only.",
@@ -10901,6 +12784,273 @@
         "summary": "Transfer Listing Ownership",
         "tags": [
           "Admin Operations"
+        ]
+      }
+    },
+    "/api/v1/admin/agents/{agent_id}": {
+      "get": {
+        "operationId": "agent_detail_api_v1_admin_agents__agent_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAgentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agent Detail",
+        "tags": [
+          "Admin Console"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_agent_api_v1_admin_agents__agent_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Patch Agent Api V1 Admin Agents  Agent Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Edit Agent Details",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/agents/{agent_id}/flags": {
+      "patch": {
+        "operationId": "set_flags_api_v1_admin_agents__agent_id__flags_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentFlags"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Flags Api V1 Admin Agents  Agent Id  Flags Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Featured / Founder / Verified",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/agents/{agent_id}/standing": {
+      "patch": {
+        "description": "Reason required to suspend; the agent is notified.",
+        "operationId": "agent_standing_api_v1_admin_agents__agent_id__standing_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentStandingUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Agent Standing Api V1 Admin Agents  Agent Id  Standing Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Suspend / Reactivate Agent",
+        "tags": [
+          "Admin Console"
         ]
       }
     },
@@ -10970,6 +13120,184 @@
         "summary": "Update Agent Status",
         "tags": [
           "Admin Operations"
+        ]
+      }
+    },
+    "/api/v1/admin/agents/{agent_id}/support": {
+      "patch": {
+        "description": "Making an agent the owner clears the previous owner.",
+        "operationId": "set_support_api_v1_admin_agents__agent_id__support_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentSupportPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Support Api V1 Admin Agents  Agent Id  Support Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Support-Team Placement",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/agents/{agent_id}/verification": {
+      "get": {
+        "operationId": "agent_verification_api_v1_admin_agents__agent_id__verification_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentVerificationResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Agent Against Official Records",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/analytics": {
+      "get": {
+        "operationId": "analytics_api_v1_admin_analytics_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAnalytics"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Platform Analytics",
+        "tags": [
+          "Admin Console"
         ]
       }
     },
@@ -11223,6 +13551,631 @@
         ]
       }
     },
+    "/api/v1/admin/commissions": {
+      "get": {
+        "operationId": "commissions_page_api_v1_admin_commissions_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCommissionsPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Commissions",
+        "tags": [
+          "Admin Console"
+        ]
+      },
+      "post": {
+        "operationId": "create_commission_api_v1_admin_commissions_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommissionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Commission Api V1 Admin Commissions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Commission",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/leads": {
+      "get": {
+        "operationId": "leads_page_api_v1_admin_leads_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminLeadsPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "All Leads",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings": {
+      "get": {
+        "operationId": "listings_page_api_v1_admin_listings_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminListingsPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listings With Ordering Info",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/order": {
+      "put": {
+        "description": "Atomic reorder with an audit row per change; null clears a position.",
+        "operationId": "reorder_api_v1_admin_listings_order_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reorder Api V1 Admin Listings Order Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Listing Order",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/shuffle": {
+      "post": {
+        "operationId": "shuffle_api_v1_admin_listings_shuffle_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Shuffle Api V1 Admin Listings Shuffle Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shuffle Listing Order",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/verify-all": {
+      "post": {
+        "operationId": "verify_all_api_v1_admin_listings_verify_all_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyAllSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify All Active Listings",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/{listing_id}/commission-lock": {
+      "patch": {
+        "operationId": "commission_lock_api_v1_admin_listings__listing_id__commission_lock_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommissionLockToggle"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Commission Lock Api V1 Admin Listings  Listing Id  Commission Lock Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lock / Unlock Commission Setting",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/{listing_id}/leads": {
+      "get": {
+        "operationId": "listing_leads_api_v1_admin_listings__listing_id__leads_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLeadsPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Leads Of One Listing",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/{listing_id}/verified": {
+      "patch": {
+        "operationId": "set_verified_api_v1_admin_listings__listing_id__verified_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifiedToggle"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Verified Api V1 Admin Listings  Listing Id  Verified Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Manually (Un)verify A Listing",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/listings/{listing_id}/verify": {
+      "post": {
+        "description": "Checks the official records and fills verification fields that are not already set.",
+        "operationId": "verify_listing_api_v1_admin_listings__listing_id__verify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingVerificationResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify One Listing",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
     "/api/v1/admin/managers": {
       "get": {
         "description": "Fetch all assigned campus managers. Admin only.",
@@ -11335,6 +14288,55 @@
         ]
       }
     },
+    "/api/v1/admin/overview": {
+      "get": {
+        "operationId": "overview_api_v1_admin_overview_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Admin Overview",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
     "/api/v1/admin/stats": {
       "get": {
         "description": "Fetch total counts of listings, active hostels, agents, and students. Admin only.",
@@ -11382,6 +14384,296 @@
         "summary": "Get Platform Stats",
         "tags": [
           "Admin Operations"
+        ]
+      }
+    },
+    "/api/v1/admin/support-agents": {
+      "get": {
+        "operationId": "support_agents_api_v1_admin_support_agents_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SupportAgentRow"
+                  },
+                  "title": "Response Support Agents Api V1 Admin Support Agents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agents For Support-Team Curation",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/transfers": {
+      "get": {
+        "operationId": "transfers_api_v1_admin_transfers_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TransferRow"
+                  },
+                  "title": "Response Transfers Api V1 Admin Transfers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listing Transfer History",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "operationId": "list_users_api_v1_admin_users_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserRow"
+                  },
+                  "title": "Response List Users Api V1 Admin Users Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "All Users",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{target_id}/promote-admin": {
+      "post": {
+        "operationId": "promote_to_admin_api_v1_admin_users__target_id__promote_admin_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Promote To Admin Api V1 Admin Users  Target Id  Promote Admin Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Promote To Admin",
+        "tags": [
+          "Admin Console"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{target_id}/role": {
+      "patch": {
+        "description": "Set a user's role to student or agent (also how privileged roles are demoted).",
+        "operationId": "change_role_api_v1_admin_users__target_id__role_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Change Role Api V1 Admin Users  Target Id  Role Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Change User Role",
+        "tags": [
+          "Admin Console"
         ]
       }
     },
@@ -16890,6 +20182,63 @@
         "tags": [
           "Official Hostels"
         ]
+      },
+      "post": {
+        "operationId": "create_official_hostel_api_v1_official_hostels_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficialHostelWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialHostelRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Official Record (Admin)",
+        "tags": [
+          "Official Hostels"
+        ]
       }
     },
     "/api/v1/official-hostels/overview": {
@@ -16937,6 +20286,175 @@
           }
         },
         "summary": "Official Records vs Platform Listings",
+        "tags": [
+          "Official Hostels"
+        ]
+      }
+    },
+    "/api/v1/official-hostels/seed": {
+      "post": {
+        "description": "Loads the bundled records; names already present are skipped, so it is safe to re-run.",
+        "operationId": "seed_official_hostels_api_v1_official_hostels_seed_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Seed Official Hostels Api V1 Official Hostels Seed Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Seed Official Records (Admin)",
+        "tags": [
+          "Official Hostels"
+        ]
+      }
+    },
+    "/api/v1/official-hostels/{record_id}": {
+      "delete": {
+        "operationId": "delete_official_hostel_api_v1_official_hostels__record_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "record_id",
+            "required": true,
+            "schema": {
+              "title": "Record Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Official Record (Admin)",
+        "tags": [
+          "Official Hostels"
+        ]
+      },
+      "patch": {
+        "operationId": "update_official_hostel_api_v1_official_hostels__record_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "record_id",
+            "required": true,
+            "schema": {
+              "title": "Record Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficialHostelWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficialHostelRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Official Record (Admin)",
         "tags": [
           "Official Hostels"
         ]

@@ -28,8 +28,10 @@ export const getPublishedLegalDocument = cache(
       effective_date?: string | null;
       updated_at: string;
     }>(path).catch((e: Error & { status?: number }) => {
-      if (e.status === 404) return null;
-      throw e;
+      // Missing document, or the API unreachable (e.g. during a build): render the "unavailable"
+      // state instead of failing the page, as the previous direct query did.
+      if (e.status !== 404) console.error('Failed to load legal document:', e.message);
+      return null;
     });
 
     if (!data || data.status !== 'published') return null;

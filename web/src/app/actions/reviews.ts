@@ -1,13 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { reviewsApi } from '@/lib/api/reviews';
 import {
   REVIEW_CATEGORIES,
   computeOverallRating,
   type CategoryRatings,
 } from '@/lib/review-categories';
 import type { ReviewStatus } from '@/types';
+import { reviewsServerApi } from '@/lib/api/reviews.server';
 
 type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
 
@@ -51,7 +51,7 @@ export async function submitReviewAction(
   }
 
   try {
-    const review = await reviewsApi.createServer({
+    const review = await reviewsServerApi.createServer({
       listing_id: listingId,
       rating: Math.round(overall),
       text: trimmedText,
@@ -93,7 +93,7 @@ export async function updateReviewAction(
   }
 
   try {
-    await reviewsApi.updateServer(reviewId, {
+    await reviewsServerApi.updateServer(reviewId, {
       rating: Math.round(overall),
       text: trimmedText,
       rating_cleanliness: categoriesPayload.cleanliness,
@@ -115,7 +115,7 @@ export async function updateReviewAction(
 
 export async function deleteReviewAction(reviewId: string): Promise<ActionResult> {
   try {
-    await reviewsApi.deleteServer(reviewId);
+    await reviewsServerApi.deleteServer(reviewId);
     revalidatePath('/dashboard');
     return { success: true };
   } catch (err: any) {
@@ -137,7 +137,7 @@ export async function moderateReviewAction(
           : updates.status === 'flagged'
             ? 'flag'
             : 'edit';
-    await reviewsApi.moderateServer(reviewId, action, reason?.trim() || undefined, updates.text);
+    await reviewsServerApi.moderateServer(reviewId, action, reason?.trim() || undefined, updates.text);
     revalidatePath('/admin');
     return { success: true };
   } catch (err: any) {
@@ -149,7 +149,7 @@ export async function toggleReviewLikeAction(
   reviewId: string,
 ): Promise<ActionResult<{ liked: boolean }>> {
   try {
-    const res = await reviewsApi.toggleLikeServer(reviewId);
+    const res = await reviewsServerApi.toggleLikeServer(reviewId);
     return { success: true, data: { liked: res.liked } };
   } catch (err: any) {
     return { success: false, error: err.message || err.data?.detail || 'Failed to toggle like.' };
@@ -169,7 +169,7 @@ export async function submitReplyAction(
   }
 
   try {
-    const reply = await reviewsApi.addReplyServer(reviewId, trimmedText);
+    const reply = await reviewsServerApi.addReplyServer(reviewId, trimmedText);
     return { success: true, data: { id: (reply as any)?.id || reviewId } };
   } catch (err: any) {
     return { success: false, error: err.message || err.data?.detail || 'Failed to submit reply.' };
@@ -178,7 +178,7 @@ export async function submitReplyAction(
 
 export async function deleteReplyAction(replyId: string): Promise<ActionResult> {
   try {
-    await reviewsApi.deleteReplyServer(replyId);
+    await reviewsServerApi.deleteReplyServer(replyId);
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || err.data?.detail || 'Failed to delete reply.' };

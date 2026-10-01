@@ -10,6 +10,9 @@ export interface LegalDocumentData {
   effective_date?: string | null;
   published_at?: string | null;
   updated_at: string;
+  updated_by?: string | null;
+  updater_email?: string | null;
+  created_at?: string;
 }
 
 export const legalApi = {

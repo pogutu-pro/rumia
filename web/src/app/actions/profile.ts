@@ -1,7 +1,7 @@
 'use server';
 
 import * as Sentry from '@sentry/nextjs';
-import { profilesApi } from '@/lib/api/profiles';
+import { profilesServerApi } from '@/lib/api/profiles.server';
 
 export type ProfileSaveResult =
   | {
@@ -45,7 +45,7 @@ export async function saveProfileCompletionAction(
   }
 
   try {
-    const updatedProfile = await profilesApi.updateMeServer({
+    const updatedProfile = await profilesServerApi.updateMeServer({
       ...(input.full_name !== undefined ? { full_name: input.full_name.trim() } : {}),
       ...(input.phone !== undefined ? { phone: input.phone.trim() } : {}),
       ...(input.campus_input ? { campus_input: input.campus_input.trim() } : {}),

@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { adminConsoleApi } from '@/lib/api/admin-console';
 import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft, Copy, Check, MessageCircle, Building2, UserCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -50,74 +49,24 @@ export default async function AdminListingLeadsPage({
   params,
 }: AdminListingLeadsPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/auth/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  if (profile?.role !== 'admin') {
-    redirect('/dashboard');
-  }
-
-  const { data: listing, error: listingError } = await supabaseAdmin
-    .from('listings')
-    .select('id, title, location, agent_id, agents ( id, name )')
-    .eq('id', id)
-    .single();
-
-  if (listingError || !listing) {
+  const data = await adminConsoleApi.listingLeads(id).catch(() => null);
+  if (!data) {
     notFound();
   }
-
-  const { data: leads } = await supabaseAdmin
-    .from('leads')
-    .select('id, name, phone, contact_type, clicked_at, agent_id')
-    .eq('listing_id', id)
-    .order('clicked_at', { ascending: false });
-
-  const allLeads: Lead[] = (leads || []) as Lead[];
+  const listing = data.listing;
+  const allLeads: Lead[] = data.leads as Lead[];
 
   // Group leads by agent
   const agentMap = new Map<string, { name: string; leads: Lead[] }>();
   const unassignedLeads: Lead[] = [];
-
   for (const lead of allLeads) {
     if (lead.agent_id) {
       if (!agentMap.has(lead.agent_id)) {
-        agentMap.set(lead.agent_id, { name: '', leads: [] });
+        agentMap.set(lead.agent_id, { name: data.agent_names[lead.agent_id] ?? '', leads: [] });
       }
       agentMap.get(lead.agent_id)!.leads.push(lead);
     } else {
       unassignedLeads.push(lead);
-    }
-  }
-
-  // Fetch agent names for agents we don't already have names for
-  const agentIds = Array.from(agentMap.keys());
-  if (agentIds.length > 0) {
-    const { data: agents } = await supabaseAdmin
-      .from('agents')
-      .select('id, name')
-      .in('id', agentIds);
-
-    if (agents) {
-      for (const agent of agents) {
-        const entry = agentMap.get(agent.id);
-        if (entry) {
-          entry.name = agent.name;
-        }
-      }
     }
   }
 

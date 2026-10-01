@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { toursApi } from '@/lib/api/tours';
+import { toursServerApi } from '@/lib/api/tours.server';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -33,7 +33,7 @@ export async function updateStudentTourBookingAction(
       }
     }
 
-    await toursApi.updateMineServer(bookingId, {
+    await toursServerApi.updateMineServer(bookingId, {
       ...(fields.preferred_date && { preferred_date: fields.preferred_date }),
       ...(fields.preferred_time && { preferred_time: fields.preferred_time as 'morning' | 'afternoon' | 'evening' }),
       ...(fields.phone && { phone: fields.phone.trim() }),
@@ -49,7 +49,7 @@ export async function cancelStudentTourBookingAction(
   bookingId: string,
 ): Promise<ActionResult> {
   try {
-    await toursApi.updateStatusServer(bookingId, 'cancelled');
+    await toursServerApi.updateStatusServer(bookingId, 'cancelled');
     revalidatePath('/account');
     return { success: true };
   } catch (err: any) {

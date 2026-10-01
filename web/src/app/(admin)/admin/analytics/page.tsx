@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Eye, Users, Building2, TrendingUp, CalendarDays } from 'lucide-react';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { adminConsoleApi } from '@/lib/api/admin-console';
 
 export const revalidate = 60;
 
@@ -10,22 +10,11 @@ function count(value: unknown) {
 }
 
 export default async function AdminAnalyticsPage() {
-  const [
-    { data: summaryRows },
-    { data: studentCountRaw },
-    { data: topListingsRaw },
-    { data: topAgentsRaw },
-  ] = await Promise.all([
-    supabaseAdmin.rpc('get_platform_view_summary'),
-    supabaseAdmin.rpc('get_registered_student_count'),
-    supabaseAdmin.rpc('get_admin_listing_view_analytics', { p_limit: 20 }),
-    supabaseAdmin.rpc('get_admin_agent_view_analytics'),
-  ]);
-
-  const summary = Array.isArray(summaryRows) ? summaryRows[0] : summaryRows;
-  const topListings = topListingsRaw ?? [];
-  const topAgents = topAgentsRaw ?? [];
-  const totalStudents = count(studentCountRaw);
+  const data = await adminConsoleApi.analytics().catch(() => null);
+  const summary = data?.summary;
+  const topListings = data?.top_listings ?? [];
+  const topAgents = data?.top_agents ?? [];
+  const totalStudents = count(data?.total_students);
 
   const viewStats = [
     { label: 'Today', value: count(summary?.today_count), icon: TrendingUp, color: 'text-blue-600 bg-blue-50' },

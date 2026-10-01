@@ -78,7 +78,6 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: https://rumia.co.ke/api/v1
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
-          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: placeholder
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: placeholder
           NEXT_PUBLIC_POSTHOG_HOST: https://placeholder.posthog.com
@@ -146,7 +145,6 @@ jobs:
           # Placeholder public env vars so the Docker build is self-contained
           # (web/.env.production is gitignored and absent in CI).
           NEXT_PUBLIC_SITE_URL: https://rumia.co.ke
-          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: placeholder

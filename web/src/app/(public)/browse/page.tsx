@@ -4,7 +4,7 @@ import { Search, MapPin, DollarSign, ArrowRight, SlidersHorizontal, Eye } from '
 import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { searchApi } from '@/lib/api/search';
+import { searchServerApi } from '@/lib/api/search.server';
 
 export const revalidate = 0;
 
@@ -33,7 +33,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
 
   let listings: any[] = [];
   try {
-    const feed = await searchApi.searchServer({
+    const feed = await searchServerApi.searchServer({
       q: search,
       min_price: minVal && !isNaN(minVal) ? minVal : undefined,
       max_price: maxVal && !isNaN(maxVal) ? maxVal : undefined,

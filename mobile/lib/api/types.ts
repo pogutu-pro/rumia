@@ -4,6 +4,44 @@
  */
 
 export interface paths {
+    "/api/v1/admin/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agents With Stats */
+        get: operations["list_agents_api_v1_admin_agents_get"];
+        put?: never;
+        /**
+         * Create Agent
+         * @description Creates a login identity and the agent record (rolled back together on failure).
+         */
+        post: operations["create_agent_api_v1_admin_agents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/agents/promote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Promote User To Agent */
+        post: operations["promote_student_api_v1_admin_agents_promote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/agents/transfer": {
         parameters: {
             query?: never;
@@ -24,6 +62,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/agents/{agent_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agent Detail */
+        get: operations["agent_detail_api_v1_admin_agents__agent_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit Agent Details */
+        patch: operations["patch_agent_api_v1_admin_agents__agent_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/agents/{agent_id}/flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Featured / Founder / Verified */
+        patch: operations["set_flags_api_v1_admin_agents__agent_id__flags_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/agents/{agent_id}/standing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Suspend / Reactivate Agent
+         * @description Reason required to suspend; the agent is notified.
+         */
+        patch: operations["agent_standing_api_v1_admin_agents__agent_id__standing_patch"];
+        trace?: never;
+    };
     "/api/v1/admin/agents/{agent_id}/status": {
         parameters: {
             query?: never;
@@ -42,6 +135,60 @@ export interface paths {
          * @description Suspend or activate an agent account. Admin only.
          */
         patch: operations["update_agent_status_api_v1_admin_agents__agent_id__status_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/agents/{agent_id}/support": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Support-Team Placement
+         * @description Making an agent the owner clears the previous owner.
+         */
+        patch: operations["set_support_api_v1_admin_agents__agent_id__support_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/agents/{agent_id}/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Check Agent Against Official Records */
+        get: operations["agent_verification_api_v1_admin_agents__agent_id__verification_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Platform Analytics */
+        get: operations["analytics_api_v1_admin_analytics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/admin/campuses": {
@@ -108,6 +255,183 @@ export interface paths {
         patch: operations["update_campus_status_api_v1_admin_campuses__campus_id__status_patch"];
         trace?: never;
     };
+    "/api/v1/admin/commissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Commissions */
+        get: operations["commissions_page_api_v1_admin_commissions_get"];
+        put?: never;
+        /** Create Commission */
+        post: operations["create_commission_api_v1_admin_commissions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All Leads */
+        get: operations["leads_page_api_v1_admin_leads_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listings With Ordering Info */
+        get: operations["listings_page_api_v1_admin_listings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/listings/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Listing Order
+         * @description Atomic reorder with an audit row per change; null clears a position.
+         */
+        put: operations["reorder_api_v1_admin_listings_order_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/listings/shuffle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Shuffle Listing Order */
+        post: operations["shuffle_api_v1_admin_listings_shuffle_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/listings/verify-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify All Active Listings */
+        post: operations["verify_all_api_v1_admin_listings_verify_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/listings/{listing_id}/commission-lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Lock / Unlock Commission Setting */
+        patch: operations["commission_lock_api_v1_admin_listings__listing_id__commission_lock_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/listings/{listing_id}/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Leads Of One Listing */
+        get: operations["listing_leads_api_v1_admin_listings__listing_id__leads_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/listings/{listing_id}/verified": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Manually (Un)verify A Listing */
+        patch: operations["set_verified_api_v1_admin_listings__listing_id__verified_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/listings/{listing_id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify One Listing
+         * @description Checks the official records and fills verification fields that are not already set.
+         */
+        post: operations["verify_listing_api_v1_admin_listings__listing_id__verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/managers": {
         parameters: {
             query?: never;
@@ -132,6 +456,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Overview */
+        get: operations["overview_api_v1_admin_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/stats": {
         parameters: {
             query?: never;
@@ -150,6 +491,94 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support-agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agents For Support-Team Curation */
+        get: operations["support_agents_api_v1_admin_support_agents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/transfers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listing Transfer History */
+        get: operations["transfers_api_v1_admin_transfers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All Users */
+        get: operations["list_users_api_v1_admin_users_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{target_id}/promote-admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Promote To Admin */
+        post: operations["promote_to_admin_api_v1_admin_users__target_id__promote_admin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{target_id}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change User Role
+         * @description Set a user's role to student or agent (also how privileged roles are demoted).
+         */
+        patch: operations["change_role_api_v1_admin_users__target_id__role_patch"];
         trace?: never;
     };
     "/api/v1/agents": {
@@ -1753,7 +2182,8 @@ export interface paths {
          */
         get: operations["list_official_hostels_api_v1_official_hostels_get"];
         put?: never;
-        post?: never;
+        /** Create Official Record (Admin) */
+        post: operations["create_official_hostel_api_v1_official_hostels_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1778,6 +2208,44 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/official-hostels/seed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Seed Official Records (Admin)
+         * @description Loads the bundled records; names already present are skipped, so it is safe to re-run.
+         */
+        post: operations["seed_official_hostels_api_v1_official_hostels_seed_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/official-hostels/{record_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Official Record (Admin) */
+        delete: operations["delete_official_hostel_api_v1_official_hostels__record_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Official Record (Admin) */
+        patch: operations["update_official_hostel_api_v1_official_hostels__record_id__patch"];
         trace?: never;
     };
     "/api/v1/profiles/check-email": {
@@ -2440,6 +2908,293 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminAgentCommission */
+        AdminAgentCommission: {
+            /** Amount */
+            amount: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Listing Id */
+            listing_id: string;
+            listings?: components["schemas"]["TitleRef"] | null;
+            /** Paid At */
+            paid_at?: string | null;
+            /** Status */
+            status: string;
+        };
+        /** AdminAgentDetail */
+        AdminAgentDetail: {
+            agent: components["schemas"]["AdminAgentDetailAgent"];
+            /** Commissions */
+            commissions: components["schemas"]["AdminAgentCommission"][];
+            /** Leads */
+            leads: components["schemas"]["AdminAgentLead"][];
+            /** Listings */
+            listings: components["schemas"]["AdminAgentListing"][];
+        };
+        /** AdminAgentDetailAgent */
+        AdminAgentDetailAgent: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Role */
+            role?: string | null;
+            /** Status */
+            status: string;
+            /** User Id */
+            user_id?: string | null;
+            /** Verified */
+            verified: boolean;
+            /** Whatsapp */
+            whatsapp: string;
+        };
+        /** AdminAgentLead */
+        AdminAgentLead: {
+            /**
+             * Clicked At
+             * Format: date-time
+             */
+            clicked_at: string;
+            /** Id */
+            id: string;
+            /** Listing Id */
+            listing_id: string;
+            listings?: components["schemas"]["TitleRef"] | null;
+        };
+        /** AdminAgentListing */
+        AdminAgentListing: {
+            /** Id */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Location */
+            location: string;
+            /** Price */
+            price: number;
+            /** Title */
+            title: string;
+        };
+        /** AdminAgentRow */
+        AdminAgentRow: {
+            /** Active Listings Count */
+            active_listings_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Is Featured */
+            is_featured: boolean;
+            /** Is Founder */
+            is_founder: boolean;
+            /** Name */
+            name: string;
+            /** Pending Commissions Sum */
+            pending_commissions_sum: number;
+            /** Phone */
+            phone: string;
+            /** Role */
+            role: string;
+            /** Status */
+            status: string;
+            /** Total Leads Count */
+            total_leads_count: number;
+            /** User Id */
+            user_id: string;
+            /** Whatsapp */
+            whatsapp: string;
+        };
+        /** AdminAnalytics */
+        AdminAnalytics: {
+            /** Summary */
+            summary: {
+                [key: string]: unknown;
+            };
+            /** Top Agents */
+            top_agents: {
+                [key: string]: unknown;
+            }[];
+            /** Top Listings */
+            top_listings: {
+                [key: string]: unknown;
+            }[];
+            /** Total Students */
+            total_students: number;
+        };
+        /** AdminCommissionRow */
+        AdminCommissionRow: {
+            /** Agent Id */
+            agent_id?: string | null;
+            agents?: components["schemas"]["AgentOption"] | null;
+            /** Amount */
+            amount: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            listings?: components["schemas"]["TitleRef"] | null;
+            /** Paid At */
+            paid_at?: string | null;
+            /** Status */
+            status: string;
+        };
+        /** AdminCommissionsPage */
+        AdminCommissionsPage: {
+            /** Agents */
+            agents: components["schemas"]["AgentOption"][];
+            /** Commissions */
+            commissions: components["schemas"]["AdminCommissionRow"][];
+            /** Total Paid */
+            total_paid: number;
+            /** Total Pending */
+            total_pending: number;
+        };
+        /** AdminLeadRow */
+        AdminLeadRow: {
+            /** Agent Id */
+            agent_id?: string | null;
+            agents?: components["schemas"]["AgentOption"] | null;
+            /**
+             * Clicked At
+             * Format: date-time
+             */
+            clicked_at: string;
+            /** Contact Type */
+            contact_type?: string | null;
+            /** Id */
+            id: string;
+            /** Ip Hash */
+            ip_hash?: string | null;
+            /** Listing Id */
+            listing_id?: string | null;
+            listings?: components["schemas"]["TitleRef"] | null;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+        };
+        /** AdminLeadsPage */
+        AdminLeadsPage: {
+            /** Agents */
+            agents: components["schemas"]["AgentOption"][];
+            /** Leads */
+            leads: components["schemas"]["AdminLeadRow"][];
+            /** Listings */
+            listings: components["schemas"]["TitleRef"][];
+        };
+        /** AdminListingRow */
+        AdminListingRow: {
+            /** Agent Id */
+            agent_id: string;
+            /** Agent Name */
+            agent_name: string;
+            /** Commission Locked By Admin */
+            commission_locked_by_admin: boolean;
+            /** Cover Image */
+            cover_image?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Landlord Phone */
+            landlord_phone?: string | null;
+            /** Leads Count */
+            leads_count: number;
+            /** Location */
+            location: string;
+            /** Pays Commission */
+            pays_commission: boolean;
+            /** Price */
+            price: number;
+            /** Sort Position */
+            sort_position?: number | null;
+            /** Title */
+            title: string;
+            /** Verified */
+            verified: boolean;
+        };
+        /** AdminListingsPage */
+        AdminListingsPage: {
+            /** Agents */
+            agents: components["schemas"]["AgentOption"][];
+            /** Has Custom Order */
+            has_custom_order: boolean;
+            /** Last Reorder At */
+            last_reorder_at?: string | null;
+            /** Listings */
+            listings: components["schemas"]["AdminListingRow"][];
+        };
+        /** AdminOverview */
+        AdminOverview: {
+            /** Active Agents */
+            active_agents: number;
+            /** Active Listings */
+            active_listings: number;
+            /** Monthly Leads */
+            monthly_leads: number;
+            /** Official Hostels */
+            official_hostels: number;
+            /** Pending Commissions Kes */
+            pending_commissions_kes: number;
+            /** Support Agents */
+            support_agents: number;
+            /** Total Campuses */
+            total_campuses: number;
+            /** Total Managers */
+            total_managers: number;
+            /** Total Regions */
+            total_regions: number;
+        };
+        /** AdminUserRow */
+        AdminUserRow: {
+            /** Agent Name */
+            agent_name?: string | null;
+            /** Agent Slug */
+            agent_slug?: string | null;
+            /** Agent Status */
+            agent_status?: string | null;
+            /** Avatar Url */
+            avatar_url?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name?: string | null;
+            /** Has Agent */
+            has_agent: boolean;
+            /** Id */
+            id: string;
+            /** Phone */
+            phone?: string | null;
+            /** Role */
+            role: string;
+            /** Updated At */
+            updated_at?: string | null;
+        };
         /** AgentApplicationCreate */
         AgentApplicationCreate: {
             /** Campus Id */
@@ -2498,6 +3253,15 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** AgentCreateRequest */
+        AgentCreateRequest: {
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Whatsapp */
+            whatsapp: string;
+        };
         /**
          * AgentDashboardRead
          * @description Headline numbers for the agent dashboard home.
@@ -2518,6 +3282,15 @@ export interface components {
             total_leads: number;
             /** Tour Earnings */
             tour_earnings: number;
+        };
+        /** AgentFlags */
+        AgentFlags: {
+            /** Is Featured */
+            is_featured?: boolean | null;
+            /** Is Founder */
+            is_founder?: boolean | null;
+            /** Verified */
+            verified?: boolean | null;
         };
         /**
          * AgentListingHostel
@@ -2765,6 +3538,35 @@ export interface components {
             /** Week Count */
             week_count: number;
         };
+        /** AgentOption */
+        AgentOption: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Status */
+            status?: string | null;
+        };
+        /** AgentPatch */
+        AgentPatch: {
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Whatsapp */
+            whatsapp?: string | null;
+        };
+        /** AgentPromoteRequest */
+        AgentPromoteRequest: {
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** User Id */
+            user_id: string;
+            /** Whatsapp */
+            whatsapp: string;
+        };
         /**
          * AgentSelfRead
          * @description An agent's own record, including private fields (balance, payment details).
@@ -2845,6 +3647,15 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** AgentSupportPatch */
+        AgentSupportPatch: {
+            /** Is Owner */
+            is_owner?: boolean | null;
+            /** Is Support */
+            is_support?: boolean | null;
+            /** Support Rank */
+            support_rank?: number | null;
+        };
         /** AgentUpdate */
         AgentUpdate: {
             /** Bio */
@@ -2861,6 +3672,15 @@ export interface components {
             profile_photo_url?: string | null;
             /** Whatsapp */
             whatsapp?: string | null;
+        };
+        /** AgentVerificationResult */
+        AgentVerificationResult: {
+            /** Matched Hostels */
+            matched_hostels: string[];
+            /** Shared Contact Detected */
+            shared_contact_detected: boolean;
+            /** Verified */
+            verified: boolean;
         };
         /** AnnouncementCreate */
         AnnouncementCreate: {
@@ -3251,6 +4071,8 @@ export interface components {
             };
             /** Hero Headline */
             hero_headline: string;
+            /** Hero Image */
+            hero_image?: string | null;
             /** Hero Subtext */
             hero_subtext?: string | null;
             /** Name */
@@ -3260,6 +4082,8 @@ export interface components {
              * @default #000000
              */
             primary_color: string;
+            /** Region Id */
+            region_id?: string | null;
             /** Slug */
             slug: string;
             /**
@@ -3477,6 +4301,10 @@ export interface components {
             name?: string | null;
             /** Primary Color */
             primary_color?: string | null;
+            /** Region Id */
+            region_id?: string | null;
+            /** Slug */
+            slug?: string | null;
             /** Status */
             status?: string | null;
             /** Whatsapp Number */
@@ -3501,6 +4329,20 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+        };
+        /** CommissionCreate */
+        CommissionCreate: {
+            /** Agent Id */
+            agent_id: string;
+            /** Amount */
+            amount: number;
+            /** Listing Id */
+            listing_id: string;
+        };
+        /** CommissionLockToggle */
+        CommissionLockToggle: {
+            /** Locked */
+            locked: boolean;
         };
         /** CommissionRead */
         CommissionRead: {
@@ -3965,6 +4807,8 @@ export interface components {
             updated_at: string;
             /** Updated By */
             updated_by?: string | null;
+            /** Updater Email */
+            updater_email?: string | null;
         };
         /** LegalDocRead */
         LegalDocRead: {
@@ -4161,6 +5005,42 @@ export interface components {
             r2_url: string;
             /** Width */
             width?: number | null;
+        };
+        /** ListingLeadRow */
+        ListingLeadRow: {
+            /** Agent Id */
+            agent_id?: string | null;
+            /**
+             * Clicked At
+             * Format: date-time
+             */
+            clicked_at: string;
+            /** Contact Type */
+            contact_type?: string | null;
+            /** Id */
+            id: string;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+        };
+        /** ListingLeadsPage */
+        ListingLeadsPage: {
+            /** Agent Names */
+            agent_names: {
+                [key: string]: unknown;
+            };
+            /** Leads */
+            leads: components["schemas"]["ListingLeadRow"][];
+            /** Listing */
+            listing: {
+                [key: string]: unknown;
+            };
+        };
+        /** ListingOrderRequest */
+        ListingOrderRequest: {
+            /** Updates */
+            updates: components["schemas"]["OrderUpdate"][];
         };
         /** ListingRead */
         ListingRead: {
@@ -4452,6 +5332,17 @@ export interface components {
             youtube_id?: string | null;
             /** Zone Id */
             zone_id?: string | null;
+        };
+        /** ListingVerificationResult */
+        ListingVerificationResult: {
+            /** Flags */
+            flags: string[];
+            /** Match Type */
+            match_type: string;
+            /** Matched Hostel */
+            matched_hostel?: string | null;
+            /** Verified */
+            verified: boolean;
         };
         /** LivenessCheckResponse */
         LivenessCheckResponse: {
@@ -4870,12 +5761,34 @@ export interface components {
             /** Zone */
             zone?: string | null;
         };
+        /** OfficialHostelWrite */
+        OfficialHostelWrite: {
+            /** Contacts */
+            contacts?: string | null;
+            /** Hostel Name */
+            hostel_name: string;
+            /** Payments */
+            payments?: string | null;
+            /** Source */
+            source?: string | null;
+            /** Verified Date */
+            verified_date?: string | null;
+            /** Zone */
+            zone?: string | null;
+        };
         /** OfficialHostelsOverview */
         OfficialHostelsOverview: {
             /** Listings */
             listings: components["schemas"]["AgentListingHostel"][];
             /** Official Hostels */
             official_hostels: components["schemas"]["OfficialHostelRead"][];
+        };
+        /** OrderUpdate */
+        OrderUpdate: {
+            /** Id */
+            id: string;
+            /** Sort Position */
+            sort_position?: number | null;
         };
         /** OwnerPhoneUpdate */
         OwnerPhoneUpdate: {
@@ -5494,6 +6407,11 @@ export interface components {
             /** Text */
             text?: string | null;
         };
+        /** RoleChange */
+        RoleChange: {
+            /** Role */
+            role: string;
+        };
         /** SavedHostelActionResponse */
         SavedHostelActionResponse: {
             /** Is Saved */
@@ -5602,6 +6520,44 @@ export interface components {
             updated_at: string;
             /** Zone */
             zone: string;
+        };
+        /** SupportAgentRow */
+        SupportAgentRow: {
+            /** Bio */
+            bio?: string | null;
+            /** Id */
+            id: string;
+            /** Is Featured */
+            is_featured: boolean;
+            /** Is Founder */
+            is_founder: boolean;
+            /** Is Owner */
+            is_owner: boolean;
+            /** Is Support */
+            is_support: boolean;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Profile Photo Url */
+            profile_photo_url?: string | null;
+            /** Slug */
+            slug?: string | null;
+            /** Status */
+            status: string;
+            /** Support Rank */
+            support_rank: number;
+            /** Verified */
+            verified: boolean;
+            /** Whatsapp */
+            whatsapp: string;
+        };
+        /** TitleRef */
+        TitleRef: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
         };
         /** TourAgentBrief */
         TourAgentBrief: {
@@ -5752,6 +6708,30 @@ export interface components {
             /** Reason */
             reason?: string | null;
         };
+        /** TransferRow */
+        TransferRow: {
+            /** Id */
+            id: string;
+            /** Listing Id */
+            listing_id: string;
+            /** Listing Title */
+            listing_title: string;
+            /** New Owner Id */
+            new_owner_id: string;
+            /** New Owner Name */
+            new_owner_name: string;
+            /** Previous Owner Id */
+            previous_owner_id: string;
+            /** Previous Owner Name */
+            previous_owner_name: string;
+            /**
+             * Transferred At
+             * Format: date-time
+             */
+            transferred_at: string;
+            /** Transferred By */
+            transferred_by: string;
+        };
         /** UnreadCountResponse */
         UnreadCountResponse: {
             /** Count */
@@ -5804,6 +6784,28 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VerifiedToggle */
+        VerifiedToggle: {
+            /** Verified */
+            verified: boolean;
+        };
+        /** VerifyAllSummary */
+        VerifyAllSummary: {
+            /** Matched */
+            matched: number;
+            /** Name Review */
+            name_review: number;
+            /** No Match */
+            no_match: number;
+            /** Official No Listing */
+            official_no_listing: number;
+            /** Phone Verified */
+            phone_verified: number;
+            /** Shared Contacts */
+            shared_contacts: number;
+            /** Total */
+            total: number;
         };
         /**
          * VerifyCandidate
@@ -6018,6 +7020,111 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_agents_api_v1_admin_agents_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAgentRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_agent_api_v1_admin_agents_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    promote_student_api_v1_admin_agents_promote_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentPromoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     transfer_listing_api_v1_admin_agents_transfer_post: {
         parameters: {
             query?: never;
@@ -6030,6 +7137,156 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["ListingTransferRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agent_detail_api_v1_admin_agents__agent_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAgentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_agent_api_v1_admin_agents__agent_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_flags_api_v1_admin_agents__agent_id__flags_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentFlags"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agent_standing_api_v1_admin_agents__agent_id__standing_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentStandingUpdate"];
             };
         };
         responses: {
@@ -6079,6 +7336,109 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["app__features__agents__schemas__AgentRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_support_api_v1_admin_agents__agent_id__support_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentSupportPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agent_verification_api_v1_admin_agents__agent_id__verification_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentVerificationResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    analytics_api_v1_admin_analytics_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAnalytics"];
                 };
             };
             /** @description Validation Error */
@@ -6232,6 +7592,381 @@ export interface operations {
             };
         };
     };
+    commissions_page_api_v1_admin_commissions_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCommissionsPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_commission_api_v1_admin_commissions_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommissionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    leads_page_api_v1_admin_leads_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLeadsPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listings_page_api_v1_admin_listings_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminListingsPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reorder_api_v1_admin_listings_order_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ListingOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shuffle_api_v1_admin_listings_shuffle_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_all_api_v1_admin_listings_verify_all_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyAllSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    commission_lock_api_v1_admin_listings__listing_id__commission_lock_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommissionLockToggle"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listing_leads_api_v1_admin_listings__listing_id__leads_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListingLeadsPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_verified_api_v1_admin_listings__listing_id__verified_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifiedToggle"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_listing_api_v1_admin_listings__listing_id__verify_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListingVerificationResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_managers_api_v1_admin_managers_get: {
         parameters: {
             query?: never;
@@ -6298,6 +8033,37 @@ export interface operations {
             };
         };
     };
+    overview_api_v1_admin_overview_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_stats_api_v1_admin_stats_get: {
         parameters: {
             query?: never;
@@ -6316,6 +8082,173 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlatformStats"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    support_agents_api_v1_admin_support_agents_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportAgentRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transfers_api_v1_admin_transfers_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_users_api_v1_admin_users_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    promote_to_admin_api_v1_admin_users__target_id__promote_admin_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_role_api_v1_admin_users__target_id__role_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -9372,6 +11305,41 @@ export interface operations {
             };
         };
     };
+    create_official_hostel_api_v1_official_hostels_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialHostelWrite"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialHostelRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     official_hostels_overview_api_v1_official_hostels_overview_get: {
         parameters: {
             query?: never;
@@ -9390,6 +11358,107 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OfficialHostelsOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seed_official_hostels_api_v1_official_hostels_seed_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_official_hostel_api_v1_official_hostels__record_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                record_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_official_hostel_api_v1_official_hostels__record_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                record_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfficialHostelWrite"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfficialHostelRead"];
                 };
             };
             /** @description Validation Error */

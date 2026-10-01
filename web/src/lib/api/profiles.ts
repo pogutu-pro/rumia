@@ -1,5 +1,4 @@
 import { api } from './client';
-import { serverApi } from './server';
 import { getApiUrl } from './config';
 
 export interface UserProfile {
@@ -62,23 +61,11 @@ export const profilesApi = {
     return api.get<UserProfile>('/profiles/me');
   },
 
-  getMeServer: () => {
-    return serverApi.get<UserProfile>('/profiles/me');
-  },
-
   updateMe: (data: ProfileUpdate) => {
     return api.patch<UserProfile>('/profiles/me', data);
   },
 
-  updateMeServer: (data: ProfileUpdate) => {
-    return serverApi.patch<UserProfile>('/profiles/me', data);
-  },
-
   setHomeCampus: (campusId: string, campusName: string) => {
     return api.post<UserProfile>('/profiles/me/campus', { campus_id: campusId, campus_name: campusName });
-  },
-
-  setHomeCampusServer: (campusId: string, campusName: string) => {
-    return serverApi.post<UserProfile>('/profiles/me/campus', { campus_id: campusId, campus_name: campusName });
-  },
+  }
 };

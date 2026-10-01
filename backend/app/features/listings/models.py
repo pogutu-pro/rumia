@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional
-from sqlalchemy import ARRAY, BOOLEAN, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, func
+from sqlalchemy import ARRAY, BOOLEAN, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -56,6 +56,11 @@ class Listing(Base):
     views: Mapped[int] = mapped_column(Integer, server_default="0")
     verified: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
     commission_locked_by_admin: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
+    verified_source: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    verified_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    discrepancy_review_needed: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
+    shared_contact_detected: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
+    manual_review_needed: Mapped[Optional[bool]] = mapped_column(BOOLEAN, server_default="false", nullable=True)
     bathroom_type: Mapped[Optional[str]] = mapped_column(String, server_default="Shared")
     proximity_description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     distance_to_campus: Mapped[Optional[str]] = mapped_column(String, nullable=True)

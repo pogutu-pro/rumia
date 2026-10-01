@@ -1,7 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
-import { isAdminUser } from '@/lib/utils/admin';
-import { redirect } from 'next/navigation';
+import { managerApi } from '@/lib/api/manager';
+import { regionsApi } from '@/lib/api/regions';
 import ManagersTableClient from './managers-table-client';
 
 export const metadata = {
@@ -9,28 +7,22 @@ export const metadata = {
 };
 
 export default async function ManagersPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/auth/login');
-  }
-
-  const isAdmin = await isAdminUser(supabase, user.id);
-  if (!isAdmin) {
-    redirect('/auth/login');
-  }
-
-  // Fetch managers
-  const { data: managers, error: managersError } = await supabaseAdmin
-    .from('profiles')
-    .select('id, email, full_name, role, managed_campus_id, managed_region_id, campuses:managed_campus_id(id, name), regions:managed_region_id(id, name)')
-    .in('role', ['manager'])
-    .order('full_name');
-
-  // Fetch campuses and regions for the form
-  const { data: campuses } = await supabaseAdmin.from('campuses').select('id, name').order('name');
-  const { data: regions } = await supabaseAdmin.from('regions').select('id, name').order('name');
+  const [staff, campusRows, regionRows] = await Promise.all([
+    managerApi.staff().catch(() => []),
+    managerApi.campuses().catch(() => []),
+    regionsApi.listServer().catch(() => []),
+  ]);
+  const campuses = campusRows.map((c) => ({ id: c.id, name: c.name }));
+  const regions = regionRows.map((r) => ({ id: r.id, name: r.name }));
+  // The table reads the embedded campus/region of each manager.
+  const managers = staff
+    .filter((m) => m.role === 'manager')
+    .sort((a, b) => (a.full_name ?? '').localeCompare(b.full_name ?? ''))
+    .map((m) => ({
+      ...m,
+      campuses: campuses.find((c) => c.id === m.managed_campus_id) ?? null,
+      regions: regions.find((r) => r.id === m.managed_region_id) ?? null,
+    }));
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -43,9 +35,9 @@ export default async function ManagersPage() {
 
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
         <ManagersTableClient 
-          initialManagers={managers || []} 
-          campuses={campuses || []} 
-          regions={regions || []} 
+          initialManagers={managers as any[]}
+          campuses={campuses}
+          regions={regions}
         />
       </div>
     </div>

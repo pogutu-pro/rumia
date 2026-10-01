@@ -1,73 +1,19 @@
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { adminConsoleApi } from '@/lib/api/admin-console';
 import { OverviewClient } from './overview-client';
 
-// Compute all four stat cards with aggregate (count/sum-scoped) queries instead
-// of streaming entire tables into memory on every admin visit.
-function startOfMonthUtc(date = new Date()): string {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1),
-  ).toISOString();
-}
-
 export default async function OverviewPage() {
-  const supabase = await createClient();
-
-  const [
-    { count: activeListings },
-    { data: pendingCommissions },
-    { count: activeAgents },
-    { count: monthlyLeads },
-    { count: campusCount },
-    { count: regionCount },
-    { count: managerCount },
-    { count: supportAgents },
-    { count: officialHostels },
-  ] = await Promise.all([
-    (supabase as any)
-      .from('listings')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_active', true),
-    (supabase as any)
-      .from('commissions')
-      .select('amount')
-      .eq('status', 'pending'),
-    (supabase as any)
-      .from('agents')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'active'),
-    (supabase as any)
-      .from('leads')
-      .select('id', { count: 'exact', head: true })
-      .gte('clicked_at', startOfMonthUtc()),
-    supabaseAdmin.from('campuses').select('id', { count: 'exact', head: true }),
-    supabaseAdmin.from('regions').select('id', { count: 'exact', head: true }),
-    supabaseAdmin.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'manager'),
-    (supabase as any)
-      .from('agents')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_support', true),
-    (supabase as any)
-      .from('dekut_official_hostels')
-      .select('id', { count: 'exact', head: true }),
-  ]);
-
-  const pendingRows = (pendingCommissions ?? []) as Array<{ amount: number }>;
-  let pendingCommissionsKes = 0;
-  for (const row of pendingRows) {
-    pendingCommissionsKes += Number(row.amount ?? 0);
-  }
+  const o = await adminConsoleApi.overview().catch(() => null);
 
   const stats = {
-    activeListings: activeListings ?? 0,
-    monthlyLeads: monthlyLeads ?? 0,
-    pendingCommissionsKes,
-    activeAgents: activeAgents ?? 0,
-    totalCampuses: campusCount ?? 0,
-    totalRegions: regionCount ?? 0,
-    totalManagers: managerCount ?? 0,
-    supportAgents: supportAgents ?? 0,
-    totalHostels: (officialHostels ?? 0) + (activeListings ?? 0),
+    activeListings: o?.active_listings ?? 0,
+    monthlyLeads: o?.monthly_leads ?? 0,
+    pendingCommissionsKes: o?.pending_commissions_kes ?? 0,
+    activeAgents: o?.active_agents ?? 0,
+    totalCampuses: o?.total_campuses ?? 0,
+    totalRegions: o?.total_regions ?? 0,
+    totalManagers: o?.total_managers ?? 0,
+    supportAgents: o?.support_agents ?? 0,
+    totalHostels: (o?.official_hostels ?? 0) + (o?.active_listings ?? 0),
   };
 
   return <OverviewClient stats={stats} />;

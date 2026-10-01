@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { listingsApi } from '@/lib/api/listings';
+import { toLegacyListingShape } from '@/lib/api/legacy-listing';
 import { notFound, redirect } from 'next/navigation';
 import { AdminEditForm } from './admin-edit-form';
 import { ArrowLeft } from 'lucide-react';
@@ -15,56 +15,14 @@ export default async function AdminEditListingPage({
   params,
 }: AdminEditListingPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/auth/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  if (profile?.role !== 'admin') {
-    redirect('/dashboard');
-  }
-
-  const { data: listing, error } = await supabaseAdmin
-    .from('listings')
-    .select(
-      `id, title, description, price, location, youtube_id, is_youtube_shorts, room_type,
-      amenities, bathroom_type, distance_to_campus,
-      security_type, water_included, electricity_included, wifi_included, hot_water_included, cooking_gas_included,
-      latitude, longitude, gender, proximity_description, is_active,
-      county, area,
-      specific_location, price_single, price_sharing, mpesa_details, distance_category,
-      landlord_phone,
-      listing_images ( id, r2_url, category, display_order, blur_data_url ),
-      agents ( id, name, phone, whatsapp )`
-    )
-    .eq('id', id)
-    .single();
-
-  if (error || !listing) {
+  // Admin read: includes inactive listings; 404 when missing.
+  const apiListing = await listingsApi.getByIdAuthenticatedServer(id).catch(() => null);
+  if (!apiListing) {
     notFound();
   }
-
-  const agent = (listing as any).agents;
-
-  const { data: roomTypes } = await supabaseAdmin
-    .from('listing_room_types')
-    .select(
-      'id, room_type, price, is_available, deposit, furnishing_items, category, occupancy, floor, size'
-    )
-    .eq('listing_id', id);
-
-  (listing as any).listing_room_types = roomTypes || [];
+  const agent = apiListing.agent;
+  // The form reads the legacy `listing_images` / `listing_room_types` keys.
+  const listing = toLegacyListingShape(apiListing);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -85,7 +43,7 @@ export default async function AdminEditListingPage({
       </div>
 
       <AdminEditForm
-        agentId={agent?.id || (listing as any).agent_id}
+        agentId={agent?.id || ''}
         agentWhatsapp={agent?.whatsapp || agent?.phone || ''}
         initialListing={listing as any}
       />

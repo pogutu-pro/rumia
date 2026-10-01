@@ -1,6 +1,6 @@
 # Plan: Remove all direct database access from the web frontend
 
-**Status:** IN PROGRESS — Phases 0, 1 and 2 done (see §13–14). Decisions confirmed 2026-10-01: keep `app/api/*` as thin same-origin cookie proxies; parity-diff against a restored production snapshot; phase order agent → manager → admin.
+**Status:** DONE (code complete; deploy + browser verification pending) — Phases 0–6 finished, see §13–15. Decisions confirmed 2026-10-01: keep `app/api/*` as thin same-origin cookie proxies; parity-diff against a restored production snapshot; phase order agent → manager → admin.
 **Parent effort:** Supabase → self-hosted Postgres (see `DB_MIGRATION.md`). This is **step 2**; it must land before the database cutover (step 1 cutover) and before the custom-auth work (step 3).
 
 ## 1. Goal and rule
@@ -329,3 +329,46 @@ Per-domain workflow (repeat for each row in §5):
 - Review author names are copied at write time; a later profile rename is not reflected.
 - `lib/push.ts` still sends pushes from Node for admin/manager actions; it goes away with Phases 4–5 (the backend already has `send_push_to_user`).
 - Add `scripts/check_schema_drift.py` and the real-DB smoke flows (`scripts/restore-snapshot.sh`) to CI.
+
+
+## 15. Phases 3–6 — agent dashboard, manager, admin, credential removal (DONE)
+
+**Result:** `scripts/check-no-direct-db.sh` reports **0 legacy files**, and its pattern now also forbids
+`SUPABASE_SERVICE_ROLE_KEY` and `@supabase/supabase-js` anywhere under `web/src`. `lib/push.ts`,
+`lib/supabase/admin.ts`, `lib/supabase/public.ts`, `lib/utils/admin.ts`, `lib/utils/manager.ts` are deleted.
+The service-role key is gone from the web Dockerfile, `docker-compose.yml`, CI and `.env.example`; it lives only
+in `backend/.env.example` (used by admin "Add agent" to create a login identity, behind `core/auth_provider.py`,
+which is the single place to swap when auth moves to our own Postgres).
+
+### New backend surface (all covered by real-DB runs on the restored snapshot)
+- **Agent dashboard:** `GET /agents/me`, `POST /agents/me/ensure`, `/agents/me/dashboard`, `/agents/me/listings`,
+  `/tours` embeds listing+agent, `/analytics/agent/{id}` (own only), `/official-hostels[/overview]`.
+- **Manager (`/manager/*`):** context, overview, campuses (+settings, admin create), applications (approve/reject),
+  agents (+standing), listings (+owner phone, edit read), hostels, announcements, staff (admin) — all scoped through
+  `core/scope.py`; zones CRUD in `/zones`; listing mutations in `/listings` now allow in-scope managers.
+- **Admin (`/admin/*`):** overview, users (+role, promote-admin), agents (+detail, create, promote, edit, flags,
+  support, verification, standing), listings (+order, shuffle, verify, verify-all, verified, commission-lock, leads),
+  leads, commissions (+create), transfers, analytics, official-hostel CRUD + idempotent seed.
+
+### Bugs found and fixed (again none visible to mocked tests)
+- Managers could not act on listings (every listing route required role `agent|admin`); ordinary users with no
+  agent record could **auto-create an agent row** by calling the create-listing endpoint, and clients could
+  choose the campus of a new listing or move a listing to another campus. Now: owner/admin/in-scope-manager only,
+  creation needs an agent record, campus comes from the agent, moving campuses is admin-only.
+- Announcements: any manager could post to / delete from any campus; "edit" created a duplicate instead of updating.
+- Analytics: any agent could read another agent's view analytics.
+- Agent self-service reads exposed the visitor `ip_hash` of leads; no longer returned.
+- `agents.support_rank/is_owner`, `campuses.hostel_finding_fee/consultation_fee/social_links` and the official-hostel
+  defaults are NOT NULL with DB defaults but had no model defaults (INSERT sent NULL → 500). Fixed; the drift checker
+  now flags this class.
+- Admin campus create/update silently dropped `region_id`/`slug`; listing create/update dropped `mpesa_details` and
+  `proximity_description`; the former `/admin/managers/{id}` DELETE the web called never existed.
+- Review/hostel/tour flows covered earlier (§14).
+
+### Still to do (needs a human / the VM)
+1. **Browser smoke test** of each role (student, agent, manager, admin) before deploying — nothing was clicked through.
+2. `pnpm remove web-push @types/web-push` (unused now; not done because it rewrites the lockfile and needs network).
+3. Remove `SUPABASE_SERVICE_ROLE_KEY` from `web/.env.production` on the server and set it in `backend/.env`
+   (only needed for admin "Add agent").
+4. Add `check_schema_drift.py` and a real-DB smoke (`scripts/restore-snapshot.sh`) to CI.
+5. Then the database cutover (`docs/DB_MIGRATION.md`) — the web no longer writes to Supabase, so it is safe to cut over.

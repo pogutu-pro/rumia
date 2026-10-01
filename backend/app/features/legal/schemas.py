@@ -26,6 +26,7 @@ class LegalDocAdminRead(BaseModel):
     created_at: datetime
     updated_at: datetime
     updated_by: Optional[str] = None
+    updater_email: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -36,10 +36,6 @@ ARG NEXT_PUBLIC_POSTHOG_HOST
 ARG NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ARG NEXT_PUBLIC_SENTRY_DSN
-# Server-only secret needed by some modules (e.g. supabaseAdmin) during
-# build-time page-data collection. Only exists as a build arg here; never
-# baked into the final image.
-ARG SUPABASE_SERVICE_ROLE_KEY
 RUN set -e; for v in \
       NEXT_PUBLIC_SITE_URL \
       NEXT_PUBLIC_SUPABASE_URL \
@@ -50,8 +46,7 @@ RUN set -e; for v in \
       NEXT_PUBLIC_POSTHOG_HOST \
       NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN \
       NEXT_PUBLIC_VAPID_PUBLIC_KEY \
-      NEXT_PUBLIC_SENTRY_DSN \
-      SUPABASE_SERVICE_ROLE_KEY; do \
+      NEXT_PUBLIC_SENTRY_DSN; do \
         val="$(printenv "$v" || true)"; \
         if [ -n "$val" ]; then echo "$v=$val" >> .env.production; fi; \
     done

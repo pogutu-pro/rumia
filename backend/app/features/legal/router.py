@@ -46,7 +46,13 @@ async def list_admin_docs(
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[LegalDocAdminRead]:
     docs = await LegalService.list_admin_docs(db, user)
-    return [LegalDocAdminRead.model_validate(d) for d in docs]
+    emails = await LegalService.updater_emails(db, [d.updated_by for d in docs if d.updated_by])
+    out = []
+    for d in docs:
+        row = LegalDocAdminRead.model_validate(d)
+        row.updater_email = emails.get(str(d.updated_by)) if d.updated_by else None
+        out.append(row)
+    return out
 
 
 @router.patch(

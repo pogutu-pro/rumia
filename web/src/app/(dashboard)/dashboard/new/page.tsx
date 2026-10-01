@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
-import { campusesApi } from '@/lib/api/campuses';
 import { redirect } from 'next/navigation';
 import { NewListingForm } from './new-listing-form';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { campusesServerApi } from '@/lib/api/campuses.server';
 
 export const revalidate = 0;
 
@@ -29,7 +29,7 @@ export default async function NewListingPage() {
   }
 
   const [campuses, campusZones] = await Promise.all([
-    campusesApi.listServer('active,coming_soon,suspended').catch(() => []),
+    campusesServerApi.listServer('active,coming_soon,suspended').catch(() => []),
     agentDashboardApi.zones(agent.campus_id),
   ]);
   const campus = campuses.find((c) => c.id === agent.campus_id);

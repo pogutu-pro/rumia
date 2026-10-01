@@ -216,3 +216,44 @@ def verify_listing(
         )
 
     return VerificationResult(flags=flags)
+
+
+
+# ── Helpers for admin tooling ────────────────────────────────────────────
+
+@dataclass
+class AgentMatch:
+    verified: bool
+    matched_hostels: List[str]
+    shared_contact_detected: bool
+
+
+def official_records() -> List[OfficialRecord]:
+    """The bundled official DeKUT housing records."""
+    return _load_records()
+
+
+def match_agent_phone(phone: Optional[str]) -> Optional[AgentMatch]:
+    """Does this phone appear in the official records? (None when the number is unusable.)"""
+    normalized = _normalize_phone(phone)
+    if not normalized:
+        return None
+    hostels = [r.hostel_name for r in _load_records() if normalized in r.contacts]
+    return AgentMatch(verified=bool(hostels), matched_hostels=hostels, shared_contact_detected=len(hostels) > 1)
+
+
+def verify_agent(phone: Optional[str], whatsapp: Optional[str]) -> AgentMatch:
+    """Best verification result across an agent's phone and WhatsApp numbers."""
+    first = match_agent_phone(phone)
+    if first and first.verified:
+        return first
+    second = match_agent_phone(whatsapp)
+    if second and second.verified:
+        return second
+    return AgentMatch(verified=False, matched_hostels=[], shared_contact_detected=False)
+
+
+def raw_official_records() -> List[dict]:
+    """The bundled records exactly as stored in the JSON file (for seeding the database)."""
+    with open(_DATA_PATH, "r") as f:
+        return json.load(f)

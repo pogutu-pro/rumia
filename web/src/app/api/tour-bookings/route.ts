@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api/client';
 import { toursApi, type TourBookingCreate } from '@/lib/api/tours';
+import { toursServerApi } from '@/lib/api/tours.server';
 
 /**
  * Thin same-origin proxy to FastAPI `POST /tours`. The session cookie is forwarded as a bearer
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const booking = await toursApi.createServer({
+    const booking = await toursServerApi.createServer({
       student_name: body.student_name,
       phone: body.phone,
       listing_id: body.listing_id ?? null,

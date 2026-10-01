@@ -28,6 +28,16 @@ class LegalService:
         return list(res.scalars().all())
 
     @staticmethod
+    async def updater_emails(db: AsyncSession, user_ids: List[str]) -> dict:
+        """user id -> email, for showing who last edited a document."""
+        if not user_ids:
+            return {}
+        from app.features.profiles.models import UserProfile
+
+        res = await db.execute(select(UserProfile.id, UserProfile.email).where(UserProfile.id.in_(user_ids)))
+        return {str(i): e for i, e in res.all() if e}
+
+    @staticmethod
     async def save_draft(db: AsyncSession, user: AuthenticatedUser, doc_type: str, draft_content: str) -> LegalDocument:
         if not user.is_admin:
             raise ForbiddenException("Only admins can manage legal documents")

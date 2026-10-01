@@ -58,7 +58,7 @@ export const adminApi = {
   },
 
   removeManagerServer: (userId: string) => {
-    return serverApi.delete(`/admin/managers/${userId}`);
+    return serverApi.delete(`/manager/staff/${userId}`);
   },
 
   getAgentsServer: () => {

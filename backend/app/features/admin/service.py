@@ -31,6 +31,8 @@ class AdminService:
             whatsapp_number=data.whatsapp_number,
             primary_color=data.primary_color,
             feature_flags=data.feature_flags or {},
+            region_id=data.region_id or None,
+            hero_image=data.hero_image,
             status=data.status,
             created_at=datetime.now(timezone.utc),
         )
@@ -50,6 +52,10 @@ class AdminService:
 
         if data.name is not None:
             campus.name = data.name
+        if data.slug is not None:
+            campus.slug = data.slug.strip().lower()
+        if data.region_id is not None:
+            campus.region_id = data.region_id or None
         if data.city is not None:
             campus.city = data.city
         if data.hero_headline is not None:

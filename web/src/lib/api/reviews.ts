@@ -1,5 +1,4 @@
 import { api } from './client';
-import { serverApi } from './server';
 
 export interface Review {
   id: string;
@@ -68,12 +67,6 @@ export const reviewsApi = {
     return api.get<{ items: Review[]; total: number }>(`/reviews?${params.toString()}`);
   },
 
-  getFeedServer: (listingId?: string, status = 'published', page = 1, limit = 10) => {
-    const params = new URLSearchParams({ status, page: page.toString(), limit: limit.toString() });
-    if (listingId) params.set('listing_id', listingId);
-    return serverApi.get<{ items: Review[]; total: number }>(`/reviews?${params.toString()}`);
-  },
-
   /** One review by id (published only unless you are its author or a moderator). */
   getById: (id: string) => {
     return api.get<Review>(`/reviews/${id}`);
@@ -83,61 +76,23 @@ export const reviewsApi = {
     return api.get<ReviewSummary>(`/reviews/summary/${listingId}`);
   },
 
-  getSummaryServer: (listingId: string) => {
-    return serverApi.get<ReviewSummary>(`/reviews/summary/${listingId}`);
-  },
-
   create: (data: ReviewCreate) => {
     return api.post<Review>('/reviews', data);
-  },
-
-  createServer: (data: ReviewCreate) => {
-    return serverApi.post<Review>('/reviews', data);
   },
 
   update: (id: string, data: ReviewUpdate) => {
     return api.put<Review>(`/reviews/${id}`, data);
   },
 
-  updateServer: (id: string, data: ReviewUpdate) => {
-    return serverApi.put<Review>(`/reviews/${id}`, data);
-  },
-
   delete: (id: string) => {
     return api.delete(`/reviews/${id}`);
-  },
-
-  deleteServer: (id: string) => {
-    return serverApi.delete(`/reviews/${id}`);
   },
 
   toggleLike: (id: string) => {
     return api.post<{ liked: boolean }>(`/reviews/${id}/like`);
   },
 
-  toggleLikeServer: (id: string) => {
-    return serverApi.post<{ liked: boolean }>(`/reviews/${id}/like`);
-  },
-
   addReply: (id: string, text: string) => {
     return api.post(`/reviews/${id}/reply`, { text });
-  },
-
-  addReplyServer: (id: string, text: string) => {
-    return serverApi.post(`/reviews/${id}/reply`, { text });
-  },
-
-  /** `edit` changes only the text and keeps the status. */
-  moderateServer: (
-    id: string,
-    action: 'approve' | 'hide' | 'flag' | 'restore' | 'edit',
-    note?: string,
-    text?: string,
-  ) => {
-    return serverApi.patch(`/reviews/${id}/moderate`, { action, note, text });
-  },
-
-  deleteReplyServer: (replyId: string) => {
-    return serverApi.delete(`/reviews/replies/${replyId}`);
-  },
+  }
 };

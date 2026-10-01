@@ -1,24 +1,17 @@
-import { api } from './client';
+/** Server-only half of `search.ts` (uses the session cookie via next/headers). Never import from client components. */
+import { serverApi } from './server';
+import { fetchPublicApi } from './config';
 import type { Listing } from '@/types';
 import type { PaginatedResponse } from './listings';
+import type { SearchParams } from './search';
 
-export interface SearchParams {
-  q?: string;
-  campus_slug?: string;
-  zone_slug?: string;
-  area?: string;
-  property_type?: string;
-  min_price?: number;
-  max_price?: number;
-  page?: number;
-  limit?: number;
-}
+export const searchServerApi = {
 
-export const searchApi = {
   /**
-   * Perform a text/filter search across listings (client-side)
+   * Perform a text/filter search across listings (server-side, public data)
+   * Uses a cookie-free fetch so pages can remain static/ISR.
    */
-  search: (params?: SearchParams) => {
+  searchServer: (params?: SearchParams) => {
     const searchParams = new URLSearchParams();
     if (params?.q) searchParams.set('q', params.q);
     if (params?.campus_slug) searchParams.set('campus_slug', params.campus_slug);
@@ -30,6 +23,6 @@ export const searchApi = {
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
 
-    return api.get<PaginatedResponse<Listing>>(`/search?${searchParams.toString()}`);
+    return fetchPublicApi<PaginatedResponse<Listing>>(`/search?${searchParams.toString()}`);
   }
 };
