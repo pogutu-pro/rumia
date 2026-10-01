@@ -1,6 +1,6 @@
 # Plan: Remove all direct database access from the web frontend
 
-**Status:** IN PROGRESS — Phase 0 and Phase 1 done (see §13). Decisions confirmed 2026-10-01: keep `app/api/*` as thin same-origin cookie proxies; parity-diff against a restored production snapshot; phase order agent → manager → admin.
+**Status:** IN PROGRESS — Phases 0, 1 and 2 done (see §13–14). Decisions confirmed 2026-10-01: keep `app/api/*` as thin same-origin cookie proxies; parity-diff against a restored production snapshot; phase order agent → manager → admin.
 **Parent effort:** Supabase → self-hosted Postgres (see `DB_MIGRATION.md`). This is **step 2**; it must land before the database cutover (step 1 cutover) and before the custom-auth work (step 3).
 
 ## 1. Goal and rule
@@ -293,3 +293,39 @@ Per-domain workflow (repeat for each row in §5):
 - Backend `create_review` hard-codes `school_verified_at_review_time=False`; the web action computes it — port that logic when reviews actions move (Phase 2).
 - Four tour/review/profile endpoints now return richer shapes; mobile's generated types (`mobile/lib/api/types.ts`) should be regenerated from `openapi.json`.
 - Order of work stays agent → manager → admin; Phase 2 (public SSR, route handlers, student actions) is next and starts by reconciling the three open tables above.
+
+
+## 14. Phase 2 — public SSR, route handlers, student actions (DONE)
+
+**Result:** direct-DB files in `web/` went 84 → **53**. Everything outside the agent-dashboard / manager / admin areas is clean; what remains on the allow-list is those three areas plus six shared libs (`lib/push.ts`, `lib/utils/admin.ts`, `lib/utils/manager.ts`, `lib/supabase/admin.ts`, `lib/supabase/public.ts`, `app/api/campuses/create`).
+
+### Converted (web → FastAPI, with real-data verification on a restored production snapshot)
+- **Route handlers (thin same-origin proxies, as decided):** `track-lead`, `listing-views`, `tour-bookings` (the dead `[id]` PATCH route deleted), `push/subscribe|unsubscribe`, `auth/check-email`, `images/process` (image *processing* stays in Node; only metadata registration moved), `auth/callback`.
+- **Student actions:** hostel requests (student + manager side), reviews (full rule parity), feedback, tour edit/cancel/delete, notifications. `createAppNotification` removed.
+- **Public SSR:** agent profile/redirect, support team, verify (Hakikisha), campus landing, sitemap, legal docs, zone tour price, listing OG image, `proxy.ts` legacy-URL redirects. New `/public/*` endpoints return an explicit public schema (no ID numbers, owner contacts, balances, user ids).
+- **Mobile:** contract regenerated (`backend/openapi.json`, `mobile/lib/api/types.ts`); lead tracking, tour booking and ratings-only reviews updated.
+
+### Bugs found and fixed on the way (all pre-existing, none visible to mocked tests)
+1. Commit-after-response race: with FastAPI ≥0.118 the DB session committed *after* the response was sent, so create-then-read could miss the write. All routes now use `Depends(get_db_session, scope="function")`; a test enforces it.
+2. Reviews: school-verification rule never enforced, author name/avatar trusted from the request, no one-per-listing check, manager scope missing, `rejected` status violating the live CHECK (`published|hidden|flagged`), reply delete hit the wrong endpoint, new-row serialization raised MissingGreenlet.
+3. Tours: amount was client-supplied (now priced from the zone server-side); linked user was client-supplied (now from the JWT); students could not cancel/edit (stub); status transitions unenforced.
+4. Leads: commission accounting was non-atomic and the agent could be client-chosen (now the listing's own agent, atomic increment); IP hash was client-supplied.
+5. Views: `user_id` and `ip_hash` were client-supplied.
+6. Legal: the public endpoint fell back to returning **unpublished drafts**.
+7. Reviews/feedback/tours/leads/hostel-requests/legal/push models mismatched the live schema (see §13).
+8. Web error handling rendered `[object Object]` for FastAPI errors (`detail.message`); fixed in `apiClient`, `apiServer`, `fetchPublicApi`.
+9. Image-upload registration is validated: R2 cleanup deletes the keys on the row, so keys must sit under the caller's own `<user_id>/` prefix.
+
+### Behaviour changes to be aware of
+- Reviews: written text now requires a school-verified account (as before the migration to FastAPI); ratings-only reviews are open to all. Legacy mobile placeholder text is treated as "no text".
+- Feedback now requires sign-in (the live table has `user_id NOT NULL`) and carries a category.
+- Moderators edit review text through `PATCH /reviews/{id}/moderate` with `action: "edit"`.
+- Guest tour bookings are linked on login by the **last 9 digits** of the profile phone (was exact digits).
+- `author_name` on reviews is snapshotted from the profile; it is no longer taken from the request.
+
+### Known gaps / follow-ups
+- **Phone ownership is unverified**: anyone can set a profile phone to another person's number and have that person's guest bookings linked to their account on next login (pre-existing). Add OTP verification.
+- `GET /public/verify-candidates` publishes every active listing's landlord phone and M-Pesa details by design (the Hakikisha checker needs them in the browser). Consider a server-side check endpoint instead.
+- Review author names are copied at write time; a later profile rename is not reflected.
+- `lib/push.ts` still sends pushes from Node for admin/manager actions; it goes away with Phases 4–5 (the backend already has `send_push_to_user`).
+- Add `scripts/check_schema_drift.py` and the real-DB smoke flows (`scripts/restore-snapshot.sh`) to CI.

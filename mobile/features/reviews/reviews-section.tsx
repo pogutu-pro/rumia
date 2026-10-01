@@ -147,8 +147,11 @@ function ReviewCardRow({
     },
   });
 
-  const isLong = review.text.length > 260;
-  const shown = isLong && !expanded ? `${review.text.slice(0, 260)}…` : review.text;
+  // Ratings-only reviews (no written text) are allowed. Older rows may hold the legacy placeholder.
+  const hasText = !!review.text && review.text !== 'No written review provided.';
+  const body = hasText ? (review.text as string) : '';
+  const isLong = body.length > 260;
+  const shown = isLong && !expanded ? `${body.slice(0, 260)}…` : body;
   const ratings = categoryRatingsFromRow(review);
   const labelFor = (key: string) => REVIEW_CATEGORIES.find((c) => c.key === key)?.shortLabel ?? key;
   const categoryEntries = Object.entries(ratings);
@@ -203,7 +206,7 @@ function ReviewCardRow({
           </View>
         )}
 
-        {review.text !== 'No written review provided.' && <Text style={styles.reviewText}>{shown}</Text>}
+        {hasText && <Text style={styles.reviewText}>{shown}</Text>}
         {isLong && (
           <Pressable onPress={() => setExpanded((v) => !v)} hitSlop={6}>
             <Text style={styles.readMore}>{expanded ? 'Read less' : 'Read more'}</Text>

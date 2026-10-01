@@ -120,9 +120,9 @@ function ZoneTourModalInner({
       phone: phone.trim(),
       zone: selection.zoneName,
       tour_type: 'full_search',
-      amount: selection.zonePrice,
       preferred_date: preferredDate,
       preferred_time: timeSlot,
+      from_listing: false,
     });
   };
 

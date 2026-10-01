@@ -739,6 +739,256 @@
         "title": "BnbDetailsRead",
         "type": "object"
       },
+      "BnbDetailsUpdate": {
+        "description": "Partial nested update for BnB-only listing details.",
+        "properties": {
+          "advance_notice_hours": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advance Notice Hours"
+          },
+          "available_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available From"
+          },
+          "available_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available Until"
+          },
+          "bathrooms": {
+            "anyOf": [
+              {
+                "maximum": 20.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bathrooms"
+          },
+          "bed_config": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BedConfig"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bed Config"
+          },
+          "bedrooms": {
+            "anyOf": [
+              {
+                "maximum": 20.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bedrooms"
+          },
+          "check_in_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Check In Time"
+          },
+          "check_out_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Check Out Time"
+          },
+          "cleaning_fee": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cleaning Fee"
+          },
+          "custom_rules": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Rules"
+          },
+          "extra_guest_fee": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extra Guest Fee"
+          },
+          "guest_suitability": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Suitability"
+          },
+          "house_rules": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HouseRules"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listing_type": {
+            "anyOf": [
+              {
+                "pattern": "^(entire_place|private_room|shared_space)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Type"
+          },
+          "max_guests": {
+            "anyOf": [
+              {
+                "maximum": 50.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Guests"
+          },
+          "max_stay_nights": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Stay Nights"
+          },
+          "min_stay_nights": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Stay Nights"
+          },
+          "nearby_landmark": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nearby Landmark"
+          },
+          "price_unit": {
+            "anyOf": [
+              {
+                "pattern": "^(night|week|month)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Unit"
+          },
+          "security_deposit": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Security Deposit"
+          }
+        },
+        "title": "BnbDetailsUpdate",
+        "type": "object"
+      },
       "BnbListingCreate": {
         "description": "Full payload to create a BnB listing (listing + bnb_details in one call).",
         "properties": {
@@ -1049,6 +1299,17 @@
             ],
             "title": "Updated At"
           },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          },
           "views": {
             "default": 0,
             "title": "Views",
@@ -1070,20 +1331,8 @@
         "type": "object"
       },
       "BnbListingUpdate": {
-        "description": "Partial update for a BnB listing.",
+        "description": "Partial update for a BnB listing, with details nested under `bnb`.",
         "properties": {
-          "advance_notice_hours": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Advance Notice Hours"
-          },
           "agent_whatsapp": {
             "anyOf": [
               {
@@ -1120,103 +1369,15 @@
             ],
             "title": "Area"
           },
-          "available_from": {
+          "bnb": {
             "anyOf": [
               {
-                "format": "date",
-                "type": "string"
+                "$ref": "#/components/schemas/BnbDetailsUpdate"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Available From"
-          },
-          "available_until": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Available Until"
-          },
-          "bathrooms": {
-            "anyOf": [
-              {
-                "maximum": 20.0,
-                "minimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bathrooms"
-          },
-          "bed_config": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/BedConfig"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bed Config"
-          },
-          "bedrooms": {
-            "anyOf": [
-              {
-                "maximum": 20.0,
-                "minimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bedrooms"
-          },
-          "check_in_time": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Check In Time"
-          },
-          "check_out_time": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Check Out Time"
-          },
-          "cleaning_fee": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cleaning Fee"
+            ]
           },
           "county": {
             "anyOf": [
@@ -1229,18 +1390,6 @@
             ],
             "title": "County"
           },
-          "custom_rules": {
-            "anyOf": [
-              {
-                "maxLength": 1000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Custom Rules"
-          },
           "description": {
             "anyOf": [
               {
@@ -1252,42 +1401,6 @@
               }
             ],
             "title": "Description"
-          },
-          "extra_guest_fee": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Extra Guest Fee"
-          },
-          "guest_suitability": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Guest Suitability"
-          },
-          "house_rules": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/HouseRules"
-              },
-              {
-                "type": "null"
-              }
-            ]
           },
           "images": {
             "anyOf": [
@@ -1326,18 +1439,6 @@
             ],
             "title": "Latitude"
           },
-          "listing_type": {
-            "anyOf": [
-              {
-                "pattern": "^(entire_place|private_room|shared_space)$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Listing Type"
-          },
           "location": {
             "anyOf": [
               {
@@ -1360,55 +1461,6 @@
             ],
             "title": "Longitude"
           },
-          "max_guests": {
-            "anyOf": [
-              {
-                "maximum": 50.0,
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Max Guests"
-          },
-          "max_stay_nights": {
-            "anyOf": [
-              {
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Max Stay Nights"
-          },
-          "min_stay_nights": {
-            "anyOf": [
-              {
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Min Stay Nights"
-          },
-          "nearby_landmark": {
-            "anyOf": [
-              {
-                "maxLength": 200,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Nearby Landmark"
-          },
           "price": {
             "anyOf": [
               {
@@ -1420,30 +1472,6 @@
               }
             ],
             "title": "Price"
-          },
-          "price_unit": {
-            "anyOf": [
-              {
-                "pattern": "^(night|week|month)$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Price Unit"
-          },
-          "security_deposit": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Security Deposit"
           },
           "specific_location": {
             "anyOf": [
@@ -1542,6 +1570,17 @@
             "title": "City",
             "type": "string"
           },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultation Fee"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -1556,6 +1595,17 @@
             "title": "Hero Headline",
             "type": "string"
           },
+          "hero_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hero Image"
+          },
           "hero_subtext": {
             "anyOf": [
               {
@@ -1567,13 +1617,68 @@
             ],
             "title": "Hero Subtext"
           },
+          "hostel_finding_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostel Finding Fee"
+          },
           "id": {
             "title": "Id",
             "type": "string"
           },
+          "manifest_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manifest Description"
+          },
+          "manifest_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manifest Name"
+          },
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "og_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Og Description"
+          },
+          "og_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Og Title"
           },
           "primary_color": {
             "title": "Primary Color",
@@ -1590,6 +1695,46 @@
             ],
             "title": "Region Id"
           },
+          "seo_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Description"
+          },
+          "seo_keywords": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Seo Keywords",
+            "type": "array"
+          },
+          "seo_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Title"
+          },
+          "short_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Name"
+          },
           "slug": {
             "title": "Slug",
             "type": "string"
@@ -1597,6 +1742,17 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "twitter_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twitter Description"
           },
           "whatsapp_number": {
             "title": "Whatsapp Number",
@@ -1869,46 +2025,44 @@
         "title": "DeviceTokenRegisterRequest",
         "type": "object"
       },
-      "FeedbackCreate": {
+      "EmailExistsResponse": {
         "properties": {
-          "content": {
-            "minLength": 5,
-            "title": "Content",
-            "type": "string"
-          },
-          "listing_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Listing Id"
-          },
-          "user_email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "User Email"
+          "exists": {
+            "title": "Exists",
+            "type": "boolean"
           }
         },
         "required": [
-          "content"
+          "exists"
+        ],
+        "title": "EmailExistsResponse",
+        "type": "object"
+      },
+      "FeedbackCreate": {
+        "properties": {
+          "category": {
+            "pattern": "^(suggest_hostel|feature_request|report_problem|general)$",
+            "title": "Category",
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 5000,
+            "minLength": 5,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "message"
         ],
         "title": "FeedbackCreate",
         "type": "object"
       },
       "FeedbackRead": {
         "properties": {
-          "content": {
-            "title": "Content",
+          "category": {
+            "title": "Category",
             "type": "string"
           },
           "created_at": {
@@ -1920,16 +2074,9 @@
             "title": "Id",
             "type": "string"
           },
-          "listing_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Listing Id"
+          "message": {
+            "title": "Message",
+            "type": "string"
           },
           "user_email": {
             "anyOf": [
@@ -1943,6 +2090,10 @@
             "title": "User Email"
           },
           "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "user_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -1951,12 +2102,14 @@
                 "type": "null"
               }
             ],
-            "title": "User Id"
+            "title": "User Name"
           }
         },
         "required": [
           "id",
-          "content",
+          "user_id",
+          "category",
+          "message",
           "created_at"
         ],
         "title": "FeedbackRead",
@@ -2005,6 +2158,29 @@
           "services"
         ],
         "title": "HealthCheckResponse",
+        "type": "object"
+      },
+      "HostelRequestCampus": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ],
+        "title": "HostelRequestCampus",
         "type": "object"
       },
       "HostelRequestCreate": {
@@ -2261,6 +2437,20 @@
         "title": "HostelRequestRead",
         "type": "object"
       },
+      "HostelRequestStatusUpdate": {
+        "properties": {
+          "status": {
+            "pattern": "^(waiting|contacted|finding|hostel_found|completed|cancelled)$",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "HostelRequestStatusUpdate",
+        "type": "object"
+      },
       "HostelRequestUpdate": {
         "properties": {
           "additional_requirements": {
@@ -2436,6 +2626,66 @@
         "title": "HouseRules",
         "type": "object"
       },
+      "ImageUploadCreate": {
+        "description": "Metadata for an image the web app already processed and stored in R2.",
+        "properties": {
+          "file_size": {
+            "minimum": 1.0,
+            "title": "File Size",
+            "type": "integer"
+          },
+          "format": {
+            "default": "image/webp",
+            "maxLength": 40,
+            "title": "Format",
+            "type": "string"
+          },
+          "height": {
+            "minimum": 1.0,
+            "title": "Height",
+            "type": "integer"
+          },
+          "large_key": {
+            "title": "Large Key",
+            "type": "string"
+          },
+          "medium_key": {
+            "title": "Medium Key",
+            "type": "string"
+          },
+          "original_filename": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Original Filename",
+            "type": "string"
+          },
+          "small_key": {
+            "title": "Small Key",
+            "type": "string"
+          },
+          "thumbnail_key": {
+            "title": "Thumbnail Key",
+            "type": "string"
+          },
+          "width": {
+            "minimum": 1.0,
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "original_filename",
+          "width",
+          "height",
+          "file_size",
+          "thumbnail_key",
+          "small_key",
+          "medium_key",
+          "large_key"
+        ],
+        "title": "ImageUploadCreate",
+        "type": "object"
+      },
       "ImageUploadRead": {
         "properties": {
           "created_at": {
@@ -2500,13 +2750,167 @@
         "title": "ImageUploadRead",
         "type": "object"
       },
+      "LeadContactAgent": {
+        "properties": {
+          "expected_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Name"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "pochi_la_biashara_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pochi La Biashara Number"
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp"
+          }
+        },
+        "title": "LeadContactAgent",
+        "type": "object"
+      },
+      "LeadContactListing": {
+        "properties": {
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "has_video": {
+            "default": false,
+            "title": "Has Video",
+            "type": "boolean"
+          },
+          "is_full": {
+            "default": false,
+            "title": "Is Full",
+            "type": "boolean"
+          },
+          "landlord_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landlord Phone"
+          },
+          "pays_commission": {
+            "default": false,
+            "title": "Pays Commission",
+            "type": "boolean"
+          },
+          "price": {
+            "title": "Price",
+            "type": "number"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Type"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "price"
+        ],
+        "title": "LeadContactListing",
+        "type": "object"
+      },
       "LeadRead": {
         "properties": {
           "agent_id": {
             "title": "Agent Id",
             "type": "string"
           },
-          "campus_id": {
+          "clicked_at": {
+            "format": "date-time",
+            "title": "Clicked At",
+            "type": "string"
+          },
+          "contact_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -2515,30 +2919,17 @@
                 "type": "null"
               }
             ],
-            "title": "Campus Id"
-          },
-          "clicked_at": {
-            "format": "date-time",
-            "title": "Clicked At",
-            "type": "string"
+            "title": "Contact Type"
           },
           "id": {
             "title": "Id",
-            "type": "string"
-          },
-          "ip_hash": {
-            "title": "Ip Hash",
             "type": "string"
           },
           "listing_id": {
             "title": "Listing Id",
             "type": "string"
           },
-          "source": {
-            "title": "Source",
-            "type": "string"
-          },
-          "user_id": {
+          "name": {
             "anyOf": [
               {
                 "type": "string"
@@ -2547,41 +2938,131 @@
                 "type": "null"
               }
             ],
-            "title": "User Id"
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
           }
         },
         "required": [
           "id",
           "listing_id",
           "agent_id",
-          "clicked_at",
-          "ip_hash",
-          "source"
+          "clicked_at"
         ],
         "title": "LeadRead",
         "type": "object"
       },
       "LeadTrackRequest": {
         "properties": {
-          "ip_hash": {
-            "title": "Ip Hash",
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
+          "contact_type": {
+            "default": "rumia_agent",
+            "enum": [
+              "rumia_agent",
+              "hostel_owner"
+            ],
+            "title": "Contact Type",
             "type": "string"
+          },
+          "fee_accepted": {
+            "default": false,
+            "title": "Fee Accepted",
+            "type": "boolean"
           },
           "listing_id": {
             "title": "Listing Id",
             "type": "string"
           },
-          "source": {
-            "default": "whatsapp",
-            "title": "Source",
-            "type": "string"
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
           }
         },
         "required": [
-          "listing_id",
-          "ip_hash"
+          "listing_id"
         ],
         "title": "LeadTrackRequest",
+        "type": "object"
+      },
+      "LeadTrackResult": {
+        "description": "What the caller needs to open the right WhatsApp chat after a lead is recorded.",
+        "properties": {
+          "agent": {
+            "$ref": "#/components/schemas/LeadContactAgent"
+          },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultation Fee"
+          },
+          "contact_type": {
+            "enum": [
+              "rumia_agent",
+              "hostel_owner"
+            ],
+            "title": "Contact Type",
+            "type": "string"
+          },
+          "listing": {
+            "$ref": "#/components/schemas/LeadContactListing"
+          },
+          "recorded": {
+            "title": "Recorded",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "recorded",
+          "contact_type",
+          "agent",
+          "listing"
+        ],
+        "title": "LeadTrackResult",
         "type": "object"
       },
       "LegalDocAdminRead": {
@@ -2879,6 +3360,11 @@
             "title": "Images",
             "type": "array"
           },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
           "is_youtube_shorts": {
             "default": false,
             "title": "Is Youtube Shorts",
@@ -3100,6 +3586,17 @@
             ],
             "title": "Height"
           },
+          "image_upload_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Upload Id"
+          },
           "r2_url": {
             "title": "R2 Url",
             "type": "string"
@@ -3175,6 +3672,17 @@
           "id": {
             "title": "Id",
             "type": "string"
+          },
+          "image_upload_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Upload Id"
           },
           "r2_url": {
             "title": "R2 Url",
@@ -3396,6 +3904,17 @@
             ],
             "title": "Longitude"
           },
+          "mpesa_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Details"
+          },
           "pays_commission": {
             "default": false,
             "title": "Pays Commission",
@@ -3447,6 +3966,17 @@
               }
             ],
             "title": "Room Type"
+          },
+          "room_type_enum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Type Enum"
           },
           "room_types": {
             "default": [],
@@ -4224,6 +4754,196 @@
         "title": "LivenessCheckResponse",
         "type": "object"
       },
+      "LoginSyncRequest": {
+        "description": "Display details from the OAuth provider (Google). Identity and email come from the JWT.",
+        "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          }
+        },
+        "title": "LoginSyncRequest",
+        "type": "object"
+      },
+      "LoginSyncResponse": {
+        "properties": {
+          "linked_bookings": {
+            "default": 0,
+            "title": "Linked Bookings",
+            "type": "integer"
+          },
+          "needs_profile_completion": {
+            "title": "Needs Profile Completion",
+            "type": "boolean"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "needs_profile_completion"
+        ],
+        "title": "LoginSyncResponse",
+        "type": "object"
+      },
+      "ManagedHostelRequestRead": {
+        "description": "A request as shown to campus managers/admins, with its campus.",
+        "properties": {
+          "additional_requirements": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Additional Requirements"
+          },
+          "budget_range": {
+            "title": "Budget Range",
+            "type": "string"
+          },
+          "campus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostelRequestCampus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "campus_id": {
+            "title": "Campus Id",
+            "type": "string"
+          },
+          "campus_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Name"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "fee": {
+            "title": "Fee",
+            "type": "number"
+          },
+          "furnishing": {
+            "title": "Furnishing",
+            "type": "string"
+          },
+          "gender": {
+            "title": "Gender",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "move_in_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Move In Date"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "preferred_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Zone"
+          },
+          "room_type": {
+            "title": "Room Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "stay_preference": {
+            "title": "Stay Preference",
+            "type": "string"
+          },
+          "student_name": {
+            "title": "Student Name",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "student_name",
+          "phone",
+          "campus_id",
+          "budget_range",
+          "gender",
+          "room_type",
+          "furnishing",
+          "stay_preference",
+          "status",
+          "fee",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ManagedHostelRequestRead",
+        "type": "object"
+      },
       "ManagerAssign": {
         "properties": {
           "managed_campus_id": {
@@ -4308,6 +5028,121 @@
           "role"
         ],
         "title": "ManagerRead",
+        "type": "object"
+      },
+      "MyTourBookingRead": {
+        "description": "A student's own booking with a brief of the toured listing embedded.",
+        "properties": {
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
+          "amount": {
+            "title": "Amount",
+            "type": "number"
+          },
+          "contacted": {
+            "default": false,
+            "title": "Contacted",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "linked_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked User Id"
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TourListingBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "preferred_date": {
+            "format": "date",
+            "title": "Preferred Date",
+            "type": "string"
+          },
+          "preferred_time": {
+            "title": "Preferred Time",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "student_name": {
+            "title": "Student Name",
+            "type": "string"
+          },
+          "tour_type": {
+            "title": "Tour Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "zone": {
+            "title": "Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "student_name",
+          "phone",
+          "zone",
+          "tour_type",
+          "amount",
+          "preferred_date",
+          "preferred_time",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MyTourBookingRead",
         "type": "object"
       },
       "NotificationPreferenceActionResponse": {
@@ -4629,6 +5464,46 @@
         "title": "PaginatedResponse[ListingRead]",
         "type": "object"
       },
+      "PaginatedResponse_MyTourBookingRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MyTourBookingRead"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "example": 20,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "example": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "example": 5,
+            "title": "Pages",
+            "type": "integer"
+          },
+          "total": {
+            "example": 100,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit",
+          "pages"
+        ],
+        "title": "PaginatedResponse[MyTourBookingRead]",
+        "type": "object"
+      },
       "PaginatedResponse_ReviewRead_": {
         "properties": {
           "items": {
@@ -4767,6 +5642,17 @@
       },
       "ProfileRead": {
         "properties": {
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id"
+          },
           "avatar_url": {
             "anyOf": [
               {
@@ -4897,6 +5783,11 @@
             "title": "Role",
             "type": "string"
           },
+          "school_verified": {
+            "default": false,
+            "title": "School Verified",
+            "type": "boolean"
+          },
           "updated_at": {
             "anyOf": [
               {
@@ -5012,6 +5903,261 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "PublicAgent": {
+        "description": "What the public may see of an agent. Deliberately excludes id numbers, owner contacts,\ncommission balance, application details and the linked user id.",
+        "properties": {
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "cover_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Image Url"
+          },
+          "expected_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Name"
+          },
+          "helping_since": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Helping Since"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "instagram": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instagram"
+          },
+          "instagram_public": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instagram Public"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "is_founder": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Founder"
+          },
+          "is_owner": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Owner"
+          },
+          "languages": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languages"
+          },
+          "linkedin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linkedin"
+          },
+          "linkedin_public": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linkedin Public"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "pochi_la_biashara_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pochi La Biashara Number"
+          },
+          "portfolio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portfolio Url"
+          },
+          "profile_photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Photo Url"
+          },
+          "service_areas": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Areas"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "support_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Rank"
+          },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          },
+          "whatsapp": {
+            "title": "Whatsapp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "whatsapp"
+        ],
+        "title": "PublicAgent",
+        "type": "object"
+      },
       "PushSubscriptionCreate": {
         "properties": {
           "auth": {
@@ -5079,28 +6225,6 @@
       },
       "ReviewCreate": {
         "properties": {
-          "author_avatar_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Author Avatar Url"
-          },
-          "author_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Author Name"
-          },
           "listing_id": {
             "title": "Listing Id",
             "type": "string"
@@ -5240,15 +6364,21 @@
             "title": "Stay Start"
           },
           "text": {
-            "minLength": 5,
-            "title": "Text",
-            "type": "string"
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
           }
         },
         "required": [
           "listing_id",
-          "rating",
-          "text"
+          "rating"
         ],
         "title": "ReviewCreate",
         "type": "object"
@@ -5256,7 +6386,7 @@
       "ReviewModerationAction": {
         "properties": {
           "action": {
-            "pattern": "^(approve|hide|reject|restore)$",
+            "pattern": "^(approve|hide|flag|reject|restore|edit)$",
             "title": "Action",
             "type": "string"
           },
@@ -5270,6 +6400,19 @@
               }
             ],
             "title": "Note"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
           }
         },
         "required": [
@@ -5315,6 +6458,11 @@
             "default": 0,
             "title": "Like Count",
             "type": "integer"
+          },
+          "liked_by_me": {
+            "default": false,
+            "title": "Liked By Me",
+            "type": "boolean"
           },
           "listing_id": {
             "title": "Listing Id",
@@ -5459,8 +6607,15 @@
             "title": "Stay Start"
           },
           "text": {
-            "title": "Text",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
           },
           "updated_at": {
             "format": "date-time",
@@ -5477,7 +6632,6 @@
           "listing_id",
           "user_id",
           "rating",
-          "text",
           "status",
           "created_at",
           "updated_at"
@@ -5539,6 +6693,18 @@
           "text": {
             "title": "Text",
             "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
           },
           "user_id": {
             "title": "User Id",
@@ -5755,7 +6921,7 @@
           "text": {
             "anyOf": [
               {
-                "minLength": 5,
+                "maxLength": 2000,
                 "type": "string"
               },
               {
@@ -5810,6 +6976,102 @@
         "title": "SetHomeCampusRequest",
         "type": "object"
       },
+      "SitemapAgent": {
+        "properties": {
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "slug"
+        ],
+        "title": "SitemapAgent",
+        "type": "object"
+      },
+      "SitemapListing": {
+        "properties": {
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "slug"
+        ],
+        "title": "SitemapListing",
+        "type": "object"
+      },
+      "SitemapResponse": {
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/SitemapAgent"
+            },
+            "title": "Agents",
+            "type": "array"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/SitemapListing"
+            },
+            "title": "Listings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "listings",
+          "agents"
+        ],
+        "title": "SitemapResponse",
+        "type": "object"
+      },
       "TourBookingCreate": {
         "properties": {
           "agent_id": {
@@ -5823,10 +7085,21 @@
             ],
             "title": "Agent Id"
           },
-          "amount": {
-            "minimum": 0.0,
-            "title": "Amount",
-            "type": "number"
+          "campus_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campus Id"
+          },
+          "from_listing": {
+            "default": false,
+            "title": "From Listing",
+            "type": "boolean"
           },
           "listing_id": {
             "anyOf": [
@@ -5840,7 +7113,8 @@
             "title": "Listing Id"
           },
           "phone": {
-            "minLength": 8,
+            "maxLength": 40,
+            "minLength": 7,
             "title": "Phone",
             "type": "string"
           },
@@ -5855,6 +7129,7 @@
             "type": "string"
           },
           "student_name": {
+            "maxLength": 200,
             "minLength": 2,
             "title": "Student Name",
             "type": "string"
@@ -5865,6 +7140,8 @@
             "type": "string"
           },
           "zone": {
+            "maxLength": 120,
+            "minLength": 1,
             "title": "Zone",
             "type": "string"
           }
@@ -5874,7 +7151,6 @@
           "phone",
           "zone",
           "tour_type",
-          "amount",
           "preferred_date",
           "preferred_time"
         ],
@@ -5985,21 +7261,54 @@
         "title": "TourBookingRead",
         "type": "object"
       },
-      "TourBookingUpdateStatus": {
+      "TourBookingStudentUpdate": {
+        "description": "Fields a student may change on their own pending booking.",
         "properties": {
-          "contacted": {
+          "phone": {
             "anyOf": [
               {
-                "type": "boolean"
+                "maxLength": 40,
+                "minLength": 7,
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Contacted"
+            "title": "Phone"
           },
+          "preferred_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Date"
+          },
+          "preferred_time": {
+            "anyOf": [
+              {
+                "pattern": "^(morning|afternoon|evening)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Time"
+          }
+        },
+        "title": "TourBookingStudentUpdate",
+        "type": "object"
+      },
+      "TourBookingUpdateStatus": {
+        "properties": {
           "status": {
-            "pattern": "^(pending_payment|confirmed|paid|completed|no_show|cancelled)$",
+            "pattern": "^(pending_payment|confirmed|paid|contacted|completed|no_show|cancelled)$",
             "title": "Status",
             "type": "string"
           }
@@ -6010,9 +7319,9 @@
         "title": "TourBookingUpdateStatus",
         "type": "object"
       },
-      "TrackViewRequest": {
+      "TourListingBrief": {
         "properties": {
-          "ip_hash": {
+          "area": {
             "anyOf": [
               {
                 "type": "string"
@@ -6021,22 +7330,94 @@
                 "type": "null"
               }
             ],
-            "title": "Ip Hash"
+            "title": "Area"
           },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "images": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TourListingImage"
+            },
+            "title": "Images",
+            "type": "array"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "TourListingBrief",
+        "type": "object"
+      },
+      "TourListingImage": {
+        "properties": {
+          "display_order": {
+            "default": 0,
+            "title": "Display Order",
+            "type": "integer"
+          },
+          "r2_url": {
+            "title": "R2 Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "r2_url"
+        ],
+        "title": "TourListingImage",
+        "type": "object"
+      },
+      "TourPriceRead": {
+        "properties": {
+          "price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          }
+        },
+        "title": "TourPriceRead",
+        "type": "object"
+      },
+      "TrackViewRequest": {
+        "properties": {
           "listing_id": {
             "title": "Listing Id",
             "type": "string"
-          },
-          "user_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "User Id"
           }
         },
         "required": [
@@ -6192,6 +7573,135 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyCandidate": {
+        "description": "A listing's contact/payment identifiers, used by the 'Hakikisha' verify-before-you-pay checker.",
+        "properties": {
+          "agent_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Phone"
+          },
+          "agent_verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Verified"
+          },
+          "agent_whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Whatsapp"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "landlord_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landlord Phone"
+          },
+          "mpesa_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Details"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "specific_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specific Location"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "VerifyCandidate",
         "type": "object"
       },
       "ViewCountRead": {
@@ -7817,8 +9327,26 @@
     },
     "/api/v1/analytics/track-view": {
       "post": {
-        "description": "Record a listing page view event (public endpoint). Passes ip_hash for deduplication.",
+        "description": "Record a listing page view (public; signed-in users are deduplicated per user, anonymous visitors per IP+user-agent). Admins and agents are never counted.",
         "operationId": "track_listing_view_api_v1_analytics_track_view_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8201,6 +9729,64 @@
         ]
       }
     },
+    "/api/v1/bnb/my/{listing_id}": {
+      "get": {
+        "operationId": "get_my_bnb_listing_for_edit_api_v1_bnb_my__listing_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BnbListingRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a BnB Listing for Editing",
+        "tags": [
+          "RumiaBnB"
+        ]
+      }
+    },
     "/api/v1/bnb/public": {
       "get": {
         "description": "Public feed of all active BnB (short_stay) listings with bnb_details.",
@@ -8561,7 +10147,7 @@
         ]
       },
       "post": {
-        "description": "Submit user feedback/suggestion. Optional auth.",
+        "description": "Submit feedback/suggestion/problem report. Authenticated.",
         "operationId": "submit_feedback_api_v1_feedback_post",
         "parameters": [
           {
@@ -8768,6 +10354,119 @@
           }
         },
         "summary": "Hostel Request Form Config",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests/manage": {
+      "get": {
+        "description": "Requests for the campuses this manager oversees (all for admins), newest first.",
+        "operationId": "list_managed_requests_api_v1_hostel_requests_manage_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ManagedHostelRequestRead"
+                  },
+                  "title": "Response List Managed Requests Api V1 Hostel Requests Manage Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Requests I Manage",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
+    "/api/v1/hostel-requests/manage/{request_id}": {
+      "get": {
+        "description": "One request, if it belongs to a campus this manager oversees (otherwise 404).",
+        "operationId": "get_managed_request_api_v1_hostel_requests_manage__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedHostelRequestRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Managed Request",
         "tags": [
           "Hostel Requests"
         ]
@@ -9014,6 +10713,75 @@
         ]
       }
     },
+    "/api/v1/hostel-requests/{request_id}/status": {
+      "patch": {
+        "description": "Campus manager/admin moves a request along its workflow; the student is notified.",
+        "operationId": "update_request_status_api_v1_hostel_requests__request_id__status_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostelRequestStatusUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostelRequestRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Request Status",
+        "tags": [
+          "Hostel Requests"
+        ]
+      }
+    },
     "/api/v1/images/upload-url": {
       "post": {
         "description": "Generate a direct presigned R2 upload URL for listing image. Authenticated.",
@@ -9069,6 +10837,66 @@
           }
         },
         "summary": "Get Presigned Upload URL",
+        "tags": [
+          "Image Uploads"
+        ]
+      }
+    },
+    "/api/v1/images/uploads": {
+      "post": {
+        "description": "Record metadata for an image the web pipeline processed into R2 so listings can reference it and clean it up later. Keys must follow the pipeline layout under the caller's own user-id prefix. Authenticated.",
+        "operationId": "register_image_upload_api_v1_images_uploads_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageUploadCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUploadRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Processed Image",
         "tags": [
           "Image Uploads"
         ]
@@ -9348,26 +11176,8 @@
     },
     "/api/v1/leads/track": {
       "post": {
-        "description": "Record a WhatsApp inquiry click. Public (optional auth).",
+        "description": "Record a student's click to contact a listing's agent or owner and return the contact details needed to open the chat. Public. Deduplicated per visitor per listing per 24h; 409 codes: REQUIRES_AGENT (hostel full), FEE_REQUIRED (fee disclosure not accepted).",
         "operationId": "track_lead_api_v1_leads_track_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "authorization",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Authorization"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -9383,7 +11193,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LeadRead"
+                  "$ref": "#/components/schemas/LeadTrackResult"
                 }
               }
             },
@@ -9817,6 +11627,42 @@
               ],
               "description": "Maximum price filter",
               "title": "Max Price"
+            }
+          },
+          {
+            "description": "Only this agent's listings (UUID)",
+            "in": "query",
+            "name": "agent_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this agent's listings (UUID)",
+              "title": "Agent Id"
+            }
+          },
+          {
+            "description": "Comma-separated listing UUIDs (max 20), e.g. for the compare view",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated listing UUIDs (max 20), e.g. for the compare view",
+              "title": "Ids"
             }
           },
           {
@@ -10918,6 +12764,52 @@
         ]
       }
     },
+    "/api/v1/profiles/check-email": {
+      "get": {
+        "description": "Whether a profile exists for an email. Public and rate-limited; used only to give a helpful message after a failed password sign-in.",
+        "operationId": "check_email_api_v1_profiles_check_email_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "maxLength": 254,
+              "minLength": 3,
+              "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+              "title": "Email",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailExistsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Email Registered",
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
     "/api/v1/profiles/me": {
       "get": {
         "description": "Fetch profile of currently authenticated user. Authenticated.",
@@ -11340,6 +13232,66 @@
         ]
       }
     },
+    "/api/v1/profiles/me/sync-login": {
+      "post": {
+        "description": "Call once after OAuth sign-in: ensures the profile exists, re-derives school verification from the token's email, mirrors the provider's name/avatar, links guest tour bookings with the user's phone, and reports whether the profile still needs completing. Authenticated.",
+        "operationId": "sync_login_api_v1_profiles_me_sync_login_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSyncResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post-Login Profile Sync",
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
     "/api/v1/profiles/me/wishlist": {
       "get": {
         "description": "Retrieve current user's wishlisted hostels. Authenticated.",
@@ -11650,6 +13602,123 @@
         ]
       }
     },
+    "/api/v1/public/agents/{slug_or_id}": {
+      "get": {
+        "description": "An active agent's public profile by slug (or by id, so legacy URLs can redirect to the slug). Public.",
+        "operationId": "get_public_agent_api_v1_public_agents__slug_or_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug_or_id",
+            "required": true,
+            "schema": {
+              "title": "Slug Or Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicAgent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Agent Profile",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/api/v1/public/sitemap": {
+      "get": {
+        "description": "Slugs and last-modified times of active listings and agents. Public.",
+        "operationId": "get_sitemap_api_v1_public_sitemap_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitemapResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Sitemap Data",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/api/v1/public/support-team": {
+      "get": {
+        "description": "Admin-curated support agents shown on the Hakikisha page, in rank order. Public.",
+        "operationId": "get_support_team_api_v1_public_support_team_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PublicAgent"
+                  },
+                  "title": "Response Get Support Team Api V1 Public Support Team Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Customer Support Team",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/api/v1/public/verify-candidates": {
+      "get": {
+        "description": "Contact and payment identifiers of active listings, used by the public Hakikisha checker to tell students whether a number or payment detail belongs to a known listing. Public.",
+        "operationId": "get_verify_candidates_api_v1_public_verify_candidates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VerifyCandidate"
+                  },
+                  "title": "Response Get Verify Candidates Api V1 Public Verify Candidates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Verify-Before-You-Pay Dataset",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
     "/api/v1/regions": {
       "get": {
         "description": "Fetch all administrative regions. Public.",
@@ -11778,6 +13847,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -11861,6 +13946,58 @@
           }
         },
         "summary": "Create Review",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/replies/{reply_id}": {
+      "delete": {
+        "description": "Delete a reply. The reply's author or an admin.",
+        "operationId": "delete_reply_api_v1_reviews_replies__reply_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reply_id",
+            "required": true,
+            "schema": {
+              "title": "Reply Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Reply",
         "tags": [
           "Reviews"
         ]
@@ -11971,6 +14108,22 @@
             "schema": {
               "title": "Review Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
             }
           }
         ],
@@ -12132,7 +14285,7 @@
     },
     "/api/v1/reviews/{review_id}/moderate": {
       "patch": {
-        "description": "Approve, hide, reject, or restore a review. Admin only.",
+        "description": "Approve, hide, reject, or restore a review, optionally editing its text. Admins, and managers for their own campus.",
         "operationId": "moderate_review_api_v1_reviews__review_id__moderate_patch",
         "parameters": [
           {
@@ -12548,7 +14701,7 @@
         ]
       },
       "post": {
-        "description": "Book a hostel tour. Public (optional auth).",
+        "description": "Book a hostel tour. Public (optional auth; a signed-in student is linked to the booking). The amount is always the zone's configured price, computed server-side. 400 when the zone has no price, the date is in the past, or the phone is invalid.",
         "operationId": "create_booking_api_v1_tours_post",
         "parameters": [
           {
@@ -12608,9 +14761,20 @@
     },
     "/api/v1/tours/me": {
       "get": {
-        "description": "Fetch tour bookings linked to current student user. Authenticated.",
+        "description": "Fetch tour bookings linked to current student user, each with a brief of its listing (title, area, county, slug, images). `sort=upcoming` orders by preferred date/time ascending; default is newest-created first. Authenticated.",
         "operationId": "list_my_tours_api_v1_tours_me_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "created_desc",
+              "pattern": "^(created_desc|upcoming)$",
+              "title": "Sort",
+              "type": "string"
+            }
+          },
           {
             "description": "Page number (1-indexed)",
             "in": "query",
@@ -12660,7 +14824,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_TourBookingRead_"
+                  "$ref": "#/components/schemas/PaginatedResponse_MyTourBookingRead_"
                 }
               }
             },
@@ -12684,6 +14848,56 @@
       }
     },
     "/api/v1/tours/{booking_id}": {
+      "delete": {
+        "description": "Permanently delete a booking. The booking's agent or an admin only.",
+        "operationId": "delete_booking_api_v1_tours__booking_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Booking",
+        "tags": [
+          "Tours"
+        ]
+      },
       "get": {
         "description": "Fetch single booking by ID. Authorized user/agent/admin.",
         "operationId": "get_booking_api_v1_tours__booking_id__get",
@@ -12740,11 +14954,78 @@
         "tags": [
           "Tours"
         ]
+      },
+      "patch": {
+        "description": "Student edits date/time/phone of their own booking while it is pending payment.",
+        "operationId": "update_my_booking_api_v1_tours__booking_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TourBookingStudentUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TourBookingRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Edit My Booking",
+        "tags": [
+          "Tours"
+        ]
       }
     },
     "/api/v1/tours/{booking_id}/status": {
       "patch": {
-        "description": "Update booking status or contacted flag. Agent or Admin.",
+        "description": "Move a booking through its lifecycle. The booking's agent or an admin may apply any allowed transition (use `contacted` once the student has been messaged); the student who owns the booking may only cancel it while pending_payment/confirmed.",
         "operationId": "update_booking_status_api_v1_tours__booking_id__status_patch",
         "parameters": [
           {
@@ -12880,6 +15161,69 @@
           }
         },
         "summary": "List Campus Zones",
+        "tags": [
+          "Campus Zones"
+        ]
+      }
+    },
+    "/api/v1/zones/tour-price": {
+      "get": {
+        "description": "The configured tour price for a zone on an active campus, or null when none is set or the zone name is ambiguous across campuses (pass campus_id to disambiguate). Public.",
+        "operationId": "get_tour_price_api_v1_zones_tour_price_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "zone",
+            "required": true,
+            "schema": {
+              "maxLength": 120,
+              "minLength": 1,
+              "title": "Zone",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Campus UUID",
+            "in": "query",
+            "name": "campus_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campus UUID",
+              "title": "Campus Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TourPriceRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Zone Tour Price",
         "tags": [
           "Campus Zones"
         ]

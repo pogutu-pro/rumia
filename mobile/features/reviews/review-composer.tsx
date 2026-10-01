@@ -24,7 +24,7 @@ import { palette, radii } from '../../lib/theme';
 
 interface ExistingReview {
   id: string;
-  text: string | null;
+  text?: string | null;
   rating_cleanliness?: number | null;
   rating_security?: number | null;
   rating_water?: number | null;
@@ -140,7 +140,7 @@ export function ReviewComposer({
     const payload: ReviewCreate = {
       listing_id: listingId,
       rating: roundedToStars(overall) || 1,
-      text: finalText || 'No written review provided.',
+      text: finalText || null,
       ...categoryColumnsFromCategories(categories),
     };
     mutation.mutate(payload);

@@ -144,9 +144,9 @@ export function BookTourModal({ visible, listing, onClose, onBooked }: BookTourM
       listing_id: listing.id,
       zone: selectedZone.name,
       tour_type: 'specific_hostel',
-      amount,
       preferred_date: preferredDate,
       preferred_time: timeSlot,
+      from_listing: false,
     });
   };
 

@@ -13,6 +13,9 @@ from app.features.reviews.models import Review, ReviewLike, ReviewModerationLog,
 from app.features.reviews.schemas import ReviewCreate, ReviewModerationAction, ReviewReplyCreate, ReviewUpdate
 
 
+LEGACY_NO_TEXT = "No written review provided."
+
+
 class ReviewService:
     @staticmethod
     async def list_reviews(
@@ -71,6 +74,8 @@ class ReviewService:
           taken from the request.
         """
         text_value = (data.text or "").strip() or None
+        if text_value == LEGACY_NO_TEXT:  # placeholder sent by older mobile builds
+            text_value = None
         profile = await ReviewService._profile(db, user.id)
         verified = bool(profile and profile.school_verified)
         if text_value and not verified:

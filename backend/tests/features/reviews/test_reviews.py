@@ -248,3 +248,12 @@ async def test_moderation_logs_status_and_text_changes_and_rejects_noops():
     with pytest.raises(APIException) as exc:
         await ReviewService.moderate_review(_db(MockResult(single=_review())), admin, "r1", ReviewModerationAction(action="approve"))
     assert exc.value.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_legacy_placeholder_text_counts_as_no_text():
+    # Older mobile builds send this string for ratings-only reviews; an unverified student must still succeed.
+    db = _db(MockResult(single=_profile(False)), MockResult(single=None))
+    review = await ReviewService.create_review(
+        db, STUDENT, ReviewCreate(listing_id="l1", rating=4, text="No written review provided."))
+    assert review.text is None

@@ -347,7 +347,7 @@ export interface paths {
         put?: never;
         /**
          * Track Listing View
-         * @description Record a listing page view event (public endpoint). Passes ip_hash for deduplication.
+         * @description Record a listing page view (public; signed-in users are deduplicated per user, anonymous visitors per IP+user-agent). Admins and agents are never counted.
          */
         post: operations["track_listing_view_api_v1_analytics_track_view_post"];
         delete?: never;
@@ -454,6 +454,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bnb/my/{listing_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a BnB Listing for Editing */
+        get: operations["get_my_bnb_listing_for_edit_api_v1_bnb_my__listing_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bnb/public": {
         parameters: {
             query?: never;
@@ -547,7 +564,7 @@ export interface paths {
         put?: never;
         /**
          * Submit Feedback
-         * @description Submit user feedback/suggestion. Optional auth.
+         * @description Submit feedback/suggestion/problem report. Authenticated.
          */
         post: operations["submit_feedback_api_v1_feedback_post"];
         delete?: never;
@@ -636,6 +653,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hostel-requests/manage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Requests I Manage
+         * @description Requests for the campuses this manager oversees (all for admins), newest first.
+         */
+        get: operations["list_managed_requests_api_v1_hostel_requests_manage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hostel-requests/manage/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Managed Request
+         * @description One request, if it belongs to a campus this manager oversees (otherwise 404).
+         */
+        get: operations["get_managed_request_api_v1_hostel_requests_manage__request_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hostel-requests/me": {
         parameters: {
             query?: never;
@@ -700,6 +757,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hostel-requests/{request_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Request Status
+         * @description Campus manager/admin moves a request along its workflow; the student is notified.
+         */
+        patch: operations["update_request_status_api_v1_hostel_requests__request_id__status_patch"];
+        trace?: never;
+    };
     "/api/v1/images/upload-url": {
         parameters: {
             query?: never;
@@ -714,6 +791,26 @@ export interface paths {
          * @description Generate a direct presigned R2 upload URL for listing image. Authenticated.
          */
         post: operations["get_upload_url_api_v1_images_upload_url_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/images/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register Processed Image
+         * @description Record metadata for an image the web pipeline processed into R2 so listings can reference it and clean it up later. Keys must follow the pipeline layout under the caller's own user-id prefix. Authenticated.
+         */
+        post: operations["register_image_upload_api_v1_images_uploads_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -811,7 +908,7 @@ export interface paths {
         put?: never;
         /**
          * Track Lead Click
-         * @description Record a WhatsApp inquiry click. Public (optional auth).
+         * @description Record a student's click to contact a listing's agent or owner and return the contact details needed to open the chat. Public. Deduplicated per visitor per listing per 24h; 409 codes: REQUIRES_AGENT (hostel full), FEE_REQUIRED (fee disclosure not accepted).
          */
         post: operations["track_lead_api_v1_leads_track_post"];
         delete?: never;
@@ -1232,6 +1329,26 @@ export interface paths {
         patch: operations["mark_read_api_v1_notifications__notification_id__read_patch"];
         trace?: never;
     };
+    "/api/v1/profiles/check-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check Email Registered
+         * @description Whether a profile exists for an email. Public and rate-limited; used only to give a helpful message after a failed password sign-in.
+         */
+        get: operations["check_email_api_v1_profiles_check_email_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles/me": {
         parameters: {
             query?: never;
@@ -1328,6 +1445,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profiles/me/sync-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post-Login Profile Sync
+         * @description Call once after OAuth sign-in: ensures the profile exists, re-derives school verification from the token's email, mirrors the provider's name/avatar, links guest tour bookings with the user's phone, and reports whether the profile still needs completing. Authenticated.
+         */
+        post: operations["sync_login_api_v1_profiles_me_sync_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles/me/wishlist": {
         parameters: {
             query?: never;
@@ -1396,6 +1533,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/agents/{slug_or_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public Agent Profile
+         * @description An active agent's public profile by slug (or by id, so legacy URLs can redirect to the slug). Public.
+         */
+        get: operations["get_public_agent_api_v1_public_agents__slug_or_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/sitemap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sitemap Data
+         * @description Slugs and last-modified times of active listings and agents. Public.
+         */
+        get: operations["get_sitemap_api_v1_public_sitemap_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/support-team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Customer Support Team
+         * @description Admin-curated support agents shown on the Hakikisha page, in rank order. Public.
+         */
+        get: operations["get_support_team_api_v1_public_support_team_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/verify-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Verify-Before-You-Pay Dataset
+         * @description Contact and payment identifiers of active listings, used by the public Hakikisha checker to tell students whether a number or payment detail belongs to a known listing. Public.
+         */
+        get: operations["get_verify_candidates_api_v1_public_verify_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/regions": {
         parameters: {
             query?: never;
@@ -1455,6 +1672,26 @@ export interface paths {
          */
         post: operations["create_review_api_v1_reviews_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reviews/replies/{reply_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Reply
+         * @description Delete a reply. The reply's author or an admin.
+         */
+        delete: operations["delete_reply_api_v1_reviews_replies__reply_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1543,7 +1780,7 @@ export interface paths {
         head?: never;
         /**
          * Moderate Review
-         * @description Approve, hide, reject, or restore a review. Admin only.
+         * @description Approve, hide, reject, or restore a review, optionally editing its text. Admins, and managers for their own campus.
          */
         patch: operations["moderate_review_api_v1_reviews__review_id__moderate_patch"];
         trace?: never;
@@ -1603,7 +1840,7 @@ export interface paths {
         put?: never;
         /**
          * Create Tour Booking
-         * @description Book a hostel tour. Public (optional auth).
+         * @description Book a hostel tour. Public (optional auth; a signed-in student is linked to the booking). The amount is always the zone's configured price, computed server-side. 400 when the zone has no price, the date is in the past, or the phone is invalid.
          */
         post: operations["create_booking_api_v1_tours_post"];
         delete?: never;
@@ -1621,7 +1858,7 @@ export interface paths {
         };
         /**
          * List My Tour Bookings
-         * @description Fetch tour bookings linked to current student user. Authenticated.
+         * @description Fetch tour bookings linked to current student user, each with a brief of its listing (title, area, county, slug, images). `sort=upcoming` orders by preferred date/time ascending; default is newest-created first. Authenticated.
          */
         get: operations["list_my_tours_api_v1_tours_me_get"];
         put?: never;
@@ -1646,10 +1883,18 @@ export interface paths {
         get: operations["get_booking_api_v1_tours__booking_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Booking
+         * @description Permanently delete a booking. The booking's agent or an admin only.
+         */
+        delete: operations["delete_booking_api_v1_tours__booking_id__delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Edit My Booking
+         * @description Student edits date/time/phone of their own booking while it is pending payment.
+         */
+        patch: operations["update_my_booking_api_v1_tours__booking_id__patch"];
         trace?: never;
     };
     "/api/v1/tours/{booking_id}/status": {
@@ -1667,7 +1912,7 @@ export interface paths {
         head?: never;
         /**
          * Update Booking Status
-         * @description Update booking status or contacted flag. Agent or Admin.
+         * @description Move a booking through its lifecycle. The booking's agent or an admin may apply any allowed transition (use `contacted` once the student has been messaged); the student who owns the booking may only cancel it while pending_payment/confirmed.
          */
         patch: operations["update_booking_status_api_v1_tours__booking_id__status_patch"];
         trace?: never;
@@ -1684,6 +1929,26 @@ export interface paths {
          * @description Retrieve zones, optionally filtered by campus_id or campus_slug (e.g. 'dekut').
          */
         get: operations["list_zones_api_v1_zones_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/zones/tour-price": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Zone Tour Price
+         * @description The configured tour price for a zone on an active campus, or null when none is set or the zone name is ambiguous across campuses (pass campus_id to disambiguate). Public.
+         */
+        get: operations["get_tour_price_api_v1_zones_tour_price_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1951,6 +2216,51 @@ export interface components {
             updated_at?: string | null;
         };
         /**
+         * BnbDetailsUpdate
+         * @description Partial nested update for BnB-only listing details.
+         */
+        BnbDetailsUpdate: {
+            /** Advance Notice Hours */
+            advance_notice_hours?: number | null;
+            /** Available From */
+            available_from?: string | null;
+            /** Available Until */
+            available_until?: string | null;
+            /** Bathrooms */
+            bathrooms?: number | null;
+            /** Bed Config */
+            bed_config?: components["schemas"]["BedConfig"][] | null;
+            /** Bedrooms */
+            bedrooms?: number | null;
+            /** Check In Time */
+            check_in_time?: string | null;
+            /** Check Out Time */
+            check_out_time?: string | null;
+            /** Cleaning Fee */
+            cleaning_fee?: number | null;
+            /** Custom Rules */
+            custom_rules?: string | null;
+            /** Extra Guest Fee */
+            extra_guest_fee?: number | null;
+            /** Guest Suitability */
+            guest_suitability?: string[] | null;
+            house_rules?: components["schemas"]["HouseRules"] | null;
+            /** Listing Type */
+            listing_type?: string | null;
+            /** Max Guests */
+            max_guests?: number | null;
+            /** Max Stay Nights */
+            max_stay_nights?: number | null;
+            /** Min Stay Nights */
+            min_stay_nights?: number | null;
+            /** Nearby Landmark */
+            nearby_landmark?: string | null;
+            /** Price Unit */
+            price_unit?: string | null;
+            /** Security Deposit */
+            security_deposit?: number | null;
+        };
+        /**
          * BnbListingCreate
          * @description Full payload to create a BnB listing (listing + bnb_details in one call).
          */
@@ -2063,6 +2373,8 @@ export interface components {
             title: string;
             /** Updated At */
             updated_at?: string | null;
+            /** Verified */
+            verified?: boolean | null;
             /**
              * Views
              * @default 0
@@ -2071,44 +2383,20 @@ export interface components {
         };
         /**
          * BnbListingUpdate
-         * @description Partial update for a BnB listing.
+         * @description Partial update for a BnB listing, with details nested under `bnb`.
          */
         BnbListingUpdate: {
-            /** Advance Notice Hours */
-            advance_notice_hours?: number | null;
             /** Agent Whatsapp */
             agent_whatsapp?: string | null;
             /** Amenities */
             amenities?: string[] | null;
             /** Area */
             area?: string | null;
-            /** Available From */
-            available_from?: string | null;
-            /** Available Until */
-            available_until?: string | null;
-            /** Bathrooms */
-            bathrooms?: number | null;
-            /** Bed Config */
-            bed_config?: components["schemas"]["BedConfig"][] | null;
-            /** Bedrooms */
-            bedrooms?: number | null;
-            /** Check In Time */
-            check_in_time?: string | null;
-            /** Check Out Time */
-            check_out_time?: string | null;
-            /** Cleaning Fee */
-            cleaning_fee?: number | null;
+            bnb?: components["schemas"]["BnbDetailsUpdate"] | null;
             /** County */
             county?: string | null;
-            /** Custom Rules */
-            custom_rules?: string | null;
             /** Description */
             description?: string | null;
-            /** Extra Guest Fee */
-            extra_guest_fee?: number | null;
-            /** Guest Suitability */
-            guest_suitability?: string[] | null;
-            house_rules?: components["schemas"]["HouseRules"] | null;
             /** Images */
             images?: {
                 [key: string]: unknown;
@@ -2117,26 +2405,12 @@ export interface components {
             is_active?: boolean | null;
             /** Latitude */
             latitude?: number | null;
-            /** Listing Type */
-            listing_type?: string | null;
             /** Location */
             location?: string | null;
             /** Longitude */
             longitude?: number | null;
-            /** Max Guests */
-            max_guests?: number | null;
-            /** Max Stay Nights */
-            max_stay_nights?: number | null;
-            /** Min Stay Nights */
-            min_stay_nights?: number | null;
-            /** Nearby Landmark */
-            nearby_landmark?: string | null;
             /** Price */
             price?: number | null;
-            /** Price Unit */
-            price_unit?: string | null;
-            /** Security Deposit */
-            security_deposit?: number | null;
             /** Specific Location */
             specific_location?: string | null;
             /** Title */
@@ -2178,6 +2452,8 @@ export interface components {
         CampusRead: {
             /** City */
             city: string;
+            /** Consultation Fee */
+            consultation_fee?: number | null;
             /**
              * Created At
              * Format: date-time
@@ -2189,20 +2465,42 @@ export interface components {
             };
             /** Hero Headline */
             hero_headline: string;
+            /** Hero Image */
+            hero_image?: string | null;
             /** Hero Subtext */
             hero_subtext?: string | null;
+            /** Hostel Finding Fee */
+            hostel_finding_fee?: number | null;
             /** Id */
             id: string;
+            /** Manifest Description */
+            manifest_description?: string | null;
+            /** Manifest Name */
+            manifest_name?: string | null;
             /** Name */
             name: string;
+            /** Og Description */
+            og_description?: string | null;
+            /** Og Title */
+            og_title?: string | null;
             /** Primary Color */
             primary_color: string;
             /** Region Id */
             region_id?: string | null;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Keywords */
+            seo_keywords?: string[];
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Short Name */
+            short_name?: string | null;
             /** Slug */
             slug: string;
             /** Status */
             status: string;
+            /** Twitter Description */
+            twitter_description?: string | null;
             /** Whatsapp Number */
             whatsapp_number: string;
         };
@@ -2291,19 +2589,22 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** EmailExistsResponse */
+        EmailExistsResponse: {
+            /** Exists */
+            exists: boolean;
+        };
         /** FeedbackCreate */
         FeedbackCreate: {
-            /** Content */
-            content: string;
-            /** Listing Id */
-            listing_id?: string | null;
-            /** User Email */
-            user_email?: string | null;
+            /** Category */
+            category: string;
+            /** Message */
+            message: string;
         };
         /** FeedbackRead */
         FeedbackRead: {
-            /** Content */
-            content: string;
+            /** Category */
+            category: string;
             /**
              * Created At
              * Format: date-time
@@ -2311,12 +2612,14 @@ export interface components {
             created_at: string;
             /** Id */
             id: string;
-            /** Listing Id */
-            listing_id?: string | null;
+            /** Message */
+            message: string;
             /** User Email */
             user_email?: string | null;
             /** User Id */
-            user_id?: string | null;
+            user_id: string;
+            /** User Name */
+            user_name?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2344,6 +2647,15 @@ export interface components {
              * @example 1.0.0
              */
             version: string;
+        };
+        /** HostelRequestCampus */
+        HostelRequestCampus: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
         };
         /** HostelRequestCreate */
         HostelRequestCreate: {
@@ -2442,6 +2754,11 @@ export interface components {
             /** User Id */
             user_id: string;
         };
+        /** HostelRequestStatusUpdate */
+        HostelRequestStatusUpdate: {
+            /** Status */
+            status: string;
+        };
         /** HostelRequestUpdate */
         HostelRequestUpdate: {
             /** Additional Requirements */
@@ -2500,6 +2817,33 @@ export interface components {
              */
             visitors: boolean;
         };
+        /**
+         * ImageUploadCreate
+         * @description Metadata for an image the web app already processed and stored in R2.
+         */
+        ImageUploadCreate: {
+            /** File Size */
+            file_size: number;
+            /**
+             * Format
+             * @default image/webp
+             */
+            format: string;
+            /** Height */
+            height: number;
+            /** Large Key */
+            large_key: string;
+            /** Medium Key */
+            medium_key: string;
+            /** Original Filename */
+            original_filename: string;
+            /** Small Key */
+            small_key: string;
+            /** Thumbnail Key */
+            thumbnail_key: string;
+            /** Width */
+            width: number;
+        };
         /** ImageUploadRead */
         ImageUploadRead: {
             /**
@@ -2528,39 +2872,109 @@ export interface components {
             /** Width */
             width: number;
         };
+        /** LeadContactAgent */
+        LeadContactAgent: {
+            /** Expected Name */
+            expected_name?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Pochi La Biashara Number */
+            pochi_la_biashara_number?: string | null;
+            /** Whatsapp */
+            whatsapp?: string | null;
+        };
+        /** LeadContactListing */
+        LeadContactListing: {
+            /** Area */
+            area?: string | null;
+            /** County */
+            county?: string | null;
+            /**
+             * Has Video
+             * @default false
+             */
+            has_video: boolean;
+            /**
+             * Is Full
+             * @default false
+             */
+            is_full: boolean;
+            /** Landlord Phone */
+            landlord_phone?: string | null;
+            /**
+             * Pays Commission
+             * @default false
+             */
+            pays_commission: boolean;
+            /** Price */
+            price: number;
+            /** Room Type */
+            room_type?: string | null;
+            /** Slug */
+            slug?: string | null;
+            /** Title */
+            title: string;
+        };
         /** LeadRead */
         LeadRead: {
             /** Agent Id */
             agent_id: string;
-            /** Campus Id */
-            campus_id?: string | null;
             /**
              * Clicked At
              * Format: date-time
              */
             clicked_at: string;
+            /** Contact Type */
+            contact_type?: string | null;
             /** Id */
             id: string;
-            /** Ip Hash */
-            ip_hash: string;
             /** Listing Id */
             listing_id: string;
-            /** Source */
-            source: string;
-            /** User Id */
-            user_id?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
         };
         /** LeadTrackRequest */
         LeadTrackRequest: {
-            /** Ip Hash */
-            ip_hash: string;
+            /** Agent Id */
+            agent_id?: string | null;
+            /**
+             * Contact Type
+             * @default rumia_agent
+             * @enum {string}
+             */
+            contact_type: "rumia_agent" | "hostel_owner";
+            /**
+             * Fee Accepted
+             * @default false
+             */
+            fee_accepted: boolean;
             /** Listing Id */
             listing_id: string;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+        };
+        /**
+         * LeadTrackResult
+         * @description What the caller needs to open the right WhatsApp chat after a lead is recorded.
+         */
+        LeadTrackResult: {
+            agent: components["schemas"]["LeadContactAgent"];
+            /** Consultation Fee */
+            consultation_fee?: number | null;
             /**
-             * Source
-             * @default whatsapp
+             * Contact Type
+             * @enum {string}
              */
-            source: string;
+            contact_type: "rumia_agent" | "hostel_owner";
+            listing: components["schemas"]["LeadContactListing"];
+            /** Recorded */
+            recorded: boolean;
         };
         /** LegalDocAdminRead */
         LegalDocAdminRead: {
@@ -2679,6 +3093,11 @@ export interface components {
              */
             images: components["schemas"]["ListingImageCreate"][];
             /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
              * Is Youtube Shorts
              * @default false
              */
@@ -2750,6 +3169,8 @@ export interface components {
             format?: string | null;
             /** Height */
             height?: number | null;
+            /** Image Upload Id */
+            image_upload_id?: string | null;
             /** R2 Url */
             r2_url: string;
             /** Width */
@@ -2769,6 +3190,8 @@ export interface components {
             height?: number | null;
             /** Id */
             id: string;
+            /** Image Upload Id */
+            image_upload_id?: string | null;
             /** R2 Url */
             r2_url: string;
             /** Width */
@@ -2850,6 +3273,8 @@ export interface components {
             location: string;
             /** Longitude */
             longitude?: number | null;
+            /** Mpesa Details */
+            mpesa_details?: string | null;
             /**
              * Pays Commission
              * @default false
@@ -2873,6 +3298,8 @@ export interface components {
             rating: number;
             /** Room Type */
             room_type?: string | null;
+            /** Room Type Enum */
+            room_type_enum?: string | null;
             /**
              * Room Types
              * @default []
@@ -3063,6 +3490,77 @@ export interface components {
              */
             status: string;
         };
+        /**
+         * LoginSyncRequest
+         * @description Display details from the OAuth provider (Google). Identity and email come from the JWT.
+         */
+        LoginSyncRequest: {
+            /** Avatar Url */
+            avatar_url?: string | null;
+            /** Full Name */
+            full_name?: string | null;
+        };
+        /** LoginSyncResponse */
+        LoginSyncResponse: {
+            /**
+             * Linked Bookings
+             * @default 0
+             */
+            linked_bookings: number;
+            /** Needs Profile Completion */
+            needs_profile_completion: boolean;
+            /** Role */
+            role: string;
+        };
+        /**
+         * ManagedHostelRequestRead
+         * @description A request as shown to campus managers/admins, with its campus.
+         */
+        ManagedHostelRequestRead: {
+            /** Additional Requirements */
+            additional_requirements?: string | null;
+            /** Budget Range */
+            budget_range: string;
+            campus?: components["schemas"]["HostelRequestCampus"] | null;
+            /** Campus Id */
+            campus_id: string;
+            /** Campus Name */
+            campus_name?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Fee */
+            fee: number;
+            /** Furnishing */
+            furnishing: string;
+            /** Gender */
+            gender: string;
+            /** Id */
+            id: string;
+            /** Move In Date */
+            move_in_date?: string | null;
+            /** Phone */
+            phone: string;
+            /** Preferred Zone */
+            preferred_zone?: string | null;
+            /** Room Type */
+            room_type: string;
+            /** Status */
+            status: string;
+            /** Stay Preference */
+            stay_preference: string;
+            /** Student Name */
+            student_name: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** User Id */
+            user_id: string;
+        };
         /** ManagerAssign */
         ManagerAssign: {
             /** Managed Campus Id */
@@ -3084,6 +3582,55 @@ export interface components {
             managed_region_id?: string | null;
             /** Role */
             role: string;
+        };
+        /**
+         * MyTourBookingRead
+         * @description A student's own booking with a brief of the toured listing embedded.
+         */
+        MyTourBookingRead: {
+            /** Agent Id */
+            agent_id?: string | null;
+            /** Amount */
+            amount: number;
+            /**
+             * Contacted
+             * @default false
+             */
+            contacted: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /** Linked User Id */
+            linked_user_id?: string | null;
+            listing?: components["schemas"]["TourListingBrief"] | null;
+            /** Listing Id */
+            listing_id?: string | null;
+            /** Phone */
+            phone: string;
+            /**
+             * Preferred Date
+             * Format: date
+             */
+            preferred_date: string;
+            /** Preferred Time */
+            preferred_time: string;
+            /** Status */
+            status: string;
+            /** Student Name */
+            student_name: string;
+            /** Tour Type */
+            tour_type: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Zone */
+            zone: string;
         };
         /** NotificationPreferenceActionResponse */
         NotificationPreferenceActionResponse: {
@@ -3266,6 +3813,31 @@ export interface components {
              */
             total: number;
         };
+        /** PaginatedResponse[MyTourBookingRead] */
+        PaginatedResponse_MyTourBookingRead_: {
+            /** Items */
+            items: components["schemas"]["MyTourBookingRead"][];
+            /**
+             * Limit
+             * @example 20
+             */
+            limit: number;
+            /**
+             * Page
+             * @example 1
+             */
+            page: number;
+            /**
+             * Pages
+             * @example 5
+             */
+            pages: number;
+            /**
+             * Total
+             * @example 100
+             */
+            total: number;
+        };
         /** PaginatedResponse[ReviewRead] */
         PaginatedResponse_ReviewRead_: {
             /** Items */
@@ -3340,6 +3912,8 @@ export interface components {
         };
         /** ProfileRead */
         ProfileRead: {
+            /** Agent Id */
+            agent_id?: string | null;
             /** Avatar Url */
             avatar_url?: string | null;
             /** Campus Id */
@@ -3377,6 +3951,11 @@ export interface components {
              * @default student
              */
             role: string;
+            /**
+             * School Verified
+             * @default false
+             */
+            school_verified: boolean;
             /** Updated At */
             updated_at?: string | null;
         };
@@ -3398,6 +3977,61 @@ export interface components {
             home_campus_name?: string | null;
             /** Phone */
             phone?: string | null;
+        };
+        /**
+         * PublicAgent
+         * @description What the public may see of an agent. Deliberately excludes id numbers, owner contacts,
+         *     commission balance, application details and the linked user id.
+         */
+        PublicAgent: {
+            /** Bio */
+            bio?: string | null;
+            /** Campus Id */
+            campus_id?: string | null;
+            /** Cover Image Url */
+            cover_image_url?: string | null;
+            /** Expected Name */
+            expected_name?: string | null;
+            /** Helping Since */
+            helping_since?: number | null;
+            /** Id */
+            id: string;
+            /** Instagram */
+            instagram?: string | null;
+            /** Instagram Public */
+            instagram_public?: boolean | null;
+            /** Is Featured */
+            is_featured?: boolean | null;
+            /** Is Founder */
+            is_founder?: boolean | null;
+            /** Is Owner */
+            is_owner?: boolean | null;
+            /** Languages */
+            languages?: string[] | null;
+            /** Linkedin */
+            linkedin?: string | null;
+            /** Linkedin Public */
+            linkedin_public?: boolean | null;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /** Pochi La Biashara Number */
+            pochi_la_biashara_number?: string | null;
+            /** Portfolio Url */
+            portfolio_url?: string | null;
+            /** Profile Photo Url */
+            profile_photo_url?: string | null;
+            /** Service Areas */
+            service_areas?: string[] | null;
+            /** Slug */
+            slug?: string | null;
+            /** Support Rank */
+            support_rank?: number | null;
+            /** Verified */
+            verified?: boolean | null;
+            /** Whatsapp */
+            whatsapp: string;
         };
         /** PushSubscriptionCreate */
         PushSubscriptionCreate: {
@@ -3429,10 +4063,6 @@ export interface components {
         };
         /** ReviewCreate */
         ReviewCreate: {
-            /** Author Avatar Url */
-            author_avatar_url?: string | null;
-            /** Author Name */
-            author_name?: string | null;
             /** Listing Id */
             listing_id: string;
             /** Rating */
@@ -3458,7 +4088,7 @@ export interface components {
             /** Stay Start */
             stay_start?: string | null;
             /** Text */
-            text: string;
+            text?: string | null;
         };
         /** ReviewModerationAction */
         ReviewModerationAction: {
@@ -3466,6 +4096,8 @@ export interface components {
             action: string;
             /** Note */
             note?: string | null;
+            /** Text */
+            text?: string | null;
         };
         /** ReviewRead */
         ReviewRead: {
@@ -3485,6 +4117,11 @@ export interface components {
              * @default 0
              */
             like_count: number;
+            /**
+             * Liked By Me
+             * @default false
+             */
+            liked_by_me: boolean;
             /** Listing Id */
             listing_id: string;
             /** Rating */
@@ -3527,7 +4164,7 @@ export interface components {
             /** Stay Start */
             stay_start?: string | null;
             /** Text */
-            text: string;
+            text?: string | null;
             /**
              * Updated At
              * Format: date-time
@@ -3558,6 +4195,8 @@ export interface components {
             review_id: string;
             /** Text */
             text: string;
+            /** Updated At */
+            updated_at?: string | null;
             /** User Id */
             user_id: string;
         };
@@ -3644,12 +4283,42 @@ export interface components {
             /** Campus Name */
             campus_name: string;
         };
+        /** SitemapAgent */
+        SitemapAgent: {
+            /** Slug */
+            slug: string;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /** SitemapListing */
+        SitemapListing: {
+            /** Area */
+            area?: string | null;
+            /** County */
+            county?: string | null;
+            /** Slug */
+            slug: string;
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /** SitemapResponse */
+        SitemapResponse: {
+            /** Agents */
+            agents: components["schemas"]["SitemapAgent"][];
+            /** Listings */
+            listings: components["schemas"]["SitemapListing"][];
+        };
         /** TourBookingCreate */
         TourBookingCreate: {
             /** Agent Id */
             agent_id?: string | null;
-            /** Amount */
-            amount: number;
+            /** Campus Id */
+            campus_id?: string | null;
+            /**
+             * From Listing
+             * @default false
+             */
+            from_listing: boolean;
             /** Listing Id */
             listing_id?: string | null;
             /** Phone */
@@ -3713,21 +4382,60 @@ export interface components {
             /** Zone */
             zone: string;
         };
+        /**
+         * TourBookingStudentUpdate
+         * @description Fields a student may change on their own pending booking.
+         */
+        TourBookingStudentUpdate: {
+            /** Phone */
+            phone?: string | null;
+            /** Preferred Date */
+            preferred_date?: string | null;
+            /** Preferred Time */
+            preferred_time?: string | null;
+        };
         /** TourBookingUpdateStatus */
         TourBookingUpdateStatus: {
-            /** Contacted */
-            contacted?: boolean | null;
             /** Status */
             status: string;
         };
+        /** TourListingBrief */
+        TourListingBrief: {
+            /** Area */
+            area?: string | null;
+            /** County */
+            county?: string | null;
+            /** Id */
+            id: string;
+            /**
+             * Images
+             * @default []
+             */
+            images: components["schemas"]["TourListingImage"][];
+            /** Slug */
+            slug?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** TourListingImage */
+        TourListingImage: {
+            /**
+             * Display Order
+             * @default 0
+             */
+            display_order: number;
+            /** R2 Url */
+            r2_url: string;
+        };
+        /** TourPriceRead */
+        TourPriceRead: {
+            /** Price */
+            price?: number | null;
+        };
         /** TrackViewRequest */
         TrackViewRequest: {
-            /** Ip Hash */
-            ip_hash?: string | null;
             /** Listing Id */
             listing_id: string;
-            /** User Id */
-            user_id?: string | null;
         };
         /** TrackViewResponse */
         TrackViewResponse: {
@@ -3790,6 +4498,36 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /**
+         * VerifyCandidate
+         * @description A listing's contact/payment identifiers, used by the 'Hakikisha' verify-before-you-pay checker.
+         */
+        VerifyCandidate: {
+            /** Agent Phone */
+            agent_phone?: string | null;
+            /** Agent Verified */
+            agent_verified?: boolean | null;
+            /** Agent Whatsapp */
+            agent_whatsapp?: string | null;
+            /** Area */
+            area?: string | null;
+            /** County */
+            county?: string | null;
+            /** Id */
+            id: string;
+            /** Landlord Phone */
+            landlord_phone?: string | null;
+            /** Mpesa Details */
+            mpesa_details?: string | null;
+            /** Slug */
+            slug?: string | null;
+            /** Specific Location */
+            specific_location?: string | null;
+            /** Title */
+            title: string;
+            /** Verified */
+            verified?: boolean | null;
         };
         /** ViewCountRead */
         ViewCountRead: {
@@ -4603,7 +5341,9 @@ export interface operations {
     track_listing_view_api_v1_analytics_track_view_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4820,6 +5560,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_BnbListingRead_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_my_bnb_listing_for_edit_api_v1_bnb_my__listing_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BnbListingRead"];
                 };
             };
             /** @description Validation Error */
@@ -5176,6 +5949,70 @@ export interface operations {
             };
         };
     };
+    list_managed_requests_api_v1_hostel_requests_manage_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedHostelRequestRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_managed_request_api_v1_hostel_requests_manage__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedHostelRequestRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_my_hostel_requests_api_v1_hostel_requests_me_get: {
         parameters: {
             query?: never;
@@ -5312,6 +6149,43 @@ export interface operations {
             };
         };
     };
+    update_request_status_api_v1_hostel_requests__request_id__status_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostelRequestStatusUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostelRequestRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_upload_url_api_v1_images_upload_url_post: {
         parameters: {
             query?: never;
@@ -5334,6 +6208,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UploadUrlResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_image_upload_api_v1_images_uploads_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImageUploadCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageUploadRead"];
                 };
             };
             /** @description Validation Error */
@@ -5488,9 +6397,7 @@ export interface operations {
     track_lead_api_v1_leads_track_post: {
         parameters: {
             query?: never;
-            header?: {
-                authorization?: string | null;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -5506,7 +6413,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LeadRead"];
+                    "application/json": components["schemas"]["LeadTrackResult"];
                 };
             };
             /** @description Validation Error */
@@ -5684,6 +6591,10 @@ export interface operations {
                 min_price?: number | null;
                 /** @description Maximum price filter */
                 max_price?: number | null;
+                /** @description Only this agent's listings (UUID) */
+                agent_id?: string | null;
+                /** @description Comma-separated listing UUIDs (max 20), e.g. for the compare view */
+                ids?: string | null;
                 /** @description Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order */
                 sort?: string | null;
                 /** @description Page number (1-indexed) */
@@ -6302,6 +7213,37 @@ export interface operations {
             };
         };
     };
+    check_email_api_v1_profiles_check_email_get: {
+        parameters: {
+            query: {
+                email: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailExistsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_my_profile_api_v1_profiles_me_get: {
         parameters: {
             query?: never;
@@ -6538,6 +7480,41 @@ export interface operations {
             };
         };
     };
+    sync_login_api_v1_profiles_me_sync_login_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginSyncRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginSyncResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_wishlist_api_v1_profiles_me_wishlist_get: {
         parameters: {
             query?: {
@@ -6708,6 +7685,97 @@ export interface operations {
             };
         };
     };
+    get_public_agent_api_v1_public_agents__slug_or_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug_or_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicAgent"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sitemap_api_v1_public_sitemap_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitemapResponse"];
+                };
+            };
+        };
+    };
+    get_support_team_api_v1_public_support_team_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicAgent"][];
+                };
+            };
+        };
+    };
+    get_verify_candidates_api_v1_public_verify_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyCandidate"][];
+                };
+            };
+        };
+    };
     list_regions_api_v1_regions_get: {
         parameters: {
             query?: never;
@@ -6770,7 +7838,9 @@ export interface operations {
                 /** @description Items per page (max 1000) */
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6831,6 +7901,37 @@ export interface operations {
             };
         };
     };
+    delete_reply_api_v1_reviews_replies__reply_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                reply_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_review_summary_api_v1_reviews_summary__listing_id__get: {
         parameters: {
             query?: never;
@@ -6865,7 +7966,9 @@ export interface operations {
     get_review_api_v1_reviews__review_id__get: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string | null;
+            };
             path: {
                 review_id: string;
             };
@@ -7193,6 +8296,7 @@ export interface operations {
     list_my_tours_api_v1_tours_me_get: {
         parameters: {
             query?: {
+                sort?: string;
                 /** @description Page number (1-indexed) */
                 page?: number;
                 /** @description Items per page (max 1000) */
@@ -7212,7 +8316,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TourBookingRead_"];
+                    "application/json": components["schemas"]["PaginatedResponse_MyTourBookingRead_"];
                 };
             };
             /** @description Validation Error */
@@ -7238,6 +8342,74 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TourBookingRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_booking_api_v1_tours__booking_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                booking_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_my_booking_api_v1_tours__booking_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                booking_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TourBookingStudentUpdate"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -7317,6 +8489,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CampusZoneRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_tour_price_api_v1_zones_tour_price_get: {
+        parameters: {
+            query: {
+                zone: string;
+                /** @description Campus UUID */
+                campus_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TourPriceRead"];
                 };
             };
             /** @description Validation Error */

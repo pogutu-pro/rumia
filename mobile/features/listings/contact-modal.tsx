@@ -20,7 +20,6 @@ import {
   Phone,
 } from 'lucide-react-native';
 import { apiFetch } from '../../lib/api/client';
-import { getAnonymousDeviceHash } from '../../lib/device';
 import type { Listing } from '../../lib/api/schema';
 import { palette, radii } from '../../lib/theme';
 
@@ -69,10 +68,15 @@ export function ContactModal({ visible, listing, onClose }: ContactModalProps) {
         : `Hi! I'm interested in ${listing.title} on Rumia. Can you help me arrange a viewing?`;
 
     try {
-      const ip_hash = await getAnonymousDeviceHash();
+      // The server derives the visitor fingerprint from the request. Reaching a Rumia agent for a
+      // non-commission listing only happens after the fee-disclosure step has been accepted.
       await apiFetch('/leads/track', {
         method: 'POST',
-        body: JSON.stringify({ listing_id: listing.id, source: 'mobile_contact', ip_hash }),
+        body: JSON.stringify({
+          listing_id: listing.id,
+          contact_type: type,
+          fee_accepted: type === 'rumia_agent',
+        }),
       });
     } catch {
       // Lead tracking is best-effort — still open WhatsApp.
