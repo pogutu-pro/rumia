@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { supabasePublic } from '@/lib/supabase/public';
+import { listingsApi } from '@/lib/api/listings';
+import { toLegacyListingShape } from '@/lib/api/legacy-listing';
 import { JsonLd } from '@/components/seo/json-ld';
 import { getAllCampusesStatic, isFallbackCampus } from '@/lib/data/campuses';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
@@ -101,45 +102,23 @@ export default async function CampusLandingPage({ params }: PageProps) {
   const campus = await resolveCampusFromSegments(county, area);
   if (!campus) notFound();
 
-  const supabase = supabasePublic;
-
-  let query = supabase
-    .from('listings')
-    .select(
-      `
-      id, title, description, price, location, slug, county, area, gender, specific_location,
-      price_single, price_sharing, distance_category, distance_to_campus, mpesa_details,
-      amenities, room_type, room_type_enum, bathroom_type, is_full,
-      wifi_included, water_included, electricity_included, security_type,
-      latitude, longitude, created_at, sort_position,
-      listing_images ( r2_url, display_order, blur_data_url ),
-      listing_room_types ( deposit, furnishing_items, room_type ),
-      agents ( name, phone, whatsapp )
-    `,
-    )
-    .eq('is_active', true);
-
-  if (campus.id && campus.id !== 'dekut') {
-    query = query.eq('campus_id', campus.id);
-  } else if (campus.slug) {
-    query = query.eq('area', campus.slug);
-  }
-
-  query = query
-    .order('sort_position', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  const { data: listingsData } = await query;
+  // The 'dekut' fallback pseudo-campus has no real id: filter by the legacy area slug instead.
+  const feed = await listingsApi
+    .getFeedServer({
+      limit: 50,
+      ...(campus.id && campus.id !== 'dekut'
+        ? { campus_id: campus.id }
+        : campus.slug
+          ? { area: campus.slug }
+          : {}),
+    })
+    .catch(() => ({ items: [] as any[] }));
 
   const activeAnnouncements = await getActiveAnnouncements(
     isFallbackCampus(campus) ? null : campus.id,
   );
 
-  const listings = (listingsData || []).map((item: any) => ({
-    ...item,
-    agents: Array.isArray(item.agents) ? item.agents[0] ?? null : item.agents,
-  })) as Listing[];
+  const listings = feed.items.map(toLegacyListingShape) as unknown as Listing[];
 
   const shortName = campus.short_name ?? campus.name;
   const chips = [...GENERIC_CHIPS, ...flagStrings(campus, 'landing_chips')];

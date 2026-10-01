@@ -12,6 +12,8 @@ export interface ListingsFeedParams {
   page?: number;
   limit?: number;
   campus_slug?: string;
+  campus_id?: string;
+  agent_id?: string;
   zone_slug?: string;
   county?: string;
   area?: string;
@@ -30,6 +32,8 @@ export const listingsApi = {
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
     if (params?.campus_slug) searchParams.set('campus_slug', params.campus_slug);
+    if (params?.campus_id) searchParams.set('campus_id', params.campus_id);
+    if (params?.agent_id) searchParams.set('agent_id', params.agent_id);
     if (params?.zone_slug) searchParams.set('zone_slug', params.zone_slug);
     if (params?.county) searchParams.set('county', params.county);
     if (params?.area) searchParams.set('area', params.area);
@@ -50,6 +54,8 @@ export const listingsApi = {
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
     if (params?.campus_slug) searchParams.set('campus_slug', params.campus_slug);
+    if (params?.campus_id) searchParams.set('campus_id', params.campus_id);
+    if (params?.agent_id) searchParams.set('agent_id', params.agent_id);
     if (params?.zone_slug) searchParams.set('zone_slug', params.zone_slug);
     if (params?.county) searchParams.set('county', params.county);
     if (params?.area) searchParams.set('area', params.area);

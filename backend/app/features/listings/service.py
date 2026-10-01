@@ -72,12 +72,15 @@ class ListingService:
         is_active: bool = True,
         sort: Optional[str] = None,
         ids: Optional[List[str]] = None,
+        agent_id: Optional[str] = None,
     ) -> Tuple[List[Listing], int, dict]:
         conditions = [Listing.is_active == is_active]
         join_specs: List[Tuple] = []
 
         if ids is not None:
             conditions.append(Listing.id.in_(ids))
+        if agent_id:
+            conditions.append(Listing.agent_id == agent_id)
 
         if campus_id:
             conditions.append(Listing.campus_id == campus_id)

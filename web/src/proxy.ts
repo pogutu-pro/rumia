@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { getApiUrl } from '@/lib/api/config';
 
 const SECURITY_HEADERS: [string, string][] = [
   ['X-DNS-Prefetch-Control', 'on'],
@@ -76,16 +77,10 @@ export default async function proxy(request: NextRequest) {
   const listingMatch = pathname.match(/^\/listing\/([0-9a-f-]{36})$/);
   if (listingMatch) {
     const id = listingMatch[1];
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
     try {
-      const res = await fetch(
-        `${supabaseUrl}/rest/v1/listings?id=eq.${id}&select=slug,county,area&limit=1`,
-        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-      );
+      const res = await fetch(getApiUrl(`/listings/${id}`));
       if (res.ok) {
-        const rows = await res.json();
-        const row = rows[0];
+        const row = await res.json();
         if (row?.slug) {
           const dest = `/hostels/${row.county || 'nyeri'}/${row.area || 'dekut'}/${row.slug}`;
           return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
@@ -98,16 +93,10 @@ export default async function proxy(request: NextRequest) {
   const agentMatch = pathname.match(/^\/agent\/([0-9a-f-]{36})$/);
   if (agentMatch) {
     const id = agentMatch[1];
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
     try {
-      const res = await fetch(
-        `${supabaseUrl}/rest/v1/agents?id=eq.${id}&select=slug&limit=1`,
-        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-      );
+      const res = await fetch(getApiUrl(`/public/agents/${id}`));
       if (res.ok) {
-        const rows = await res.json();
-        const row = rows[0];
+        const row = await res.json();
         if (row?.slug) {
           return NextResponse.redirect(new URL(`/agents/${row.slug}`, request.url), { status: 301 });
         }

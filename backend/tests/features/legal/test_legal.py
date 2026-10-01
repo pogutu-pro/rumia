@@ -21,3 +21,10 @@ async def test_get_admin_legal_non_admin_forbidden(client: AsyncClient):
         assert response.status_code == 403
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_public_legal_never_falls_back_to_an_unpublished_draft(client: AsyncClient):
+    # The mock DB has no published document; the endpoint must 404 rather than serve a draft.
+    response = await client.get("/api/v1/legal/terms")
+    assert response.status_code == 404

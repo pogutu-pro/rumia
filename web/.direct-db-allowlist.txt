@@ -26,7 +26,6 @@ web/src/app/(admin)/admin/transfers/page.tsx
 web/src/app/(admin)/admin/users/page.tsx
 web/src/app/(admin)/layout.tsx
 web/src/app/api/campuses/create/route.ts
-web/src/app/api/og/route.tsx
 web/src/app/(dashboard)/dashboard/analytics/page.tsx
 web/src/app/(dashboard)/dashboard/bnb/edit/[id]/page.tsx
 web/src/app/(dashboard)/dashboard/bnb/new/page.tsx
@@ -48,17 +47,8 @@ web/src/app/(manager)/manager/payments/page.tsx
 web/src/app/(manager)/manager/settings/page.tsx
 web/src/app/(manager)/manager/staff/page.tsx
 web/src/app/(manager)/manager/zones/page.tsx
-web/src/app/(public)/agent/[id]/page.tsx
-web/src/app/(public)/agents/[slug]/page.tsx
-web/src/app/(public)/hostels/[county]/[area]/page.tsx
-web/src/app/(public)/hostels/[county]/[area]/[slug]/opengraph-image.tsx
-web/src/app/(public)/verify/page.tsx
-web/src/app/sitemap.ts
-web/src/lib/data/legal-documents.ts
 web/src/lib/push.ts
 web/src/lib/supabase/admin.ts
 web/src/lib/supabase/public.ts
 web/src/lib/utils/admin.ts
 web/src/lib/utils/manager.ts
-web/src/lib/utils/zone-tour-price.ts
-web/src/proxy.ts

@@ -1,4 +1,4 @@
-import { supabasePublic } from '@/lib/supabase/public';
+import { publicApi } from '@/lib/api/public';
 import { notFound, redirect } from 'next/navigation';
 
 // Redirect legacy UUID-based agent URLs to their canonical slug URLs.
@@ -12,11 +12,7 @@ interface PageProps {
 // Redirect legacy UUID-based agent URLs to their canonical slug URLs.
 export default async function AgentLegacyRedirect({ params }: PageProps) {
   const { id } = await params;
-  const { data } = await supabasePublic
-    .from('agents')
-    .select('slug')
-    .eq('id', id)
-    .single();
+  const data = await publicApi.getAgent(id, { revalidate: 86400 });
 
   if (data?.slug) {
     redirect(`/agents/${data.slug}`);

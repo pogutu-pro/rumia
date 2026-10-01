@@ -1,3 +1,4 @@
+import { fetchPublicApi } from '@/lib/api/config';
 import { ImageResponse } from 'next/og';
 import { getCampusBySlug } from '@/lib/data/campuses';
 import type { Campus } from '@/types';
@@ -118,23 +119,19 @@ export async function GET(request: Request) {
       return fallbackImage(campus);
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    // Use service-role key so RLS on listing_images never blocks the join
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/listings?slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&select=title,price,location,listing_images(r2_url,display_order)&limit=1`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-    );
-    const rows = res.ok ? await res.json() : [];
-    const listing = rows[0];
+    const listing = await fetchPublicApi<{
+      title: string;
+      price: number;
+      location: string;
+      images?: { r2_url: string; display_order: number }[];
+    }>(`/listings/${encodeURIComponent(slug)}`).catch(() => null);
 
     const shortName = campus.short_name ?? 'DeKUT';
     const city = campus.city ?? 'Nyeri';
     const title = listing?.title ?? `Student Hostel Near ${shortName}`;
     const price = listing?.price ? `KES ${Number(listing.price).toLocaleString()}/mo` : '';
     const location = listing?.location ?? `${city}, Kenya`;
-    const images = (listing?.listing_images ?? []).sort((a: any, b: any) => a.display_order - b.display_order);
+    const images = (listing?.images ?? []).sort((a: any, b: any) => a.display_order - b.display_order);
     const coverUrl = images[0]?.r2_url ?? null;
     const coverDataUrl = coverUrl ? await fetchImageAsDataUrl(coverUrl) : null;
 

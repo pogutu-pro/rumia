@@ -1,4 +1,6 @@
-import { supabasePublic } from '@/lib/supabase/public';
+import { publicApi } from '@/lib/api/public';
+import { listingsApi } from '@/lib/api/listings';
+import { toLegacyListingShape } from '@/lib/api/legacy-listing';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -18,13 +20,7 @@ interface PageProps {
 }
 
 async function getAgent(slug: string) {
-  const { data } = await supabasePublic
-    .from('agents')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'active')
-    .single();
-  return data as Record<string, any> | null;
+  return (await publicApi.getAgent(slug, { revalidate })) as Record<string, any> | null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -67,19 +63,12 @@ export default async function AgentSlugPage({ params }: PageProps) {
   const campus = await getCampusBySlug('dekut');
   const campusShortName = campus.short_name ?? 'DeKUT';
 
-  const supabase = supabasePublic;
-  const { data: listingsData } = await supabase
-    .from('listings')
-    .select(`
-      id, title, description, price, location, slug, county, area, is_active, created_at, sort_position,
-      listing_images ( r2_url, display_order )
-    `)
-    .eq('agent_id', agent.id)
-    .eq('is_active', true)
-    .order('sort_position', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false });
+  const feed = await listingsApi
+    .getFeedServer({ agent_id: agent.id, limit: 100 })
+    .catch(() => ({ items: [] as any[] }));
 
-  const listings = (listingsData || []) as any[];
+  // Cards read the legacy `listing_images` key.
+  const listings = feed.items.map(toLegacyListingShape) as any[];
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
   const canonicalUrl = `${metadataBase}/agents/${slug}`;
 

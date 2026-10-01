@@ -34,7 +34,15 @@ export async function fetchPublicApi<T>(
     } catch {
       // keep raw text
     }
-    throw new Error(errorData?.detail || errorData?.message || `API request failed: ${response.status}`);
+    const detail = errorData?.detail;
+    const message =
+      (typeof detail === 'string' ? detail : detail?.message) ||
+      errorData?.error?.message ||
+      errorData?.message ||
+      `API request failed: ${response.status}`;
+    const error = new Error(message) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
   }
   if (response.status === 204) {
     return null as any;

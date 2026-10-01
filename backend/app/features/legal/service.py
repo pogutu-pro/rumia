@@ -15,11 +15,8 @@ class LegalService:
         res = await db.execute(select(LegalDocument).where(LegalDocument.type == doc_type, LegalDocument.status == "published"))
         doc = res.scalar_one_or_none()
         if not doc:
-            # Fallback check for any doc of that type
-            res_any = await db.execute(select(LegalDocument).where(LegalDocument.type == doc_type))
-            doc = res_any.scalar_one_or_none()
-            if not doc:
-                raise NotFoundException(f"Legal document '{doc_type}' not found")
+            # Never fall back to an unpublished (draft) document on the public endpoint.
+            raise NotFoundException(f"Legal document '{doc_type}' not found")
         return doc
 
     @staticmethod

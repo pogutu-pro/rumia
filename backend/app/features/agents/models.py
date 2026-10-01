@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import Boolean, DateTime, ForeignKey, Numeric, String, Text, func
+from sqlalchemy import ARRAY, Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -27,6 +27,21 @@ class AgentProfile(Base):
     is_support: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     profile_photo_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    slug: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    cover_image_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    service_areas: Mapped[Optional[list]] = mapped_column(ARRAY(String), nullable=True)
+    languages: Mapped[Optional[list]] = mapped_column(ARRAY(String), nullable=True)
+    helping_since: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    instagram: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    linkedin: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    instagram_public: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    linkedin_public: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    verified: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    pochi_la_biashara_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    expected_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    support_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    is_owner: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 

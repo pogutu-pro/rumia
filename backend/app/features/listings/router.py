@@ -45,12 +45,18 @@ async def get_listings(
     has_video: Optional[bool] = Query(None, description="Filter to listings with a YouTube video (youtube_id IS NOT NULL)"),
     min_price: Optional[float] = Query(None, ge=0, description="Minimum price filter"),
     max_price: Optional[float] = Query(None, ge=0, description="Maximum price filter"),
+    agent_id: Optional[str] = Query(None, description="Only this agent's listings (UUID)"),
     ids: Optional[str] = Query(None, description="Comma-separated listing UUIDs (max 20), e.g. for the compare view"),
     sort: Optional[str] = Query(None, description="Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order"),
     pagination: PaginationParams = Depends(),
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[ListingRead]:
+    if agent_id is not None:
+        try:
+            agent_id = str(uuid.UUID(agent_id))
+        except ValueError:
+            raise BadRequestException("agent_id must be a UUID")
     id_list = None
     if ids is not None:
         id_list = [part.strip() for part in ids.split(",") if part.strip()][:20]
@@ -73,6 +79,7 @@ async def get_listings(
         max_price=max_price,
         sort=sort,
         ids=id_list,
+        agent_id=agent_id,
     )
     saved_ids = (
         await ProfileService.get_saved_listing_ids(db, user, [str(item.id) for item in listings])

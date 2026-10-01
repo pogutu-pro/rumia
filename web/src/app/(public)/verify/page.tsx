@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { SupportTeamSection } from '@/components/agents/support-team-section';
-import { supabasePublic } from '@/lib/supabase/public';
+import { publicApi } from '@/lib/api/public';
 import { HakisaChecker } from '@/components/agents/hakisa-checker';
 import type { ListingMatchCandidate } from '@/lib/utils/dekut-verification';
 
@@ -24,40 +24,26 @@ export const metadata: Metadata = {
 };
 
 export default async function VerifyPage() {
-  const [{ data: rawListings }, { data: agents }] = await Promise.all([
-    supabasePublic
-      .from('listings')
-      .select(
-        `id, title, landlord_phone, mpesa_details, specific_location, verified, county, area, slug,
-      agents ( phone, whatsapp, verified )`,
-      )
-      .eq('is_active', true),
-    supabasePublic
-      .from('agents')
-      .select('*')
-      .eq('status', 'active')
-      .eq('is_support', true)
-      .order('support_rank'),
+  const [candidates, activeAgents] = await Promise.all([
+    publicApi.getVerifyCandidates({ revalidate }).catch(() => []),
+    publicApi.getSupportTeam({ revalidate }).catch(() => []),
   ]);
 
-  const rumiaListings: ListingMatchCandidate[] = (rawListings || []).map(
-    (l: any) => ({
-      id: l.id,
-      title: l.title,
-      county: l.county,
-      area: l.area,
-      slug: l.slug,
-      landlord_phone: l.landlord_phone,
-      agent_phone: l.agents?.phone,
-      agent_whatsapp: l.agents?.whatsapp,
-      agent_verified: l.agents?.verified,
-      verified: l.verified,
-      mpesa_details: l.mpesa_details,
-      specific_location: l.specific_location,
-    }),
-  );
-
-  const activeAgents = (agents || []).filter((a: any) => a.status === 'active');
+  // Already in the checker's shape (FastAPI returns the flattened candidate).
+  const rumiaListings: ListingMatchCandidate[] = candidates.map((c) => ({
+    id: c.id,
+    title: c.title,
+    county: c.county,
+    area: c.area,
+    slug: c.slug,
+    landlord_phone: c.landlord_phone,
+    agent_phone: c.agent_phone,
+    agent_whatsapp: c.agent_whatsapp,
+    agent_verified: c.agent_verified,
+    verified: c.verified,
+    mpesa_details: c.mpesa_details,
+    specific_location: c.specific_location,
+  })) as ListingMatchCandidate[];
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] pb-[calc(4rem+env(safe-area-inset-bottom))]">
