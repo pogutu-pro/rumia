@@ -3,6 +3,36 @@ services:
   # APPLICATION SERVICES
   # ──────────────────────────────────────
 
+  # ──────────────────────────────────────
+  # DATABASE (self-hosted; replaces Supabase Postgres)
+  # ──────────────────────────────────────
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: rumia_postgres
+    restart: always
+    # Loopback only: reachable from the host (backups, psql) and the docker network.
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-rumia}
+      - POSTGRES_USER=${POSTGRES_USER:-rumia}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rumia-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   web:
     build:
       context: ./web
@@ -107,6 +137,9 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  postgres_data:
 
 networks:
   rumia-network:
