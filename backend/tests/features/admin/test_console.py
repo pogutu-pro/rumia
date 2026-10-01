@@ -80,7 +80,7 @@ async def test_promote_to_admin_rules():
 @pytest.mark.asyncio
 async def test_create_agent_rolls_the_login_back_when_the_agent_record_fails(monkeypatch):
     provider = SimpleNamespace(create_user=AsyncMock(return_value="new-user"), delete_user=AsyncMock())
-    monkeypatch.setattr("app.features.admin.console_service.get_auth_provider", lambda: provider)
+    monkeypatch.setattr("app.features.admin.console_service.get_auth_provider", lambda *_: provider)
     # no profile campus and no DeKUT campus -> cannot create the agent
     no_profile = MagicMock()
     no_profile.first.return_value = None
@@ -94,7 +94,7 @@ async def test_create_agent_rolls_the_login_back_when_the_agent_record_fails(mon
 @pytest.mark.asyncio
 async def test_create_agent_success_notifies_admins(monkeypatch):
     provider = SimpleNamespace(create_user=AsyncMock(return_value="new-user"), delete_user=AsyncMock())
-    monkeypatch.setattr("app.features.admin.console_service.get_auth_provider", lambda: provider)
+    monkeypatch.setattr("app.features.admin.console_service.get_auth_provider", lambda *_: provider)
 
     class Rows:
         def __init__(self, rows):

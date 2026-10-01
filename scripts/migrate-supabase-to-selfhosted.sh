@@ -19,24 +19,44 @@ PSQL="$REMOTE psql -U rumia -v ON_ERROR_STOP=1 -q"
 
 echo "[1/6] dump public schema from Supabase"
 # pg_dump must be >= the server major version (17); use the matching client image.
-docker run --rm --network host -v "$WORK:$WORK" postgres:17-alpine pg_dump "$SUPABASE_DB_URL" -Fc --no-owner --no-privileges --schema=public -f "$WORK/rumia.dump"
-echo "[2/6] export auth.users identities"
+for attempt in 1 2 3 4 5 6; do  # the pooler occasionally drops long COPYs
+  docker run --rm --network host -v "$WORK:$WORK" postgres:17-alpine pg_dump "$SUPABASE_DB_URL" --exclude-table-data=public.listing_views -Fc --no-owner --no-privileges --schema=public -f "$WORK/rumia.dump" && break
+  echo "dump attempt $attempt failed, retrying" >&2; sleep 10
+done
+[ -s "$WORK/rumia.dump" ] || { echo "dump failed" >&2; exit 1; }
+echo "[2/6] export auth.users identities + listing_views"
+# The pooler drops long reads of this table (2 min statement_timeout, connection resets), so it is
+# copied in keyset-paginated chunks, each in its own short session.
+: > "$WORK/listing_views.csv"; LAST="00000000-0000-0000-0000-000000000000"
+while :; do
+  rm -f "$WORK/lv_chunk.csv"
+  for attempt in 1 2 3 4 5 6; do
+    psql "$SUPABASE_DB_URL" -q -c "\\copy (select * from public.listing_views where id > '$LAST' order by id limit 4000) to '$WORK/lv_chunk.csv' csv" && break
+    echo "listing_views chunk after $LAST failed (attempt $attempt), retrying" >&2; sleep 10
+  done
+  [ -f "$WORK/lv_chunk.csv" ] || { echo "listing_views export failed" >&2; exit 1; }
+  [ -s "$WORK/lv_chunk.csv" ] || break
+  cat "$WORK/lv_chunk.csv" >> "$WORK/listing_views.csv"
+  LAST="$(tail -n 1 "$WORK/lv_chunk.csv" | cut -d, -f1)"
+done
+[ -s "$WORK/listing_views.csv" ] || { echo "listing_views export failed" >&2; exit 1; }
 psql "$SUPABASE_DB_URL" -qc "\copy (select id,email,phone,raw_user_meta_data,raw_app_meta_data,created_at,coalesce(updated_at,created_at),last_sign_in_at from auth.users) to '$WORK/users.csv' csv"
 psql "$SUPABASE_DB_URL" -Atc "select table_name, (xpath('/row/c/text()', query_to_xml(format('select count(*) c from public.%I', table_name), false, true, '')))[1]::text from information_schema.tables where table_schema='public' and table_type='BASE TABLE' order by 1" > "$WORK/counts_src.txt"
 psql "$SUPABASE_DB_URL" -Atc "select 'auth.users', count(*) from auth.users" >> "$WORK/counts_src.txt"
 
 echo "[3/6] ship to VM"
-"${SCP[@]}" "$WORK/rumia.dump" "$WORK/users.csv" db/00_supabase_shim.sql supabase/migrations/20261001000000_auth_refresh_tokens.sql "$VM:/tmp/"
+"${SCP[@]}" "$WORK/rumia.dump" "$WORK/users.csv" "$WORK/listing_views.csv" db/00_supabase_shim.sql supabase/migrations/20261001000000_auth_refresh_tokens.sql "$VM:/tmp/"
 
 echo "[4/6] recreate target database + shim + identities"
 "${SSH[@]}" "$REMOTE psql -U rumia -d postgres -qc 'DROP DATABASE IF EXISTS rumia_new' -c 'CREATE DATABASE rumia_new'"
-"${SSH[@]}" "cd ~/rumia && docker cp /tmp/rumia.dump rumia_postgres:/tmp/ && docker cp /tmp/users.csv rumia_postgres:/tmp/ && docker cp /tmp/00_supabase_shim.sql rumia_postgres:/tmp/ && docker cp /tmp/20261001000000_auth_refresh_tokens.sql rumia_postgres:/tmp/"
+"${SSH[@]}" "cd ~/rumia && docker cp /tmp/rumia.dump rumia_postgres:/tmp/ && docker cp /tmp/users.csv rumia_postgres:/tmp/ && docker cp /tmp/listing_views.csv rumia_postgres:/tmp/ && docker cp /tmp/00_supabase_shim.sql rumia_postgres:/tmp/ && docker cp /tmp/20261001000000_auth_refresh_tokens.sql rumia_postgres:/tmp/"
 "${SSH[@]}" "$PSQL -d rumia_new -f /tmp/00_supabase_shim.sql"
 "${SSH[@]}" "$PSQL -d rumia_new -c \"\\copy auth.users(id,email,phone,raw_user_meta_data,raw_app_meta_data,created_at,updated_at,last_sign_in_at) from '/tmp/users.csv' csv\""
 
 echo "[5/6] restore"
-"${SSH[@]}" "cd ~/rumia && docker compose exec -T postgres pg_restore -U rumia -d rumia_new --no-owner --exit-on-error /tmp/rumia.dump"
+"${SSH[@]}" "cd ~/rumia && docker compose exec -T postgres sh -c \"pg_restore -l /tmp/rumia.dump | grep -v ' SCHEMA - public ' > /tmp/restore.list && pg_restore -U rumia -d rumia_new --no-owner --exit-on-error -L /tmp/restore.list /tmp/rumia.dump\""
 "${SSH[@]}" "$PSQL -d rumia_new -f /tmp/20261001000000_auth_refresh_tokens.sql"
+"${SSH[@]}" "$PSQL -d rumia_new -c \"\\copy public.listing_views from '/tmp/listing_views.csv' csv\""
 
 echo "[6/6] verify row counts"
 "${SSH[@]}" "$PSQL -d rumia_new -At -c \"select table_name, (xpath('/row/c/text()', query_to_xml(format('select count(*) c from public.%I', table_name), false, true, '')))[1]::text from information_schema.tables where table_schema='public' and table_type='BASE TABLE' order by 1\" -c \"select 'auth.users', count(*) from auth.users\"" > "$WORK/counts_dst.txt"

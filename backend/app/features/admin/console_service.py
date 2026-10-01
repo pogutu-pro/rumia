@@ -243,7 +243,7 @@ class AdminConsoleService:
         """Create a login identity AND its agent record; roll the identity back if the record fails."""
         require_admin(user)
         sanitized = "".join(ch for ch in data.phone if ch.isalnum())
-        provider = get_auth_provider()
+        provider = get_auth_provider(db)
         new_user_id = await provider.create_user(f"{sanitized}@agents.rumia.co.ke")
         try:
             phone, whatsapp = _normalize_phone(data.phone), _normalize_phone(data.whatsapp)
