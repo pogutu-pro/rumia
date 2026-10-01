@@ -83,3 +83,18 @@ class HostelRequestFormConfig(BaseModel):
     campus_name: Optional[str] = None
     fee: int = 100
     zones: List[HostelRequestZoneOption] = []
+
+class HostelRequestStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(" + "|".join(REQUEST_STATUSES) + ")$")
+
+
+class HostelRequestCampus(BaseModel):
+    id: str
+    name: str
+    slug: str
+
+
+class ManagedHostelRequestRead(HostelRequestRead):
+    """A request as shown to campus managers/admins, with its campus."""
+
+    campus: Optional[HostelRequestCampus] = None

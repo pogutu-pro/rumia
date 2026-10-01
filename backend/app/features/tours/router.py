@@ -44,7 +44,7 @@ async def create_booking(
     data: TourBookingCreate,
     background_tasks: BackgroundTasks,
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> TourBookingRead:
     booking, pushes = await TourService.create_booking(db, data, user)
     _schedule_pushes(background_tasks, pushes)
@@ -66,7 +66,7 @@ async def list_my_tours(
     pagination: PaginationParams = Depends(),
     sort: str = Query("created_desc", pattern="^(created_desc|upcoming)$"),
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[MyTourBookingRead]:
     items, total = await TourService.list_my_tours(db, user, pagination=pagination, sort=sort)
     listings = await TourService.get_listings_by_id(db, [b.listing_id for b in items if b.listing_id])
@@ -91,7 +91,7 @@ async def list_bookings(
     status_filter: Optional[str] = Query(None, alias="status"),
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[TourBookingRead]:
     items, total = await TourService.list_bookings(db, user, status_filter=status_filter, pagination=pagination)
     validated = [TourBookingRead.model_validate(b) for b in items]
@@ -109,7 +109,7 @@ async def list_bookings(
 async def get_booking(
     booking_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> TourBookingRead:
     booking = await TourService.get_booking_by_id(db, user, booking_id)
     return TourBookingRead.model_validate(booking)
@@ -131,7 +131,7 @@ async def update_booking_status(
     data: TourBookingUpdateStatus,
     background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> TourBookingRead:
     booking, pushes = await TourService.update_booking_status(db, user, booking_id, data)
     _schedule_pushes(background_tasks, pushes)
@@ -150,7 +150,7 @@ async def update_my_booking(
     data: TourBookingStudentUpdate,
     background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> TourBookingRead:
     booking, pushes = await TourService.update_my_booking(db, user, booking_id, data)
     _schedule_pushes(background_tasks, pushes)
@@ -166,6 +166,6 @@ async def update_my_booking(
 async def delete_booking(
     booking_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await TourService.delete_booking(db, user, booking_id)

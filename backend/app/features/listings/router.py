@@ -49,7 +49,7 @@ async def get_listings(
     sort: Optional[str] = Query(None, description="Sort mode: 'views' ranks by most-visited, 'newest' by most recently added, otherwise curated sort_position order"),
     pagination: PaginationParams = Depends(),
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[ListingRead]:
     id_list = None
     if ids is not None:
@@ -103,7 +103,7 @@ async def get_listings(
 async def get_listing(
     id_or_slug: str,
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.get_listing_by_id_or_slug(db, id_or_slug=id_or_slug)
     if not listing:
@@ -134,7 +134,7 @@ async def get_listing(
 async def create_listing(
     data: ListingCreate,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.create_listing(db=db, user=user, data=data)
     return ListingRead.model_validate(listing)
@@ -152,7 +152,7 @@ async def update_listing(
     data: ListingUpdate,
     background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     before = await ListingService.get_listing_by_id_or_slug(db, listing_id)
     if not before:
@@ -185,7 +185,7 @@ async def toggle_listing_full(
     payload: ListingToggleFull,
     background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     before = await ListingService.get_listing_by_id_or_slug(db, listing_id)
     if not before:
@@ -219,7 +219,7 @@ async def toggle_listing_active(
     listing_id: str,
     payload: ListingToggleActive,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.toggle_listing_active(
         db=db, listing_id=listing_id, user=user, is_active=payload.is_active
@@ -238,7 +238,7 @@ async def toggle_listing_commission(
     listing_id: str,
     payload: ListingToggleCommission,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ListingRead:
     listing = await ListingService.toggle_listing_commission(
         db=db, listing_id=listing_id, user=user, pays_commission=payload.pays_commission
@@ -255,6 +255,6 @@ async def toggle_listing_commission(
 async def delete_listing(
     listing_id: str,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await ListingService.delete_listing(db=db, listing_id=listing_id, user=user)

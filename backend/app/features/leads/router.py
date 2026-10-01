@@ -30,7 +30,7 @@ async def track_lead(
     request: Request,
     data: LeadTrackRequest,
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> LeadTrackResult:
     ip_hash = hashlib.sha256(_client_ip(request).encode()).hexdigest()
     tracked = await LeadService.track_lead(db, data, ip_hash)
@@ -55,7 +55,7 @@ async def track_lead(
 async def list_leads(
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[LeadRead]:
     items, total = await LeadService.list_leads(db, user, pagination)
     validated = [LeadRead.model_validate(l) for l in items]
@@ -72,7 +72,7 @@ async def list_leads(
 async def list_commissions(
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[CommissionRead]:
     items, total = await LeadService.list_commissions(db, user, pagination)
     validated = [CommissionRead.model_validate(c) for c in items]
@@ -89,7 +89,7 @@ async def list_commissions(
 async def pay_commission(
     commission_id: str,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> CommissionRead:
     comm = await LeadService.pay_commission(db, user, commission_id)
     return CommissionRead.model_validate(comm)

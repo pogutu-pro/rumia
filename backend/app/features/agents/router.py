@@ -26,7 +26,7 @@ router = APIRouter(prefix="/agents", tags=["Agents"])
 )
 async def list_agents(
     campus_id: Optional[str] = Query(None, description="Filter by campus ID"),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[AgentRead]:
     agents = await AgentService.get_agents(db, campus_id=campus_id)
     return [AgentRead.model_validate(a) for a in agents]
@@ -41,7 +41,7 @@ async def list_agents(
 )
 async def get_my_applications(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[AgentApplicationRead]:
     apps = await AgentService.get_user_applications(db, user.id)
     return [AgentApplicationRead.model_validate(a) for a in apps]
@@ -58,7 +58,7 @@ async def list_applications(
     status_filter: Optional[str] = Query(None, alias="status"),
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(require_roles("manager", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[AgentApplicationRead]:
     items, total = await AgentService.list_applications(db, status_filter=status_filter, pagination=pagination)
     validated = [AgentApplicationRead.model_validate(a) for a in items]
@@ -76,7 +76,7 @@ async def review_application(
     application_id: str,
     review_data: AgentApplicationReview,
     user: AuthenticatedUser = Depends(require_roles("manager", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AgentApplicationRead:
     app_obj = await AgentService.review_application(db, user, application_id, review_data)
     return AgentApplicationRead.model_validate(app_obj)
@@ -92,7 +92,7 @@ async def review_application(
 async def submit_application(
     data: AgentApplicationCreate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AgentApplicationRead:
     app_obj = await AgentService.submit_application(db, user, data)
     return AgentApplicationRead.model_validate(app_obj)
@@ -107,7 +107,7 @@ async def submit_application(
 )
 async def get_my_agent_profile(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AgentRead:
     agent = await AgentService.get_agent_by_user_id(db, user.id)
     return AgentRead.model_validate(agent)
@@ -120,7 +120,7 @@ async def get_my_agent_profile(
     summary="Get Agent Profile",
     description="Fetch single agent profile by ID. Public.",
 )
-async def get_agent(agent_id: str, db: AsyncSession = Depends(get_db_session)) -> AgentRead:
+async def get_agent(agent_id: str, db: AsyncSession = Depends(get_db_session, scope="function")) -> AgentRead:
     agent = await AgentService.get_agent_by_id(db, agent_id)
     return AgentRead.model_validate(agent)
 
@@ -136,7 +136,7 @@ async def update_agent(
     agent_id: str,
     data: AgentUpdate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AgentRead:
     agent = await AgentService.update_agent_profile(db, user, agent_id, data)
     return AgentRead.model_validate(agent)

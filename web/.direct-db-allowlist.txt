@@ -1,7 +1,6 @@
 # Legacy files with direct DB access. Shrink only. See docs/PLAN_FRONTEND_DB_DECOUPLING.md
 web/src/app/actions/admin.ts
 web/src/app/actions/campus-settings.ts
-web/src/app/actions/hostel-requests.ts
 web/src/app/actions/listings.ts
 web/src/app/actions/manager.ts
 web/src/app/actions/notifications.ts

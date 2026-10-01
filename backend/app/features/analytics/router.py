@@ -31,7 +31,7 @@ async def track_listing_view(
     request: Request,
     payload: TrackViewRequest,
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> TrackViewResponse:
     fingerprint = f"{_client_ip(request)}:{request.headers.get('user-agent', '')}"
     return await AnalyticsService.track_view(
@@ -51,7 +51,7 @@ async def track_listing_view(
 )
 async def get_view_counts(
     listing_id: str,
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ViewCountRead:
     return await AnalyticsService.get_listing_view_counts(db=db, listing_id=listing_id)
 
@@ -66,7 +66,7 @@ async def get_view_counts(
 async def get_agent_analytics(
     agent_id: str,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> list[AgentListingViewEntry]:
     return await AnalyticsService.get_agent_view_analytics(db=db, agent_id=agent_id)
 
@@ -80,6 +80,6 @@ async def get_agent_analytics(
 )
 async def get_platform_summary(
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PlatformViewSummary:
     return await AnalyticsService.get_platform_view_summary(db=db)

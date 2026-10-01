@@ -35,7 +35,7 @@ router = APIRouter(prefix="/profiles", tags=["Profiles"])
 async def check_email(
     request: Request,
     email: str = Query(..., min_length=3, max_length=254, pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$"),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> EmailExistsResponse:
     return EmailExistsResponse(exists=await ProfileService.email_exists(db, email))
 
@@ -49,7 +49,7 @@ async def check_email(
 )
 async def get_my_profile(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ProfileRead:
     profile = await ProfileService.get_or_create_profile(db, user)
     result = ProfileRead.model_validate(profile)
@@ -67,7 +67,7 @@ async def get_my_profile(
 async def update_my_profile(
     data: ProfileUpdate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ProfileRead:
     profile = await ProfileService.update_profile(db, user, data)
     return ProfileRead.model_validate(profile)
@@ -83,7 +83,7 @@ async def update_my_profile(
 async def set_home_campus(
     req: SetHomeCampusRequest,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ProfileRead:
     profile = await ProfileService.set_home_campus(db, user, req)
     return ProfileRead.model_validate(profile)
@@ -99,7 +99,7 @@ async def set_home_campus(
 async def get_wishlist(
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[ListingRead]:
     listings, total = await ProfileService.get_saved_hostels(db, user, pagination)
     items = []
@@ -123,7 +123,7 @@ async def get_wishlist(
 async def get_saved_hostels(
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[ListingRead]:
     return await get_wishlist(pagination, user, db)
 
@@ -139,7 +139,7 @@ async def get_saved_hostels(
 async def batch_check_wishlist(
     body: WishlistBatchCheckRequest,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> WishlistBatchCheckResponse:
     # Cap at 100 to prevent abuse
     ids = body.ids[:100]
@@ -159,7 +159,7 @@ async def batch_check_wishlist(
 async def get_wishlist_state(
     listing_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> WishlistActionResponse:
     return await ProfileService.get_saved_state(db, user, listing_id)
 
@@ -174,7 +174,7 @@ async def get_wishlist_state(
 async def wishlist_hostel(
     listing_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> WishlistActionResponse:
     return await ProfileService.save_hostel(db, user, listing_id)
 
@@ -189,7 +189,7 @@ async def wishlist_hostel(
 async def unwishlist_hostel(
     listing_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> WishlistActionResponse:
     return await ProfileService.unsave_hostel(db, user, listing_id)
 
@@ -205,7 +205,7 @@ async def unwishlist_hostel(
 async def get_saved_state(
     listing_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> SavedHostelActionResponse:
     return await ProfileService.get_saved_state(db, user, listing_id)
 
@@ -221,7 +221,7 @@ async def get_saved_state(
 async def save_hostel(
     listing_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> SavedHostelActionResponse:
     return await ProfileService.save_hostel(db, user, listing_id)
 
@@ -237,7 +237,7 @@ async def save_hostel(
 async def unsave_hostel(
     listing_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> SavedHostelActionResponse:
     return await ProfileService.unsave_hostel(db, user, listing_id)
 

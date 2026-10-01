@@ -31,7 +31,7 @@ router = APIRouter(prefix="/admin", tags=["Admin Operations"])
 )
 async def list_campuses_admin(
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[CampusRead]:
     campuses = await CampusService.get_campuses(db)
     return [CampusRead.model_validate(c) for c in campuses]
@@ -47,7 +47,7 @@ async def list_campuses_admin(
 async def create_campus(
     data: CampusCreate,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> CampusRead:
     campus = await AdminService.create_campus(db, user, data)
     return CampusRead.model_validate(campus)
@@ -64,7 +64,7 @@ async def update_campus(
     campus_id: str,
     data: CampusUpdate,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> CampusRead:
     campus = await AdminService.update_campus(db, user, campus_id, data)
     return CampusRead.model_validate(campus)
@@ -81,7 +81,7 @@ async def update_campus_status(
     campus_id: str,
     data: CampusStatusUpdate,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> CampusRead:
     campus = await AdminService.update_campus_status(db, user, campus_id, data)
     return CampusRead.model_validate(campus)
@@ -96,7 +96,7 @@ async def update_campus_status(
 )
 async def list_managers(
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[ManagerRead]:
     managers = await AdminService.list_managers(db, user)
     return [ManagerRead.model_validate(m) for m in managers]
@@ -112,7 +112,7 @@ async def list_managers(
 async def assign_manager(
     data: ManagerAssign,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ManagerRead:
     prof = await AdminService.assign_manager(db, user, data)
     return ManagerRead.model_validate(prof)
@@ -129,7 +129,7 @@ async def update_agent_status(
     agent_id: str,
     data: AgentStatusUpdate,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AgentRead:
     agent = await AdminService.update_agent_status(db, user, agent_id, data.status)
     return AgentRead.model_validate(agent)
@@ -144,7 +144,7 @@ async def update_agent_status(
 async def transfer_listing(
     data: ListingTransferRequest,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> dict:
     history = await AdminService.transfer_listing(db, user, data)
     return {"status": "success", "transfer_id": history.id}
@@ -159,6 +159,6 @@ async def transfer_listing(
 )
 async def get_stats(
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PlatformStats:
     return await AdminService.get_platform_stats(db, user)

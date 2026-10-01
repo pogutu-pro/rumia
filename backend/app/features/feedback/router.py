@@ -23,7 +23,7 @@ async def submit_feedback(
     request: Request,
     data: FeedbackCreate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> FeedbackRead:
     fb = await FeedbackService.create_feedback(db, data, user)
     return FeedbackRead.model_validate(fb)
@@ -39,7 +39,7 @@ async def submit_feedback(
 async def list_feedback(
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[FeedbackRead]:
     items, total = await FeedbackService.list_feedback(db, pagination)
     validated = [FeedbackRead.model_validate(f) for f in items]

@@ -43,7 +43,7 @@ async def list_reviews(
     status_filter: str = Query("published", alias="status"),
     pagination: PaginationParams = Depends(),
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[ReviewRead]:
     # Only moderators may list anything other than published reviews.
     if status_filter != "published" and not (user and user.is_manager):
@@ -61,7 +61,7 @@ async def list_reviews(
     summary="Get Listing Review Summary",
     description="Fetch aggregate rating, distribution, and category breakdown for a listing. Public.",
 )
-async def get_review_summary(listing_id: str, db: AsyncSession = Depends(get_db_session)) -> ReviewSummary:
+async def get_review_summary(listing_id: str, db: AsyncSession = Depends(get_db_session, scope="function")) -> ReviewSummary:
     summary_dict = await ReviewService.get_summary(db, listing_id)
     return ReviewSummary.model_validate(summary_dict)
 
@@ -76,7 +76,7 @@ async def get_review_summary(listing_id: str, db: AsyncSession = Depends(get_db_
 async def get_review(
     review_id: str,
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ReviewRead:
     r = await ReviewService.get_review_by_id(db, review_id)
     # Unpublished reviews are visible only to their author and moderators (404, not 403, to avoid leaking existence).
@@ -97,7 +97,7 @@ async def create_review(
     request: Request,
     data: ReviewCreate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ReviewRead:
     r = await ReviewService.create_review(db, user, data)
     return _to_review_read(r)
@@ -114,7 +114,7 @@ async def update_review(
     review_id: str,
     data: ReviewUpdate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ReviewRead:
     r = await ReviewService.update_review(db, user, review_id, data)
     return _to_review_read(r)
@@ -129,7 +129,7 @@ async def update_review(
 async def delete_review(
     review_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await ReviewService.delete_review(db, user, review_id)
 
@@ -143,7 +143,7 @@ async def delete_review(
 async def toggle_like(
     review_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> dict:
     is_liked = await ReviewService.toggle_like(db, user, review_id)
     return {"liked": is_liked}
@@ -158,7 +158,7 @@ async def toggle_like(
 async def delete_reply(
     reply_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await ReviewService.delete_reply(db, user, reply_id)
 
@@ -174,7 +174,7 @@ async def add_reply(
     review_id: str,
     data: ReviewReplyCreate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ReviewReplyRead:
     reply = await ReviewService.add_reply(db, user, review_id, data)
     return ReviewReplyRead.model_validate(reply)
@@ -191,7 +191,7 @@ async def moderate_review(
     review_id: str,
     action: ReviewModerationAction,
     user: AuthenticatedUser = Depends(require_roles("manager")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ReviewRead:
     r = await ReviewService.moderate_review(db, user, review_id, action)
     return _to_review_read(r)

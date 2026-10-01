@@ -69,7 +69,7 @@ async def test_create_request_authed(authed_client: AsyncClient):
     with patch(
         "app.features.hostel_requests.service.HostelRequestService.create_request",
         new_callable=AsyncMock,
-        return_value=created,
+        return_value=(created, []),
     ):
         payload = {
             "phone": "0712345678",
@@ -141,3 +141,63 @@ async def test_delete_request_authed(authed_client: AsyncClient):
         response = await authed_client.delete("/api/v1/hostel-requests/request-1")
         assert response.status_code == 200
         assert response.json()["message"] == "Request deleted"
+
+# ── Manager side ─────────────────────────────────────────────────────────────────
+
+from types import SimpleNamespace  # noqa: E402
+from unittest.mock import MagicMock  # noqa: E402
+
+from app.core.errors import APIException  # noqa: E402
+from app.features.hostel_requests.service import HostelRequestService  # noqa: E402
+from tests.conftest import MockResult  # noqa: E402
+
+
+def _db(*results):
+    db = MagicMock()
+    db.execute = AsyncMock(side_effect=list(results))
+    db.flush = AsyncMock()
+    return db
+
+
+@pytest.mark.asyncio
+async def test_manager_status_update_is_campus_scoped_and_notifies_student(monkeypatch):
+    req = _make_request(status="waiting", user_id="student-9", campus_id="c1")
+    manager = SimpleNamespace(id="m1", role="manager", is_admin=False, managed_campus_id="c1", managed_region_id=None)
+
+    async def scope(user, campus_id, db):
+        return campus_id == "c1"
+
+    monkeypatch.setattr("app.features.hostel_requests.service.check_campus_scope", scope)
+
+    updated, push = await HostelRequestService.update_status(_db(MockResult(single=req)), manager, "request-1", "hostel_found")
+    assert updated.status == "hostel_found"
+    assert push.user_id == "student-9" and "Hostel Found" in push.body
+
+    other = _make_request(status="waiting", campus_id="c2")
+    with pytest.raises(APIException) as exc:
+        await HostelRequestService.update_status(_db(MockResult(single=other)), manager, "request-1", "completed")
+    assert exc.value.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_out_of_scope_request_looks_missing_to_a_manager(monkeypatch):
+    async def deny(user, campus_id, db):
+        return False
+
+    monkeypatch.setattr("app.features.hostel_requests.service.check_campus_scope", deny)
+    with pytest.raises(APIException) as exc:
+        await HostelRequestService.get_managed(_db(MockResult(single=_make_request())), SimpleNamespace(), "request-1")
+    assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_manager_without_scope_sees_no_requests():
+    nobody = SimpleNamespace(is_admin=False, managed_campus_id=None, managed_region_id=None)
+    assert await HostelRequestService.list_managed(_db(), nobody) == []
+
+
+@pytest.mark.asyncio
+async def test_status_endpoint_rejects_unknown_status_and_students(authed_client: AsyncClient):
+    # authed_client is an "agent"; agents are not managers
+    response = await authed_client.patch("/api/v1/hostel-requests/request-1/status", json={"status": "completed"})
+    assert response.status_code == 403

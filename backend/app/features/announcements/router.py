@@ -19,7 +19,7 @@ router = APIRouter(prefix="/announcements", tags=["Announcements"])
 )
 async def list_announcements(
     campus_id: Optional[str] = Query(None, description="Filter by campus ID"),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[AnnouncementRead]:
     anns = await AnnouncementService.get_active_announcements(db, campus_id=campus_id)
     return [AnnouncementRead.model_validate(a) for a in anns]
@@ -35,7 +35,7 @@ async def list_announcements(
 async def create_announcement(
     data: AnnouncementCreate,
     user: AuthenticatedUser = Depends(require_roles("manager", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AnnouncementRead:
     ann = await AnnouncementService.create_announcement(db, user, data)
     return AnnouncementRead.model_validate(ann)
@@ -50,6 +50,6 @@ async def create_announcement(
 async def delete_announcement(
     announcement_id: str,
     user: AuthenticatedUser = Depends(require_roles("manager", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
     await AnnouncementService.delete_announcement(db, user, announcement_id)

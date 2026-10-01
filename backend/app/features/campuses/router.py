@@ -19,7 +19,7 @@ router = APIRouter(prefix="/campuses", tags=["Campuses"])
 )
 async def list_campuses(
     status_filter: Optional[str] = Query("active", alias="status"),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[CampusRead]:
     return await CampusService.get_campuses(db, status=status_filter)
 
@@ -33,7 +33,7 @@ async def list_campuses(
 )
 async def get_campus(
     slug: str,
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> CampusRead:
     campus = await CampusService.get_campus_by_slug(db, slug=slug)
     if not campus:

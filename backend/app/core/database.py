@@ -41,7 +41,14 @@ async_session_factory = AsyncSessionLocal
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency that provides an async database session per request."""
+    """Dependency that provides an async database session per request.
+
+    ALWAYS declare it as `Depends(get_db_session, scope="function")`. FastAPI (>=0.118) runs the
+    cleanup of a default-scoped yield dependency *after the response is sent*, so the commit
+    below would land after the client already has the response, and an immediate follow-up read
+    (e.g. create then reload the list) could miss the write. `scope="function"` runs the commit
+    right after the endpoint returns, before the response goes out.
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session

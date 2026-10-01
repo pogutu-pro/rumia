@@ -2,6 +2,7 @@
 
 import re
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
@@ -9,7 +10,8 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import BadRequestException, ForbiddenException, NotFoundException
-from app.core.security import AuthenticatedUser
+from app.core.security import AuthenticatedUser, check_campus_scope
+from app.features.campuses.models import Campus
 from app.features.hostel_requests.models import HostelRequest
 from app.features.hostel_requests.schemas import (
     BUDGET_RANGES,
@@ -17,13 +19,32 @@ from app.features.hostel_requests.schemas import (
     GENDERS,
     ROOM_TYPES,
     STAY_PREFERENCES,
+    HostelRequestCampus,
     HostelRequestCreate,
     HostelRequestFormConfig,
+    ManagedHostelRequestRead,
     HostelRequestUpdate,
     HostelRequestZoneOption,
 )
 
 DEFAULT_FEE = 100
+STATUS_LABELS = {
+    "waiting": "Waiting",
+    "contacted": "Contacted",
+    "finding": "Finding a Hostel",
+    "hostel_found": "Hostel Found",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+}
+
+
+@dataclass
+class PushMessage:
+    user_id: str
+    title: str
+    body: str
+    url: str
+
 EDITABLE_STATUSES = ("waiting", "contacted")
 
 _PHONE_RE = re.compile(r"^(?:\+?254|0)([17]\d{8})$")
@@ -90,83 +111,110 @@ class HostelRequestService:
         return [HostelRequestZoneOption(id=str(r.id), name=r.name) for r in rows]
 
     @staticmethod
-    async def _notify_campus_managers(
-        db: AsyncSession, campus_id: str, student_name: str, zone: Optional[str], campus_name: str, request_id: str
-    ) -> None:
-        """Best-effort: insert in-app notifications for the campus managers."""
-        try:
-            result = await db.execute(
-                text(
-                    """
-                    SELECT id::text AS id FROM public.profiles
-                    WHERE role = 'manager' AND managed_campus_id = CAST(:campus_id AS uuid)
-                    """
-                ),
-                {"campus_id": campus_id},
+    async def manager_user_ids(db: AsyncSession, campus_id: str) -> List[str]:
+        """Who to alert about a campus's requests: its campus managers plus the managers of its
+        region; admins when nobody manages it."""
+        ids = set()
+        res = await db.execute(
+            text("SELECT id::text AS id FROM public.profiles WHERE role = 'manager' AND managed_campus_id = CAST(:c AS uuid)"),
+            {"c": campus_id},
+        )
+        ids.update(str(r.id) for r in res.fetchall())
+        res = await db.execute(
+            text("SELECT region_id::text AS region_id FROM public.campuses WHERE id = CAST(:c AS uuid)"),
+            {"c": campus_id},
+        )
+        region = res.fetchone()
+        if region and region.region_id:
+            res = await db.execute(
+                text("SELECT id::text AS id FROM public.profiles WHERE role = 'manager' AND managed_region_id = CAST(:r AS uuid)"),
+                {"r": region.region_id},
             )
-            manager_ids = [str(r.id) for r in result.fetchall()]
+            ids.update(str(r.id) for r in res.fetchall())
+        if not ids:
+            res = await db.execute(text("SELECT id::text AS id FROM public.profiles WHERE role = 'admin'"))
+            ids.update(str(r.id) for r in res.fetchall())
+        return sorted(ids)
 
-            if not manager_ids:
-                result = await db.execute(
-                    text(
-                        """
-                        SELECT c.region_id::text FROM public.campuses c
-                        WHERE c.id = CAST(:campus_id AS uuid)
-                        """
-                    ),
-                    {"campus_id": campus_id},
-                )
-                region_row = result.fetchone()
-                if region_row and region_row.region_id:
-                    result = await db.execute(
-                        text(
-                            """
-                            SELECT id::text FROM public.profiles
-                            WHERE role = 'manager' AND managed_region_id = CAST(:region_id AS uuid)
-                            """
-                        ),
-                        {"region_id": region_row.region_id},
-                    )
-                    manager_ids = [str(r.id) for r in result.fetchall()]
+    # ── Manager side ────────────────────────────────────────────────────────
 
-            if not manager_ids:
-                result = await db.execute(
-                    text("SELECT id::text FROM public.profiles WHERE role = 'admin'")
-                )
-                manager_ids = [str(r.id) for r in result.fetchall()]
-
-            if not manager_ids:
-                return
-
-            title = "New hostel request"
-            body = (
-                f"{student_name} needs help finding a hostel near {campus_name} "
-                f"({zone or 'any area'}). Tap to review."
+    @staticmethod
+    async def _allowed_campus_ids(db: AsyncSession, user: AuthenticatedUser) -> Optional[List[str]]:
+        """None = all campuses (admin); otherwise the campuses this manager may see."""
+        if user.is_admin:
+            return None
+        if user.managed_campus_id:
+            return [user.managed_campus_id]
+        if user.managed_region_id:
+            res = await db.execute(
+                text("SELECT id::text AS id FROM public.campuses WHERE region_id = CAST(:r AS uuid)"),
+                {"r": user.managed_region_id},
             )
-            for manager_id in manager_ids:
-                await db.execute(
-                    text(
-                        """
-                        INSERT INTO public.app_notifications (id, user_id, title, body, url, is_read)
-                        VALUES (CAST(:id AS uuid), CAST(:user_id AS uuid), :title, :body, :url, false)
-                        """
-                    ),
-                    {
-                        "id": str(uuid.uuid4()),
-                        "user_id": manager_id,
-                        "title": title,
-                        "body": body,
-                        "url": f"/hostel-requests/{request_id}",
-                    },
-                )
-        except Exception:
-            # Manager notifications are best-effort and must never block a request.
-            pass
+            return [str(r.id) for r in res.fetchall()]
+        return []
+
+    @staticmethod
+    async def _with_campus(db: AsyncSession, requests: List[HostelRequest]) -> List[ManagedHostelRequestRead]:
+        campus_ids = sorted({str(r.campus_id) for r in requests})
+        campuses = {}
+        if campus_ids:
+            res = await db.execute(select(Campus).where(Campus.id.in_(campus_ids)))
+            campuses = {str(c.id): c for c in res.scalars().all()}
+        out = []
+        for r in requests:
+            row = ManagedHostelRequestRead.model_validate(r)
+            campus = campuses.get(str(r.campus_id))
+            if campus:
+                row.campus = HostelRequestCampus(id=str(campus.id), name=campus.name, slug=campus.slug)
+                row.campus_name = campus.name
+            out.append(row)
+        return out
+
+    @staticmethod
+    async def list_managed(db: AsyncSession, user: AuthenticatedUser) -> List[ManagedHostelRequestRead]:
+        allowed = await HostelRequestService._allowed_campus_ids(db, user)
+        if allowed is not None and not allowed:
+            return []
+        stmt = select(HostelRequest).order_by(HostelRequest.created_at.desc())
+        if allowed is not None:
+            stmt = stmt.where(HostelRequest.campus_id.in_(allowed))
+        res = await db.execute(stmt)
+        return await HostelRequestService._with_campus(db, list(res.scalars().all()))
+
+    @staticmethod
+    async def get_managed(db: AsyncSession, user: AuthenticatedUser, request_id: str) -> ManagedHostelRequestRead:
+        res = await db.execute(select(HostelRequest).where(HostelRequest.id == request_id))
+        request = res.scalar_one_or_none()
+        # Out-of-scope requests look identical to missing ones.
+        if request is None or not await check_campus_scope(user, str(request.campus_id), db):
+            raise NotFoundException(f"Hostel request '{request_id}' not found.")
+        return (await HostelRequestService._with_campus(db, [request]))[0]
+
+    @staticmethod
+    async def update_status(
+        db: AsyncSession, user: AuthenticatedUser, request_id: str, new_status: str
+    ) -> Tuple[HostelRequest, Optional[PushMessage]]:
+        res = await db.execute(select(HostelRequest).where(HostelRequest.id == request_id))
+        request = res.scalar_one_or_none()
+        if request is None:
+            raise NotFoundException(f"Hostel request '{request_id}' not found.")
+        if not await check_campus_scope(user, str(request.campus_id), db):
+            raise ForbiddenException("You cannot update requests outside your campus")
+        request.status = new_status
+        request.updated_at = datetime.now(timezone.utc)
+        await db.flush()
+        label = STATUS_LABELS.get(new_status, new_status)
+        push = PushMessage(
+            str(request.user_id), "Hostel request update",
+            f"Your hostel request status is now: {label}. Check your account for details.",
+            "/account?tab=overview",
+        ) if request.user_id else None
+        return request, push
 
     @staticmethod
     async def create_request(
         db: AsyncSession, user: AuthenticatedUser, data: HostelRequestCreate
-    ) -> HostelRequest:
+    ) -> Tuple[HostelRequest, List[PushMessage]]:
         phone = clean_kenyan_phone(data.phone)
 
         student_name, _, campus_id = await HostelRequestService._get_profile(db, user.id)
@@ -198,10 +246,16 @@ class HostelRequestService:
         db.add(request)
         await db.flush()
 
-        await HostelRequestService._notify_campus_managers(
-            db, campus_id, request.student_name, request.preferred_zone, campus_name or "your campus", request.id
+        title = "New hostel request"
+        body = (
+            f"{request.student_name} needs help finding a hostel near {campus_name or 'your campus'} "
+            f"({request.preferred_zone or 'any area'}). Tap to review."
         )
-        return request
+        pushes = [
+            PushMessage(manager_id, title, body, "/manager/requests")
+            for manager_id in await HostelRequestService.manager_user_ids(db, campus_id)
+        ]
+        return request, pushes
 
     @staticmethod
     async def list_my_requests(db: AsyncSession, user: AuthenticatedUser) -> List[HostelRequest]:

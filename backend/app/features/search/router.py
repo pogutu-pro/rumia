@@ -26,7 +26,7 @@ async def search_listings(
     min_price: Optional[float] = Query(None, description="Minimum monthly price"),
     max_price: Optional[float] = Query(None, description="Maximum monthly price"),
     pagination: PaginationParams = Depends(),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[ListingRead]:
     items, total = await SearchService.search_listings(
         db=db,

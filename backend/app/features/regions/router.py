@@ -16,7 +16,7 @@ router = APIRouter(prefix="/regions", tags=["Regions"])
     summary="List Regions",
     description="Fetch all administrative regions. Public.",
 )
-async def list_regions(db: AsyncSession = Depends(get_db_session)) -> List[RegionRead]:
+async def list_regions(db: AsyncSession = Depends(get_db_session, scope="function")) -> List[RegionRead]:
     regions = await RegionService.get_regions(db)
     return [RegionRead.model_validate(r) for r in regions]
 
@@ -28,6 +28,6 @@ async def list_regions(db: AsyncSession = Depends(get_db_session)) -> List[Regio
     summary="Get Region Details",
     description="Fetch details of a single region by slug. Public.",
 )
-async def get_region(slug: str, db: AsyncSession = Depends(get_db_session)) -> RegionRead:
+async def get_region(slug: str, db: AsyncSession = Depends(get_db_session, scope="function")) -> RegionRead:
     region = await RegionService.get_region_by_slug(db, slug)
     return RegionRead.model_validate(region)

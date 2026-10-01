@@ -72,7 +72,7 @@ def _to_read(listing, bnb) -> BnbListingRead:
 )
 async def get_public_bnb_listings(
     pagination: PaginationParams = Depends(),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[BnbListingRead]:
     """Public feed of all active BnB (short_stay) listings with bnb_details."""
     from sqlalchemy import select, func
@@ -120,7 +120,7 @@ async def get_public_bnb_listings(
 async def create_bnb_listing(
     data: BnbListingCreate,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> BnbListingRead:
     listing, bnb = await BnbService.create_bnb_listing(db=db, user=user, data=data)
     return _to_read(listing, bnb)
@@ -136,7 +136,7 @@ async def update_bnb_listing(
     listing_id: str,
     data: BnbListingUpdate,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> BnbListingRead:
     listing, bnb = await BnbService.update_bnb_listing(
         db=db, listing_id=listing_id, user=user, data=data
@@ -153,7 +153,7 @@ async def update_bnb_listing(
 async def get_my_bnb_listings(
     pagination: PaginationParams = Depends(),
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> PaginatedResponse[BnbListingRead]:
     listings, total = await BnbService.get_agent_bnb_listings(
         db=db, user=user, pagination=pagination
@@ -173,7 +173,7 @@ async def get_my_bnb_listings(
 async def get_my_bnb_listing_for_edit(
     listing_id: str,
     user: AuthenticatedUser = Depends(require_roles("agent", "admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> BnbListingRead:
     listing, bnb = await BnbService.get_bnb_listing_for_edit(
         db=db,
@@ -192,7 +192,7 @@ async def get_my_bnb_listing_for_edit(
 async def get_bnb_listing(
     listing_id: str,
     user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> BnbListingRead:
     listing, bnb = await BnbService.get_bnb_listing(db=db, listing_id=listing_id)
     if not listing.is_active:

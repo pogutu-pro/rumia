@@ -37,7 +37,7 @@ async def get_upload_url(
 async def register_image_upload(
     data: ImageUploadCreate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ImageUploadRead:
     img = await ImageService.register_upload(db, user, data)
     return ImageUploadRead.model_validate(img)
@@ -53,7 +53,7 @@ async def register_image_upload(
 async def get_image_upload(
     image_upload_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ImageUploadRead:
     img = await ImageService.get_image_upload(db, image_upload_id)
     return ImageUploadRead.model_validate(img)

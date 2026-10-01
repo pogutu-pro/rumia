@@ -17,7 +17,7 @@ router = APIRouter(prefix="/legal", tags=["Legal Documents"])
     summary="Get Terms & Conditions",
     description="Fetch published Terms & Conditions document. Public.",
 )
-async def get_terms(db: AsyncSession = Depends(get_db_session)) -> LegalDocRead:
+async def get_terms(db: AsyncSession = Depends(get_db_session, scope="function")) -> LegalDocRead:
     doc = await LegalService.get_published_doc(db, "terms")
     return LegalDocRead.model_validate(doc)
 
@@ -29,7 +29,7 @@ async def get_terms(db: AsyncSession = Depends(get_db_session)) -> LegalDocRead:
     summary="Get Privacy Policy",
     description="Fetch published Privacy Policy document. Public.",
 )
-async def get_privacy(db: AsyncSession = Depends(get_db_session)) -> LegalDocRead:
+async def get_privacy(db: AsyncSession = Depends(get_db_session, scope="function")) -> LegalDocRead:
     doc = await LegalService.get_published_doc(db, "privacy")
     return LegalDocRead.model_validate(doc)
 
@@ -43,7 +43,7 @@ async def get_privacy(db: AsyncSession = Depends(get_db_session)) -> LegalDocRea
 )
 async def list_admin_docs(
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[LegalDocAdminRead]:
     docs = await LegalService.list_admin_docs(db, user)
     return [LegalDocAdminRead.model_validate(d) for d in docs]
@@ -60,7 +60,7 @@ async def save_draft(
     doc_type: str,
     data: LegalDraftUpdate,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> LegalDocAdminRead:
     doc = await LegalService.save_draft(db, user, doc_type, data.draft_content)
     return LegalDocAdminRead.model_validate(doc)
@@ -76,7 +76,7 @@ async def save_draft(
 async def publish_doc(
     doc_type: str,
     user: AuthenticatedUser = Depends(require_roles("admin")),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> LegalDocAdminRead:
     doc = await LegalService.publish_doc(db, user, doc_type)
     return LegalDocAdminRead.model_validate(doc)

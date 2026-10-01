@@ -33,7 +33,7 @@ async def register_device_token(
     request: Request,
     data: DeviceTokenRegisterRequest,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> DeviceTokenActionResponse:
     return await NotificationService.register_device_token(db, user, data)
 
@@ -48,7 +48,7 @@ async def register_device_token(
 async def unregister_device_token(
     token: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> DeviceTokenActionResponse:
     return await NotificationService.unregister_device_token(db, user, token)
 
@@ -62,7 +62,7 @@ async def unregister_device_token(
 async def subscribe_push(
     data: PushSubscriptionCreate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> dict:
     sub = await NotificationService.subscribe_push(db, user, data)
     return {"id": sub.id, "message": "Successfully subscribed to push notifications"}
@@ -77,7 +77,7 @@ async def subscribe_push(
 async def unsubscribe_push(
     data: PushUnsubscribeRequest,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> dict:
     await NotificationService.unsubscribe_push(db, user, data.endpoint)
     return {"message": "Successfully unsubscribed"}
@@ -92,7 +92,7 @@ async def unsubscribe_push(
 )
 async def unread_count(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> UnreadCountResponse:
     count = await NotificationService.unread_count(db, user)
     return UnreadCountResponse(count=count)
@@ -107,7 +107,7 @@ async def unread_count(
 )
 async def get_preferences(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> NotificationPreferenceRead:
     pref = await NotificationService.list_preferences(db, user)
     return NotificationPreferenceRead.model_validate(pref)
@@ -123,7 +123,7 @@ async def get_preferences(
 async def update_preferences(
     data: NotificationPreferenceUpdate,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> NotificationPreferenceActionResponse:
     return await NotificationService.update_preferences(db, user, data)
 
@@ -137,7 +137,7 @@ async def update_preferences(
 )
 async def list_notifications(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> List[AppNotificationRead]:
     notifs = await NotificationService.list_notifications(db, user)
     return [AppNotificationRead.model_validate(n) for n in notifs]
@@ -153,7 +153,7 @@ async def list_notifications(
 async def mark_read(
     notification_id: str,
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AppNotificationRead:
     notif = await NotificationService.mark_read(db, user, notification_id)
     return AppNotificationRead.model_validate(notif)
@@ -167,7 +167,7 @@ async def mark_read(
 )
 async def mark_all_read(
     user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> dict:
     await NotificationService.mark_all_read(db, user)
     return {"message": "All notifications marked as read"}

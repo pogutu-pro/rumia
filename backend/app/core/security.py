@@ -227,7 +227,7 @@ async def _resolve_authenticated_user(
 
 async def get_current_user(
     authorization: Optional[str] = Header(None),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AuthenticatedUser:
     """FastAPI Dependency: Extract Bearer JWT and return verified AuthenticatedUser."""
     token = _extract_bearer_token(authorization)
@@ -240,7 +240,7 @@ async def get_current_user(
 
 async def get_optional_current_user(
     authorization: Optional[str] = Header(None),
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> Optional[AuthenticatedUser]:
     """Resolve an authenticated user when a bearer token is present; allow anonymous reads."""
     token = _extract_bearer_token(authorization)

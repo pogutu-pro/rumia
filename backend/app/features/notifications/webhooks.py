@@ -52,7 +52,7 @@ def _verify_bearer_token(request: Request) -> bool:
 )
 async def brevo_webhook(
     request: Request,
-    db: AsyncSession = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> dict:
     if not _verify_bearer_token(request):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid webhook token")
