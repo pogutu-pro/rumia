@@ -2,16 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { campusesApi } from '@/lib/api/campuses';
-import { profilesApi } from '@/lib/api/profiles';
 import { signInWithGoogle, hasStoredSessionCookie } from '@/lib/supabase/auth';
 import posthog from 'posthog-js';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { KeyRound, Mail, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { BrandedLoader } from '@/components/ui/branded-loader';
 
 export default function LoginPage() {
@@ -22,11 +17,7 @@ export default function LoginPage() {
   >([]);
 
   // Sign-in form state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSigningIn, setIsSigningIn] = useState(false);
   const [googleSigningIn, setGoogleSigningIn] = useState(false);
-  const supabase = createClient();
 
   function getNextParam(): string | undefined {
     const params = new URLSearchParams(window.location.search);
@@ -101,80 +92,6 @@ export default function LoginPage() {
     })();
   }, [router]);
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSigningIn) return;
-    setIsSigningIn(true);
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        if (error.message === 'Invalid login credentials') {
-          const res = await fetch(
-            `/api/auth/check-email?email=${encodeURIComponent(email)}`,
-          );
-          const { exists } = await res.json();
-
-          if (!exists) {
-            toast.error(
-              'This email is not registered. Sign up with Google above.',
-              { duration: 6000 },
-            );
-          } else {
-            toast.error('Wrong password. Please try again.');
-          }
-        } else {
-          toast.error(error.message);
-        }
-        setIsSigningIn(false);
-        return;
-      }
-
-      const userId = data.user?.id;
-      if (!userId) {
-        toast.error('Authentication failed');
-        setIsSigningIn(false);
-        return;
-      }
-
-      const profile = await profilesApi.getMe().catch(() => null);
-
-      if (profile?.role === 'admin') {
-        posthog.identify(userId);
-        posthog.capture('user_signed_in', { method: 'email', role: 'admin' });
-        toast.success('Logged in as administrator');
-        router.push('/admin');
-        router.refresh();
-        return;
-      }
-
-      const agent = profile?.agent_id ?? null;
-
-      if (agent) {
-        posthog.identify(userId);
-        posthog.capture('user_signed_in', { method: 'email', role: 'agent' });
-        toast.success('Welcome back, Agent!');
-        router.push('/dashboard');
-        router.refresh();
-      } else {
-        posthog.identify(userId);
-        posthog.capture('user_signed_in', { method: 'email', role: 'user' });
-        toast.success('Signed in successfully');
-        router.push(getNextParam() || '/account');
-        router.refresh();
-      }
-    } catch (err) {
-      posthog.captureException(err);
-      toast.error('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsSigningIn(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" role="status" aria-live="polite" aria-busy="true">
@@ -235,74 +152,8 @@ export default function LoginPage() {
           {googleSigningIn ? 'Redirecting to Google...' : 'Continue with Google'}
         </button>
 
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
-          </div>
-          <div className="relative flex justify-center text-xs font-semibold uppercase tracking-wider text-slate-400">
-            <span className="bg-white px-4">or</span>
-          </div>
-        </div>
-
-        {/* Email / Password Form */}
-        <form className="space-y-4" onSubmit={handleEmailSignIn}>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="pl-10 h-12 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="pl-10 h-12 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 text-sm"
-              />
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isSigningIn}
-            className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 border-0"
-          >
-            {isSigningIn ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              'Sign in'
-            )}
-          </Button>
-        </form>
-
         <p className="text-center text-xs text-slate-400">
-          New here? Sign up with Google. Already have an account? Sign in with
-          email above.
-        </p>
-        <p className="text-center text-xs text-slate-400">
-          Agents and administrators use email sign-in.
+          Everyone — students, agents and administrators — signs in with Google.
         </p>
         {comingCampuses.length > 0 && (
           <div className="mt-4">

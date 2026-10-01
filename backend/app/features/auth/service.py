@@ -28,6 +28,7 @@ GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_CERTS_URL = "https://www.googleapis.com/oauth2/v3/certs"
 GOOGLE_ISSUERS = ("https://accounts.google.com", "accounts.google.com")
 OTC_TTL_SECONDS = 120
+REUSE_GRACE_SECONDS = 10
 
 
 class AuthDisabled(APIException):
@@ -201,6 +202,10 @@ class AuthService:
             raise UnauthorizedException("Invalid token")
         if row.revoked_at is not None or row.expires_at < _now():
             raise UnauthorizedException("Token expired")
+        if row.used_at is not None and kind == "refresh" and (_now() - row.used_at).total_seconds() <= REUSE_GRACE_SECONDS:
+            # Two tabs/requests refreshed with the same token at once: let the loser through on the
+            # same family instead of treating a benign race as theft.
+            return row
         if row.used_at is not None:
             await db.execute(
                 text("UPDATE public.auth_refresh_tokens SET revoked_at = now() WHERE family_id = :f AND revoked_at IS NULL"),

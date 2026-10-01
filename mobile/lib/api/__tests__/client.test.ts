@@ -1,16 +1,14 @@
 import { ApiError, apiFetch } from '../client';
-import { supabase } from '../../supabase/client';
+import { authClient } from '../../auth/client';
 
-jest.mock('../../supabase/client', () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn(),
-      refreshSession: jest.fn(),
-    },
+jest.mock('../../auth/client', () => ({
+  authClient: {
+    getSession: jest.fn(),
+    refreshSession: jest.fn(),
   },
 }));
 
-const mockAuth = supabase.auth as unknown as {
+const mockAuth = authClient as unknown as {
   getSession: jest.Mock;
   refreshSession: jest.Mock;
 };

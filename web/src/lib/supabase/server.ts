@@ -1,36 +1,21 @@
-import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { AT_COOKIE, isFresh, sessionFromToken } from '@/lib/auth/session';
 
+/**
+ * Server-side auth reader (Server Components / Actions / Route Handlers). It only *reads* the
+ * session cookie, which `proxy.ts` keeps fresh. The claims are not verified here: they drive UX
+ * (redirects, greetings) only, and every data call re-checks the token in the API.
+ */
 export async function createClient() {
-  const cookieStore = await cookies();
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables'
-    );
-  }
-
-  return createServerClient(
-    url,
-    key,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // This can be ignored if called from a Server Component
-          }
-        },
-      },
-    }
-  );
+  const store = await cookies();
+  const session = () => {
+    const s = sessionFromToken(store.get(AT_COOKIE)?.value);
+    return isFresh(s, 0) ? s : null;
+  };
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: session() }, error: null as Error | null }),
+      getUser: async () => ({ data: { user: session()?.user ?? null }, error: null as Error | null }),
+    },
+  };
 }

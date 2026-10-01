@@ -1,13 +1,12 @@
 import { useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import type { Session, User } from '@supabase/supabase-js';
 import { apiFetch } from '../../lib/api/client';
 import type { Profile } from '../../lib/api/schema';
-import { supabase } from '../../lib/supabase/client';
+import { authClient, type AuthSession, type AuthUser } from '../../lib/auth/client';
 import { unregisterPushToken } from '../notifications/use-push-notifications';
 import { useSessionStore, type UserProfileData } from '../../stores/session';
 
-function sessionUser(authUser: User, profile?: Profile): UserProfileData {
+function sessionUser(authUser: AuthUser, profile?: Profile): UserProfileData {
   return {
     id: authUser.id,
     email: profile?.email ?? authUser.email,
@@ -21,7 +20,7 @@ function sessionUser(authUser: User, profile?: Profile): UserProfileData {
   };
 }
 
-export async function hydrateSessionUser(authUser: User) {
+export async function hydrateSessionUser(authUser: AuthUser) {
   try {
     const profile = await apiFetch<Profile>('/profiles/me');
     return sessionUser(authUser, profile);
@@ -35,7 +34,7 @@ export function useSessionHydration() {
   const clearSession = useSessionStore((state) => state.clearSession);
 
   return useCallback(
-    async (session: Session | null) => {
+    async (session: AuthSession | null) => {
       if (!session?.user) {
         clearSession();
         return;
@@ -53,7 +52,7 @@ export function useAuthActions() {
 
   const signOut = useCallback(async () => {
     await unregisterPushToken();
-    await supabase.auth.signOut();
+    await authClient.signOut();
     clearSession();
     router.replace('/(tabs)');
   }, [clearSession, router]);

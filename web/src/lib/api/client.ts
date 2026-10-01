@@ -1,4 +1,4 @@
-import { createClient } from '../supabase/client';
+import { getBrowserSession } from '../supabase/client';
 import { getApiUrl } from './config';
 
 /**
@@ -29,15 +29,13 @@ export class ApiError extends Error {
 
 /**
  * Universal fetch wrapper for Client Components.
- * Automatically injects the Supabase JWT token.
+ * Automatically injects the session access token.
  */
 export async function apiClient<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const supabase = createClient();
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData?.session?.access_token;
+  const token = (await getBrowserSession())?.access_token;
 
   const headers = new Headers(options.headers || {});
   

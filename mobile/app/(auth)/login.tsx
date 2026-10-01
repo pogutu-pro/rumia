@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Mail, KeyRound, Loader2 } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { supabase } from '../../lib/supabase/client';
 import { AuthFlowCancelledError, signInWithGoogle } from '../../features/auth/oauth';
 import { useSessionHydration } from '../../features/auth/use-auth';
 import { useSessionStore } from '../../stores/session';
@@ -25,9 +24,6 @@ export default function LoginScreen() {
   const redirectAfterAuth = useRedirectAfterAuth();
   const hydrateSession = useSessionHydration();
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
 
@@ -37,48 +33,6 @@ export default function LoginScreen() {
       router.replace('/profile');
     }
   }, [isAuthenticated, router]);
-
-  const handleEmailSignIn = async () => {
-    if (!email || !password) {
-      Alert.alert('Missing fields', 'Please enter email and password.');
-      return;
-    }
-    setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
-
-    if (error) {
-      if (error.message === 'Invalid login credentials') {
-        // Distinguish an unregistered email from a wrong password (web parity).
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('email', email.trim().toLowerCase())
-            .maybeSingle();
-          Alert.alert(
-            'Sign In Failed',
-            profile
-              ? 'Wrong password. Please try again.'
-              : 'This email is not registered. Sign up with Google above.',
-          );
-        } catch {
-          Alert.alert('Sign In Failed', error.message);
-        }
-      } else {
-        Alert.alert('Sign In Failed', error.message);
-      }
-      return;
-    }
-
-    if (data.session) {
-      await hydrateSession(data.session);
-      redirectAfterAuth();
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -128,58 +82,7 @@ export default function LoginScreen() {
           </Text>
         </Pressable>
 
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <Text style={styles.label}>Email</Text>
-        <View style={styles.inputWrap}>
-          <Mail size={16} color={palette.slate[400]} style={styles.inputIcon} />
-          <TextInput
-            style={styles.input}
-            placeholder="you@example.com"
-            placeholderTextColor={palette.slate[400]}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-
-        <Text style={styles.label}>Password</Text>
-        <View style={styles.inputWrap}>
-          <KeyRound size={16} color={palette.slate[400]} style={styles.inputIcon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            placeholderTextColor={palette.slate[400]}
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
-
-        <Pressable
-          style={({ pressed }) => [styles.primaryButton, (pressed || loading) && styles.pressed]}
-          onPress={handleEmailSignIn}
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <Loader2 size={18} color={palette.white} />
-              <Text style={styles.buttonText}>Signing in...</Text>
-            </>
-          ) : (
-            <Text style={styles.buttonText}>Sign in</Text>
-          )}
-        </Pressable>
-
-        <Text style={styles.footnote}>
-          New here? Sign up with Google. Already have an account? Sign in with email above.
-        </Text>
-        <Text style={styles.footnote}>Agents and administrators use email sign-in.</Text>
+        <Text style={styles.footnote}>Everyone — students, agents and administrators — signs in with Google.</Text>
       </View>
     </ScrollView>
   );

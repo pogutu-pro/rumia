@@ -4,7 +4,7 @@ import { ApiError, extractApiErrorMessage } from './client';
 
 /**
  * Universal fetch wrapper for Server Components and Server Actions.
- * Automatically injects the Supabase JWT token from cookies.
+ * Automatically injects the session access token from cookies.
  */
 export async function apiServer<T>(
   path: string,

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
 import { getApiUrl } from '@/lib/api/config';
+import { authBackend } from '@/lib/auth/backend';
+import { AT_COOKIE, HINT_COOKIE, RT_COOKIE, isFresh, sessionCookies, sessionFromToken } from '@/lib/auth/session';
 
 const SECURITY_HEADERS: [string, string][] = [
   ['X-DNS-Prefetch-Control', 'on'],
@@ -17,7 +18,7 @@ const SECURITY_HEADERS: [string, string][] = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
-       "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://rumia.co.ke https://www.rumia.co.ke https://*.supabase.co wss://*.supabase.co https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com https://*.i.posthog.com https://*.posthog.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://www.youtube.com https://*.youtube.com https://*.ytimg.com",
+       "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://rumia.co.ke https://www.rumia.co.ke https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com https://*.i.posthog.com https://*.posthog.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://www.youtube.com https://*.youtube.com https://*.ytimg.com",
       "frame-src 'self' https://www.youtube.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -35,7 +36,7 @@ function applySecurityHeaders(headers: Headers) {
 /**
  * Proxy (Next.js 16: formerly middleware.ts) for Rumia Marketplace.
  * Runs on the Node.js runtime before every matched request.
- * - Surfaces Supabase OAuth failures on the login page
+ * - Keeps the session fresh (refresh-token exchange) and surfaces OAuth failures on the login page
  * - 301 redirects /listing/[id] and /agent/[id] UUID paths to slug-based canonical URLs
  * - Protects /dashboard, /admin, /manager and /account routes
  */
@@ -111,43 +112,37 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith('/manager') ||
     pathname.startsWith('/account');
 
-  // Skip Supabase session refresh for public routes — only needed for
-  // protected routes and the login redirect.  This removes ~1 round-trip
-  // from every public page load.
-  if (!isProtectedRoute && !pathname.startsWith('/auth/login')) {
-    const response = NextResponse.next({ request: { headers: request.headers } });
+  // ── Session refresh ───────────────────────────────────────────────────────────
+  // The access token lives 30 min. When it is missing/near expiry but a refresh token exists,
+  // exchange it here so Server Components see a valid session (they cannot set cookies).
+  // Public pages without any session cookie cost nothing.
+  let session = sessionFromToken(request.cookies.get(AT_COOKIE)?.value);
+  let refreshed: ReturnType<typeof sessionCookies> | null = null;
+  const rt = request.cookies.get(RT_COOKIE)?.value;
+  if (!isFresh(session) && rt) {
+    const result = await authBackend.refresh(rt).catch(() => null);
+    if (result?.ok && result.data) {
+      refreshed = sessionCookies(result.data);
+      session = sessionFromToken(result.data.access_token);
+      // Make the new token visible to this very request's Server Components.
+      for (const c of refreshed) request.cookies.set(c.name, c.value);
+    } else if (result && !result.ok) {
+      session = null; // refresh token revoked/expired: treat as signed out
+    }
+  }
+  const user = isFresh(session, 0) ? session!.user : null;
+
+  const finish = (response: NextResponse) => {
+    if (refreshed) {
+      for (const c of refreshed) response.cookies.set(c.name, c.value, c.options);
+    }
     applySecurityHeaders(response.headers);
     return response;
+  };
+
+  if (!isProtectedRoute && !pathname.startsWith('/auth/login')) {
+    return finish(NextResponse.next({ request: { headers: request.headers } }));
   }
-
-  // ── Auth-required routes ─────────────────────────────────────────────────────
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  });
-
-  // Create a Supabase client that can read/write cookies in the middleware
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-
-  // Refresh the session (important for Supabase Auth token rotation)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   // Redirect unauthenticated users away from protected routes
   if (isProtectedRoute && !user) {
@@ -157,7 +152,11 @@ export default async function proxy(request: NextRequest) {
         ? pathname
         : '/dashboard';
     loginUrl.searchParams.set('next', safePath);
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    if (rt && !refreshed) {
+      for (const name of [AT_COOKIE, RT_COOKIE, HINT_COOKIE]) redirect.cookies.delete({ name, path: '/' });
+    }
+    return finish(redirect);
   }
 
   // If authenticated user visits /auth/login, let them through.
@@ -165,8 +164,7 @@ export default async function proxy(request: NextRequest) {
   // accounts). The login page's own useEffect handles the redirect to
   // /account if they are already signed in and don't need to re-authenticate.
 
-  applySecurityHeaders(response.headers);
-  return response;
+  return finish(NextResponse.next({ request: { headers: request.headers } }));
 }
 
 export const config = {

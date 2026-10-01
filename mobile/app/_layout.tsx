@@ -4,9 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Platform, StyleSheet, View, useColorScheme } from 'react-native';
-import type { Session } from '@supabase/supabase-js';
 import type { ReactNode } from 'react';
-import { supabase } from '../lib/supabase/client';
+import { authClient, type AuthSession } from '../lib/auth/client';
 import { ApiError } from '../lib/api/client';
 import { AnalyticsProvider } from '../lib/posthog';
 import { initSentry, wrapWithSentry } from '../lib/sentry';
@@ -56,17 +55,17 @@ function RootLayout() {
   useEffect(() => {
     let active = true;
 
-    const syncSession = async (session: Session | null) => {
+    const syncSession = async (session: AuthSession | null) => {
       if (active) {
         await hydrateSession(session);
       }
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    authClient.getSession().then(({ data: { session } }) => {
       void syncSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = authClient.onAuthStateChange((_event, session) => {
       void syncSession(session);
     });
 
