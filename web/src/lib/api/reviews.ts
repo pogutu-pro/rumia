@@ -36,9 +36,8 @@ export interface ReviewSummary {
 export interface ReviewCreate {
   listing_id: string;
   rating: number;
+  /** Optional; only school-verified students may include text (server-enforced). */
   text?: string | null;
-  stay_start?: string | null;
-  stay_end?: string | null;
   rating_cleanliness?: number | null;
   rating_security?: number | null;
   rating_water?: number | null;
@@ -128,7 +127,17 @@ export const reviewsApi = {
     return serverApi.post(`/reviews/${id}/reply`, { text });
   },
 
-  moderateServer: (id: string, action: string, note?: string) => {
-    return serverApi.patch(`/reviews/${id}/moderate`, { action, note });
+  /** `edit` changes only the text and keeps the status. */
+  moderateServer: (
+    id: string,
+    action: 'approve' | 'hide' | 'flag' | 'restore' | 'edit',
+    note?: string,
+    text?: string,
+  ) => {
+    return serverApi.patch(`/reviews/${id}/moderate`, { action, note, text });
+  },
+
+  deleteReplyServer: (replyId: string) => {
+    return serverApi.delete(`/reviews/replies/${replyId}`);
   },
 };

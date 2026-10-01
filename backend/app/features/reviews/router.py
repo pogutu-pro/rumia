@@ -149,6 +149,20 @@ async def toggle_like(
     return {"liked": is_liked}
 
 
+@router.delete(
+    "/replies/{reply_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete Reply",
+    description="Delete a reply. The reply's author or an admin.",
+)
+async def delete_reply(
+    reply_id: str,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> None:
+    await ReviewService.delete_reply(db, user, reply_id)
+
+
 @router.post(
     "/{review_id}/reply",
     response_model=ReviewReplyRead,
@@ -171,12 +185,12 @@ async def add_reply(
     response_model=ReviewRead,
     status_code=status.HTTP_200_OK,
     summary="Moderate Review",
-    description="Approve, hide, reject, or restore a review. Admin only.",
+    description="Approve, hide, reject, or restore a review, optionally editing its text. Admins, and managers for their own campus.",
 )
 async def moderate_review(
     review_id: str,
     action: ReviewModerationAction,
-    user: AuthenticatedUser = Depends(require_roles("admin")),
+    user: AuthenticatedUser = Depends(require_roles("manager")),
     db: AsyncSession = Depends(get_db_session),
 ) -> ReviewRead:
     r = await ReviewService.moderate_review(db, user, review_id, action)

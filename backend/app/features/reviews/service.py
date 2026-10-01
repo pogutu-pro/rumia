@@ -4,9 +4,11 @@ from typing import List, Optional, Tuple
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import ForbiddenException, NotFoundException
+from app.core.errors import BadRequestException, ConflictException, ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
-from app.core.security import AuthenticatedUser
+from app.core.security import AuthenticatedUser, check_campus_scope
+from app.features.listings.models import Listing
+from app.features.profiles.models import UserProfile
 from app.features.reviews.models import Review, ReviewLike, ReviewModerationLog, ReviewReply
 from app.features.reviews.schemas import ReviewCreate, ReviewModerationAction, ReviewReplyCreate, ReviewUpdate
 
@@ -45,17 +47,56 @@ class ReviewService:
         return review
 
     @staticmethod
+    async def _profile(db: AsyncSession, user_id: str) -> Optional[UserProfile]:
+        res = await db.execute(select(UserProfile).where(UserProfile.id == user_id))
+        return res.scalar_one_or_none()
+
+    @staticmethod
+    async def _can_moderate(db: AsyncSession, user: AuthenticatedUser, listing_id: str) -> bool:
+        """Admins always; managers only for listings on a campus they manage."""
+        if user.is_admin:
+            return True
+        if user.role != "manager":
+            return False
+        res = await db.execute(select(Listing.campus_id).where(Listing.id == listing_id))
+        campus_id = res.scalar_one_or_none()
+        return bool(campus_id) and await check_campus_scope(user, str(campus_id), db)
+
+    @staticmethod
     async def create_review(db: AsyncSession, user: AuthenticatedUser, data: ReviewCreate) -> Review:
+        """Rules ported from the former web action:
+        - written text is only for school-verified students (ratings alone are open to everyone);
+        - one review per user per listing (409 ALREADY_REVIEWED);
+        - author name/avatar and school-verification are snapshotted from the profile, never
+          taken from the request.
+        """
+        text_value = (data.text or "").strip() or None
+        profile = await ReviewService._profile(db, user.id)
+        verified = bool(profile and profile.school_verified)
+        if text_value and not verified:
+            raise ForbiddenException(
+                "Only verified DeKUT students can write review text. You can still submit a rating."
+            )
+
+        existing = await db.execute(
+            select(Review.id).where(Review.listing_id == data.listing_id, Review.user_id == user.id).limit(1)
+        )
+        if existing.scalar_one_or_none():
+            raise ConflictException(
+                code="ALREADY_REVIEWED",
+                message="You have already reviewed this hostel. You can edit your existing review.",
+            )
+
         review = Review(
             id=str(uuid.uuid4()),
             listing_id=data.listing_id,
             user_id=user.id,
             rating=data.rating,
-            text=data.text,
-            school_verified_at_review_time=False,
-            status="published",  # Default auto-publish in backend service
-            author_name=data.author_name or "Anonymous Student",
-            author_avatar_url=data.author_avatar_url,
+            text=text_value,
+            school_verified_at_review_time=verified,
+            status="published",
+            author_name=(profile.full_name if profile else None),
+            author_avatar_url=(profile.avatar_url if profile else None),
             rating_cleanliness=data.rating_cleanliness,
             rating_security=data.rating_security,
             rating_water=data.rating_water,
@@ -69,34 +110,34 @@ class ReviewService:
         )
         db.add(review)
         await db.flush()
+        # A brand-new row has not loaded its relationships; serializing it would lazy-load
+        # outside the async context (MissingGreenlet).
+        await db.refresh(review, attribute_names=["likes", "replies"])
         return review
 
     @staticmethod
     async def update_review(db: AsyncSession, user: AuthenticatedUser, review_id: str, data: ReviewUpdate) -> Review:
+        """Author-only edit (moderators use the moderate endpoint). Sending `text: null` clears the text;
+        adding text to a text-less review requires school verification."""
         review = await ReviewService.get_review_by_id(db, review_id)
-        if review.user_id != user.id and not user.is_admin:
+        if str(review.user_id) != user.id:
             raise ForbiddenException("You can only edit your own review")
 
+        if "text" in data.model_fields_set:
+            new_text = (data.text or "").strip() or None
+            if new_text and not review.text:
+                profile = await ReviewService._profile(db, user.id)
+                if not (profile and profile.school_verified):
+                    raise ForbiddenException("Only verified DeKUT students can add review text.")
+            review.text = new_text
         if data.rating is not None:
             review.rating = data.rating
-        if data.text is not None:
-            review.text = data.text
-        if data.rating_cleanliness is not None:
-            review.rating_cleanliness = data.rating_cleanliness
-        if data.rating_security is not None:
-            review.rating_security = data.rating_security
-        if data.rating_water is not None:
-            review.rating_water = data.rating_water
-        if data.rating_wifi is not None:
-            review.rating_wifi = data.rating_wifi
-        if data.rating_facilities is not None:
-            review.rating_facilities = data.rating_facilities
-        if data.rating_location is not None:
-            review.rating_location = data.rating_location
-        if data.rating_management is not None:
-            review.rating_management = data.rating_management
-        if data.rating_value is not None:
-            review.rating_value = data.rating_value
+        for field in (
+            "rating_cleanliness", "rating_security", "rating_water", "rating_wifi",
+            "rating_facilities", "rating_location", "rating_management", "rating_value",
+        ):
+            if field in data.model_fields_set:
+                setattr(review, field, getattr(data, field))
 
         review.updated_at = datetime.now(timezone.utc)
         await db.flush()
@@ -104,9 +145,16 @@ class ReviewService:
 
     @staticmethod
     async def delete_review(db: AsyncSession, user: AuthenticatedUser, review_id: str) -> None:
+        """Authors delete their own review; admins/campus managers delete with an audit entry."""
         review = await ReviewService.get_review_by_id(db, review_id)
-        if review.user_id != user.id and not user.is_admin:
-            raise ForbiddenException("You can only delete your own review")
+        if str(review.user_id) != user.id:
+            if not await ReviewService._can_moderate(db, user, str(review.listing_id)):
+                raise ForbiddenException("You can only delete your own review")
+            db.add(ReviewModerationLog(
+                id=str(uuid.uuid4()), review_id=review.id, review_listing_id=review.listing_id,
+                review_user_id=review.user_id, actor_user_id=user.id, action="delete",
+                previous_status=review.status, previous_text=review.text, previous_rating=review.rating,
+            ))
         await db.delete(review)
         await db.flush()
 
@@ -128,12 +176,14 @@ class ReviewService:
     @staticmethod
     async def add_reply(db: AsyncSession, user: AuthenticatedUser, review_id: str, data: ReviewReplyCreate) -> ReviewReply:
         await ReviewService.get_review_by_id(db, review_id)
+        profile = await ReviewService._profile(db, user.id)
         reply = ReviewReply(
             id=str(uuid.uuid4()),
             review_id=review_id,
             user_id=user.id,
             text=data.text,
-            author_name=user.email or "Verified User",
+            author_name=(profile.full_name if profile else None),
+            author_avatar_url=(profile.avatar_url if profile else None),
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
@@ -142,28 +192,55 @@ class ReviewService:
         return reply
 
     @staticmethod
-    async def moderate_review(db: AsyncSession, user: AuthenticatedUser, review_id: str, action: ReviewModerationAction) -> Review:
-        if not user.is_admin:
-            raise ForbiddenException("Only admins can moderate reviews")
+    async def delete_reply(db: AsyncSession, user: AuthenticatedUser, reply_id: str) -> None:
+        res = await db.execute(select(ReviewReply).where(ReviewReply.id == reply_id))
+        reply = res.scalar_one_or_none()
+        if not reply:
+            raise NotFoundException(f"Reply with id '{reply_id}' not found")
+        if str(reply.user_id) != user.id and not user.is_admin:
+            raise ForbiddenException("You can only delete your own reply")
+        await db.delete(reply)
+        await db.flush()
 
+    @staticmethod
+    async def moderate_review(db: AsyncSession, user: AuthenticatedUser, review_id: str, action: ReviewModerationAction) -> Review:
         review = await ReviewService.get_review_by_id(db, review_id)
+        if not await ReviewService._can_moderate(db, user, str(review.listing_id)):
+            raise ForbiddenException("You can only moderate reviews within your campus")
         status_map = {
             "approve": "published",
             "restore": "published",
             "hide": "hidden",
-            "reject": "rejected",
+            "flag": "flagged",
+            "reject": "flagged",  # legacy alias: the live status check allows published|hidden|flagged
         }
-        review.status = status_map.get(action.action, review.status)
+        previous_status = review.status
+        previous_text = review.text
+        new_status = status_map.get(action.action, review.status)
+
+        status_changed = new_status != previous_status
+        text_changed = action.text is not None and action.text.strip() != (previous_text or "")
+        if not status_changed and not text_changed:
+            raise BadRequestException("No changes to apply.")
+        if status_changed:
+            review.status = new_status
+        if text_changed:
+            review.text = action.text.strip() or None
         review.updated_at = datetime.now(timezone.utc)
 
-        log = ReviewModerationLog(
-            id=str(uuid.uuid4()),
-            review_id=review_id,
-            actor_user_id=user.id,
-            action=action.action,
-            note=action.note,
-        )
-        db.add(log)
+        # One audit row per kind of change (the live table allows status_change | text_edit | delete).
+        if status_changed:
+            db.add(ReviewModerationLog(
+                id=str(uuid.uuid4()), review_id=review_id, review_listing_id=review.listing_id,
+                review_user_id=review.user_id, actor_user_id=user.id, action="status_change",
+                previous_status=previous_status, new_status=new_status, reason=action.note,
+            ))
+        if text_changed:
+            db.add(ReviewModerationLog(
+                id=str(uuid.uuid4()), review_id=review_id, review_listing_id=review.listing_id,
+                review_user_id=review.user_id, actor_user_id=user.id, action="text_edit",
+                previous_text=previous_text, new_text=review.text, reason=action.note,
+            ))
         await db.flush()
         return review
 

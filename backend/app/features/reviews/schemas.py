@@ -25,7 +25,7 @@ class ReviewRead(BaseModel):
     listing_id: str
     user_id: str
     rating: int
-    text: str
+    text: Optional[str] = None
     stay_start: Optional[date] = None
     stay_end: Optional[date] = None
     school_verified_at_review_time: bool = False
@@ -56,11 +56,11 @@ class ReviewRead(BaseModel):
 class ReviewCreate(BaseModel):
     listing_id: str
     rating: int = Field(..., ge=1, le=5)
-    text: str = Field(..., min_length=5)
+    # Optional: ratings alone are allowed; written text needs school verification (enforced in the service).
+    text: Optional[str] = Field(None, max_length=2000)
+    # Accepted for backwards compatibility but ignored (no such columns).
     stay_start: Optional[date] = None
     stay_end: Optional[date] = None
-    author_name: Optional[str] = None
-    author_avatar_url: Optional[str] = None
 
     rating_cleanliness: Optional[int] = Field(None, ge=1, le=5)
     rating_security: Optional[int] = Field(None, ge=1, le=5)
@@ -74,7 +74,7 @@ class ReviewCreate(BaseModel):
 
 class ReviewUpdate(BaseModel):
     rating: Optional[int] = Field(None, ge=1, le=5)
-    text: Optional[str] = Field(None, min_length=5)
+    text: Optional[str] = Field(None, max_length=2000)  # null clears the text
 
     rating_cleanliness: Optional[int] = Field(None, ge=1, le=5)
     rating_security: Optional[int] = Field(None, ge=1, le=5)
@@ -87,8 +87,10 @@ class ReviewUpdate(BaseModel):
 
 
 class ReviewModerationAction(BaseModel):
-    action: str = Field(..., pattern="^(approve|hide|reject|restore)$")
+    action: str = Field(..., pattern="^(approve|hide|flag|reject|restore|edit)$")  # edit = text only, keep status
     note: Optional[str] = None
+    # Optional moderator edit of the review text (logged as a separate text_edit entry).
+    text: Optional[str] = Field(None, min_length=1, max_length=2000)
 
 
 class ReviewSummaryCategory(BaseModel):

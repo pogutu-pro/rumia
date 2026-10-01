@@ -67,11 +67,21 @@ class ReviewReply(Base):
 
 
 class ReviewModerationLog(Base):
+    """Mirrors the live `review_moderation_log` (actions: status_change | text_edit | delete)."""
+
     __tablename__ = "review_moderation_log"
 
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
-    review_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("reviews.id", ondelete="CASCADE"), nullable=False)
-    actor_user_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), nullable=False)
+    review_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("reviews.id", ondelete="SET NULL"), nullable=True)
+    review_listing_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
+    review_user_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
+    actor_user_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), nullable=True)
     action: Mapped[str] = mapped_column(String, nullable=False)
-    note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    previous_status: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    new_status: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    previous_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    new_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    previous_rating: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
+    new_rating: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
+    reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

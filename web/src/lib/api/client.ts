@@ -1,6 +1,20 @@
 import { createClient } from '../supabase/client';
 import { getApiUrl } from './config';
 
+/**
+ * Pull a human-readable message out of a FastAPI error body. Handles the three shapes the
+ * backend produces: `{detail: {code, message}}` (domain errors), `{error: {message}}`
+ * (envelope) and `{detail: string | [...]}` (framework/validation errors).
+ */
+export function extractApiErrorMessage(body: any): string | undefined {
+  if (typeof body?.detail?.message === 'string') return body.detail.message;
+  if (typeof body?.error?.message === 'string') return body.error.message;
+  if (typeof body?.detail === 'string') return body.detail;
+  if (Array.isArray(body?.detail)) return 'Validation error';
+  if (typeof body?.message === 'string') return body.message;
+  return undefined;
+}
+
 export class ApiError extends Error {
   public status: number;
   public data: any;
@@ -51,17 +65,9 @@ export async function apiClient<T>(
       // keep raw text
     }
 
-    // FastAPI errors use {error:{code,message,details}}; Pydantic 422s use
-    // {detail:[...]}. Parse the envelope first, degrade to legacy shapes.
-    const envelopeMessage =
-      typeof errorData?.error?.message === 'string' ? errorData.error.message : undefined;
-    const detailMessage =
-      typeof errorData?.detail === 'string' ? errorData.detail : undefined;
-    const validationMessage = Array.isArray(errorData?.detail) ? 'Validation error' : undefined;
-
     throw new ApiError(
       response.status,
-      envelopeMessage || detailMessage || validationMessage || errorData?.message || 'API request failed',
+      extractApiErrorMessage(errorData) || 'API request failed',
       errorData
     );
   }

@@ -1,6 +1,6 @@
 import { createClient } from '../supabase/server';
 import { getApiUrl, API_BASE_URL } from './config';
-import { ApiError } from './client';
+import { ApiError, extractApiErrorMessage } from './client';
 
 /**
  * Universal fetch wrapper for Server Components and Server Actions.
@@ -40,7 +40,7 @@ export async function apiServer<T>(
     
     throw new ApiError(
       response.status,
-      errorData?.detail || errorData?.message || 'API request failed',
+      extractApiErrorMessage(errorData) || 'API request failed',
       errorData
     );
   }

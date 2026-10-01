@@ -129,8 +129,15 @@ export async function moderateReviewAction(
   reason?: string,
 ): Promise<ActionResult> {
   try {
-    const action = updates.status === 'published' ? 'approve' : updates.status === 'hidden' ? 'hide' : 'restore';
-    await reviewsApi.moderateServer(reviewId, action, reason);
+    const action =
+      updates.status === 'published'
+        ? 'approve'
+        : updates.status === 'hidden'
+          ? 'hide'
+          : updates.status === 'flagged'
+            ? 'flag'
+            : 'edit';
+    await reviewsApi.moderateServer(reviewId, action, reason?.trim() || undefined, updates.text);
     revalidatePath('/admin');
     return { success: true };
   } catch (err: any) {
@@ -171,7 +178,7 @@ export async function submitReplyAction(
 
 export async function deleteReplyAction(replyId: string): Promise<ActionResult> {
   try {
-    await reviewsApi.deleteServer(replyId);
+    await reviewsApi.deleteReplyServer(replyId);
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || err.data?.detail || 'Failed to delete reply.' };
