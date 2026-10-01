@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { imagesApi } from '@/lib/api/images';
 import { processImage } from '@/lib/image/processor';
 import { LISTING_VARIANTS, AGENT_VARIANTS } from '@/lib/image/variants';
 import { generateImageBasePath, getVariantKey, getBlurKey } from '@/lib/image/keys';
@@ -105,9 +106,10 @@ export async function POST(req: NextRequest) {
     const mediumKey = getVariantKey(basePath, 'gallery', 'image/webp');
     const largeKey = getVariantKey(basePath, 'large', 'image/webp');
 
-    const { data: imageUpload } = await supabase
-      .from('image_uploads')
-      .insert({
+    // Registration failure must not lose the upload: the image is already in R2 and the
+    // client can still use the URLs; only listing cleanup linkage would be missing.
+    const imageUpload = await imagesApi
+      .registerUploadServer({
         original_filename: file.name,
         width: result.original.width,
         height: result.original.height,
@@ -118,8 +120,10 @@ export async function POST(req: NextRequest) {
         medium_key: mediumKey,
         large_key: largeKey,
       })
-      .select('id')
-      .single();
+      .catch((err) => {
+        console.error('Image upload registration failed:', err);
+        return null;
+      });
 
     const primaryVariant = purpose === 'agent' ? 'profile' : 'card';
     const primaryUrl = getPublicUrl(getVariantKey(basePath, primaryVariant, 'image/webp'));

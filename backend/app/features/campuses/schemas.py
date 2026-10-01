@@ -26,6 +26,7 @@ class CampusRead(BaseModel):
     short_name: Optional[str] = None
     hero_image: Optional[str] = None
     hostel_finding_fee: Optional[float] = None
+    consultation_fee: Optional[float] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

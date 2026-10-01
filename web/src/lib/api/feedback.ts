@@ -1,19 +1,21 @@
 import { api } from './client';
 import { serverApi } from './server';
 
+export type FeedbackCategory = 'suggest_hostel' | 'feature_request' | 'report_problem' | 'general';
+
 export interface Feedback {
   id: string;
-  listing_id?: string | null;
-  content: string;
+  user_id: string;
+  category: FeedbackCategory;
+  message: string;
   user_email?: string | null;
-  user_id?: string | null;
+  user_name?: string | null;
   created_at: string;
 }
 
 export interface FeedbackCreate {
-  listing_id?: string | null;
-  content: string;
-  user_email?: string | null;
+  category: FeedbackCategory;
+  message: string;
 }
 
 export const feedbackApi = {

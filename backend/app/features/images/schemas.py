@@ -31,3 +31,17 @@ class ImageUploadRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ImageUploadCreate(BaseModel):
+    """Metadata for an image the web app already processed and stored in R2."""
+
+    original_filename: str = Field(..., min_length=1, max_length=255)
+    width: int = Field(..., ge=1)
+    height: int = Field(..., ge=1)
+    file_size: int = Field(..., ge=1)
+    format: str = Field("image/webp", max_length=40)
+    thumbnail_key: str
+    small_key: str
+    medium_key: str
+    large_key: str

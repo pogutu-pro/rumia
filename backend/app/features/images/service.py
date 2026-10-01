@@ -1,13 +1,16 @@
 import asyncio
+import uuid
+from datetime import datetime, timezone
 from pathlib import PurePosixPath
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import NotFoundException
+from app.core.errors import BadRequestException, NotFoundException
+from app.core.security import AuthenticatedUser
 from app.core.storage.r2 import R2StorageService
 from app.features.images.models import ImageUpload
-from app.features.images.schemas import UploadUrlRequest, UploadUrlResponse
+from app.features.images.schemas import ImageUploadCreate, UploadUrlRequest, UploadUrlResponse
 from app.features.listings.models import ListingImage
 
 
@@ -31,6 +34,38 @@ class ImageService:
             public_url=result["public_url"],
             expires_in=int(result["expires_in"]),
         )
+
+    @staticmethod
+    async def register_upload(db: AsyncSession, user: AuthenticatedUser, data: ImageUploadCreate) -> ImageUpload:
+        """Record metadata for an image processed into R2 by the web pipeline.
+
+        Cleanup later deletes the R2 objects named here, so every key must follow the
+        pipeline's layout and live under the caller's own `<user_id>/` prefix; otherwise a
+        user could point a row at someone else's files and have them deleted.
+        """
+        expected = {
+            "thumbnail_key": "thumb.webp",
+            "small_key": "card.webp",
+            "medium_key": "gallery.webp",
+            "large_key": "large.webp",
+        }
+        base_paths = set()
+        for field, filename in expected.items():
+            key = PurePosixPath(getattr(data, field))
+            if key.name != filename:
+                raise BadRequestException(f"{field} must end with {filename}")
+            base_paths.add(key.parent.as_posix())
+        if len(base_paths) != 1:
+            raise BadRequestException("Image variants must share one base path")
+        base_path = base_paths.pop()
+        parts = PurePosixPath(base_path).parts
+        if len(parts) != 2 or ".." in parts or (parts[0] != user.id and not user.is_admin):
+            raise BadRequestException("Image keys must be under your own user prefix")
+
+        upload = ImageUpload(id=str(uuid.uuid4()), created_at=datetime.now(timezone.utc), **data.model_dump())
+        db.add(upload)
+        await db.flush()
+        return upload
 
     @staticmethod
     async def get_image_upload(db: AsyncSession, image_upload_id: str) -> ImageUpload:

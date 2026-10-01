@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
+from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, get_current_user
 from app.features.listings.schemas import ListingRead
 from app.features.profiles.schemas import (
+    EmailExistsResponse,
     ProfileRead,
     ProfileUpdate,
     SavedHostelActionResponse,
@@ -17,6 +19,25 @@ from app.features.profiles.schemas import (
 from app.features.profiles.service import ProfileService
 
 router = APIRouter(prefix="/profiles", tags=["Profiles"])
+
+
+@router.get(
+    "/check-email",
+    response_model=EmailExistsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Check Email Registered",
+    description=(
+        "Whether a profile exists for an email. Public and rate-limited; used only to give a "
+        "helpful message after a failed password sign-in."
+    ),
+)
+@limiter.limit("10/minute")
+async def check_email(
+    request: Request,
+    email: str = Query(..., min_length=3, max_length=254, pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$"),
+    db: AsyncSession = Depends(get_db_session),
+) -> EmailExistsResponse:
+    return EmailExistsResponse(exists=await ProfileService.email_exists(db, email))
 
 
 @router.get(

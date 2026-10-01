@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.security import AuthenticatedUser, get_current_user
-from app.features.images.schemas import ImageUploadRead, UploadUrlRequest, UploadUrlResponse
+from app.features.images.schemas import ImageUploadCreate, ImageUploadRead, UploadUrlRequest, UploadUrlResponse
 from app.features.images.service import ImageService
 
 router = APIRouter(prefix="/images", tags=["Image Uploads"])
@@ -21,6 +21,26 @@ async def get_upload_url(
     user: AuthenticatedUser = Depends(get_current_user),
 ) -> UploadUrlResponse:
     return ImageService.generate_upload_url(req)
+
+
+@router.post(
+    "/uploads",
+    response_model=ImageUploadRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register Processed Image",
+    description=(
+        "Record metadata for an image the web pipeline processed into R2 so listings can reference "
+        "it and clean it up later. Keys must follow the pipeline layout under the caller's own "
+        "user-id prefix. Authenticated."
+    ),
+)
+async def register_image_upload(
+    data: ImageUploadCreate,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> ImageUploadRead:
+    img = await ImageService.register_upload(db, user, data)
+    return ImageUploadRead.model_validate(img)
 
 
 @router.get(

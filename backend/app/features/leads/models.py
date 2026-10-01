@@ -16,9 +16,9 @@ class Lead(Base):
     agent_id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
     clicked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     ip_hash: Mapped[str] = mapped_column(String, nullable=False)
-    source: Mapped[str] = mapped_column(String, default="whatsapp", nullable=False)
-    user_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    campus_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    contact_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
 
 class Commission(Base):

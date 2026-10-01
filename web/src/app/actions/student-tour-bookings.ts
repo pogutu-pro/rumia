@@ -33,7 +33,11 @@ export async function updateStudentTourBookingAction(
       }
     }
 
-    await toursApi.updateStatusServer(bookingId, 'pending_payment');
+    await toursApi.updateMineServer(bookingId, {
+      ...(fields.preferred_date && { preferred_date: fields.preferred_date }),
+      ...(fields.preferred_time && { preferred_time: fields.preferred_time as 'morning' | 'afternoon' | 'evening' }),
+      ...(fields.phone && { phone: fields.phone.trim() }),
+    });
     revalidatePath('/account');
     return { success: true };
   } catch (err: any) {

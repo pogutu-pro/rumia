@@ -32,4 +32,5 @@ class Campus(Base):
     short_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     hero_image: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     hostel_finding_fee: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
+    consultation_fee: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

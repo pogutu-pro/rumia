@@ -1,17 +1,15 @@
 'use server';
 
-import { feedbackApi } from '@/lib/api/feedback';
+import { feedbackApi, type FeedbackCategory } from '@/lib/api/feedback';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
 export async function submitFeedbackAction(
-  category: string,
+  category: FeedbackCategory,
   message: string,
 ): Promise<ActionResult> {
   try {
-    await feedbackApi.submitServer({
-      content: `[Category: ${category}] ${message}`,
-    });
+    await feedbackApi.submitServer({ category, message });
 
     return { success: true };
   } catch (err: any) {

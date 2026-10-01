@@ -28,9 +28,9 @@ class AgentListingViewEntry(BaseModel):
 
 
 class TrackViewRequest(BaseModel):
+    # Identity (JWT) and visitor fingerprint (client IP + user-agent) are derived server-side;
+    # clients can no longer supply a user_id or ip_hash.
     listing_id: str
-    user_id: Optional[str] = None
-    ip_hash: Optional[str] = None
 
 
 class TrackViewResponse(BaseModel):

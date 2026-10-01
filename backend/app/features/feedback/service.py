@@ -8,6 +8,7 @@ from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
 from app.features.feedback.models import Feedback
 from app.features.feedback.schemas import FeedbackCreate
+from app.features.profiles.models import UserProfile
 
 
 class FeedbackService:
@@ -15,14 +16,16 @@ class FeedbackService:
     async def create_feedback(
         db: AsyncSession,
         data: FeedbackCreate,
-        user: Optional[AuthenticatedUser] = None,
+        user: AuthenticatedUser,
     ) -> Feedback:
+        name_res = await db.execute(select(UserProfile.full_name).where(UserProfile.id == user.id))
         fb = Feedback(
             id=str(uuid.uuid4()),
-            listing_id=data.listing_id,
-            content=data.content,
-            user_email=data.user_email or (user.email if user else None),
-            user_id=user.id if user else None,
+            user_id=user.id,
+            category=data.category,
+            message=data.message,
+            user_email=user.email,
+            user_name=name_res.scalar_one_or_none(),
             created_at=datetime.now(timezone.utc),
         )
         db.add(fb)

@@ -68,3 +68,15 @@ class BadRequestException(APIException):
             message=message,
             details=details,
         )
+
+
+class ConflictException(APIException):
+    """409 with a machine-readable `code` (e.g. FEE_REQUIRED) so clients can branch on it."""
+
+    def __init__(self, code: str = "CONFLICT", message: str = "Conflict", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            code=code,
+            message=message,
+            details=details,
+        )

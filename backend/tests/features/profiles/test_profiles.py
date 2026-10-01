@@ -89,3 +89,20 @@ async def test_get_profile_agent_id_is_null_for_non_agent(client: AsyncClient):
         assert response.json()["agent_id"] is None
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_check_email_reports_existence(client: AsyncClient):
+    from unittest.mock import AsyncMock, patch
+
+    with patch("app.features.profiles.service.ProfileService.email_exists", new_callable=AsyncMock, return_value=True) as exists:
+        response = await client.get("/api/v1/profiles/check-email?email=Student@Example.com")
+    assert response.status_code == 200
+    assert response.json() == {"exists": True}
+    assert exists.await_args.args[1] == "Student@Example.com"
+
+
+@pytest.mark.asyncio
+async def test_check_email_rejects_malformed_address(client: AsyncClient):
+    response = await client.get("/api/v1/profiles/check-email?email=not-an-email")
+    assert response.status_code == 422

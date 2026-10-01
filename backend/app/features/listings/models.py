@@ -19,6 +19,8 @@ class Agent(Base):
     commission_balance: Mapped[float] = mapped_column(Numeric, server_default="0")
     status: Mapped[str] = mapped_column(String, nullable=False, server_default="active")
     slug: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    pochi_la_biashara_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    expected_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     campus_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("campuses.id"), nullable=True, index=True)
     user_id: Mapped[Optional[str]] = mapped_column(PG_UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

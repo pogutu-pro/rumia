@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { submitFeedbackAction } from '@/app/actions/feedback';
+import type { FeedbackCategory } from '@/lib/api/feedback';
 import { toast } from 'sonner';
 import { Loader2, SendHorizonal } from 'lucide-react';
 
@@ -30,7 +31,7 @@ const PLACEHOLDERS: Record<string, string> = {
 };
 
 export function FeedbackForm() {
-  const [category, setCategory] = useState<string>('general');
+  const [category, setCategory] = useState<FeedbackCategory>('general');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -86,7 +87,7 @@ export function FeedbackForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Select value={category} onValueChange={setCategory}>
+      <Select value={category} onValueChange={(v) => setCategory(v as FeedbackCategory)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Choose a category" />
         </SelectTrigger>

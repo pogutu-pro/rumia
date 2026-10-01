@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, List, Optional
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +29,8 @@ class AnalyticsService:
             },
         )
         row = result.scalar_one_or_none()
+        if isinstance(row, str):  # asyncpg returns jsonb from a raw text() query as a JSON string
+            row = json.loads(row)
         if not row:
             return TrackViewResponse(inserted=False, reason="rpc_error")
         return TrackViewResponse(

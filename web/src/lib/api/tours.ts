@@ -35,11 +35,20 @@ export interface TourBookingCreate {
   phone: string;
   listing_id?: string | null;
   zone: string;
+  /** Scopes the zone price to one campus; needed when a zone name exists on several. */
+  campus_id?: string | null;
   tour_type: 'specific_hostel' | 'full_search';
-  amount: number;
   preferred_date: string;
   preferred_time: 'morning' | 'afternoon' | 'evening';
   agent_id?: string | null;
+  from_listing?: boolean;
+  // No `amount`: the server always prices the tour from the zone's configured price.
+}
+
+export interface TourBookingStudentUpdate {
+  preferred_date?: string;
+  preferred_time?: 'morning' | 'afternoon' | 'evening';
+  phone?: string;
 }
 
 export const toursApi = {
@@ -72,7 +81,17 @@ export const toursApi = {
     return serverApi.get<TourBooking>(`/tours/${bookingId}`);
   },
 
-  updateStatusServer: (bookingId: string, status: string, contacted?: boolean) => {
-    return serverApi.patch<TourBooking>(`/tours/${bookingId}/status`, { status, contacted });
+  updateStatusServer: (bookingId: string, status: string) => {
+    return serverApi.patch<TourBooking>(`/tours/${bookingId}/status`, { status });
+  },
+
+  /** A student edits date/time/phone of their own pending booking. */
+  updateMineServer: (bookingId: string, fields: TourBookingStudentUpdate) => {
+    return serverApi.patch<TourBooking>(`/tours/${bookingId}`, fields);
+  },
+
+  /** Permanently delete a booking (the booking's agent or an admin). */
+  deleteServer: (bookingId: string) => {
+    return serverApi.delete<null>(`/tours/${bookingId}`);
   },
 };

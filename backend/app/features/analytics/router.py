@@ -1,10 +1,12 @@
+import hashlib
 from typing import Optional
+
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.ratelimit import limiter
-from app.core.security import AuthenticatedUser, get_current_user, require_roles
+from app.core.ratelimit import _client_ip, limiter
+from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user, require_roles
 from app.features.analytics.schemas import (
     AgentListingViewEntry,
     PlatformViewSummary,
@@ -22,19 +24,21 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
     response_model=TrackViewResponse,
     status_code=status.HTTP_200_OK,
     summary="Track Listing View",
-    description="Record a listing page view event (public endpoint). Passes ip_hash for deduplication.",
+    description="Record a listing page view (public; signed-in users are deduplicated per user, anonymous visitors per IP+user-agent). Admins and agents are never counted.",
 )
 @limiter.limit("60/minute")
 async def track_listing_view(
     request: Request,
     payload: TrackViewRequest,
+    user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> TrackViewResponse:
+    fingerprint = f"{_client_ip(request)}:{request.headers.get('user-agent', '')}"
     return await AnalyticsService.track_view(
         db=db,
         listing_id=payload.listing_id,
-        user_id=payload.user_id,
-        ip_hash=payload.ip_hash,
+        user_id=user.id if user else None,
+        ip_hash=hashlib.sha256(fingerprint.encode()).hexdigest(),
     )
 
 

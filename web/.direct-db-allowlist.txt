@@ -27,15 +27,8 @@ web/src/app/(admin)/admin/tours/page.tsx
 web/src/app/(admin)/admin/transfers/page.tsx
 web/src/app/(admin)/admin/users/page.tsx
 web/src/app/(admin)/layout.tsx
-web/src/app/api/auth/check-email/route.ts
 web/src/app/api/campuses/create/route.ts
-web/src/app/api/images/process/route.ts
-web/src/app/api/listing-views/route.ts
-web/src/app/api/push/subscribe/route.ts
-web/src/app/api/push/unsubscribe/route.ts
-web/src/app/api/tour-bookings/[id]/route.ts
-web/src/app/api/tour-bookings/route.ts
-web/src/app/api/track-lead/route.ts
+web/src/app/api/og/route.tsx
 web/src/app/auth/callback/route.ts
 web/src/app/(dashboard)/dashboard/analytics/page.tsx
 web/src/app/(dashboard)/dashboard/bnb/edit/[id]/page.tsx
@@ -61,6 +54,7 @@ web/src/app/(manager)/manager/zones/page.tsx
 web/src/app/(public)/agent/[id]/page.tsx
 web/src/app/(public)/agents/[slug]/page.tsx
 web/src/app/(public)/hostels/[county]/[area]/page.tsx
+web/src/app/(public)/hostels/[county]/[area]/[slug]/opengraph-image.tsx
 web/src/app/(public)/verify/page.tsx
 web/src/app/sitemap.ts
 web/src/lib/data/legal-documents.ts
@@ -70,3 +64,4 @@ web/src/lib/supabase/public.ts
 web/src/lib/utils/admin.ts
 web/src/lib/utils/manager.ts
 web/src/lib/utils/zone-tour-price.ts
+web/src/proxy.ts

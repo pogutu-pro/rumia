@@ -1,11 +1,10 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, Header, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.ratelimit import limiter
-from app.core.security import AuthenticatedUser, decode_jwt_token, require_roles
+from app.core.security import AuthenticatedUser, get_current_user, require_roles
 from app.features.feedback.schemas import FeedbackCreate, FeedbackRead
 from app.features.feedback.service import FeedbackService
 
@@ -17,24 +16,15 @@ router = APIRouter(prefix="/feedback", tags=["Feedback"])
     response_model=FeedbackRead,
     status_code=status.HTTP_201_CREATED,
     summary="Submit Feedback",
-    description="Submit user feedback/suggestion. Optional auth.",
+    description="Submit feedback/suggestion/problem report. Authenticated.",
 )
 @limiter.limit("10/minute")
 async def submit_feedback(
     request: Request,
     data: FeedbackCreate,
-    authorization: Optional[str] = Header(None),
+    user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> FeedbackRead:
-    user: Optional[AuthenticatedUser] = None
-    if authorization and authorization.lower().startswith("bearer "):
-        try:
-            token = authorization.split()[1]
-            token_data = decode_jwt_token(token)
-            user = AuthenticatedUser(id=token_data.user_id, email=token_data.email)
-        except Exception:
-            pass
-
     fb = await FeedbackService.create_feedback(db, data, user)
     return FeedbackRead.model_validate(fb)
 

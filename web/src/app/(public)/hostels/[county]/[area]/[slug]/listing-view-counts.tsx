@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Eye } from 'lucide-react';
+import { fetchPublicApi } from '@/lib/api/config';
 import type { ListingViewCounts } from '@/lib/listing-views';
 
 const EMPTY_COUNTS: ListingViewCounts = {
@@ -43,25 +44,8 @@ function fetchListingViewCounts(
   const pending = inFlightFetches.get(listingId);
   if (pending) return pending;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) return Promise.resolve(null);
-
-  const url = new URL(`${supabaseUrl}/rest/v1/rpc/get_listing_view_counts`);
-  url.searchParams.set('p_listing_id', listingId);
-
-  const promise = fetch(url, {
-    method: 'GET',
-    headers: {
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
-    },
-  })
-    .then((res) => (res.ok ? res.json() : null))
-    .then((rows) => {
-      if (!rows) return null;
-      const row = Array.isArray(rows) ? rows[0] : rows;
+  const promise = fetchPublicApi<Record<string, unknown>>(`/analytics/views/${listingId}`)
+    .then((row) => {
       if (!row) return null;
       return {
         today: toCount(row.today_count),

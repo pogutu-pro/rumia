@@ -24,7 +24,7 @@ export async function deleteTourBookingAction(
   bookingId: string,
 ): Promise<ActionResult> {
   try {
-    await toursApi.updateStatusServer(bookingId, 'cancelled');
+    await toursApi.deleteServer(bookingId);
     revalidatePath('/dashboard');
     revalidatePath('/admin/tours');
     return { success: true };

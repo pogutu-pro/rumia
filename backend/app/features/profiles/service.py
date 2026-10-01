@@ -16,6 +16,13 @@ from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, W
 
 class ProfileService:
     @staticmethod
+    async def email_exists(db: AsyncSession, email: str) -> bool:
+        res = await db.execute(
+            select(UserProfile.id).where(func.lower(UserProfile.email) == email.strip().lower()).limit(1)
+        )
+        return res.scalar_one_or_none() is not None
+
+    @staticmethod
     async def get_agent_id(db: AsyncSession, user_id: str) -> str | None:
         """Return the id of the agent record owned by this user, if any."""
         result = await db.execute(select(Agent.id).where(Agent.user_id == user_id))

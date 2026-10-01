@@ -9,11 +9,16 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ALLOW=web/.direct-db-allowlist.txt
-PATTERN="supabaseAdmin|supabasePublic|\.from\(['\"][a-z_]+['\"]\)|\.rpc\(['\"][a-z_]+['\"]|\.storage\.from|auth\.admin\."
+PATTERN="supabaseAdmin|supabasePublic|\.from\(['\"][a-z_]+['\"]\)|\.rpc\(['\"][a-z_]+['\"]|\.storage\.from|auth\.admin\.|rest/v1/"
 
 offenders=$(grep -rIlE "$PATTERN" web/src --include=*.ts --include=*.tsx \
   | grep -vE '/__tests__/|\.test\.(ts|tsx)$' | sort -u || true)
 allowed=$(grep -vE '^\s*(#|$)' "$ALLOW" 2>/dev/null | sort -u || true)
+
+if [ "${1:-}" = "--fix" ]; then   # prune entries that no longer violate (never adds)
+  { grep -E '^\s*(#|$)' "$ALLOW" || true; comm -12 <(echo "$offenders") <(echo "$allowed"); } > "$ALLOW.tmp"
+  mv "$ALLOW.tmp" "$ALLOW"; allowed=$(grep -vE '^\s*(#|$)' "$ALLOW" | sort -u)
+fi
 
 new=$(comm -23 <(echo "$offenders") <(echo "$allowed") | sed '/^$/d')
 stale=$(comm -13 <(echo "$offenders") <(echo "$allowed") | sed '/^$/d')

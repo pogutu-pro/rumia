@@ -4,15 +4,28 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class TourBookingCreate(BaseModel):
-    student_name: str = Field(..., min_length=2)
-    phone: str = Field(..., min_length=8)
+    student_name: str = Field(..., min_length=2, max_length=200)
+    phone: str = Field(..., min_length=7, max_length=40)
     listing_id: Optional[str] = None
-    zone: str
+    zone: str = Field(..., min_length=1, max_length=120)
+    # Scopes the zone price lookup to one campus; required when a zone name exists on several.
+    campus_id: Optional[str] = None
     tour_type: str = Field(..., pattern="^(specific_hostel|full_search)$")
-    amount: float = Field(..., ge=0)
     preferred_date: date
     preferred_time: str = Field(..., pattern="^(morning|afternoon|evening)$")
     agent_id: Optional[str] = None
+    # Analytics only.
+    from_listing: bool = False
+    # NOTE: there is deliberately no `amount`: the price is always the zone's configured price,
+    # computed server-side. Extra fields (e.g. a stale client-sent amount) are ignored.
+
+
+class TourBookingStudentUpdate(BaseModel):
+    """Fields a student may change on their own pending booking."""
+
+    preferred_date: Optional[date] = None
+    preferred_time: Optional[str] = Field(None, pattern="^(morning|afternoon|evening)$")
+    phone: Optional[str] = Field(None, min_length=7, max_length=40)
 
 
 class TourBookingUpdateStatus(BaseModel):

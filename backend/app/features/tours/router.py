@@ -1,15 +1,17 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.core.ratelimit import limiter
-from app.core.security import AuthenticatedUser, decode_jwt_token, get_current_user
+from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user
+from app.core.tasks.worker import send_push_to_user
 from app.features.tours.schemas import (
     MyTourBookingRead,
     TourBookingCreate,
     TourBookingRead,
+    TourBookingStudentUpdate,
     TourBookingUpdateStatus,
     TourListingBrief,
 )
@@ -18,30 +20,34 @@ from app.features.tours.service import TourService
 router = APIRouter(prefix="/tours", tags=["Tours"])
 
 
+def _schedule_pushes(background_tasks: BackgroundTasks, pushes) -> None:
+    for push in pushes:
+        background_tasks.add_task(
+            send_push_to_user, push.user_id, push.title, push.body, {"url": push.url, "type": "tour"}
+        )
+
+
 @router.post(
     "",
     response_model=TourBookingRead,
     status_code=status.HTTP_201_CREATED,
     summary="Create Tour Booking",
-    description="Book a hostel tour. Public (optional auth).",
+    description=(
+        "Book a hostel tour. Public (optional auth; a signed-in student is linked to the booking). "
+        "The amount is always the zone's configured price, computed server-side. "
+        "400 when the zone has no price, the date is in the past, or the phone is invalid."
+    ),
 )
 @limiter.limit("10/minute")
 async def create_booking(
     request: Request,
     data: TourBookingCreate,
-    authorization: Optional[str] = Header(None),
+    background_tasks: BackgroundTasks,
+    user: Optional[AuthenticatedUser] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> TourBookingRead:
-    user: Optional[AuthenticatedUser] = None
-    if authorization and authorization.lower().startswith("bearer "):
-        try:
-            token = authorization.split()[1]
-            token_data = decode_jwt_token(token)
-            user = AuthenticatedUser(id=token_data.user_id, email=token_data.email)
-        except Exception:
-            pass
-
-    booking = await TourService.create_booking(db, data, user)
+    booking, pushes = await TourService.create_booking(db, data, user)
+    _schedule_pushes(background_tasks, pushes)
     return TourBookingRead.model_validate(booking)
 
 
@@ -114,13 +120,52 @@ async def get_booking(
     response_model=TourBookingRead,
     status_code=status.HTTP_200_OK,
     summary="Update Booking Status",
-    description="Update booking status (use status `contacted` once the student has been messaged). Agent or Admin.",
+    description=(
+        "Move a booking through its lifecycle. The booking's agent or an admin may apply any allowed "
+        "transition (use `contacted` once the student has been messaged); the student who owns the "
+        "booking may only cancel it while pending_payment/confirmed."
+    ),
 )
 async def update_booking_status(
     booking_id: str,
     data: TourBookingUpdateStatus,
+    background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> TourBookingRead:
-    booking = await TourService.update_booking_status(db, user, booking_id, data)
+    booking, pushes = await TourService.update_booking_status(db, user, booking_id, data)
+    _schedule_pushes(background_tasks, pushes)
     return TourBookingRead.model_validate(booking)
+
+
+@router.patch(
+    "/{booking_id}",
+    response_model=TourBookingRead,
+    status_code=status.HTTP_200_OK,
+    summary="Edit My Booking",
+    description="Student edits date/time/phone of their own booking while it is pending payment.",
+)
+async def update_my_booking(
+    booking_id: str,
+    data: TourBookingStudentUpdate,
+    background_tasks: BackgroundTasks,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> TourBookingRead:
+    booking, pushes = await TourService.update_my_booking(db, user, booking_id, data)
+    _schedule_pushes(background_tasks, pushes)
+    return TourBookingRead.model_validate(booking)
+
+
+@router.delete(
+    "/{booking_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete Booking",
+    description="Permanently delete a booking. The booking's agent or an admin only.",
+)
+async def delete_booking(
+    booking_id: str,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> None:
+    await TourService.delete_booking(db, user, booking_id)

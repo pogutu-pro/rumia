@@ -1,12 +1,14 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, Header, Request, status
+import hashlib
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.pagination import PaginatedResponse, PaginationParams
-from app.core.ratelimit import limiter
-from app.core.security import AuthenticatedUser, decode_jwt_token, get_current_user, require_roles
-from app.features.leads.schemas import CommissionRead, LeadRead, LeadTrackRequest
+from app.core.ratelimit import _client_ip, limiter
+from app.core.security import AuthenticatedUser, get_current_user, require_roles
+from app.core.tasks.worker import send_push_to_user
+from app.features.leads.schemas import CommissionRead, LeadRead, LeadTrackRequest, LeadTrackResult
 from app.features.leads.service import LeadService
 
 router = APIRouter(prefix="/leads", tags=["Leads"])
@@ -14,29 +16,33 @@ router = APIRouter(prefix="/leads", tags=["Leads"])
 
 @router.post(
     "/track",
-    response_model=LeadRead,
+    response_model=LeadTrackResult,
     status_code=status.HTTP_200_OK,
     summary="Track Lead Click",
-    description="Record a WhatsApp inquiry click. Public (optional auth).",
+    description=(
+        "Record a student's click to contact a listing's agent or owner and return the contact "
+        "details needed to open the chat. Public. Deduplicated per visitor per listing per 24h; "
+        "409 codes: REQUIRES_AGENT (hostel full), FEE_REQUIRED (fee disclosure not accepted)."
+    ),
 )
 @limiter.limit("10/minute")
 async def track_lead(
     request: Request,
     data: LeadTrackRequest,
-    authorization: Optional[str] = Header(None),
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db_session),
-) -> LeadRead:
-    user: Optional[AuthenticatedUser] = None
-    if authorization and authorization.lower().startswith("bearer "):
-        try:
-            token = authorization.split()[1]
-            token_data = decode_jwt_token(token)
-            user = AuthenticatedUser(id=token_data.user_id, email=token_data.email)
-        except Exception:
-            pass
-
-    lead = await LeadService.track_lead(db, data, user)
-    return LeadRead.model_validate(lead)
+) -> LeadTrackResult:
+    ip_hash = hashlib.sha256(_client_ip(request).encode()).hexdigest()
+    tracked = await LeadService.track_lead(db, data, ip_hash)
+    if tracked.notify_user_id:
+        background_tasks.add_task(
+            send_push_to_user,
+            tracked.notify_user_id,
+            "New student inquiry",
+            f'Someone is interested in "{tracked.listing_title}". Check your dashboard.',
+            {"url": "/dashboard", "type": "lead"},
+        )
+    return tracked.result
 
 
 @router.get(

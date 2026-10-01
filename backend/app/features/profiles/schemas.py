@@ -63,3 +63,7 @@ class WishlistBatchCheckRequest(BaseModel):
 class WishlistBatchCheckResponse(BaseModel):
     """Map of listing_id → is_saved for every requested id."""
     saved: dict[str, bool]
+
+
+class EmailExistsResponse(BaseModel):
+    exists: bool
