@@ -144,7 +144,8 @@ class ListingService:
 
         if listings and sort != "views":
             ids = [str(item.id) for item in listings]
-            counts_result = await db.execute(ListingService._all_time_view_counts(ids))
+            counts_sub = ListingService._all_time_view_counts(ids)
+            counts_result = await db.execute(select(counts_sub.c.listing_id, counts_sub.c.view_count))
             for listing_id, count in counts_result.all():
                 view_counts[str(listing_id)] = int(count)
 
