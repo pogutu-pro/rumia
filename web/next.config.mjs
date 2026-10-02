@@ -125,6 +125,9 @@ export default sentryEnabled
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       authToken: process.env.SENTRY_AUTH_TOKEN,
+      // The org lives in Sentry's EU region; the CLI defaults to the US host and the upload
+      // would fail silently (silent: true below).
+      sentryUrl: process.env.SENTRY_URL || 'https://de.sentry.io',
       silent: !process.env.CI,
       sourcemaps: {
         disable: process.env.NODE_ENV !== 'production',
