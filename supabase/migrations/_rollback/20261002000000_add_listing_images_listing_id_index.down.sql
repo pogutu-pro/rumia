@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_listing_images_listing_id_display_order;
