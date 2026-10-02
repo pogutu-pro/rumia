@@ -20,8 +20,8 @@
 (function () {
   'use strict';
 
-  var STATIC_CACHE = 'rumia-static-v4';
-  var OFFLINE_CACHE = 'rumia-offline-v4';
+  var STATIC_CACHE = 'rumia-static-v5';
+  var OFFLINE_CACHE = 'rumia-offline-v5';
   var OFFLINE_URL = '/offline';
   // Hard cap so a hung request (e.g. a captive portal) surfaces the offline
   // page instead of an endless loading skeleton.
@@ -172,7 +172,12 @@
           return cache.match(request).then(function (cached) {
             if (cached) return cached;
             return fetch(request).then(function (response) {
-              if (response.ok) cache.put(request, response.clone());
+              // Never cache a wrong-typed body (e.g. an HTML error page served for a chunk URL):
+              // cache-first would replay it forever and break webpack's module loading.
+              var type = response.headers.get('content-type') || '';
+              if (response.status === 200 && !/text\/html|text\/plain/i.test(type)) {
+                cache.put(request, response.clone());
+              }
               return response;
             });
           });

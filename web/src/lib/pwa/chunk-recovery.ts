@@ -10,7 +10,7 @@ export function isStaleBuildError(error: unknown): boolean {
   const message = error instanceof Error ? `${error.name} ${error.message}` : String(error ?? '');
   return (
     /ChunkLoadError|Loading (CSS )?chunk [\w-]+ failed|Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(message) ||
-    /^TypeError: \w+\[\w+\] is not a function$/.test(message.trim())
+    /\b\w{1,2}\[\w{1,2}\] is not a function$/.test(message.trim())
   );
 }
 
