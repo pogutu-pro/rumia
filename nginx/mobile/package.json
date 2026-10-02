@@ -61,7 +61,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "generate:api": "openapi-typescript ../backend/openapi.json -o lib/api/types.ts"
+    "generate:api": "openapi-typescript ../../backend/openapi.json -o lib/api/types.ts"
   },
   "jest": {
     "preset": "jest-expo"

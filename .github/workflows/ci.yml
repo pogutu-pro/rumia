@@ -104,27 +104,27 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          cache-dependency-path: 'mobile/pnpm-lock.yaml'
+          cache-dependency-path: 'nginx/mobile/pnpm-lock.yaml'
 
       - name: Install Mobile Dependencies
         run: |
-          cd mobile
+          cd nginx/mobile
           pnpm install --frozen-lockfile
 
       - name: Verify OpenAPI Generated Types
         run: |
-          cd mobile
+          cd nginx/mobile
           pnpm run generate:api
           git diff --exit-code lib/api/types.ts
 
       - name: Run Mobile TypeScript Typecheck
         run: |
-          cd mobile
+          cd nginx/mobile
           pnpm exec tsc --noEmit
 
       - name: Run Mobile Lint
         run: |
-          cd mobile
+          cd nginx/mobile
           pnpm lint
 
   docker-build-test:
