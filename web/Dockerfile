@@ -65,6 +65,14 @@ COPY --from=envprep /app/.env.production ./.env.production
 # over .env.production dotfile values, so the ARG wins at build time.
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+# Sentry source-map upload (build-time only; builder stage is not shipped).
+# Leave unset to skip the upload.
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_ORG=$SENTRY_ORG \
+    SENTRY_PROJECT=$SENTRY_PROJECT \
+    SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 RUN pnpm build
 
 # Production image, copy all the files and run next

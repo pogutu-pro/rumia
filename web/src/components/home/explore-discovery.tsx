@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, BedDouble, Building2, House, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import {
   ExploreListingCard,
   type ExploreListing,
 } from './explore-listing-card';
-import { RumiaBnbComingSoon } from './rumiabnb-coming-soon';
 
 export interface ExploreZone {
   name: string;
@@ -67,7 +67,7 @@ export function ExploreDiscovery({
     (campusName ? { name: campusName, short_name: campusName } : null);
   const [category, setCategory] = useState<CategoryKey>('hostel');
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
-  const [rumiaBnbOpen, setRumiaBnbOpen] = useState(false);
+  const router = useRouter();
 
   const filtered = useMemo(() => {
     let result = items.filter(
@@ -135,7 +135,7 @@ export function ExploreDiscovery({
                 type="button"
                 onClick={() => {
                   if (key === 'short_stay') {
-                    setRumiaBnbOpen(true);
+                    router.push('/bnb');
                     return;
                   }
                   setCategory(key);
@@ -262,11 +262,6 @@ export function ExploreDiscovery({
           </div>
         )}
       </div>
-
-      <RumiaBnbComingSoon
-        open={rumiaBnbOpen}
-        onOpenChange={setRumiaBnbOpen}
-      />
     </section>
   );
 }
