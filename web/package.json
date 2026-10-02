@@ -140,6 +140,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@sentry/cli",
       "sharp"
     ]
   }
