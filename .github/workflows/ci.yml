@@ -149,5 +149,7 @@ jobs:
           NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: placeholder
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: placeholder
           NEXT_PUBLIC_SENTRY_DSN: ''
+          # compose requires it for interpolation; the build never uses the value.
+          POSTGRES_PASSWORD: placeholder
         run: |
           docker compose build
