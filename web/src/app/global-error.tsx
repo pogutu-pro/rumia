@@ -2,6 +2,7 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
+import { isStaleBuildError, reloadOnceForNewBuild } from '@/lib/pwa/chunk-recovery';
 
 export default function GlobalError({
   error,
@@ -11,6 +12,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    if (isStaleBuildError(error) && reloadOnceForNewBuild()) return;
     Sentry.captureException(error);
   }, [error]);
 

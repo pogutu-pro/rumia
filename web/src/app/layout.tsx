@@ -6,6 +6,7 @@ import { BottomNav } from '@/components/pwa/BottomNav';
 import { RouteProgress } from '@/components/pwa/RouteProgress';
 import { CompareTray } from '@/components/compare/compare-tray';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
+import { ChunkErrorRecovery } from '@/components/pwa/ChunkErrorRecovery';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileMain } from '@/components/pwa/MobileMain';
 import '@/styles/globals.css';
@@ -98,6 +99,7 @@ export default function RootLayout({
           <BottomNav />
         </Providers>
         <ServiceWorkerRegister />
+        <ChunkErrorRecovery />
         <InstallBanner />
         {/* Cloudflare Web Analytics — injected dynamically to prevent Cloudflare edge SRI integrity mismatch */}
         <script

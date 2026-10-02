@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import * as Sentry from '@sentry/nextjs';
+import { isStaleBuildError, reloadOnceForNewBuild } from '@/lib/pwa/chunk-recovery';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { AlertTriangle, RefreshCcw, Home, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +19,8 @@ export default function Error({ error, reset }: ErrorProps) {
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (isStaleBuildError(error) && reloadOnceForNewBuild()) return;
+    Sentry.captureException(error);
     headingRef.current?.focus();
     if (process.env.NODE_ENV === 'production') {
       console.error('RUMI Error Digest:', error.digest ?? 'N/A');
