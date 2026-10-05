@@ -26,3 +26,23 @@ export function safeNext(raw: string | null | undefined): string {
   }
   return '/account';
 }
+
+/**
+ * The OAuth state cookie is host-only and Google returns to the canonical origin, so a sign-in
+ * started on any other host (e.g. www) cannot complete. Returns the URL to bounce to, or null when
+ * the request is already on the canonical host.
+ */
+export function canonicalRedirectFor(requestHost: string | null, requestUrl: URL, canonicalOrigin: string): URL | null {
+  if (!requestHost) return null;
+  let canonical: URL;
+  try {
+    canonical = new URL(canonicalOrigin);
+  } catch {
+    return null;
+  }
+  const host = requestHost.split(',')[0].trim().toLowerCase();
+  // Local dev, previews and the internal container hostname are left alone.
+  if (!host || host === canonical.host.toLowerCase() || /^(localhost|127\.|\[::1\])/.test(host) || host.includes(':3000')) return null;
+  if (host !== `www.${canonical.host.toLowerCase()}`) return null;
+  return new URL(`${requestUrl.pathname}${requestUrl.search}`, canonical.origin);
+}

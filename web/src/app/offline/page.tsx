@@ -14,8 +14,8 @@ export default function OfflinePage() {
             You&apos;re offline
           </h1>
           <p className="text-sm text-slate-500 leading-relaxed">
-            Connect to the internet to browse hostels and get the latest
-            listings near DeKUT.
+            We couldn&apos;t reach Rumia. Pages you&apos;ve opened recently may still
+            load, but you&apos;ll need a connection for the latest listings.
           </p>
         </div>
         <button

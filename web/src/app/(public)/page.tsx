@@ -16,7 +16,7 @@ import type { Campus, Listing } from '@/types';
 
 export const revalidate = 300;
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
 
 const FEED_LIMIT = 12;
 

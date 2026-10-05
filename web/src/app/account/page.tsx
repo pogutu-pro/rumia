@@ -59,6 +59,21 @@ interface Profile {
   home_campus_confirmed_at?: string | null;
 }
 
+/** One retry for transient failures; null (not an empty object) tells the caller the load failed. */
+async function loadProfileWithRetry(): Promise<UserProfile | null> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await profilesApi.getMe();
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      // 401/403/404 will not improve by retrying.
+      if (status === 401 || status === 403 || status === 404) return null;
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 800));
+    }
+  }
+  return null;
+}
+
 function AccountSkeleton() {
   return (
     <div className="min-h-screen bg-white">
@@ -115,6 +130,9 @@ export default function AccountPage() {
     PlatformInsightData | undefined
   >(undefined);
   const [campuses, setCampuses] = useState<Campus[]>([]);
+  // True when /profiles/me could not be read. We must not guess "profile incomplete" from an
+  // empty fallback: that showed the blocking completion modal to users who had already finished.
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
   // Session-scoped fallback: if profile completion keeps failing the user can
   // dismiss the modal for this session instead of being stranded on it. The
   // draft is preserved and settings still lets them finish any time.
@@ -155,7 +173,7 @@ export default function AccountPage() {
       ] = await Promise.all([
         // A missing/failed profile (e.g. brand-new user) must not crash the page;
         // the API creates the profile on first read, but degrade gracefully anyway.
-        profilesApi.getMe().catch(() => null),
+        loadProfileWithRetry(),
         getMyAgentApplicationsAction().catch(() => [] as unknown[]),
         // A 401 here (backend failing to validate the Supabase session token)
         // must never reject the whole Promise.all — otherwise setLoading(false)
@@ -179,6 +197,7 @@ export default function AccountPage() {
       ]);
 
       if (!cancelled) {
+        setProfileLoadFailed(profileRes === null);
         const profileData = profileRes ?? ({} as Partial<UserProfile>);
         const resolvedProfile = {
           id: profileData.id ?? user.id,
@@ -345,7 +364,7 @@ export default function AccountPage() {
   const missingPhone = !profile.phone?.trim();
   const missingCampus = !profile.home_campus_confirmed_at;
   const needsProfileCompletion =
-    !profileCompletionDismissed && (missingPhone || missingCampus);
+    !profileLoadFailed && !profileCompletionDismissed && (missingPhone || missingCampus);
 
   return (
     <div className="min-h-screen bg-white">
@@ -395,6 +414,24 @@ export default function AccountPage() {
         isManager={profile.role === 'manager' || profile.role === 'admin'}
         hasAgent={hasAgent}
       />
+
+      {profileLoadFailed && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <div
+            role="alert"
+            className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          >
+            <span>We couldn&apos;t load your profile details. Some information may be missing.</span>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="shrink-0 font-semibold underline underline-offset-2"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">

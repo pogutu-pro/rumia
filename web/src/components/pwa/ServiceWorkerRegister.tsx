@@ -7,6 +7,16 @@ const SW_SCOPE = '/';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 30_000;
 const RELOAD_ONCE_KEY = 'rumia:sw:updated';
+// A reload here would throw away an in-progress sign-in or form, so a new worker just takes over
+// silently on these screens (stale chunks are handled by ChunkErrorRecovery).
+const NO_AUTO_RELOAD_PATH = /^\/(auth|account|dashboard|admin|manager)(\/|$)/;
+
+function safeToReload(): boolean {
+  if (NO_AUTO_RELOAD_PATH.test(window.location.pathname)) return false;
+  const active = document.activeElement;
+  if (active && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName)) return false;
+  return true;
+}
 
 /**
  * Bulletproof service worker registration.
@@ -46,6 +56,7 @@ export function ServiceWorkerRegister() {
       if (sessionStorage.getItem(RELOAD_ONCE_KEY)) return;
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!safeToReload()) return;
         sessionStorage.setItem(RELOAD_ONCE_KEY, '1');
         window.location.reload();
       });
@@ -60,6 +71,9 @@ export function ServiceWorkerRegister() {
           if (existing.waiting) {
             existing.waiting.postMessage({ type: 'SKIP_WAITING' });
           }
+          // Pick up a newly deployed sw.js on this visit instead of waiting for the browser's
+          // own (up to 24h) schedule. Failures are harmless: the current worker keeps running.
+          existing.update().catch(() => {});
           return;
         }
 

@@ -69,6 +69,14 @@ export function sessionFromToken(token: string | undefined | null): AuthSession 
   }
 }
 
+/**
+ * A refresh the backend actively refused (token revoked, expired, reused). Anything else (429,
+ * 5xx, a network error) is transient and must NOT sign the user out or clear their cookies.
+ */
+export function isRefreshRejected(status: number): boolean {
+  return status === 400 || status === 401 || status === 403;
+}
+
 export function isFresh(session: AuthSession | null, skew = REFRESH_SKEW_SECONDS): session is AuthSession {
   return !!session && session.expires_at - Math.floor(Date.now() / 1000) > skew;
 }

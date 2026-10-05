@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
 import { STATE_COOKIE, cookieSecure } from '@/lib/auth/session';
-import { getCanonicalOrigin } from '@/lib/auth/origin';
+import { canonicalRedirectFor, getCanonicalOrigin } from '@/lib/auth/origin';
 
 export async function GET(request: NextRequest) {
   const origin = getCanonicalOrigin(request);
+  // Belt and braces for the nginx www redirect: never start the flow on a non-canonical host.
+  const bounce = canonicalRedirectFor(
+    request.headers.get('x-forwarded-host') || request.headers.get('host'),
+    request.nextUrl,
+    origin,
+  );
+  if (bounce) return NextResponse.redirect(bounce, 307);
   const sp = request.nextUrl.searchParams;
   const res = await authBackend.start(sp.get('next'), sp.get('app_redirect')).catch(() => null);
   if (!res?.ok || !res.data) {

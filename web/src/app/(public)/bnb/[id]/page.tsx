@@ -47,7 +47,7 @@ export async function generateMetadata({
   const listing = await getBnbListing(id);
   if (!listing) return { title: 'Stay Not Found' };
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const url = `${baseUrl}/bnb/${id}`;
   const bnb = listing.bnb;
   const priceUnit =
@@ -121,7 +121,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
   const listing = await getBnbListing(id);
   if (!listing) notFound();
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const canonicalUrl = `${baseUrl}/bnb/${id}`;
 
   const images = [...(listing.images ?? [])].sort(

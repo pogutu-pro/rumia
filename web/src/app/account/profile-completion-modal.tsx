@@ -3,7 +3,6 @@
 import { useState, useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as Sentry from '@sentry/nextjs';
 import { Phone, Loader2, Check, HelpCircle } from 'lucide-react';
 import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { saveProfileCompletionAction } from '@/app/actions/profile';
+import { saveProfile } from '@/lib/api/profile-save';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
 
 const DRAFT_PHONE_KEY = 'rumia:pc:draft-phone';
@@ -117,6 +116,7 @@ requirePhone = true,
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // Persist a partial draft to sessionStorage so a failed/abandoned save never
   // makes the user re-type their phone/campus after a refresh or retry.
@@ -187,27 +187,28 @@ requirePhone = true,
 
     setIsSaving(true);
     try {
-      const result = await saveProfileCompletionAction({
+      const result = await saveProfile({
         ...(requirePhone ? { phone: phone.trim() } : {}),
         ...(requireCampus ? { campus_input: campusInput.trim() } : {}),
       });
 
       if (!result.success) {
-        setSaveFailed(true);
+        // Validation problems are the user's to fix; everything else means the save did not happen.
+        if (result.kind !== 'validation') setSaveFailed(true);
+        setSaveMessage(result.error);
         posthog.capture('profile_completion_failed', {
           error: result.error,
+          kind: result.kind,
           required_phone: requirePhone,
           required_campus: requireCampus,
           source: 'web-modal',
-        });
-        Sentry.captureException(new Error(result.error), {
-          tags: { event_name: 'profile_completion_failed', source: 'web-modal' },
         });
         toast.error(result.error);
         return;
       }
 
       setSaveFailed(false);
+      setSaveMessage(null);
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem(DRAFT_PHONE_KEY);
         sessionStorage.removeItem(DRAFT_CAMPUS_KEY);
@@ -218,9 +219,7 @@ requirePhone = true,
         campus: result.updated.home_campus_name ?? null,
       });
       onSuccess({
-        ...(result.updated.phone !== undefined
-          ? { phone: result.updated.phone }
-          : {}),
+        ...(result.updated.phone !== undefined ? { phone: result.updated.phone } : {}),
         ...(result.updated.home_campus_id !== undefined
           ? { home_campus_id: result.updated.home_campus_id }
           : {}),
@@ -233,16 +232,13 @@ requirePhone = true,
       });
       toast.success('Profile updated');
     } catch (err) {
+      // saveProfile never throws; this guards against a bug in the handlers above.
       setSaveFailed(true);
+      setSaveMessage('Unable to update profile right now. Please try again.');
       posthog.capture('profile_completion_failed', {
         error: err instanceof Error ? err.message : String(err),
         unexpected: true,
-        required_phone: requirePhone,
-        required_campus: requireCampus,
         source: 'web-modal',
-      });
-      Sentry.captureException(err instanceof Error ? err : new Error(String(err)), {
-        tags: { event_name: 'profile_completion_failed', unexpected: 'true' },
       });
       toast.error('Unable to update profile right now. Please try again.');
     } finally {
@@ -333,8 +329,8 @@ requirePhone = true,
       {saveFailed && !isSaving && (
         <div className="rounded-xl border border-red-100 bg-red-50/70 p-3 space-y-2.5">
           <p className="text-xs text-red-700 leading-relaxed">
-            We couldn&apos;t save your details yet — your draft is kept, so you can
-            try again. You can also keep browsing and finish this later.
+            {saveMessage ?? 'We couldn\u2019t save your details yet.'} Your draft is kept, so you
+            can try again. You can also keep browsing and finish this later.
           </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1.5 items-center">
             <a

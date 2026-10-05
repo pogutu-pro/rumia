@@ -5,7 +5,7 @@ import BnbSearch, { BnbSearchSkeleton, type BnbListing } from './bnb-search';
 
 export const revalidate = 300;
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
 
 export const metadata: Metadata = {
   title: 'RumiaBnB — Short Stays in Nyeri & Across Kenya',

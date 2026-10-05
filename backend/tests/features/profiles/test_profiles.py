@@ -192,3 +192,44 @@ async def test_sync_login_endpoint_reports_profile_completion(client: AsyncClien
 @pytest.mark.asyncio
 async def test_sync_login_requires_authentication(client: AsyncClient):
     assert (await client.post("/api/v1/profiles/me/sync-login", json={})).status_code == 401
+
+
+def _profile_stub(**kw):
+    from types import SimpleNamespace
+
+    base = dict(
+        id="student-1", full_name=None, phone=None, avatar_url=None, home_campus_id="default-dekut-id",
+        home_campus_name=None, home_campus_confirmed_at=None, updated_at=None,
+    )
+    base.update(kw)
+    return SimpleNamespace(**base)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "campus_row, expected_id",
+    [(None, None), (type("C", (), {"id": "moi-id"})(), "moi-id")],
+    ids=["unregistered-campus-clears-default", "registered-campus-links-it"],
+)
+async def test_update_profile_campus_input_resolution(campus_row, expected_id):
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    from app.features.profiles.schemas import ProfileUpdate
+    from app.features.profiles.service import ProfileService
+
+    profile = _profile_stub()
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = campus_row
+    db = MagicMock()
+    db.execute = AsyncMock(return_value=result)
+    db.flush = AsyncMock()
+    user = AuthenticatedUser(id="student-1", email="s@gmail.com", role="student")
+
+    with patch.object(ProfileService, "get_or_create_profile", AsyncMock(return_value=profile)):
+        await ProfileService.update_profile(
+            db, user, ProfileUpdate(phone="0712345678", campus_input="Moi University", home_campus_confirmed=True)
+        )
+
+    assert profile.home_campus_id == expected_id
+    assert profile.home_campus_name == "Moi University"
+    assert profile.home_campus_confirmed_at is not None

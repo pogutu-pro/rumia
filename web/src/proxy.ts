@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getApiUrl } from '@/lib/api/config';
 import { authBackend } from '@/lib/auth/backend';
-import { AT_COOKIE, HINT_COOKIE, RT_COOKIE, isFresh, sessionCookies, sessionFromToken } from '@/lib/auth/session';
+import { AT_COOKIE, HINT_COOKIE, RT_COOKIE, isFresh, isRefreshRejected, sessionCookies, sessionFromToken } from '@/lib/auth/session';
 
 const SECURITY_HEADERS: [string, string][] = [
   ['X-DNS-Prefetch-Control', 'on'],
@@ -118,6 +118,9 @@ export default async function proxy(request: NextRequest) {
   // Public pages without any session cookie cost nothing.
   let session = sessionFromToken(request.cookies.get(AT_COOKIE)?.value);
   let refreshed: ReturnType<typeof sessionCookies> | null = null;
+  // The refresh endpoint was unreachable or throttled (not a rejection): keep the cookies and let
+  // the browser retry via /auth/refresh instead of bouncing the user to the login page.
+  let refreshUnavailable = false;
   const rt = request.cookies.get(RT_COOKIE)?.value;
   if (!isFresh(session) && rt) {
     const result = await authBackend.refresh(rt).catch(() => null);
@@ -126,8 +129,10 @@ export default async function proxy(request: NextRequest) {
       session = sessionFromToken(result.data.access_token);
       // Make the new token visible to this very request's Server Components.
       for (const c of refreshed) request.cookies.set(c.name, c.value);
-    } else if (result && !result.ok) {
+    } else if (result && isRefreshRejected(result.status)) {
       session = null; // refresh token revoked/expired: treat as signed out
+    } else {
+      refreshUnavailable = true;
     }
   }
   const user = isFresh(session, 0) ? session!.user : null;
@@ -141,6 +146,10 @@ export default async function proxy(request: NextRequest) {
   };
 
   if (!isProtectedRoute && !pathname.startsWith('/auth/login')) {
+    return finish(NextResponse.next({ request: { headers: request.headers } }));
+  }
+
+  if (isProtectedRoute && !user && refreshUnavailable) {
     return finish(NextResponse.next({ request: { headers: request.headers } }));
   }
 

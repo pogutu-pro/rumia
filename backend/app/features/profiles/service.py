@@ -153,6 +153,9 @@ class ProfileService:
                     profile.home_campus_id = matched.id
                     profile.home_campus_name = data.campus_input.strip()
                 else:
+                    # A university outside the registry: keep the typed name and drop the default
+                    # campus sign-up pinned, otherwise this student is silently treated as DeKUT.
+                    profile.home_campus_id = None
                     profile.home_campus_name = data.campus_input.strip()
                 if profile.home_campus_confirmed_at is None:
                     profile.home_campus_confirmed_at = datetime.now(timezone.utc)

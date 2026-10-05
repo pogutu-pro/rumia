@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { WishlistNotificationPreferences } from '@/components/settings/WishlistNotificationPreferences';
 import { createClient } from '@/lib/supabase/client';
-import { saveProfileCompletionAction } from '@/app/actions/profile';
+import { saveProfile } from '@/lib/api/profile-save';
 import { User, Phone, Mail, GraduationCap, Loader2, Check, LogOut, AlertTriangle, X, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -60,7 +60,7 @@ export function AccountSettingsTab({
 
     const campusValue = campusInput.trim();
     setSaving(true);
-    const result = await saveProfileCompletionAction({
+    const result = await saveProfile({
       full_name: fullName.trim(),
       phone: phone.trim(),
       campus_input: campusValue || undefined,

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const agent = await getAgent(slug);
   if (!agent) return { title: 'Agent Not Found' };
 
-  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const canonical = `${metadataBase}/agents/${slug}`;
   const name = agent.name || 'Hostel Agent';
   const bio = agent.bio ? `${agent.bio.slice(0, 120)}` : `Student hostel agent near Dedan Kimathi University in Nyeri, Kenya.`;
@@ -69,7 +69,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
   // Cards read the legacy `listing_images` key.
   const listings = feed.items.map(toLegacyListingShape) as any[];
-  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rumia.co.ke';
+  const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const canonicalUrl = `${metadataBase}/agents/${slug}`;
 
   const personSchema = {
