@@ -2597,7 +2597,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/public/verify-candidates": {
+    "/api/v1/public/verify-lookup": {
         parameters: {
             query?: never;
             header?: never;
@@ -2605,10 +2605,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Verify-Before-You-Pay Dataset
-         * @description Contact and payment identifiers of active listings, used by the public Hakikisha checker to tell students whether a number or payment detail belongs to a known listing. Public.
+         * Verify-Before-You-Pay Lookup
+         * @description Active listings matching ONE phone number, payment detail or name the visitor typed into the Hakikisha checker (max 10). Payment details are returned only when the search was by payment detail. Rate limited. Public.
          */
-        get: operations["get_verify_candidates_api_v1_public_verify_candidates_get"];
+        get: operations["verify_lookup_api_v1_public_verify_lookup_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -12340,9 +12340,12 @@ export interface operations {
             };
         };
     };
-    get_verify_candidates_api_v1_public_verify_candidates_get: {
+    verify_lookup_api_v1_public_verify_lookup_get: {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Phone number, M-Pesa detail or hostel name */
+                q: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -12356,6 +12359,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VerifyCandidate"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -21797,10 +21797,25 @@
         ]
       }
     },
-    "/api/v1/public/verify-candidates": {
+    "/api/v1/public/verify-lookup": {
       "get": {
-        "description": "Contact and payment identifiers of active listings, used by the public Hakikisha checker to tell students whether a number or payment detail belongs to a known listing. Public.",
-        "operationId": "get_verify_candidates_api_v1_public_verify_candidates_get",
+        "description": "Active listings matching ONE phone number, payment detail or name the visitor typed into the Hakikisha checker (max 10). Payment details are returned only when the search was by payment detail. Rate limited. Public.",
+        "operationId": "verify_lookup_api_v1_public_verify_lookup_get",
+        "parameters": [
+          {
+            "description": "Phone number, M-Pesa detail or hostel name",
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "description": "Phone number, M-Pesa detail or hostel name",
+              "maxLength": 100,
+              "minLength": 3,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -21809,15 +21824,25 @@
                   "items": {
                     "$ref": "#/components/schemas/VerifyCandidate"
                   },
-                  "title": "Response Get Verify Candidates Api V1 Public Verify Candidates Get",
+                  "title": "Response Verify Lookup Api V1 Public Verify Lookup Get",
                   "type": "array"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
-        "summary": "Verify-Before-You-Pay Dataset",
+        "summary": "Verify-Before-You-Pay Lookup",
         "tags": [
           "Public"
         ]

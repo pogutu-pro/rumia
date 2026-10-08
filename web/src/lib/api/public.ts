@@ -66,8 +66,9 @@ export const publicApi = {
   getSupportTeam: (next?: Revalidate) =>
     fetchPublicApi<PublicAgent[]>('/public/support-team', opts(next)),
 
-  getVerifyCandidates: (next?: Revalidate) =>
-    fetchPublicApi<VerifyCandidate[]>('/public/verify-candidates', opts(next)),
+  /** Listings matching ONE phone / payment detail / name typed into the Hakikisha checker (max 10). */
+  lookupVerifyCandidates: (q: string) =>
+    fetchPublicApi<VerifyCandidate[]>(`/public/verify-lookup?q=${encodeURIComponent(q)}`, { cache: 'no-store' }),
 
   getSitemap: (next?: Revalidate) => fetchPublicApi<SitemapData>('/public/sitemap', opts(next)),
 

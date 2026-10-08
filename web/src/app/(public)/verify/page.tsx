@@ -24,26 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function VerifyPage() {
-  const [candidates, activeAgents] = await Promise.all([
-    publicApi.getVerifyCandidates({ revalidate }).catch(() => []),
-    publicApi.getSupportTeam({ revalidate }).catch(() => []),
-  ]);
-
-  // Already in the checker's shape (FastAPI returns the flattened candidate).
-  const rumiaListings: ListingMatchCandidate[] = candidates.map((c) => ({
-    id: c.id,
-    title: c.title,
-    county: c.county,
-    area: c.area,
-    slug: c.slug,
-    landlord_phone: c.landlord_phone,
-    agent_phone: c.agent_phone,
-    agent_whatsapp: c.agent_whatsapp,
-    agent_verified: c.agent_verified,
-    verified: c.verified,
-    mpesa_details: c.mpesa_details,
-    specific_location: c.specific_location,
-  })) as ListingMatchCandidate[];
+  const activeAgents = await publicApi.getSupportTeam({ revalidate }).catch(() => []);
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] pb-[calc(4rem+env(safe-area-inset-bottom))]">
@@ -54,7 +35,7 @@ export default async function VerifyPage() {
             <SupportTeamSection agents={activeAgents} ownerAtTop />
           </div>
           <div className="mt-10 lg:mt-0">
-            <HakisaChecker rumiaListings={rumiaListings} />
+            <HakisaChecker />
           </div>
         </div>
 
