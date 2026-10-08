@@ -11,6 +11,7 @@ from app.features.analytics import analytics_router
 from app.features.announcements import announcements_router
 from app.features.campuses import campuses_router
 from app.features.catalog import catalog_router
+from app.features.discovery import discovery_router
 from app.features.events import events_router
 from app.features.feedback import feedback_router
 from app.features.geo import geo_router
@@ -63,6 +64,7 @@ api_router.include_router(manager_router)
 api_router.include_router(admin_console_router)
 api_router.include_router(geo_router)
 api_router.include_router(catalog_router)
+api_router.include_router(discovery_router)
 api_router.include_router(media_router)
 api_router.include_router(events_router)
 api_router.include_router(inquiries_router)

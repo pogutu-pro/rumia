@@ -2410,6 +2410,126 @@
         "title": "AgentVerificationResult",
         "type": "object"
       },
+      "AlertCreate": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "whatsapp"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "frequency": {
+            "default": "daily",
+            "enum": [
+              "instant",
+              "daily",
+              "weekly"
+            ],
+            "title": "Frequency",
+            "type": "string"
+          },
+          "intent": {
+            "additionalProperties": true,
+            "title": "Intent",
+            "type": "object"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "intent",
+          "channel"
+        ],
+        "title": "AlertCreate",
+        "type": "object"
+      },
+      "AlertRead": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "frequency": {
+            "title": "Frequency",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "intent": {
+            "additionalProperties": true,
+            "title": "Intent",
+            "type": "object"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "required": [
+          "id",
+          "intent",
+          "channel",
+          "frequency",
+          "active",
+          "created_at"
+        ],
+        "title": "AlertRead",
+        "type": "object"
+      },
       "AnnouncementCreate": {
         "properties": {
           "campus_id": {
@@ -11089,6 +11209,30 @@
         "title": "RegionRead",
         "type": "object"
       },
+      "Relaxation": {
+        "properties": {
+          "change": {
+            "additionalProperties": true,
+            "title": "Change",
+            "type": "object"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "count",
+          "change"
+        ],
+        "title": "Relaxation",
+        "type": "object"
+      },
       "ReportCreate": {
         "properties": {
           "details": {
@@ -11877,6 +12021,268 @@
         "title": "SavedIds",
         "type": "object"
       },
+      "SearchCard": {
+        "properties": {
+          "cover_blur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Blur"
+          },
+          "cover_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Url"
+          },
+          "flags": {
+            "$ref": "#/components/schemas/SearchFlags",
+            "default": {
+              "has_video": false,
+              "registry": false,
+              "visited": false
+            }
+          },
+          "freshness": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freshness"
+          },
+          "from_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Price"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lng": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lng"
+          },
+          "move_in_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Move In Total"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "place_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place Name"
+          },
+          "price_period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Period"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "unit_kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Kind"
+          },
+          "walk_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Walk Min"
+          },
+          "walk_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Walk To"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "kind",
+          "status"
+        ],
+        "title": "SearchCard",
+        "type": "object"
+      },
+      "SearchFlags": {
+        "properties": {
+          "has_video": {
+            "default": false,
+            "title": "Has Video",
+            "type": "boolean"
+          },
+          "registry": {
+            "default": false,
+            "title": "Registry",
+            "type": "boolean"
+          },
+          "visited": {
+            "default": false,
+            "title": "Visited",
+            "type": "boolean"
+          }
+        },
+        "title": "SearchFlags",
+        "type": "object"
+      },
+      "SearchResponse": {
+        "properties": {
+          "applied": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Applied",
+            "type": "object"
+          },
+          "chips": {
+            "default": [],
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Chips",
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SearchCard"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "relaxations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Relaxation"
+            },
+            "title": "Relaxations",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "SearchResponse",
+        "type": "object"
+      },
       "SessionTokens": {
         "properties": {
           "access_token": {
@@ -11961,6 +12367,22 @@
           "campus_name"
         ],
         "title": "SetHomeCampusRequest",
+        "type": "object"
+      },
+      "SimilarResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SearchCard"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SimilarResponse",
         "type": "object"
       },
       "SitemapAgent": {
@@ -17936,6 +18358,556 @@
         "summary": "Get Campus Details",
         "tags": [
           "Campuses"
+        ]
+      }
+    },
+    "/api/v1/discovery/alerts": {
+      "get": {
+        "operationId": "list_alerts_api_v1_discovery_alerts_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AlertRead"
+                  },
+                  "title": "Response List Alerts Api V1 Discovery Alerts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Alerts",
+        "tags": [
+          "Discovery"
+        ]
+      },
+      "post": {
+        "description": "Save a search and be told when new places match. Works without an account (per device). Needs an email (sent today) or a phone number (WhatsApp, once a provider is connected).",
+        "operationId": "create_alert_api_v1_discovery_alerts_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create An Alert",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/alerts/{alert_id}": {
+      "delete": {
+        "operationId": "delete_alert_api_v1_discovery_alerts__alert_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "title": "Alert Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete An Alert",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/properties/{slug}/similar": {
+      "get": {
+        "description": "Places of the same kind at a similar price, same area first. Public.",
+        "operationId": "similar_places_api_v1_discovery_properties__slug__similar_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 6,
+              "maximum": 12,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Similar Places Nearby",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/search": {
+      "get": {
+        "description": "Plain-language and filtered search with explainable ranking. `q` understands things like 'bedsitter near dekut under 8k with wifi'; explicit filters win over what is inferred. Cursor paged (max 50 per page). Public.",
+        "operationId": "search_places_api_v1_discovery_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 200,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "market",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Market"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "default": "monthly",
+              "pattern": "^(monthly|nightly)$",
+              "title": "Mode",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated place slugs",
+            "in": "query",
+            "name": "place",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated place slugs",
+              "title": "Place"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(hostel|apartment|house|compound|room)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "description": "Comma-separated unit kinds",
+            "in": "query",
+            "name": "unit_kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated unit kinds",
+              "title": "Unit Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_price",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Price"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_price",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Price"
+            }
+          },
+          {
+            "description": "Comma-separated",
+            "in": "query",
+            "name": "amenities",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated",
+              "title": "Amenities"
+            }
+          },
+          {
+            "in": "query",
+            "name": "has_video",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Has Video"
+            }
+          },
+          {
+            "description": "Landmark slug",
+            "in": "query",
+            "name": "near",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Landmark slug",
+              "title": "Near"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_walk",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 120,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Walk"
+            }
+          },
+          {
+            "in": "query",
+            "name": "gender",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(women|men)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "best",
+              "pattern": "^(best|newest|price_asc|price_desc)$",
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Places",
+        "tags": [
+          "Discovery"
         ]
       }
     },

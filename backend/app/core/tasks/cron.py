@@ -73,6 +73,17 @@ async def freshness_and_scores() -> None:
     logger.info("freshness sweep %s; scored %d; distances for %d", result, scored, located)
 
 
+async def send_alerts() -> None:
+    from app.core.database import async_session_factory
+    from app.features.discovery.alerts import send_due_alerts
+
+    async with async_session_factory() as db:
+        result = await send_due_alerts(db)
+        await db.commit()
+    if result["sent"]:
+        logger.info("alerts: %s", result)
+
+
 async def ensure_event_partitions() -> None:
     """Create the next three monthly partitions of `events` so inserts never fall into the default one."""
     from datetime import date
@@ -118,5 +129,6 @@ def start_cron_jobs() -> None:
     # Durable jobs every 5 seconds; daily-ish maintenance (all idempotent, so re-running is harmless).
     loop.create_task(_run_cron_loop(5, run_jobs))
     loop.create_task(_run_cron_loop(6 * 3600, freshness_and_scores))
+    loop.create_task(_run_cron_loop(3600, send_alerts))
     loop.create_task(_run_cron_loop(24 * 3600, ensure_event_partitions))
     logger.info("Cron jobs scheduled: announcements 15m, delivery retries 1m, job runner 5s, freshness+scores 6h, partitions daily")

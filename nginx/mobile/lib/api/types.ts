@@ -1151,6 +1151,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/discovery/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Alerts */
+        get: operations["list_alerts_api_v1_discovery_alerts_get"];
+        put?: never;
+        /**
+         * Create An Alert
+         * @description Save a search and be told when new places match. Works without an account (per device). Needs an email (sent today) or a phone number (WhatsApp, once a provider is connected).
+         */
+        post: operations["create_alert_api_v1_discovery_alerts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/alerts/{alert_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete An Alert */
+        delete: operations["delete_alert_api_v1_discovery_alerts__alert_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/properties/{slug}/similar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Similar Places Nearby
+         * @description Places of the same kind at a similar price, same area first. Public.
+         */
+        get: operations["similar_places_api_v1_discovery_properties__slug__similar_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Places
+         * @description Plain-language and filtered search with explainable ranking. `q` understands things like 'bedsitter near dekut under 8k with wifi'; explicit filters win over what is inferred. Cursor paged (max 50 per page). Public.
+         */
+        get: operations["search_places_api_v1_discovery_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/events": {
         parameters: {
             query?: never;
@@ -4161,6 +4239,52 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /** AlertCreate */
+        AlertCreate: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "email" | "whatsapp";
+            /** Email */
+            email?: string | null;
+            /**
+             * Frequency
+             * @default daily
+             * @enum {string}
+             */
+            frequency: "instant" | "daily" | "weekly";
+            /** Intent */
+            intent: {
+                [key: string]: unknown;
+            };
+            /** Label */
+            label?: string | null;
+            /** Phone */
+            phone?: string | null;
+        };
+        /** AlertRead */
+        AlertRead: {
+            /** Active */
+            active: boolean;
+            /** Channel */
+            channel: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Frequency */
+            frequency: string;
+            /** Id */
+            id: string;
+            /** Intent */
+            intent: {
+                [key: string]: unknown;
+            };
+            /** Label */
+            label?: string | null;
+        };
         /** AnnouncementCreate */
         AnnouncementCreate: {
             /** Campus Id */
@@ -7032,6 +7156,17 @@ export interface components {
             /** Slug */
             slug: string;
         };
+        /** Relaxation */
+        Relaxation: {
+            /** Change */
+            change: {
+                [key: string]: unknown;
+            };
+            /** Count */
+            count: number;
+            /** Label */
+            label: string;
+        };
         /** ReportCreate */
         ReportCreate: {
             /** Details */
@@ -7261,6 +7396,99 @@ export interface components {
             /** Listing Ids */
             listing_ids: string[];
         };
+        /** SearchCard */
+        SearchCard: {
+            /** Cover Blur */
+            cover_blur?: string | null;
+            /** Cover Url */
+            cover_url?: string | null;
+            /**
+             * @default {
+             *       "has_video": false,
+             *       "registry": false,
+             *       "visited": false
+             *     }
+             */
+            flags: components["schemas"]["SearchFlags"];
+            /** Freshness */
+            freshness?: string | null;
+            /** From Price */
+            from_price?: number | null;
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /** Move In Total */
+            move_in_total?: number | null;
+            /** Name */
+            name: string;
+            /** Place Name */
+            place_name?: string | null;
+            /** Price Period */
+            price_period?: string | null;
+            /** Reason */
+            reason?: string | null;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+            /** Unit Kind */
+            unit_kind?: string | null;
+            /** Walk Min */
+            walk_min?: number | null;
+            /** Walk To */
+            walk_to?: string | null;
+        };
+        /** SearchFlags */
+        SearchFlags: {
+            /**
+             * Has Video
+             * @default false
+             */
+            has_video: boolean;
+            /**
+             * Registry
+             * @default false
+             */
+            registry: boolean;
+            /**
+             * Visited
+             * @default false
+             */
+            visited: boolean;
+        };
+        /** SearchResponse */
+        SearchResponse: {
+            /**
+             * Applied
+             * @default {}
+             */
+            applied: {
+                [key: string]: unknown;
+            };
+            /**
+             * Chips
+             * @default []
+             */
+            chips: {
+                [key: string]: string;
+            }[];
+            /** Items */
+            items: components["schemas"]["SearchCard"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+            /**
+             * Relaxations
+             * @default []
+             */
+            relaxations: components["schemas"]["Relaxation"][];
+            /** Total */
+            total: number;
+        };
         /** SessionTokens */
         SessionTokens: {
             /** Access Token */
@@ -7293,6 +7521,11 @@ export interface components {
             campus_id: string;
             /** Campus Name */
             campus_name: string;
+        };
+        /** SimilarResponse */
+        SimilarResponse: {
+            /** Items */
+            items: components["schemas"]["SearchCard"][];
         };
         /** SitemapAgent */
         SitemapAgent: {
@@ -10323,6 +10556,189 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CampusRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_alerts_api_v1_discovery_alerts_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_alert_api_v1_discovery_alerts_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_alert_api_v1_discovery_alerts__alert_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                alert_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    similar_places_api_v1_discovery_properties__slug__similar_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimilarResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_places_api_v1_discovery_search_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                market?: string | null;
+                mode?: string;
+                /** @description Comma-separated place slugs */
+                place?: string | null;
+                kind?: string | null;
+                /** @description Comma-separated unit kinds */
+                unit_kind?: string | null;
+                min_price?: number | null;
+                max_price?: number | null;
+                /** @description Comma-separated */
+                amenities?: string | null;
+                has_video?: boolean | null;
+                /** @description Landmark slug */
+                near?: string | null;
+                max_walk?: number | null;
+                gender?: string | null;
+                sort?: string;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResponse"];
                 };
             };
             /** @description Validation Error */
