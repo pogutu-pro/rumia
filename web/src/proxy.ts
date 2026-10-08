@@ -1,3 +1,4 @@
+import { reportAuthFailure } from '@/lib/auth/report';
 import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
 import { listingPath } from '@/lib/utils/listing-path';
 import { NextResponse } from 'next/server';
@@ -135,6 +136,7 @@ export default async function proxy(request: NextRequest) {
       session = null; // refresh token revoked/expired: treat as signed out
     } else {
       refreshUnavailable = true;
+      reportAuthFailure({ stage: 'refresh', cause: result ? `backend_${result.status}` : 'backend_unreachable', status: result?.status });
     }
   }
   const user = isFresh(session, 0) ? session!.user : null;

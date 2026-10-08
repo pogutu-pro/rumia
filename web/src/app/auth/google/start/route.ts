@@ -1,4 +1,5 @@
-import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
+import { clientIpFrom } from '@/lib/net/client-ip';
+import { reportAuthFailure, errorCodeForStatus } from '@/lib/auth/report';
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
 import { STATE_COOKIE, cookieSecure } from '@/lib/auth/session';
@@ -16,7 +17,8 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const res = await authBackend.start(sp.get('next'), sp.get('app_redirect'), clientIpFrom(request.headers)).catch(() => null);
   if (!res?.ok || !res.data) {
-    return NextResponse.redirect(new URL('/auth/login?error=auth_failed', origin));
+    reportAuthFailure({ stage: 'start', cause: res ? `backend_${res.status}` : 'backend_unreachable', status: res?.status });
+    return NextResponse.redirect(new URL(`/auth/login?error=${errorCodeForStatus(res?.status)}`, origin));
   }
   const response = NextResponse.redirect(res.data.url);
   // Binds the Google round-trip to this browser (CSRF); compared in the callback.

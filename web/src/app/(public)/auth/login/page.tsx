@@ -31,6 +31,12 @@ export default function LoginPage() {
     if (error === 'access_denied') {
       return 'You cancelled the Google sign-in.';
     }
+    if (error === 'rate_limited') {
+      return 'Too many sign-in attempts right now. Please wait a minute and try again.';
+    }
+    if (error === 'server_unavailable') {
+      return 'Rumia could not reach the sign-in service. Please try again in a moment.';
+    }
     return null;
   }
 
