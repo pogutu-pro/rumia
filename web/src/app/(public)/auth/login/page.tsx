@@ -1,5 +1,6 @@
 'use client';
 
+import { InAppBrowserNotice } from '@/components/auth/in-app-browser-notice';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { campusesApi } from '@/lib/api/campuses';
@@ -119,6 +120,8 @@ export default function LoginPage() {
             Welcome back, or create an account to get started.
           </p>
         </div>
+
+<InAppBrowserNotice />
 
 {/* Google Sign-In — prominent */}
         <button
