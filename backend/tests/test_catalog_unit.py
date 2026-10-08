@@ -38,6 +38,9 @@ def test_facts_only_state_what_evidence_supports():
     assert texts[0].startswith("Available, confirmed by the owner")
     assert "Visited by Rumia on 12 Sep 2026" in texts
     assert "In DeKUT register" in texts
+    # A source that already says "register" is not repeated.
+    registry2 = dict(registry, source="DeKUT register")
+    assert "In DeKUT register" in [f.text for f in build_facts([registry2], NOW, "live")]
 
 
 def test_stale_places_say_so_and_never_claim_availability():

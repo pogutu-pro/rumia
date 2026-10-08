@@ -53,7 +53,9 @@ def build_facts(evidence: List[Dict[str, Any]], last_confirmed_at: Optional[date
         facts.append(FactRead(kind="visit", text=f"Visited by Rumia on {visit['observed_at']:%-d %b %Y}", observed_at=visit["observed_at"]))
     registry = by_kind.get("registry_match")
     if registry and registry["status"] == "valid":
-        facts.append(FactRead(kind="registry", text=f"In {registry.get('source') or 'an official'} register", observed_at=registry["observed_at"]))
+        source = (registry.get("source") or "an official").strip()
+        label = source if source.lower().endswith("register") else f"{source} register"
+        facts.append(FactRead(kind="registry", text=f"In {label}", observed_at=registry["observed_at"]))
     return facts
 
 
@@ -156,7 +158,8 @@ async def get_property_read(db: AsyncSession, slug: str) -> PropertyRead:
     cheapest = min(available, key=lambda u: u.price_amount) if available else None
 
     return PropertyRead(
-        id=pid, slug=prop["slug"], name=prop["name"], kind=prop["kind"], status=prop["status"],
+        id=pid, listing_id=str(prop["legacy_listing_id"]) if prop["legacy_listing_id"] else None,
+        slug=prop["slug"], name=prop["name"], kind=prop["kind"], status=prop["status"],
         market_slug=prop["market_slug"], place_slug=prop["place_slug"], place_name=prop["place_name"],
         lat=float(prop["lat"]) if prop["lat"] is not None else None,
         lng=float(prop["lng"]) if prop["lng"] is not None else None,

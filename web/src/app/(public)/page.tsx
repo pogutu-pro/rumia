@@ -1,314 +1,156 @@
-import { listingPath } from '@/lib/utils/listing-path';
-import { Metadata } from 'next';
-import { listingsApi } from '@/lib/api/listings';
-
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import { JsonLd } from '@/components/seo/json-ld';
-import {
-  ExploreDiscovery,
-  type ExploreZone,
-} from '@/components/home/explore-discovery';
-import { ListingSection } from '@/components/home/listing-section';
-import type { ExploreListing } from '@/components/home/explore-listing-card';
-import { PublicAnnouncements } from '@/components/announcements/public-announcements';
-import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
-import { getZonesByCampusSlug } from '@/lib/data/zones';
-import { getActiveAnnouncements } from '@/lib/data/announcements';
-import type { Campus, Listing } from '@/types';
-import { getStartingPrice } from '@/lib/utils/starting-price';
+import { AlertPrompt } from '@/components/rumia/explore/alert-prompt';
+import { ExploreControls } from '@/components/rumia/explore/explore-controls';
+import { ExploreMemory } from '@/components/rumia/explore/explore-memory';
+import { ExploreResults } from '@/components/rumia/explore/results';
+import { ReturningStrip } from '@/components/rumia/explore/returning-strip';
+import { rumiaServer } from '@/lib/api/rumia';
+import { chipsFor, filtersHref, parseFilters, toApiQuery } from '@/lib/rumia/explore-params';
 
-export const revalidate = 300;
+// Search pages are cached briefly at the edge (the API sets Cache-Control); the shell is rendered per request.
+export const dynamic = 'force-dynamic';
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
+const MARKET = 'nyeri';
 
-const FEED_LIMIT = 12;
-
-export async function generateMetadata(): Promise<Metadata> {
-  const campus = await getCampusBySlug('dekut');
-
-  const description =
-    campus.og_description ??
-    'Explore verified hostels, apartments and short stays in Nyeri. Browse by category, save favourites and contact agents directly on WhatsApp.';
-
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const f = parseFilters(await searchParams);
+  const refined = Boolean(f.q || f.place.length || f.kind || f.unit_kind.length || f.max_price || f.near);
   return {
-    title:
-      campus.seo_title ??
-      'Rumia — Explore Hostels, Apartments & Short Stays in Kenya',
-    description,
-    alternates: { canonical: baseUrl },
-    openGraph: {
-      title: campus.og_title ?? `${campus.seo_title} | Rumia`,
-      description,
-      url: baseUrl,
-      siteName: 'Rumia',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: campus.og_title ?? `Find places to stay near your campus | Rumia`,
-      description:
-        'Explore verified hostels, apartments and short stays in Nyeri. Contact agents directly on WhatsApp.',
-    },
+    title: 'Rumia · Real places to rent in Nyeri, confirmed by owners',
+    description: 'Find hostels, bedsitters, apartments and short stays in Nyeri. Every place shows when the owner last confirmed it is available, what it really costs to move in, and one tap to WhatsApp.',
+    alternates: { canonical: SITE },
+    robots: refined ? { index: false, follow: true } : undefined,
   };
 }
 
-function buildPageSchemas(
-  campus: Campus,
-  listings: ExploreListing[],
-): Record<string, unknown> {
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'Organization',
-        name: 'Rumia',
-        url: baseUrl,
-        description: `Verified places to stay near ${campus.name}, ${campus.city}, Kenya.`,
-        areaServed: {
-          '@type': 'City',
-          name: campus.city,
-          addressCountry: 'KE',
-        },
-      },
-      {
-        '@type': 'WebSite',
-        name: 'Rumia',
-        url: baseUrl,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: {
-            '@type': 'EntryPoint',
-            urlTemplate: `${baseUrl}/hostels?q={search_term_string}`,
-          },
-          'query-input': 'required name=search_term_string',
-        },
-      },
-      {
-        '@type': 'ItemList',
-        name: `Accommodation near ${campus.name}`,
-        numberOfItems: Math.min(listings.length, 10),
-        itemListElement: listings.slice(0, 10).map((item, idx) => ({
-          '@type': 'ListItem',
-          position: idx + 1,
-          name: item.title,
-          url: `${baseUrl}${item.slug ? `${listingPath(item)}` : `/listing/${item.id}`}`,
-          image: item.image_url || undefined,
-        })),
-      },
-    ],
-  };
-}
+export default async function ExplorePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const filters = parseFilters(await searchParams);
+  const api = rumiaServer();
 
-function toExploreListing(item: Listing): ExploreListing {
-  const firstImage = item.images?.[0];
-  return {
-    id: String(item.id),
-    title: item.title,
-    price: getStartingPrice(item, item.room_types),
-    location: item.location,
-    slug: item.slug,
-    county: item.county,
-    area: item.area,
-    property_type: item.property_type,
-    distance_category: item.distance_category,
-    room_type: item.room_type,
-    bathroom_type: item.bathroom_type,
-    wifi_included: item.wifi_included,
-    rating:
-      typeof item.rating === 'number' ? item.rating : Number(item.rating) || 0,
-    views: item.views,
-    created_at: item.created_at,
-    image_url: firstImage?.r2_url ?? null,
-    blur_data_url: firstImage?.blur_data_url ?? null,
-    verified: item.verified ?? null,
-  };
-}
-
-function dedupeById(listings: ExploreListing[]): ExploreListing[] {
-  const seen = new Set<string>();
-  const result: ExploreListing[] = [];
-  for (const item of listings) {
-    if (seen.has(item.id)) continue;
-    seen.add(item.id);
-    result.push(item);
-  }
-  return result;
-}
-
-async function fetchFeed(params: {
-  limit?: number;
-  sort?: 'views' | 'newest';
-  property_type?: string;
-  campus_slug?: string;
-}): Promise<ExploreListing[]> {
-  try {
-    const feed = await listingsApi.getFeedServer({
-      limit: params.limit ?? FEED_LIMIT,
-      is_active: true,
-      sort: params.sort,
-      property_type: params.property_type,
-      campus_slug: params.campus_slug,
-    });
-    return feed.items.map(toExploreListing);
-  } catch (err) {
-    console.error('Failed to fetch explore listings from backend:', err);
-    return [];
-  }
-}
-
-export default async function HomePage() {
-  const campus = await getCampusBySlug('dekut');
-  const campusSlug = isFallbackCampus(campus) ? undefined : campus.slug;
-  const city = campus.city ?? 'Nyeri';
-
-  const [
-    campusZones,
-    activeAnnouncements,
-    allFeed,
-    apartFeed,
-    shortStayFeed,
-    popularFeed,
-    newestFeed,
-  ] = await Promise.all([
-    getZonesByCampusSlug(campus.slug),
-    getActiveAnnouncements(isFallbackCampus(campus) ? null : campus.id),
-    fetchFeed({ limit: 24, campus_slug: campusSlug }),
-    fetchFeed({ property_type: 'apartment', campus_slug: campusSlug }),
-    fetchFeed({ property_type: 'short_stay', campus_slug: campusSlug }),
-    fetchFeed({ sort: 'views', campus_slug: campusSlug }),
-    fetchFeed({ sort: 'newest', campus_slug: campusSlug }),
+  const [search, placesRes, landmarksRes] = await Promise.all([
+    api.GET('/api/v1/discovery/search', { params: { query: toApiQuery(filters, { limit: 12 }) } }).catch(() => null),
+    api.GET('/api/v1/markets/{market_slug}/places', { params: { path: { market_slug: MARKET } } }).catch(() => null),
+    api.GET('/api/v1/markets/{market_slug}/landmarks', { params: { path: { market_slug: MARKET } } }).catch(() => null),
   ]);
 
-  const allPool = dedupeById([
-    ...allFeed,
-    ...apartFeed,
-    ...shortStayFeed,
-    ...popularFeed,
-    ...newestFeed,
-  ]);
+  const places = (placesRes?.data ?? []).filter((p) => p.kind === 'neighbourhood');
+  const landmarks = landmarksRes?.data ?? [];
+  const result = search?.data;
+  const failed = !result;
 
-  const exploreItems = dedupeById([...allFeed, ...apartFeed, ...shortStayFeed]);
+  // What the server actually applied (explicit filters plus anything understood from the typed words).
+  const applied = result?.applied as Record<string, unknown> | undefined;
+  const effective = applied
+    ? parseFilters({
+        q: String(applied.q ?? ''),
+        mode: String(applied.mode ?? 'monthly'),
+        place: (applied.places as string[] | undefined)?.join(','),
+        kind: applied.kind as string | undefined,
+        unit_kind: (applied.unit_kind as string[] | undefined)?.join(','),
+        min_price: applied.min_price !== undefined ? String(applied.min_price) : undefined,
+        max_price: applied.max_price !== undefined ? String(applied.max_price) : undefined,
+        amenities: (applied.amenities as string[] | undefined)?.join(','),
+        near: applied.near as string | undefined,
+        has_video: applied.has_video ? 'true' : undefined,
+        gender: applied.gender as string | undefined,
+        sort: filters.sort,
+      })
+    : filters;
 
-  const excludeIds = (source: ExploreListing[], exclude: Set<string>) =>
-    source.filter((item) => !exclude.has(item.id));
+  const chips = chipsFor(effective, places, landmarks);
+  const refined = chips.length > 0 || Boolean(effective.q);
+  const label = [...chips.map((c) => c.label), effective.q].filter(Boolean).join(' · ') || 'places in Nyeri';
+  const here = filtersHref(filters);
 
-  const popularUnique = dedupeById(popularFeed).slice(0, FEED_LIMIT);
-  const popularIds = new Set(popularUnique.map((i) => i.id));
-
-  const newestUnique = dedupeById(excludeIds(newestFeed, popularIds)).slice(
-    0,
-    FEED_LIMIT,
-  );
-  const newestIds = new Set(newestUnique.map((i) => i.id));
-
-  const affordablePool = allPool
-    .filter(
-      (item) =>
-        (item.property_type ?? 'hostel') !== 'short_stay' && item.price > 0,
-    )
-    .sort((a, b) => a.price - b.price);
-  const affordableUnique = dedupeById(
-    excludeIds(affordablePool, new Set([...popularIds, ...newestIds])),
-  ).slice(0, FEED_LIMIT);
-
-  // Consolidate real accommodation zones from campus_zones and listings feed
-  const areaCounts = new Map<string, number>();
-  for (const item of exploreItems) {
-    const areaName = (item.area || '').trim();
-    if (areaName) {
-      areaCounts.set(areaName, (areaCounts.get(areaName) ?? 0) + 1);
-    }
-  }
-
-  const zoneMap = new Map<string, ExploreZone>();
-  for (const z of campusZones) {
-    if (z.name) {
-      const trimmed = z.name.trim();
-      zoneMap.set(trimmed.toLowerCase(), {
-        name: trimmed,
-        slug: z.slug,
-        count: areaCounts.get(trimmed) ?? 0,
-      });
-    }
-  }
-
-  for (const [areaName, count] of areaCounts.entries()) {
-    const key = areaName.toLowerCase();
-    if (!zoneMap.has(key)) {
-      zoneMap.set(key, {
-        name: areaName,
-        count,
-      });
-    }
-  }
-
-  const zones: ExploreZone[] = Array.from(zoneMap.values());
+  // Starting points come from what is actually in the market, not from a fixed list.
+  const starts: Array<{ href: string; label: string }> = [];
+  if (landmarks[0]) starts.push({ href: filtersHref({ near: landmarks[0].slug }), label: `Near ${landmarks[0].features && (landmarks[0].features as Record<string, string>).short_name ? (landmarks[0].features as Record<string, string>).short_name : landmarks[0].name}` });
+  for (const p of places.filter((p) => p.listing_count > 0).slice(0, 2)) starts.push({ href: filtersHref({ place: [p.slug] }), label: p.name });
+  starts.push({ href: filtersHref({ kind: 'apartment' }), label: 'Apartments' });
+  starts.push({ href: filtersHref({ mode: 'nightly' }), label: 'Stay a few nights' });
 
   return (
-    <main id="main-content" className="flex flex-col min-h-screen bg-white">
-      <h1 className="sr-only">
-        Student Accommodation, Hostels, Bedsitters & Apartments near{' '}
-        {campus.name}
-      </h1>
-      <JsonLd data={buildPageSchemas(campus, exploreItems)} />
+    <div className="bg-rum-surface">
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Rumia', url: SITE, potentialAction: { '@type': 'SearchAction', target: `${SITE}/?q={search_term_string}`, 'query-input': 'required name=search_term_string' } }} />
+      <ExploreMemory href={here} label={label} active={refined && !failed && (result?.total ?? 0) > 0} />
 
-      {activeAnnouncements.length > 0 && (
-        <section className="mx-auto w-full max-w-6xl px-4 pt-4 lg:px-8">
-          <PublicAnnouncements announcements={activeAnnouncements} />
-        </section>
-      )}
+      <div className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-5 lg:px-8">
+        <header className="space-y-1">
+          <h1 className="text-2xl font-semibold leading-tight text-rum-text sm:text-3xl">Places to rent in Nyeri, confirmed by owners.</h1>
+          <p className="text-base text-rum-muted">See what it really costs to move in, and message the owner on WhatsApp.</p>
+        </header>
 
-      <ExploreDiscovery
-        city={city}
-        campus={campus}
-        zones={zones}
-        items={exploreItems}
-      />
+        <ExploreControls filters={effective} places={places} landmarks={landmarks} total={result?.total ?? 0} />
 
-      <div className="pb-10 pt-2">
-        <ListingSection
-          title={
-            <>
-              <span className="md:hidden">
-                Popular near{' '}
-                {campus.short_name ??
-                  (campus.slug === 'dekut' ? 'DeKUT' : campus.name)}
-              </span>
-              <span className="hidden md:inline">
-                Popular near {campus.name}
-              </span>
-            </>
-          }
-          subtitle="Most viewed this week"
-          seeAllHref="/hostels"
-          seeAllLabel="See all"
-          items={popularUnique}
-        />
-        <ListingSection
-          title="New on Rumia"
-          subtitle="Fresh listings"
-          seeAllHref="/hostels"
-          seeAllLabel="See all"
-          items={newestUnique}
-        />
-        <ListingSection
-          title={
-            <>
-              <span className="md:hidden">
-                Affordable near{' '}
-                {campus.short_name ??
-                  (campus.slug === 'dekut' ? 'DeKUT' : campus.name)}
-              </span>
-              <span className="hidden md:inline">
-                Affordable near {campus.name}
-              </span>
-            </>
-          }
-          subtitle="Budget-friendly hostels"
-          seeAllHref="/hostels?maxPrice=6500"
-          seeAllLabel="See all"
-          items={affordableUnique}
-        />
+        {!refined && (
+          <nav aria-label="Ways to start" className="rum-scroll-x -mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:px-0">
+            {starts.map((s) => (
+              <Link key={s.href} href={s.href} className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-rum-line bg-rum-raised px-4 text-sm font-medium text-rum-text">
+                {s.label}
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {!refined && <ReturningStrip currentHref={here} />}
+
+        {failed ? (
+          <div role="alert" className="rounded-rum-media border border-rum-line bg-rum-raised p-6 text-center">
+            <p className="text-base font-semibold">We could not load places right now.</p>
+            <p className="mt-1 text-sm text-rum-muted">Check your connection, then try again.</p>
+            <Link href={here} className="mt-4 inline-flex min-h-11 items-center rounded-rum-control bg-rum-accent px-5 text-base font-semibold text-rum-on-accent">
+              Try again
+            </Link>
+          </div>
+        ) : result.total === 0 ? (
+          <div className="space-y-4">
+            <div className="rounded-rum-media border border-rum-line bg-rum-raised p-6">
+              <p className="text-base font-semibold">No places match all of that.</p>
+              {result.relaxations.length > 0 ? (
+                <ul className="mt-3 space-y-2">
+                  {result.relaxations.map((r) => (
+                    <li key={r.label}>
+                      <Link
+                        href={filtersHref({
+                          ...effective,
+                          ...(r.change.max_price ? { max_price: String(r.change.max_price) } : {}),
+                          ...('places' in r.change ? { place: r.change.places as string[] } : {}),
+                          ...('unit_kind' in r.change ? { unit_kind: r.change.unit_kind as string[] } : {}),
+                          ...('amenities' in r.change ? { amenities: r.change.amenities as string[] } : {}),
+                        })}
+                        className="inline-flex min-h-11 items-center text-base font-semibold text-rum-accent underline underline-offset-2"
+                      >
+                        {r.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-sm text-rum-muted">Try removing a filter, or ask us to tell you when one is listed.</p>
+              )}
+            </div>
+            <AlertPrompt filters={effective} label={label} />
+          </div>
+        ) : (
+          <>
+            {result.total < 5 && result.relaxations.length > 0 && (
+              <div className="rounded-rum-media bg-rum-sunken p-4 text-sm">
+                <p className="font-semibold">Close to your search</p>
+                <ul className="mt-1">
+                  {result.relaxations.map((r) => (
+                    <li key={r.label} className="py-0.5">{r.label}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <ExploreResults filters={effective} initial={result.items} total={result.total} nextCursor={result.next_cursor ?? null} />
+            {refined && <AlertPrompt filters={effective} label={label} />}
+          </>
+        )}
       </div>
-    </main>
+    </div>
   );
 }

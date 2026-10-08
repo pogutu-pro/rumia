@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Response, status
@@ -37,6 +38,7 @@ async def search_places(
     amenities: Optional[str] = Query(None, description="Comma-separated"),
     has_video: Optional[bool] = None, near: Optional[str] = Query(None, description="Landmark slug"),
     max_walk: Optional[int] = Query(None, ge=1, le=120), gender: Optional[str] = Query(None, pattern="^(women|men)$"),
+    published_after: Optional[datetime] = Query(None, description="Only places published after this time (e.g. 'new since your last visit')"),
     sort: str = Query("best", pattern="^(best|newest|price_asc|price_desc)$"),
     limit: int = Query(20, ge=1, le=service.MAX_LIMIT), cursor: Optional[str] = None,
     db: AsyncSession = Depends(get_db_session, scope="function"),
@@ -45,7 +47,7 @@ async def search_places(
     params = service.SearchParams(
         market=market, q=q.strip(), mode=mode, places=_csv(place), kind=kind, unit_kind=_csv(unit_kind),
         min_price=min_price, max_price=max_price, amenities=_csv(amenities), has_video=has_video, near=near,
-        max_walk=max_walk, gender=gender, sort=sort, limit=limit, offset=service.decode_cursor(cursor),
+        max_walk=max_walk, gender=gender, new_since=published_after, sort=sort, limit=limit, offset=service.decode_cursor(cursor),
     )
     return await service.search(db, params)
 

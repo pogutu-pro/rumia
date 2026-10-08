@@ -58,6 +58,7 @@ class OrgBrief(BaseModel):
 
 class PropertyRead(BaseModel):
     id: str
+    listing_id: Optional[str] = None
     slug: str
     name: str
     kind: str

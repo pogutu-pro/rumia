@@ -10894,6 +10894,17 @@
             ],
             "title": "Lat"
           },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
           "lng": {
             "anyOf": [
               {
@@ -12231,6 +12242,17 @@
               }
             ],
             "title": "Lat"
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
           },
           "lng": {
             "anyOf": [
@@ -19113,6 +19135,25 @@
                 }
               ],
               "title": "Gender"
+            }
+          },
+          {
+            "description": "Only places published after this time (e.g. 'new since your last visit')",
+            "in": "query",
+            "name": "published_after",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only places published after this time (e.g. 'new since your last visit')",
+              "title": "Published After"
             }
           },
           {

@@ -7377,6 +7377,8 @@ export interface components {
             last_confirmed_at?: string | null;
             /** Lat */
             lat?: number | null;
+            /** Listing Id */
+            listing_id?: string | null;
             /** Lng */
             lng?: number | null;
             /**
@@ -7764,6 +7766,8 @@ export interface components {
             kind: string;
             /** Lat */
             lat?: number | null;
+            /** Listing Id */
+            listing_id?: string | null;
             /** Lng */
             lng?: number | null;
             /** Move In Total */
@@ -11143,6 +11147,8 @@ export interface operations {
                 near?: string | null;
                 max_walk?: number | null;
                 gender?: string | null;
+                /** @description Only places published after this time (e.g. 'new since your last visit') */
+                published_after?: string | null;
                 sort?: string;
                 limit?: number;
                 cursor?: string | null;

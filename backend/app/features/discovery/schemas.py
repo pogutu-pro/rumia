@@ -12,6 +12,7 @@ class SearchFlags(BaseModel):
 
 class SearchCard(BaseModel):
     id: str
+    listing_id: Optional[str] = None  # legacy listing id; saves and contacts still key on it
     slug: str
     name: str
     kind: str
