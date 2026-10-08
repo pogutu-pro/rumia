@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { getStartingPrice } from '@/lib/utils/starting-price';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
@@ -424,7 +425,7 @@ export default function HostelsSearch({
                 const imageUrl = sorted[0]?.r2_url;
                 const blurDataUrl = sorted[0]?.blur_data_url;
                 const href = item.slug
-                  ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
+                  ? `${listingPath(item)}`
                   : `/listing/${item.id}`;
 
                 const distanceBadge = getDistanceBadgeText(

@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getApiUrl } from '@/lib/api/config';
@@ -83,7 +84,7 @@ export default async function proxy(request: NextRequest) {
       if (res.ok) {
         const row = await res.json();
         if (row?.slug) {
-          const dest = `/hostels/${row.county || 'nyeri'}/${row.area || 'dekut'}/${row.slug}`;
+          const dest = `${listingPath(row)}`;
           return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
         }
       }

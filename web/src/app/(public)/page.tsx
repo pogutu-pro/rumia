@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { Metadata } from 'next';
 import { listingsApi } from '@/lib/api/listings';
 
@@ -89,7 +90,7 @@ function buildPageSchemas(
           '@type': 'ListItem',
           position: idx + 1,
           name: item.title,
-          url: `${baseUrl}${item.slug ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}` : `/listing/${item.id}`}`,
+          url: `${baseUrl}${item.slug ? `${listingPath(item)}` : `/listing/${item.id}`}`,
           image: item.image_url || undefined,
         })),
       },

@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useCallback } from 'react';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Link from 'next/link';
@@ -133,7 +134,7 @@ export function CampusCompareGrid({ listings }: { listings: CampusListing[] }) {
           const imageUrl = sortedImages[0]?.r2_url;
           const blurDataUrl = sortedImages[0]?.blur_data_url;
           const href = item.slug
-            ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+            ? `${listingPath(item)}`
             : `/listing/${item.id}`;
           const isSelected = isCompareSelected(item.id);
 

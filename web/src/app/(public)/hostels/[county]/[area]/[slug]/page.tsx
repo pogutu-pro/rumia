@@ -1,7 +1,8 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { cache } from 'react';
 import { getStartingPrice, pickBestRoomType } from '@/lib/utils/starting-price';
 import { listingsApi } from '@/lib/api/listings';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -52,6 +53,14 @@ export async function generateStaticParams() {
     }));
   } catch (error) {
     return [];
+  }
+}
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
   }
 }
 
@@ -106,6 +115,8 @@ export async function generateMetadata({
   const { county, area, slug } = await params;
   const listing = await getListing(slug);
   if (!listing) return { title: 'Hostel Not Found' };
+  void county;
+  void area;
 
   const roomType =
     listing.listing_room_types?.[0]?.room_type ??
@@ -118,7 +129,7 @@ export async function generateMetadata({
       155,
     );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
-  const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
+  const canonicalUrl = `${metadataBase}${listingPath({ ...listing, slug: listing.slug || slug })}`;
   const firstImage = listing.listing_images?.[0]?.r2_url;
 
   return {
@@ -147,6 +158,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const listing = await getListing(slug);
   if (!listing) notFound();
 
+  // Old links used raw area names ("Near Gate A"). Send them to the clean, lowercase URL permanently.
+  const canonicalPath = listingPath({ ...listing, slug: listing.slug || slug });
+  const requestedPath = `/hostels/${safeDecode(county)}/${safeDecode(area)}/${safeDecode(slug)}`;
+  if (requestedPath !== canonicalPath) permanentRedirect(canonicalPath);
+
   const embeddedCampus = Array.isArray(listing.campuses)
     ? listing.campuses[0]
     : listing.campuses;
@@ -160,7 +176,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
     (a: any, b: any) => a.display_order - b.display_order,
   );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
-  const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
+  const canonicalUrl = `${metadataBase}${canonicalPath}`;
   const agentSlug = listing.agents?.slug;
   const nearbyListings = await getNearbyListings(listing);
 
@@ -648,7 +664,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 const imageUrl = sortedImages[0]?.r2_url;
                 const blurDataUrl = sortedImages[0]?.blur_data_url;
                 const href = item.slug
-                  ? `/hostels/${item.county || county}/${item.area || area}/${item.slug}`
+                  ? listingPath({ county: item.county || county, area: item.area || area, slug: item.slug })
                   : `/listing/${item.id}`;
 
                 return (

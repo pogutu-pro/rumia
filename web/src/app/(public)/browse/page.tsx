@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, MapPin, DollarSign, ArrowRight, SlidersHorizontal, Eye } from 'lucide-react';
@@ -159,7 +160,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
                   return (
                     <Link
                       key={item.id}
-                      href={item.slug ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}` : `/listing/${item.id}`}
+                      href={item.slug ? `${listingPath(item)}` : `/listing/${item.id}`}
                       className="group flex flex-col bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full"
                     >
                       <div className="relative aspect-4/3 overflow-hidden bg-slate-100">

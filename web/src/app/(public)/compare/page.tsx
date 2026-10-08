@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import React, { useEffect, useRef, useState, useCallback, Suspense } from 'react';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Link from 'next/link';
@@ -394,7 +395,7 @@ function DesktopCompareTable({
           <AnimatePresence mode="popLayout">
             {hostels.map((h) => {
               const href = h.slug
-                ? `/hostels/${h.county ?? 'nyeri'}/${h.area ?? 'dekut'}/${h.slug}`
+                ? `${listingPath(h)}`
                 : `/listing/${h.id}`;
               const isLowestPrice =
                 (h.price_single ?? h.price_sharing ?? h.price) === lowestPrice &&
@@ -1108,7 +1109,7 @@ function MobileCompareTable({
             {/* Hostel header cells */}
             {hostels.map((h) => {
               const href = h.slug
-                ? `/hostels/${h.county ?? 'nyeri'}/${h.area ?? 'dekut'}/${h.slug}`
+                ? `${listingPath(h)}`
                 : `/listing/${h.id}`;
               return (
                 <div

@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, BadgeCheck } from 'lucide-react';
@@ -46,7 +47,7 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
     type === 'short_stay'
       ? `/bnb/${item.id}`
       : item.slug
-        ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+        ? `${listingPath(item)}`
         : `/listing/${item.id}`;
   const distance = item.distance_category
     ? getDistanceBadgeText(item.distance_category)

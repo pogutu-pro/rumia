@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import React, { useCallback, useState } from 'react';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Link from 'next/link';
@@ -46,7 +47,7 @@ export function FeaturedHostelCard({
   const blurDataUrl = sortedImages[0]?.blur_data_url;
 
   const href = item.slug
-    ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+    ? `${listingPath(item)}`
     : `/listing/${item.id}`;
 
   const handleCompare = useCallback(

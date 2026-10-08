@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import Link from 'next/link';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Image from 'next/image';
@@ -32,7 +33,7 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
   const city = campus.city ?? 'Nyeri';
 
   const href = item.slug
-    ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+    ? `${listingPath(item)}`
     : `/listing/${item.id}`;
 
   const handleCompare = useCallback(
