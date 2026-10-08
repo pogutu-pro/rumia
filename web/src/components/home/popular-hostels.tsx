@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Image from 'next/image';
 import { MapPin, TrendingUp, ArrowRight, Eye, GitCompareArrows, Check } from 'lucide-react';
 import { useCompareStore, type CompareSelection } from '@/stores/compare-store';
@@ -46,7 +47,7 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
         id: item.id,
         title: item.title,
         price: item.price,
-        imageUrl: item.r2_url || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600',
+        imageUrl: item.r2_url || '',
         slug: item.slug,
         county: item.county,
         area: item.area,
@@ -63,11 +64,9 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
       className="group flex flex-col bg-white rounded-2xl overflow-hidden md:hover:shadow-lg md:transition-shadow md:duration-200 h-full border border-slate-100"
     >
       <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
+        {item.r2_url ? (
         <Image
-          src={
-            item.r2_url ||
-            'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600'
-          }
+          src={item.r2_url}
           alt={`${item.title} — popular student hostel near ${shortName} ${city}`}
           fill
           className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
@@ -76,6 +75,9 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
           blurDataURL={item.blur_data_url || undefined}
           priority={index < 3}
         />
+        ) : (
+          <NoPhotoTile />
+        )}
 
         <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-slate-900/85 flex items-center justify-center text-white text-xs font-black border border-white/20">
           {index + 1}

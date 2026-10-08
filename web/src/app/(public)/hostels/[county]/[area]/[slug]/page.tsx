@@ -547,10 +547,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     <span>Water Included</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Security {listing.security_type || 'Available'}</span>
-                </div>
+                {listing.security_type && (
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>Security {listing.security_type}</span>
+                  </div>
+                )}
                 {listing.wifi_included && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" />

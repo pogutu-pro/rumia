@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback, Suspense } from 'react';
+import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -38,8 +39,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { listingsClientApi } from '@/lib/api/listings-client';
 import { listingToCompareSelection, type CompareListingSource } from '@/lib/compare/to-selection';
 
-const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
 
 function cleanPhone(phone: string): string {
   const clean = phone.replace(/[^\d+]/g, '');
@@ -413,13 +412,17 @@ function DesktopCompareTable({
                 >
                   <Link href={href} className="block">
                     <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                      <Image
-                        src={h.imageUrl || FALLBACK_IMAGE}
-                        alt={h.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="300px"
-                      />
+                      {h.imageUrl ? (
+                        <Image
+                          src={h.imageUrl}
+                          alt={h.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="300px"
+                        />
+                      ) : (
+                        <NoPhotoTile />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                   </Link>
@@ -1125,13 +1128,17 @@ function MobileCompareTable({
 
                   {/* Thumbnail */}
                   <div className="relative w-14 h-14 mt-2 rounded-xl overflow-hidden bg-slate-100 ring-2 ring-white shadow-sm">
-                    <Image
-                      src={h.imageUrl || FALLBACK_IMAGE}
-                      alt={h.title}
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />
+                    {h.imageUrl ? (
+                      <Image
+                        src={h.imageUrl}
+                        alt={h.title}
+                        fill
+                        className="object-cover"
+                        sizes="56px"
+                      />
+                    ) : (
+                      <NoPhotoTile className="[&_span]:hidden" />
+                    )}
                   </div>
 
                   {/* Name */}
