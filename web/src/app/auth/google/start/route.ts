@@ -1,3 +1,4 @@
+import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
 import { STATE_COOKIE, cookieSecure } from '@/lib/auth/session';
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
   );
   if (bounce) return NextResponse.redirect(bounce, 307);
   const sp = request.nextUrl.searchParams;
-  const res = await authBackend.start(sp.get('next'), sp.get('app_redirect')).catch(() => null);
+  const res = await authBackend.start(sp.get('next'), sp.get('app_redirect'), clientIpFrom(request.headers)).catch(() => null);
   if (!res?.ok || !res.data) {
     return NextResponse.redirect(new URL('/auth/login?error=auth_failed', origin));
   }

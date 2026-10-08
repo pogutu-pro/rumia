@@ -57,13 +57,13 @@ async def test_rate_limit_triggers_429_envelope(client: AsyncClient):
     for _ in range(2):
         response = await client.get(
             "/api/v1/test-ratelimit/ping",
-            headers={"X-Forwarded-For": "198.51.100.10"},
+            headers={"X-Real-IP": "198.51.100.10"},
         )
         assert response.status_code == 200
 
     response = await client.get(
         "/api/v1/test-ratelimit/ping",
-        headers={"X-Forwarded-For": "198.51.100.10"},
+        headers={"X-Real-IP": "198.51.100.10"},
     )
     assert response.status_code == 429, f"expected 429, got {response.status_code}"
     body = response.json()
@@ -72,23 +72,35 @@ async def test_rate_limit_triggers_429_envelope(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_rate_limit_keyed_by_forwarded_ip(client: AsyncClient):
+async def test_rate_limit_keyed_by_real_ip(client: AsyncClient):
     # Bursting from one IP must not exhaust another IP's quota
     for _ in range(5):
         await client.get(
             "/api/v1/test-ratelimit/ping",
-            headers={"X-Forwarded-For": "203.0.113.7"},
+            headers={"X-Real-IP": "203.0.113.7"},
         )
 
     for _ in range(2):
         response = await client.get(
             "/api/v1/test-ratelimit/ping",
-            headers={"X-Forwarded-For": "203.0.113.8"},
+            headers={"X-Real-IP": "203.0.113.8"},
         )
         assert response.status_code == 200
 
     response = await client.get(
         "/api/v1/test-ratelimit/ping",
-        headers={"X-Forwarded-For": "203.0.113.8"},
+        headers={"X-Real-IP": "203.0.113.8"},
     )
     assert response.status_code == 429
+
+@pytest.mark.asyncio
+async def test_x_forwarded_for_is_not_trusted(client: AsyncClient):
+    # A client cannot dodge the limit by rotating X-Forwarded-For: all of these share one bucket.
+    statuses = []
+    for i in range(3):
+        response = await client.get(
+            "/api/v1/test-ratelimit/ping",
+            headers={"X-Forwarded-For": f"192.0.2.{i + 1}"},
+        )
+        statuses.append(response.status_code)
+    assert statuses == [200, 200, 429]

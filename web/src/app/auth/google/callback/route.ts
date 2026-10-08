@@ -1,3 +1,4 @@
+import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
 import { STATE_COOKIE, sessionCookies } from '@/lib/auth/session';
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
   let result;
   try {
-    result = await authBackend.callback(code, state);
+    result = await authBackend.callback(code, state, clientIpFrom(request.headers));
   } catch (err) {
     console.error('[auth/google/callback] backend unreachable', err);
     return fail(origin, 'auth_failed');

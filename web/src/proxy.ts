@@ -1,3 +1,4 @@
+import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
 import { listingPath } from '@/lib/utils/listing-path';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -124,7 +125,7 @@ export default async function proxy(request: NextRequest) {
   let refreshUnavailable = false;
   const rt = request.cookies.get(RT_COOKIE)?.value;
   if (!isFresh(session) && rt) {
-    const result = await authBackend.refresh(rt).catch(() => null);
+    const result = await authBackend.refresh(rt, clientIpFrom(request.headers)).catch(() => null);
     if (result?.ok && result.data) {
       refreshed = sessionCookies(result.data);
       session = sessionFromToken(result.data.access_token);
