@@ -248,7 +248,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
           <aside className="rounded-rum-media border border-rum-line bg-rum-raised p-4 text-sm text-rum-text">
             <p>
-              <strong>Never pay a deposit before you have seen the room.</strong> Be careful if anyone rushes you to pay.{' '}
+              <strong>Don&apos;t pay any deposit before you&apos;ve seen the room.</strong> Report anyone who asks.{' '}
               <Link href="/help" className="font-semibold underline underline-offset-2">How to stay safe</Link>
             </p>
           </aside>
