@@ -62,7 +62,7 @@ export const Footer = React.memo(function Footer({
             <p className="text-sm text-slate-500 font-medium text-center md:text-left">
               {isBnbPage
                 ? 'Comfortable short stays and direct host connections.'
-                : 'Verified campus accommodations and simplified lead generation.'}
+                : 'Real places to rent, confirmed by owners.'}
             </p>
           </div>
 
@@ -142,7 +142,7 @@ export const Footer = React.memo(function Footer({
               Terms of Service
             </Link>
           </div>
-          <p>Built with ❤️ for university students in Kenya.</p>
+          <p>Built in Kenya, for people looking for a place to stay.</p>
         </div>
       </div>
     </footer>

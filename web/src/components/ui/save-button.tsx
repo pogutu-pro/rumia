@@ -48,7 +48,7 @@ export function SaveButton({
     } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      router.push('/auth/login');
+      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
 
