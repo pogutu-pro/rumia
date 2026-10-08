@@ -1,25 +1,19 @@
 import { ReactNode } from 'react';
-import { PublicHeader } from '@/components/layouts/public-header';
-import { Footer } from '@/components/layouts/public-footer';
-import { getCampusBySlug } from '@/lib/data/campuses';
-import { CampusProvider } from '@/lib/campus-context';
+import { SiteFooter } from '@/components/rumia/site-footer';
+import { SiteHeader } from '@/components/rumia/site-header';
 import { PublicTelemetry } from '@/components/telemetry/public-telemetry';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export default async function PublicLayout({ children }: LayoutProps) {
-  const campus = await getCampusBySlug('dekut');
-
+export default function PublicLayout({ children }: LayoutProps) {
   return (
-    <CampusProvider campus={campus}>
-      <div className="flex min-h-screen flex-col">
-        <PublicHeader />
-        <main className="flex-1">{children}</main>
-        <PublicTelemetry />
-        <Footer whatsappNumber={campus.whatsapp_number} />
-      </div>
-    </CampusProvider>
+    <div className="flex min-h-screen flex-col bg-rum-surface">
+      <SiteHeader />
+      <main className="flex-1">{children}</main>
+      <PublicTelemetry />
+      <SiteFooter />
+    </div>
   );
 }
