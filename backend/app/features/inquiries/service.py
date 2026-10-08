@@ -163,7 +163,42 @@ class InquiryService:
     @staticmethod
     async def outcome(db: AsyncSession, ref_code: str, device_id: Optional[str], outcome: str) -> None:
         inquiry_id = await InquiryService._owned(db, ref_code, device_id)
+        await InquiryService._set_outcome(db, inquiry_id, outcome, "seeker")
+
+    @staticmethod
+    async def lister_outcome(db: AsyncSession, org_id: str, ref_code: str, outcome: str) -> None:
+        """The lister confirms the result for a contact on one of their organisation's places."""
+        row = (
+            await db.execute(
+                text(
+                    """
+                    SELECT i.id FROM inquiries i JOIN properties p ON p.legacy_listing_id = i.listing_id
+                    WHERE i.ref_code = :r AND p.org_id = CAST(:o AS uuid)
+                    """
+                ),
+                {"r": ref_code.upper(), "o": org_id},
+            )
+        ).first()
+        if not row:
+            raise NotFoundException("Contact not found.")
+        await InquiryService._set_outcome(db, row[0], outcome, "lister")
+
+    @staticmethod
+    async def _set_outcome(db: AsyncSession, inquiry_id, outcome: str, source: str) -> None:
         await db.execute(
-            text("UPDATE inquiries SET outcome = :o, outcome_source = 'seeker', outcome_at = now() WHERE id = :i"),
-            {"o": outcome, "i": inquiry_id},
+            text("UPDATE inquiries SET outcome = :o, outcome_source = :s, outcome_at = now() WHERE id = :i"),
+            {"o": outcome, "s": source, "i": inquiry_id},
         )
+        # Money follows a confirmed move-in, never a click. Disabled until a fee is configured.
+        if outcome == "moved_in" and settings.LEDGER_MOVE_IN_FEE_KES > 0:
+            await db.execute(
+                text(
+                    """
+                    INSERT INTO ledger_entries (kind, org_id, amount, inquiry_id, property_id, note)
+                    SELECT 'move_in_fee', p.org_id, :fee, i.id, p.id, 'move-in confirmed by ' || :s
+                    FROM inquiries i JOIN properties p ON p.legacy_listing_id = i.listing_id WHERE i.id = :i
+                    ON CONFLICT (inquiry_id) WHERE kind = 'move_in_fee' DO NOTHING
+                    """
+                ),
+                {"fee": settings.LEDGER_MOVE_IN_FEE_KES, "i": inquiry_id, "s": source},
+            )

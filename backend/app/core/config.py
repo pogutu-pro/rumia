@@ -93,6 +93,9 @@ class Settings(BaseSettings):
     # per-click commission (deduplicated per verified visitor). Turn off once outcome-based money replaces it.
     INQUIRY_ACCRUES_LEGACY_COMMISSION: bool = True
 
+    # Fee recorded when a move-in is confirmed (KES). 0 = nothing is recorded; set once the revenue model is decided.
+    LEDGER_MOVE_IN_FEE_KES: float = 0
+
     # Scheduled jobs (delivery retries, announcement cleanup). In production the API sets this to
     # false and a single `worker` container runs them, so they never run once per web worker.
     RUN_SCHEDULER: bool = True

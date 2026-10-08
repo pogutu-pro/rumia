@@ -3,6 +3,8 @@ from app.features.admin import admin_router
 from app.features.admin.console_router import router as admin_console_router
 from app.features.manager import manager_router
 from app.features.official_hostels import official_hostels_router
+from app.features.ops import ops_router
+from app.features.workspace import workspace_router
 from app.features.public import public_router
 from app.features.agents import agents_router
 from app.features.bnb import bnb_router
@@ -64,6 +66,8 @@ api_router.include_router(manager_router)
 api_router.include_router(admin_console_router)
 api_router.include_router(geo_router)
 api_router.include_router(catalog_router)
+api_router.include_router(ops_router)
+api_router.include_router(workspace_router)
 api_router.include_router(discovery_router)
 api_router.include_router(media_router)
 api_router.include_router(events_router)

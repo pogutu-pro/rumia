@@ -102,3 +102,31 @@ async def test_markets_are_seeded_and_public_endpoints_list_places_with_counts(d
     assert dekut.features.get("school_email_domain") == "dkut.ac.ke"
     with pytest.raises(NotFoundException):
         await list_places("atlantis", Response(), db)
+
+
+@pytest.mark.asyncio
+async def test_money_is_recorded_only_for_a_confirmed_move_in_and_only_once(db, monkeypatch):
+    from app.core.config import settings
+    from app.features.catalog.service import project_listing
+
+    campus = await make_campus(db)
+    agent = await make_agent(db, campus, phone="0712345678")
+    listing = await make_listing(db, agent, campus, title="Fee Place", price=8000)
+    await project_listing(db, listing)
+    device = str(uuid.uuid4())
+    result, _, _ = await InquiryService.create(db, InquiryCreate(listing_id=listing), device, None, "h")
+    org_id = str((await db.execute(text("SELECT org_id FROM properties WHERE legacy_listing_id = CAST(:l AS uuid)"), {"l": listing})).scalar_one())
+
+    monkeypatch.setattr(settings, "LEDGER_MOVE_IN_FEE_KES", 0)
+    await InquiryService.outcome(db, result.ref_code, device, "moved_in")
+    assert (await db.execute(text("SELECT count(*) FROM ledger_entries WHERE kind = 'move_in_fee'"))).scalar_one() == 0  # no fee configured
+
+    monkeypatch.setattr(settings, "LEDGER_MOVE_IN_FEE_KES", 1000)
+    await InquiryService.lister_outcome(db, org_id, result.ref_code, "moved_in")
+    await InquiryService.lister_outcome(db, org_id, result.ref_code, "moved_in")  # reported twice
+    entries = (await db.execute(text("SELECT amount, status, note FROM ledger_entries WHERE kind = 'move_in_fee'"))).all()
+    assert len(entries) == 1 and float(entries[0][0]) == 1000 and entries[0][1] == "pending" and "lister" in entries[0][2]
+
+    # A click on its own never creates money.
+    await InquiryService.create(db, InquiryCreate(listing_id=listing), str(uuid.uuid4()), None, "h2")
+    assert (await db.execute(text("SELECT count(*) FROM ledger_entries WHERE kind = 'move_in_fee'"))).scalar_one() == 1
