@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 from sqlalchemy import func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.auth_provider import get_auth_provider
 from app.core.errors import BadRequestException, ConflictException, ForbiddenException, NotFoundException
 from app.core.security import AuthenticatedUser
@@ -220,11 +221,11 @@ class AdminConsoleService:
 
     @staticmethod
     async def _agent_campus_id(db: AsyncSession, user_id: str) -> Optional[str]:
-        """The user's own campus (so promoted students keep it), else DeKUT. agents.campus_id is NOT NULL."""
+        """The user's own campus (so promoted students keep it), else the default campus. agents.campus_id is NOT NULL."""
         row = (await db.execute(select(UserProfile.campus_id, UserProfile.home_campus_id).where(UserProfile.id == user_id))).first()
         if row and (row.campus_id or row.home_campus_id):
             return str(row.campus_id or row.home_campus_id)
-        dekut = (await db.execute(select(Campus.id).where(Campus.slug == "dekut"))).scalar_one_or_none()
+        dekut = (await db.execute(select(Campus.id).where(Campus.slug == settings.DEFAULT_CAMPUS_SLUG))).scalar_one_or_none()
         return str(dekut) if dekut else None
 
     @staticmethod

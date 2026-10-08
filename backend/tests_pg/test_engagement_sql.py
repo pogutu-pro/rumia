@@ -86,3 +86,19 @@ async def test_device_saves_merge_into_the_account_on_sign_in(db):
 
     await SaveService.remove(db, listing, user, None)
     assert await SaveService.list_ids(db, user, None) == []
+
+
+@pytest.mark.asyncio
+async def test_markets_are_seeded_and_public_endpoints_list_places_with_counts(db):
+    from app.features.geo.router import list_landmarks, list_markets, list_places
+    from fastapi import Response
+
+    markets = await list_markets(Response(), db)
+    assert "nyeri" in [m.slug for m in markets]
+    places = await list_places("nyeri", Response(), db)
+    assert all(p.listing_count >= 0 for p in places)
+    landmarks = await list_landmarks("nyeri", Response(), db)
+    dekut = next(l for l in landmarks if l.slug == "dekut")
+    assert dekut.features.get("school_email_domain") == "dkut.ac.ke"
+    with pytest.raises(NotFoundException):
+        await list_places("atlantis", Response(), db)

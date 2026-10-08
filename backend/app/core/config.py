@@ -80,6 +80,12 @@ class Settings(BaseSettings):
     POSTHOG_PROJECT_TOKEN: str = ""
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
 
+    # Defaults for the first market. Nothing else in the code should name a campus, county or school.
+    DEFAULT_CAMPUS_SLUG: str = "dekut"
+    DEFAULT_COUNTY: str = "nyeri"
+    # Email domains that mark a student of a supported institution as school-verified.
+    SCHOOL_EMAIL_DOMAINS: List[str] = ["dkut.ac.ke"]
+
     # Who a seeker's WhatsApp/call goes to when a listing has both an agent and a separate owner number.
     # "agent_first" keeps today's behaviour (the listing's agent); "owner_first" prefers the owner's number.
     INQUIRY_CONTACT_POLICY: str = "agent_first"

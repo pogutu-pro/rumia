@@ -2150,6 +2150,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/markets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Markets
+         * @description Towns Rumia currently serves (live or pilot). Public.
+         */
+        get: operations["list_markets_api_v1_markets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/markets/{market_slug}/landmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Landmarks In A Market
+         * @description Universities, town centres and other points people orient by. Public.
+         */
+        get: operations["list_landmarks_api_v1_markets__market_slug__landmarks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/markets/{market_slug}/places": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Places In A Market
+         * @description Neighbourhoods and towns of a market with the number of live listings in each. Public.
+         */
+        get: operations["list_places_api_v1_markets__market_slug__places_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -5034,6 +5094,31 @@ export interface components {
             /** Whatsapp Url */
             whatsapp_url?: string | null;
         };
+        /** LandmarkRead */
+        LandmarkRead: {
+            /**
+             * Aliases
+             * @default []
+             */
+            aliases: string[];
+            /**
+             * Features
+             * @default {}
+             */
+            features: {
+                [key: string]: unknown;
+            };
+            /** Kind */
+            kind: string;
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
         /** LeadContactAgent */
         LeadContactAgent: {
             /** Expected Name */
@@ -5203,11 +5288,8 @@ export interface components {
              * @default []
              */
             amenities: string[];
-            /**
-             * Area
-             * @default dekut
-             */
-            area: string | null;
+            /** Area */
+            area?: string | null;
             /**
              * Bathroom Type
              * @default Shared
@@ -5220,11 +5302,8 @@ export interface components {
              * @default false
              */
             cooking_gas_included: boolean;
-            /**
-             * County
-             * @default nyeri
-             */
-            county: string | null;
+            /** County */
+            county?: string | null;
             /** Description */
             description: string;
             /** Distance Category */
@@ -6026,6 +6105,19 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** MarketRead */
+        MarketRead: {
+            /** Center Lat */
+            center_lat?: number | null;
+            /** Center Lng */
+            center_lng?: number | null;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+        };
         /** MergeResult */
         MergeResult: {
             /** Merged */
@@ -6388,6 +6480,29 @@ export interface components {
              * @example 100
              */
             total: number;
+        };
+        /** PlaceRead */
+        PlaceRead: {
+            /**
+             * Aliases
+             * @default []
+             */
+            aliases: string[];
+            /** Kind */
+            kind: string;
+            /** Lat */
+            lat?: number | null;
+            /**
+             * Listing Count
+             * @default 0
+             */
+            listing_count: number;
+            /** Lng */
+            lng?: number | null;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
         };
         /** PlatformStats */
         PlatformStats: {
@@ -11640,6 +11755,88 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_markets_api_v1_markets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketRead"][];
+                };
+            };
+        };
+    };
+    list_landmarks_api_v1_markets__market_slug__landmarks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                market_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandmarkRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_places_api_v1_markets__market_slug__places_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                market_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaceRead"][];
+                };
             };
             /** @description Validation Error */
             422: {

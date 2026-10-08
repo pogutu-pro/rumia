@@ -32,9 +32,9 @@ def _listening_url(listing: dict) -> str:
     slug = listing.get("slug")
     if not slug:
         return f"{settings.PUBLIC_BASE_URL}/hostels"
-    county = listing.get("county") or "nyeri"
-    area = listing.get("area") or "dekut"
-    return f"{settings.PUBLIC_BASE_URL}/hostels/{county}/{area}/{slug}"
+    from app.core.slug import listing_path
+
+    return f"{settings.PUBLIC_BASE_URL}{listing_path(listing.get('county'), listing.get('area'), slug)}"
 
 
 def _render_for_type(notification_type: str, user: dict, listing: dict, event_data: dict):

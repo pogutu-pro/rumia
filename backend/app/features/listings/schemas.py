@@ -1,3 +1,4 @@
+from app.core.config import settings
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
@@ -125,8 +126,8 @@ class ListingCreate(BaseModel):
     property_type: str = Field(default="hostel", pattern="^(hostel|apartment|short_stay)$")
     price: float = Field(..., ge=0)
     location: str = Field(..., min_length=2)
-    county: Optional[str] = "nyeri"
-    area: Optional[str] = "dekut"
+    county: Optional[str] = Field(default_factory=lambda: settings.DEFAULT_COUNTY)
+    area: Optional[str] = None
     specific_location: Optional[str] = None
     landlord_phone: Optional[str] = None
     mpesa_details: Optional[str] = None
