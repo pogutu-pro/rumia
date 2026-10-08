@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { getStartingPrice } from '@/lib/utils/starting-price';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -431,14 +432,7 @@ export default function HostelsSearch({
                 );
                 const isSelected = isCompareSelected(item.id);
 
-                let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
-                if (item.price_single && item.price_sharing) {
-                  priceDisplay = `KES ${item.price_single.toLocaleString()} for 1 person · KES ${item.price_sharing.toLocaleString()} sharing`;
-                } else if (item.price_single) {
-                  priceDisplay = `KES ${item.price_single.toLocaleString()}/mo for 1 person`;
-                } else if (item.price_sharing) {
-                  priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
-                }
+                const priceDisplay = `From KES ${getStartingPrice(item, item.listing_room_types).toLocaleString()}/mo`;
 
                 let areaDisplay = item.area || 'Hostel Area';
                 if (item.specific_location) {

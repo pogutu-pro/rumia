@@ -13,6 +13,7 @@ import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
 import { getZonesByCampusSlug } from '@/lib/data/zones';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 import type { Campus, Listing } from '@/types';
+import { getStartingPrice } from '@/lib/utils/starting-price';
 
 export const revalidate = 300;
 
@@ -101,7 +102,7 @@ function toExploreListing(item: Listing): ExploreListing {
   return {
     id: String(item.id),
     title: item.title,
-    price: item.price,
+    price: getStartingPrice(item, item.room_types),
     location: item.location,
     slug: item.slug,
     county: item.county,

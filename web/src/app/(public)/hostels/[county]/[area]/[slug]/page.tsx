@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { getStartingPrice, pickBestRoomType } from '@/lib/utils/starting-price';
 import { listingsApi } from '@/lib/api/listings';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
@@ -175,24 +176,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const roomTypes = (listing.listing_room_types || []) as any[];
   const availableRooms = roomTypes.filter((rt) => rt.is_available !== false);
 
-  function pickBestVariant() {
-    if (availableRooms.length === 0) return null;
-
-    const shared = availableRooms.filter(
-      (rt) =>
-        Number(rt.occupancy) > 1 ||
-        rt.category === 'shared' ||
-        rt.room_type?.toLowerCase().includes('sharing') ||
-        rt.room_type?.toLowerCase().includes('shared'),
-    );
-    const pool = shared.length > 0 ? shared : availableRooms;
-    return pool.reduce((best, rt) =>
-      best == null || rt.price < best.price ? rt : best,
-    null as any);
-  }
-
-  const bestVariant = pickBestVariant();
-  const startingPrice = bestVariant?.price ?? listing.price_sharing ?? listing.price_single ?? listing.price ?? 0;
+  const bestVariant = pickBestRoomType(roomTypes);
+  const startingPrice = getStartingPrice(listing, roomTypes);
   const startingDeposit = bestVariant?.deposit != null && bestVariant.deposit > 0
     ? bestVariant.deposit
     : null;
