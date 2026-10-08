@@ -44,6 +44,7 @@ export type MarketRead = components['schemas']['MarketRead'];
 export type PlaceRead = components['schemas']['PlaceRead'];
 export type LandmarkRead = components['schemas']['LandmarkRead'];
 export type AlertRead = components['schemas']['AlertRead'];
+export type ActionPreview = components['schemas']['ActionPreview'];
 
 export class RumiaApiError extends Error {
   constructor(
