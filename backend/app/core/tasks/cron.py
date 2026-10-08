@@ -42,6 +42,59 @@ async def retry_failed_deliveries() -> None:
     await retry_push_deliveries()
 
 
+async def run_jobs() -> None:
+    """Run due queued jobs (image processing, reconfirmation messages)."""
+    from app.core.database import async_session_factory
+    from app.core.tasks.jobs import run_due_jobs
+
+    _register_handlers()
+    await run_due_jobs(async_session_factory, limit=10)
+
+
+def _register_handlers() -> None:
+    # Importing registers each module's @register("kind") handlers.
+    import app.features.catalog.notify  # noqa: F401
+    import app.features.media.processing  # noqa: F401
+
+
+async def freshness_and_scores() -> None:
+    """Ask for reconfirmation, demote and pause unconfirmed places, then refresh scores and distances."""
+    from app.core.database import async_session_factory
+    from app.features.catalog import service as catalog
+    from app.features.catalog.lifecycle import freshness_sweep
+
+    async with async_session_factory() as db:
+        result = await freshness_sweep(db)
+        await db.commit()
+    async with async_session_factory() as db:
+        scored = await catalog.refresh_scores(db)
+        located = await catalog.refresh_distances(db)
+        await db.commit()
+    logger.info("freshness sweep %s; scored %d; distances for %d", result, scored, located)
+
+
+async def ensure_event_partitions() -> None:
+    """Create the next three monthly partitions of `events` so inserts never fall into the default one."""
+    from datetime import date
+
+    from sqlalchemy import text
+
+    from app.core.database import async_session_factory
+
+    def month(d: date, add: int) -> date:
+        idx = d.year * 12 + (d.month - 1) + add
+        return date(idx // 12, idx % 12 + 1, 1)
+
+    today = date.today()
+    async with async_session_factory() as db:
+        for offset in range(0, 4):
+            start, end = month(today, offset), month(today, offset + 1)
+            await db.execute(
+                text(f"CREATE TABLE IF NOT EXISTS events_{start:%Y_%m} PARTITION OF events FOR VALUES FROM ('{start}') TO ('{end}')")
+            )
+        await db.commit()
+
+
 async def _run_cron_loop(interval_seconds: int, coro_fn) -> None:
     """Run a coroutine on a fixed interval, logging errors without stopping the loop."""
     while True:
@@ -62,4 +115,8 @@ def start_cron_jobs() -> None:
     loop.create_task(_run_cron_loop(900, archive_expired_announcements))
     # Retry pending/failed email + push deliveries every minute
     loop.create_task(_run_cron_loop(60, retry_failed_deliveries))
-    logger.info("Cron jobs scheduled: archive_expired_announcements (every 15m), retry_failed_deliveries (every 1m)")
+    # Durable jobs every 5 seconds; daily-ish maintenance (all idempotent, so re-running is harmless).
+    loop.create_task(_run_cron_loop(5, run_jobs))
+    loop.create_task(_run_cron_loop(6 * 3600, freshness_and_scores))
+    loop.create_task(_run_cron_loop(24 * 3600, ensure_event_partitions))
+    logger.info("Cron jobs scheduled: announcements 15m, delivery retries 1m, job runner 5s, freshness+scores 6h, partitions daily")

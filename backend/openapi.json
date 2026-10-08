@@ -1,6 +1,52 @@
 {
   "components": {
     "schemas": {
+      "ActionPreview": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "current_status": {
+            "title": "Current Status",
+            "type": "string"
+          },
+          "property_name": {
+            "title": "Property Name",
+            "type": "string"
+          },
+          "property_slug": {
+            "title": "Property Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "property_name",
+          "property_slug",
+          "current_status"
+        ],
+        "title": "ActionPreview",
+        "type": "object"
+      },
+      "ActionResult": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "status"
+        ],
+        "title": "ActionResult",
+        "type": "object"
+      },
       "AdminAgentCommission": {
         "properties": {
           "amount": {
@@ -4946,6 +4992,36 @@
         "title": "EventIn",
         "type": "object"
       },
+      "FactRead": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed At"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "FactRead",
+        "type": "object"
+      },
       "FeedbackCreate": {
         "properties": {
           "category": {
@@ -5894,6 +5970,34 @@
           "message"
         ],
         "title": "InquiryResult",
+        "type": "object"
+      },
+      "LandmarkDistance": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "walk_min": {
+            "title": "Walk Min",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "kind",
+          "walk_min"
+        ],
+        "title": "LandmarkDistance",
         "type": "object"
       },
       "LandmarkRead": {
@@ -9117,6 +9221,105 @@
         "title": "MarketRead",
         "type": "object"
       },
+      "MediaRead": {
+        "properties": {
+          "blur_data_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blur Data Url"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_cover": {
+            "default": false,
+            "title": "Is Cover",
+            "type": "boolean"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "position": {
+            "default": 0,
+            "title": "Position",
+            "type": "integer"
+          },
+          "room_tag": {
+            "default": "other",
+            "title": "Room Tag",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "variants": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Variants",
+            "type": "object"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "source"
+        ],
+        "title": "MediaRead",
+        "type": "object"
+      },
       "MergeResult": {
         "properties": {
           "merged": {
@@ -9531,6 +9734,24 @@
           "id"
         ],
         "title": "OrderUpdate",
+        "type": "object"
+      },
+      "OrgBrief": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "OrgBrief",
         "type": "object"
       },
       "OwnerPhoneUpdate": {
@@ -10316,6 +10537,238 @@
         "title": "PromotableAgent",
         "type": "object"
       },
+      "PropertyRead": {
+        "properties": {
+          "address_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Hint"
+          },
+          "amenities": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Amenities",
+            "type": "array"
+          },
+          "audience": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Audience",
+            "type": "array"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "facts": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/FactRead"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "from_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Price"
+          },
+          "from_price_period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Price Period"
+          },
+          "house_rules": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "House Rules",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "included_utilities": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Included Utilities",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "landmarks": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LandmarkDistance"
+            },
+            "title": "Landmarks",
+            "type": "array"
+          },
+          "last_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Confirmed At"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lng": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lng"
+          },
+          "location_precision": {
+            "default": "approximate",
+            "title": "Location Precision",
+            "type": "string"
+          },
+          "market_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Slug"
+          },
+          "media": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MediaRead"
+            },
+            "title": "Media",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "org": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OrgBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "place_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place Name"
+          },
+          "place_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place Slug"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tier"
+          },
+          "units": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/UnitRead"
+            },
+            "title": "Units",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "kind",
+          "status"
+        ],
+        "title": "PropertyRead",
+        "type": "object"
+      },
       "PublicAgent": {
         "description": "What the public may see of an agent. Deliberately excludes id numbers, owner contacts,\ncommission balance, application details and the linked user id.",
         "properties": {
@@ -10634,6 +11087,30 @@
           "created_at"
         ],
         "title": "RegionRead",
+        "type": "object"
+      },
+      "ReportCreate": {
+        "properties": {
+          "details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ReportCreate",
         "type": "object"
       },
       "ReviewCreate": {
@@ -11769,6 +12246,23 @@
         "title": "StaffTourBookingRead",
         "type": "object"
       },
+      "StatusChange": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "StatusChange",
+        "type": "object"
+      },
       "SupportAgentRow": {
         "properties": {
           "bio": {
@@ -12405,6 +12899,148 @@
         "title": "TransferRow",
         "type": "object"
       },
+      "UnitRead": {
+        "properties": {
+          "bathroom": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bathroom"
+          },
+          "bathrooms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bathrooms"
+          },
+          "bedrooms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bedrooms"
+          },
+          "count_available": {
+            "title": "Count Available",
+            "type": "integer"
+          },
+          "deposit_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deposit Amount"
+          },
+          "furnished": {
+            "default": "none",
+            "title": "Furnished",
+            "type": "string"
+          },
+          "gender_policy": {
+            "default": "any",
+            "title": "Gender Policy",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "max_guests": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Guests"
+          },
+          "min_stay": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Stay"
+          },
+          "move_in_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Move In Total"
+          },
+          "price_amount": {
+            "title": "Price Amount",
+            "type": "number"
+          },
+          "price_period": {
+            "title": "Price Period",
+            "type": "string"
+          },
+          "sharing": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sharing"
+          },
+          "unit_kind": {
+            "title": "Unit Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "unit_kind",
+          "price_amount",
+          "price_period",
+          "count_available"
+        ],
+        "title": "UnitRead",
+        "type": "object"
+      },
       "UnreadCountResponse": {
         "properties": {
           "count": {
@@ -12416,6 +13052,65 @@
           "count"
         ],
         "title": "UnreadCountResponse",
+        "type": "object"
+      },
+      "UploadRequest": {
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "filename": {
+            "maxLength": 200,
+            "title": "Filename",
+            "type": "string"
+          },
+          "org_id": {
+            "title": "Org Id",
+            "type": "string"
+          },
+          "size": {
+            "exclusiveMinimum": 0.0,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "org_id",
+          "filename",
+          "content_type",
+          "size"
+        ],
+        "title": "UploadRequest",
+        "type": "object"
+      },
+      "UploadTicket": {
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": true,
+            "title": "Headers",
+            "type": "object"
+          },
+          "method": {
+            "default": "PUT",
+            "title": "Method",
+            "type": "string"
+          },
+          "upload_url": {
+            "title": "Upload Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "upload_url",
+          "headers"
+        ],
+        "title": "UploadTicket",
         "type": "object"
       },
       "UploadUrlRequest": {
@@ -13248,6 +13943,90 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/actions/{token}": {
+      "get": {
+        "description": "What a reconfirmation link will do. Has no side effects, so link previewers (WhatsApp, email scanners) are harmless.",
+        "operationId": "preview_action_api_v1_actions__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionPreview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview A One-Tap Link",
+        "tags": [
+          "Catalog"
+        ]
+      },
+      "post": {
+        "description": "Performs the confirm / let / pause action carried by a signed, expiring link. No sign-in.",
+        "operationId": "do_action_api_v1_actions__token__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Do A One-Tap Action",
+        "tags": [
+          "Catalog"
+        ]
+      }
+    },
     "/api/v1/admin/agents": {
       "get": {
         "operationId": "list_agents_api_v1_admin_agents_get",
@@ -20855,6 +21634,188 @@
         ]
       }
     },
+    "/api/v1/media/uploads": {
+      "post": {
+        "description": "Returns a short-lived URL to PUT the file straight to storage. Call /media/{id}/complete afterwards. Requires permission to add properties for the organisation.",
+        "operationId": "start_upload_api_v1_media_uploads_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTicket"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start A Photo Upload",
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{asset_id}": {
+      "get": {
+        "description": "Whether a photo is still processing, ready, or was rejected (with why).",
+        "operationId": "asset_status_api_v1_media__asset_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Asset Status Api V1 Media  Asset Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Status",
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{asset_id}/complete": {
+      "post": {
+        "description": "Confirms the file arrived and queues processing (resizing, blur placeholder, duplicate hash).",
+        "operationId": "complete_upload_api_v1_media__asset_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Upload Api V1 Media  Asset Id  Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Finish A Photo Upload",
+        "tags": [
+          "Media"
+        ]
+      }
+    },
     "/api/v1/notifications": {
       "get": {
         "description": "Fetch latest 50 in-app notifications. Authenticated.",
@@ -22586,6 +23547,330 @@
         "summary": "Wishlist Hostel",
         "tags": [
           "Profiles"
+        ]
+      }
+    },
+    "/api/v1/properties/{property_id}/confirm": {
+      "post": {
+        "operationId": "confirm_property_api_v1_properties__property_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "property_id",
+            "required": true,
+            "schema": {
+              "title": "Property Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Still Available",
+        "tags": [
+          "Catalog"
+        ]
+      }
+    },
+    "/api/v1/properties/{property_id}/let": {
+      "post": {
+        "operationId": "let_property_api_v1_properties__property_id__let_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "property_id",
+            "required": true,
+            "schema": {
+              "title": "Property Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChange",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mark As Let / Full",
+        "tags": [
+          "Catalog"
+        ]
+      }
+    },
+    "/api/v1/properties/{property_id}/pause": {
+      "post": {
+        "operationId": "pause_property_api_v1_properties__property_id__pause_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "property_id",
+            "required": true,
+            "schema": {
+              "title": "Property Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChange",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pause A Listing",
+        "tags": [
+          "Catalog"
+        ]
+      }
+    },
+    "/api/v1/properties/{slug}": {
+      "get": {
+        "description": "One place with its units, media, dated facts and distances. Live, stale, paused and let places resolve (so a shared link never dead-ends); anything else is 404. Public.",
+        "operationId": "get_property_api_v1_properties__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Property",
+        "tags": [
+          "Catalog"
+        ]
+      }
+    },
+    "/api/v1/properties/{slug}/reports": {
+      "post": {
+        "description": "Not available, wrong price, scam, wrong location or other. Repeated reports from different people trigger a reconfirmation or a review hold automatically. Public, rate limited.",
+        "operationId": "report_property_api_v1_properties__slug__reports_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Report Property Api V1 Properties  Slug  Reports Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report A Listing",
+        "tags": [
+          "Catalog"
         ]
       }
     },

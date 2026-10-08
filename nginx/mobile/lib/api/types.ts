@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+    "/api/v1/actions/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview A One-Tap Link
+         * @description What a reconfirmation link will do. Has no side effects, so link previewers (WhatsApp, email scanners) are harmless.
+         */
+        get: operations["preview_action_api_v1_actions__token__get"];
+        put?: never;
+        /**
+         * Do A One-Tap Action
+         * @description Performs the confirm / let / pause action carried by a signed, expiring link. No sign-in.
+         */
+        post: operations["do_action_api_v1_actions__token__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/agents": {
         parameters: {
             query?: never;
@@ -2210,6 +2234,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start A Photo Upload
+         * @description Returns a short-lived URL to PUT the file straight to storage. Call /media/{id}/complete afterwards. Requires permission to add properties for the organisation.
+         */
+        post: operations["start_upload_api_v1_media_uploads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Upload Status
+         * @description Whether a photo is still processing, ready, or was rejected (with why).
+         */
+        get: operations["asset_status_api_v1_media__asset_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{asset_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish A Photo Upload
+         * @description Confirms the file arrived and queues processing (resizing, blur placeholder, duplicate hash).
+         */
+        post: operations["complete_upload_api_v1_media__asset_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -2672,6 +2756,97 @@ export interface paths {
          * @description Remove a hostel from the current user's wishlist. Authenticated.
          */
         delete: operations["unwishlist_hostel_api_v1_profiles_me_wishlist__listing_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{property_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Still Available */
+        post: operations["confirm_property_api_v1_properties__property_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{property_id}/let": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark As Let / Full */
+        post: operations["let_property_api_v1_properties__property_id__let_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{property_id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause A Listing */
+        post: operations["pause_property_api_v1_properties__property_id__pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Property
+         * @description One place with its units, media, dated facts and distances. Live, stale, paused and let places resolve (so a shared link never dead-ends); anything else is 404. Public.
+         */
+        get: operations["get_property_api_v1_properties__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{slug}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report A Listing
+         * @description Not available, wrong price, scam, wrong location or other. Repeated reports from different people trigger a reconfirmation or a review hold automatically. Public, rate limited.
+         */
+        post: operations["report_property_api_v1_properties__slug__reports_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3194,6 +3369,24 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActionPreview */
+        ActionPreview: {
+            /** Action */
+            action: string;
+            /** Current Status */
+            current_status: string;
+            /** Property Name */
+            property_name: string;
+            /** Property Slug */
+            property_slug: string;
+        };
+        /** ActionResult */
+        ActionResult: {
+            /** Action */
+            action: string;
+            /** Status */
+            status: string;
+        };
         /** AdminAgentCommission */
         AdminAgentCommission: {
             /** Amount */
@@ -4720,6 +4913,15 @@ export interface components {
             /** Surface */
             surface?: ("home" | "explore" | "property" | "saved" | "watch" | "share_landing" | "place" | "check" | "other") | null;
         };
+        /** FactRead */
+        FactRead: {
+            /** Kind */
+            kind: string;
+            /** Observed At */
+            observed_at?: string | null;
+            /** Text */
+            text: string;
+        };
         /** FeedbackCreate */
         FeedbackCreate: {
             /** Category */
@@ -5093,6 +5295,17 @@ export interface components {
             tel_url?: string | null;
             /** Whatsapp Url */
             whatsapp_url?: string | null;
+        };
+        /** LandmarkDistance */
+        LandmarkDistance: {
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Walk Min */
+            walk_min: number;
         };
         /** LandmarkRead */
         LandmarkRead: {
@@ -6118,6 +6331,47 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** MediaRead */
+        MediaRead: {
+            /** Blur Data Url */
+            blur_data_url?: string | null;
+            /** External Id */
+            external_id?: string | null;
+            /** Height */
+            height?: number | null;
+            /** Id */
+            id: string;
+            /**
+             * Is Cover
+             * @default false
+             */
+            is_cover: boolean;
+            /** Kind */
+            kind: string;
+            /**
+             * Position
+             * @default 0
+             */
+            position: number;
+            /**
+             * Room Tag
+             * @default other
+             */
+            room_tag: string;
+            /** Source */
+            source: string;
+            /** Url */
+            url?: string | null;
+            /**
+             * Variants
+             * @default {}
+             */
+            variants: {
+                [key: string]: unknown;
+            };
+            /** Width */
+            width?: number | null;
+        };
         /** MergeResult */
         MergeResult: {
             /** Merged */
@@ -6250,6 +6504,13 @@ export interface components {
             id: string;
             /** Sort Position */
             sort_position?: number | null;
+        };
+        /** OrgBrief */
+        OrgBrief: {
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
         };
         /** OwnerPhoneUpdate */
         OwnerPhoneUpdate: {
@@ -6605,6 +6866,89 @@ export interface components {
             /** Id */
             id: string;
         };
+        /** PropertyRead */
+        PropertyRead: {
+            /** Address Hint */
+            address_hint?: string | null;
+            /**
+             * Amenities
+             * @default []
+             */
+            amenities: string[];
+            /**
+             * Audience
+             * @default []
+             */
+            audience: string[];
+            /** Description */
+            description?: string | null;
+            /**
+             * Facts
+             * @default []
+             */
+            facts: components["schemas"]["FactRead"][];
+            /** From Price */
+            from_price?: number | null;
+            /** From Price Period */
+            from_price_period?: string | null;
+            /**
+             * House Rules
+             * @default {}
+             */
+            house_rules: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: string;
+            /**
+             * Included Utilities
+             * @default []
+             */
+            included_utilities: string[];
+            /** Kind */
+            kind: string;
+            /**
+             * Landmarks
+             * @default []
+             */
+            landmarks: components["schemas"]["LandmarkDistance"][];
+            /** Last Confirmed At */
+            last_confirmed_at?: string | null;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /**
+             * Location Precision
+             * @default approximate
+             */
+            location_precision: string;
+            /** Market Slug */
+            market_slug?: string | null;
+            /**
+             * Media
+             * @default []
+             */
+            media: components["schemas"]["MediaRead"][];
+            /** Name */
+            name: string;
+            org?: components["schemas"]["OrgBrief"] | null;
+            /** Place Name */
+            place_name?: string | null;
+            /** Place Slug */
+            place_slug?: string | null;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+            /** Tier */
+            tier?: string | null;
+            /**
+             * Units
+             * @default []
+             */
+            units: components["schemas"]["UnitRead"][];
+        };
         /**
          * PublicAgent
          * @description What the public may see of an agent. Deliberately excludes id numbers, owner contacts,
@@ -6687,6 +7031,13 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+        };
+        /** ReportCreate */
+        ReportCreate: {
+            /** Details */
+            details?: string | null;
+            /** Reason */
+            reason: string;
         };
         /** ReviewCreate */
         ReviewCreate: {
@@ -7033,6 +7384,11 @@ export interface components {
             /** Zone */
             zone: string;
         };
+        /** StatusChange */
+        StatusChange: {
+            /** Reason */
+            reason?: string | null;
+        };
         /** SupportAgentRow */
         SupportAgentRow: {
             /** Bio */
@@ -7256,10 +7612,78 @@ export interface components {
             /** Transferred By */
             transferred_by: string;
         };
+        /** UnitRead */
+        UnitRead: {
+            /** Bathroom */
+            bathroom?: string | null;
+            /** Bathrooms */
+            bathrooms?: number | null;
+            /** Bedrooms */
+            bedrooms?: number | null;
+            /** Count Available */
+            count_available: number;
+            /** Deposit Amount */
+            deposit_amount?: number | null;
+            /**
+             * Furnished
+             * @default none
+             */
+            furnished: string;
+            /**
+             * Gender Policy
+             * @default any
+             */
+            gender_policy: string;
+            /** Id */
+            id: string;
+            /** Label */
+            label?: string | null;
+            /** Max Guests */
+            max_guests?: number | null;
+            /** Min Stay */
+            min_stay?: number | null;
+            /** Move In Total */
+            move_in_total?: number | null;
+            /** Price Amount */
+            price_amount: number;
+            /** Price Period */
+            price_period: string;
+            /** Sharing */
+            sharing?: number | null;
+            /** Unit Kind */
+            unit_kind: string;
+        };
         /** UnreadCountResponse */
         UnreadCountResponse: {
             /** Count */
             count: number;
+        };
+        /** UploadRequest */
+        UploadRequest: {
+            /** Content Type */
+            content_type: string;
+            /** Filename */
+            filename: string;
+            /** Org Id */
+            org_id: string;
+            /** Size */
+            size: number;
+        };
+        /** UploadTicket */
+        UploadTicket: {
+            /** Asset Id */
+            asset_id: string;
+            /** Headers */
+            headers: {
+                [key: string]: unknown;
+            };
+            /**
+             * Method
+             * @default PUT
+             */
+            method: string;
+            /** Upload Url */
+            upload_url: string;
         };
         /** UploadUrlRequest */
         UploadUrlRequest: {
@@ -7544,6 +7968,68 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    preview_action_api_v1_actions__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    do_action_api_v1_actions__token__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_agents_api_v1_admin_agents_get: {
         parameters: {
             query?: never;
@@ -11849,6 +12335,111 @@ export interface operations {
             };
         };
     };
+    start_upload_api_v1_media_uploads_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTicket"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_status_api_v1_media__asset_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_upload_api_v1_media__asset_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_notifications_api_v1_notifications_get: {
         parameters: {
             query?: never;
@@ -12842,6 +13433,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WishlistActionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_property_api_v1_properties__property_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    let_property_api_v1_properties__property_id__let_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pause_property_api_v1_properties__property_id__pause_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_property_api_v1_properties__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_property_api_v1_properties__slug__reports_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */

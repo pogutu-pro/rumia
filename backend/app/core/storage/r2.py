@@ -83,3 +83,46 @@ class R2StorageService:
         errors = response.get("Errors", [])
         if errors:
             raise RuntimeError(f"R2 failed to delete {len(errors)} image object(s)")
+
+    # ── Direct-to-storage uploads (browser uploads straight to R2; a worker processes it) ──────────
+
+    @staticmethod
+    def _client_or_raise():
+        client = R2StorageService.get_s3_client()
+        if client is None:
+            raise RuntimeError("R2 storage is not configured")
+        return client
+
+    @staticmethod
+    def presign_put(key: str, content_type: str, expires_in: int = 900) -> str:
+        client = R2StorageService._client_or_raise()
+        return client.generate_presigned_url(
+            "put_object",
+            Params={"Bucket": settings.R2_BUCKET_NAME, "Key": key, "ContentType": content_type},
+            ExpiresIn=expires_in,
+        )
+
+    @staticmethod
+    def head_size(key: str) -> Optional[int]:
+        """Size in bytes of an uploaded object, or None if it does not exist."""
+        client = R2StorageService._client_or_raise()
+        try:
+            return int(client.head_object(Bucket=settings.R2_BUCKET_NAME, Key=key)["ContentLength"])
+        except Exception as exc:  # botocore ClientError 404
+            if "404" in str(exc) or "Not Found" in str(exc) or "NoSuchKey" in str(exc):
+                return None
+            raise
+
+    @staticmethod
+    def get_bytes(key: str) -> bytes:
+        client = R2StorageService._client_or_raise()
+        return client.get_object(Bucket=settings.R2_BUCKET_NAME, Key=key)["Body"].read()
+
+    @staticmethod
+    def put_bytes(key: str, data: bytes, content_type: str) -> str:
+        client = R2StorageService._client_or_raise()
+        client.put_object(
+            Bucket=settings.R2_BUCKET_NAME, Key=key, Body=data, ContentType=content_type,
+            CacheControl="public, max-age=31536000, immutable",
+        )
+        return f"{settings.R2_PUBLIC_URL}/{key}"

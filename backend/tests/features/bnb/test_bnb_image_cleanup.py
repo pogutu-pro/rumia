@@ -40,6 +40,7 @@ async def test_bnb_deletion_cleans_uploads_before_existing_listing_delete(monkey
     events = []
     cleanup = AsyncMock(side_effect=lambda *_: events.append("cleanup"))
     db = MagicMock()
+    db.execute = AsyncMock()  # delete also marks the matching property as removed
     db.delete = AsyncMock(side_effect=lambda *_: events.append("delete"))
     db.flush = AsyncMock()
     monkeypatch.setattr(ListingService, "get_listing_by_id_or_slug", AsyncMock(return_value=listing))
@@ -136,6 +137,7 @@ async def test_non_bnb_listing_deletion_keeps_existing_path_without_image_cleanu
         agent_user_id="owner-user-id",
     )
     db = MagicMock()
+    db.execute = AsyncMock()  # delete also marks the matching property as removed
     db.delete = AsyncMock()
     db.flush = AsyncMock()
     cleanup = AsyncMock()

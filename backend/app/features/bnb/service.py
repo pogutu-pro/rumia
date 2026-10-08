@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.features.catalog.service import mark_removed_for_listing, project_listing
 from app.core.errors import ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser, check_ownership
@@ -56,6 +57,7 @@ class BnbService:
 
         bnb = await BnbService._upsert_bnb_details(db, listing.id, data.bnb)
         reloaded = await ListingService.get_listing_by_id_or_slug(db, listing.id)
+        await project_listing(db, listing.id)
         return reloaded or listing, bnb
 
     @staticmethod
@@ -112,6 +114,7 @@ class BnbService:
             partial=True,
         )
         reloaded = await ListingService.get_listing_by_id_or_slug(db, listing_id)
+        await project_listing(db, listing.id)
         return reloaded or listing, bnb
 
     @staticmethod
