@@ -25,6 +25,29 @@ const nextConfig = {
       },
     ];
   },
+  // Permanent redirects from the old public URLs to the rebuilt screens
+  // (ux/03 principles-and-IA routing table). Property pages are /p/{slug};
+  // places are /{market}/{place}; compare lives inside Saved.
+  async redirects() {
+    return [
+      { source: '/browse', destination: '/', permanent: true },
+      { source: '/videos', destination: '/', permanent: true },
+      { source: '/compare', destination: '/saved', permanent: true },
+      { source: '/bnb', destination: '/?mode=nightly', permanent: true },
+      { source: '/hostels', destination: '/', permanent: true },
+      { source: '/agents', destination: '/', permanent: true },
+      { source: '/agent', destination: '/', permanent: true },
+      { source: '/book-tour', destination: '/help', permanent: true },
+      // Old property URLs keep their slug (properties.slug == listings.slug).
+      { source: '/hostels/:county/:area/:slug', destination: '/p/:slug', permanent: true },
+      // Old area/place pages become the new place landing pages.
+      { source: '/hostels/:county/:area', destination: '/:county/:area', permanent: true },
+      // Anything else under the old directories falls back to Explore.
+      { source: '/hostels/:path*', destination: '/', permanent: true },
+      { source: '/agents/:path*', destination: '/', permanent: true },
+      { source: '/agent/:path*', destination: '/', permanent: true },
+    ];
+  },
   images: {
     loader: 'custom',
     loaderFile: './src/lib/image/r2-loader.ts',

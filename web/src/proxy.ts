@@ -1,6 +1,5 @@
 import { reportAuthFailure } from '@/lib/auth/report';
 import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
-import { listingPath } from '@/lib/utils/listing-path';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getApiUrl } from '@/lib/api/config';
@@ -40,7 +39,7 @@ function applySecurityHeaders(headers: Headers) {
  * Proxy (Next.js 16: formerly middleware.ts) for Rumia Marketplace.
  * Runs on the Node.js runtime before every matched request.
  * - Keeps the session fresh (refresh-token exchange) and surfaces OAuth failures on the login page
- * - 301 redirects /listing/[id] and /agent/[id] UUID paths to slug-based canonical URLs
+ * - 301 redirects the old UUID listing / BnB URLs to the canonical /p/{slug}
  * - Protects /dashboard, /admin, /manager and /account routes
  */
 export default async function proxy(request: NextRequest) {
@@ -70,13 +69,6 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ── 301 redirect /browse → /hostels ──────────────────────────────────────────
-  if (pathname === '/browse') {
-    const dest = new URL('/hostels', request.url);
-    request.nextUrl.searchParams.forEach((v, k) => dest.searchParams.set(k, v));
-    return NextResponse.redirect(dest, { status: 301 });
-  }
-
   // ── 301 permanent redirects for old UUID-based listing URLs ──────────────────
   const listingMatch = pathname.match(/^\/listing\/([0-9a-f-]{36})$/);
   if (listingMatch) {
@@ -86,26 +78,28 @@ export default async function proxy(request: NextRequest) {
       if (res.ok) {
         const row = await res.json();
         if (row?.slug) {
-          const dest = `${listingPath(row)}`;
-          return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
+          return NextResponse.redirect(new URL(`/p/${row.slug}`, request.url), { status: 301 });
         }
       }
     } catch {}
   }
 
-  // ── 301 permanent redirects for old UUID-based agent URLs ────────────────────
-  const agentMatch = pathname.match(/^\/agent\/([0-9a-f-]{36})$/);
-  if (agentMatch) {
-    const id = agentMatch[1];
+  // ── 301 permanent redirects for old short-stay (BnB) URLs ─────────────────────
+  // BnB ids are legacy listing ids, so look up the slug before redirecting to /p/{slug}.
+  const bnbMatch = pathname.match(/^\/bnb\/([A-Za-z0-9-]+)$/);
+  if (bnbMatch) {
+    const id = bnbMatch[1];
     try {
-      const res = await fetch(getApiUrl(`/public/agents/${id}`));
+      const res = await fetch(getApiUrl(`/bnb/${id}`));
       if (res.ok) {
         const row = await res.json();
         if (row?.slug) {
-          return NextResponse.redirect(new URL(`/agents/${row.slug}`, request.url), { status: 301 });
+          return NextResponse.redirect(new URL(`/p/${row.slug}`, request.url), { status: 301 });
         }
       }
     } catch {}
+    // Unknown stay: send them to Explore in short-stay mode rather than a dead end.
+    return NextResponse.redirect(new URL('/?mode=nightly', request.url), { status: 301 });
   }
 
   // ── Auth protection ───────────────────────────────────────────────────────────
