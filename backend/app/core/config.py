@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     POSTHOG_PROJECT_TOKEN: str = ""
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
 
+    # Scheduled jobs (delivery retries, announcement cleanup). In production the API sets this to
+    # false and a single `worker` container runs them, so they never run once per web worker.
+    RUN_SCHEDULER: bool = True
+
     # Sentry Error Tracking
     SENTRY_DSN: str = ""
     SENTRY_TRACES_SAMPLE_RATE: float = 0.2  # 20% of transactions for performance tracking

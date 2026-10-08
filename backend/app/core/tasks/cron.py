@@ -57,7 +57,7 @@ def start_cron_jobs() -> None:
     Schedule recurring background maintenance tasks on the running event loop.
     Call this from FastAPI lifespan startup.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     # Archive expired announcements every 15 minutes
     loop.create_task(_run_cron_loop(900, archive_expired_announcements))
     # Retry pending/failed email + push deliveries every minute

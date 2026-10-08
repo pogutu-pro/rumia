@@ -8,49 +8,23 @@ from app.api import api_router
 from app.core.config import settings
 from app.core.logging import logger, setup_logging
 from app.core.ratelimit import limiter, rate_limit_exceeded_handler
-
-
-def _init_sentry() -> None:
-    """Initialize Sentry SDK for error tracking and performance monitoring."""
-    if not settings.SENTRY_DSN:
-        return
-    import sentry_sdk
-    from sentry_sdk.integrations.fastapi import FastApiIntegration
-    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration
-    import logging
-
-    sentry_sdk.init(
-        dsn=settings.SENTRY_DSN,
-        environment=settings.ENVIRONMENT,
-        release=settings.VERSION,
-        traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
-        profiles_sample_rate=settings.SENTRY_PROFILES_SAMPLE_RATE,
-        integrations=[
-            FastApiIntegration(),
-            SqlalchemyIntegration(),
-            LoggingIntegration(
-                level=logging.WARNING,      # Capture warnings+ as breadcrumbs
-                event_level=logging.ERROR,  # Send errors+ as Sentry events
-            ),
-        ],
-        send_default_pii=False,  # Never send personally identifiable information
-    )
-    logger.info("Sentry SDK initialized", environment=settings.ENVIRONMENT)
+from app.core.sentry import init_sentry
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
-    _init_sentry()
+    init_sentry()
     logger.info(
         "Starting Rumia FastAPI Backend",
         version=settings.VERSION,
         environment=settings.ENVIRONMENT,
     )
-    # Start background maintenance cron jobs
-    from app.core.tasks.cron import start_cron_jobs
-    start_cron_jobs()
+    # Scheduled jobs run in the dedicated worker process (python -m app.worker). They stay enabled
+    # here only when RUN_SCHEDULER is on (local development without a separate worker).
+    if settings.RUN_SCHEDULER:
+        from app.core.tasks.cron import start_cron_jobs
+        start_cron_jobs()
     yield
     logger.info("Shutting down Rumia FastAPI Backend")
 
