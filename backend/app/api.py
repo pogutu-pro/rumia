@@ -10,10 +10,12 @@ from app.features.auth import auth_router
 from app.features.analytics import analytics_router
 from app.features.announcements import announcements_router
 from app.features.campuses import campuses_router
+from app.features.events import events_router
 from app.features.feedback import feedback_router
 from app.features.health import health_router
 from app.features.hostel_requests import hostel_requests_router
 from app.features.images import images_router
+from app.features.inquiries import inquiries_router
 from app.features.leads import leads_router
 from app.features.legal import legal_router
 from app.features.listings import listings_router
@@ -22,6 +24,7 @@ from app.features.notifications.webhooks import router as webhooks_router
 from app.features.profiles import profiles_router
 from app.features.regions import regions_router
 from app.features.reviews import reviews_router
+from app.features.saves import saves_router
 from app.features.search import search_router
 from app.features.tours import tours_router
 from app.features.zones import zones_router
@@ -55,6 +58,9 @@ api_router.include_router(public_router)
 api_router.include_router(official_hostels_router)
 api_router.include_router(manager_router)
 api_router.include_router(admin_console_router)
+api_router.include_router(events_router)
+api_router.include_router(inquiries_router)
+api_router.include_router(saves_router)
 
 
 

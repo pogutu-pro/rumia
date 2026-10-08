@@ -4778,6 +4778,174 @@
         "title": "EmailExistsResponse",
         "type": "object"
       },
+      "EventBatch": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/EventIn"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Events",
+            "type": "array"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "title": "EventBatch",
+        "type": "object"
+      },
+      "EventBatchResult": {
+        "properties": {
+          "accepted": {
+            "title": "Accepted",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accepted"
+        ],
+        "title": "EventBatchResult",
+        "type": "object"
+      },
+      "EventIn": {
+        "properties": {
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Client-generated UUID, used to ignore duplicates",
+            "title": "Event Id"
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
+          "market": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market"
+          },
+          "name": {
+            "enum": [
+              "session_started",
+              "intent_set",
+              "search_performed",
+              "results_impression",
+              "property_opened",
+              "media_engaged",
+              "property_dwell",
+              "save_toggled",
+              "share_clicked",
+              "contact_followup_answered",
+              "directions_opened",
+              "not_interested",
+              "alert_created",
+              "alert_opened",
+              "outcome_reported"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "props": {
+            "additionalProperties": true,
+            "title": "Props",
+            "type": "object"
+          },
+          "referrer_kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "whatsapp",
+                  "instagram",
+                  "tiktok",
+                  "facebook",
+                  "google",
+                  "direct",
+                  "internal",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referrer Kind"
+          },
+          "surface": {
+            "anyOf": [
+              {
+                "enum": [
+                  "home",
+                  "explore",
+                  "property",
+                  "saved",
+                  "watch",
+                  "share_landing",
+                  "place",
+                  "check",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surface"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "EventIn",
+        "type": "object"
+      },
       "FeedbackCreate": {
         "properties": {
           "category": {
@@ -5584,6 +5752,148 @@
           "created_at"
         ],
         "title": "ImageUploadRead",
+        "type": "object"
+      },
+      "InquiryCreate": {
+        "properties": {
+          "channel": {
+            "default": "whatsapp",
+            "enum": [
+              "whatsapp",
+              "call"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "listing_id": {
+            "title": "Listing Id",
+            "type": "string"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the contact was made, e.g. 'property', 'card'",
+            "title": "Source"
+          }
+        },
+        "required": [
+          "listing_id"
+        ],
+        "title": "InquiryCreate",
+        "type": "object"
+      },
+      "InquiryFollowup": {
+        "properties": {
+          "replied": {
+            "enum": [
+              "yes",
+              "no",
+              "not_yet"
+            ],
+            "title": "Replied",
+            "type": "string"
+          }
+        },
+        "required": [
+          "replied"
+        ],
+        "title": "InquiryFollowup",
+        "type": "object"
+      },
+      "InquiryOutcome": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "moved_in",
+              "not_suitable",
+              "no_reply"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome"
+        ],
+        "title": "InquiryOutcome",
+        "type": "object"
+      },
+      "InquiryResult": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "whatsapp",
+              "call"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "contact_name": {
+            "title": "Contact Name",
+            "type": "string"
+          },
+          "listing_is_full": {
+            "default": false,
+            "title": "Listing Is Full",
+            "type": "boolean"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ref_code": {
+            "title": "Ref Code",
+            "type": "string"
+          },
+          "tel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tel Url"
+          },
+          "whatsapp_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Url"
+          }
+        },
+        "required": [
+          "ref_code",
+          "channel",
+          "contact_name",
+          "message"
+        ],
+        "title": "InquiryResult",
         "type": "object"
       },
       "LeadContactAgent": {
@@ -8717,6 +9027,19 @@
         "title": "ManagerRead",
         "type": "object"
       },
+      "MergeResult": {
+        "properties": {
+          "merged": {
+            "title": "Merged",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "merged"
+        ],
+        "title": "MergeResult",
+        "type": "object"
+      },
       "MyTourBookingRead": {
         "description": "A student's own booking with a brief of the toured listing embedded.",
         "properties": {
@@ -10911,6 +11234,22 @@
           "listing_id"
         ],
         "title": "SavedHostelActionResponse",
+        "type": "object"
+      },
+      "SavedIds": {
+        "properties": {
+          "listing_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Listing Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "listing_ids"
+        ],
+        "title": "SavedIds",
         "type": "object"
       },
       "SessionTokens": {
@@ -16673,6 +17012,82 @@
         ]
       }
     },
+    "/api/v1/events": {
+      "post": {
+        "description": "Batched first-party analytics events (max 50). Pseudonymous: identified by the X-Device-Id header and, when signed in, the user. Only whitelisted event names are accepted. Rate limited. Public.",
+        "operationId": "ingest_events_api_v1_events_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventBatchResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ingest Behaviour Events",
+        "tags": [
+          "Events"
+        ]
+      }
+    },
     "/api/v1/feedback": {
       "get": {
         "description": "List all submitted feedback. Admin only.",
@@ -17561,6 +17976,206 @@
         "summary": "Get Image Metadata",
         "tags": [
           "Image Uploads"
+        ]
+      }
+    },
+    "/api/v1/inquiries": {
+      "post": {
+        "description": "Record a contact and return the WhatsApp link (with a pre-written message and reference code) or tel: link for the person who handles this place. No account needed. Identified by X-Device-Id. Rate limited. Public.",
+        "operationId": "create_inquiry_api_v1_inquiries_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InquiryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InquiryResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Contact A Place",
+        "tags": [
+          "Inquiries"
+        ]
+      }
+    },
+    "/api/v1/inquiries/{ref_code}/followup": {
+      "post": {
+        "description": "The seeker says whether the place replied. Only the device that made the contact may answer.",
+        "operationId": "inquiry_followup_api_v1_inquiries__ref_code__followup_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ref_code",
+            "required": true,
+            "schema": {
+              "title": "Ref Code",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InquiryFollowup"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Did They Reply?",
+        "tags": [
+          "Inquiries"
+        ]
+      }
+    },
+    "/api/v1/inquiries/{ref_code}/outcome": {
+      "post": {
+        "description": "The seeker reports whether they moved in. Only the device that made the contact may answer.",
+        "operationId": "inquiry_outcome_api_v1_inquiries__ref_code__outcome_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ref_code",
+            "required": true,
+            "schema": {
+              "title": "Ref Code",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InquiryOutcome"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report The Outcome",
+        "tags": [
+          "Inquiries"
         ]
       }
     },
@@ -22547,6 +23162,271 @@
         "summary": "Add Reply to Review",
         "tags": [
           "Reviews"
+        ]
+      }
+    },
+    "/api/v1/saves": {
+      "get": {
+        "description": "Ids saved by the signed-in user, or by this device when not signed in. Public.",
+        "operationId": "list_saved_api_v1_saves_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedIds"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Saved Listing Ids",
+        "tags": [
+          "Saves"
+        ]
+      }
+    },
+    "/api/v1/saves/merge": {
+      "post": {
+        "description": "Call after sign-in with the device's X-Device-Id. Authenticated.",
+        "operationId": "merge_saves_api_v1_saves_merge_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge Device Saves Into Account",
+        "tags": [
+          "Saves"
+        ]
+      }
+    },
+    "/api/v1/saves/{listing_id}": {
+      "delete": {
+        "operationId": "unsave_listing_api_v1_saves__listing_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unsave A Listing",
+        "tags": [
+          "Saves"
+        ]
+      },
+      "put": {
+        "description": "Save for the signed-in user, or for this device (X-Device-Id) when not signed in.",
+        "operationId": "save_listing_api_v1_saves__listing_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save A Listing",
+        "tags": [
+          "Saves"
         ]
       }
     },

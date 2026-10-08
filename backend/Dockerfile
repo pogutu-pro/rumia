@@ -24,6 +24,8 @@ RUN addgroup --system --gid 1001 appgroup && \
 # Copy virtual environment and application code from builder stage
 COPY --from=builder /app/.venv /app/.venv
 COPY app /app/app
+COPY alembic.ini /app/alembic.ini
+COPY alembic /app/alembic
 
 # Set environment
 ENV PATH="/app/.venv/bin:$PATH" \

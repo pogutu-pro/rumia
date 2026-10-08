@@ -80,6 +80,13 @@ class Settings(BaseSettings):
     POSTHOG_PROJECT_TOKEN: str = ""
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
 
+    # Who a seeker's WhatsApp/call goes to when a listing has both an agent and a separate owner number.
+    # "agent_first" keeps today's behaviour (the listing's agent); "owner_first" prefers the owner's number.
+    INQUIRY_CONTACT_POLICY: str = "agent_first"
+    # Until the revenue model is decided, a contact on a commission-paying listing still accrues the legacy
+    # per-click commission (deduplicated per verified visitor). Turn off once outcome-based money replaces it.
+    INQUIRY_ACCRUES_LEGACY_COMMISSION: bool = True
+
     # Scheduled jobs (delivery retries, announcement cleanup). In production the API sets this to
     # false and a single `worker` container runs them, so they never run once per web worker.
     RUN_SCHEDULER: bool = True

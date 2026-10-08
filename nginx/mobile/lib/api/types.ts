@@ -1127,6 +1127,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ingest Behaviour Events
+         * @description Batched first-party analytics events (max 50). Pseudonymous: identified by the X-Device-Id header and, when signed in, the user. Only whitelisted event names are accepted. Rate limited. Public.
+         */
+        post: operations["ingest_events_api_v1_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/feedback": {
         parameters: {
             query?: never;
@@ -1409,6 +1429,66 @@ export interface paths {
         get: operations["get_image_upload_api_v1_images__image_upload_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Contact A Place
+         * @description Record a contact and return the WhatsApp link (with a pre-written message and reference code) or tel: link for the person who handles this place. No account needed. Identified by X-Device-Id. Rate limited. Public.
+         */
+        post: operations["create_inquiry_api_v1_inquiries_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inquiries/{ref_code}/followup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Did They Reply?
+         * @description The seeker says whether the place replied. Only the device that made the contact may answer.
+         */
+        post: operations["inquiry_followup_api_v1_inquiries__ref_code__followup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inquiries/{ref_code}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report The Outcome
+         * @description The seeker reports whether they moved in. Only the device that made the contact may answer.
+         */
+        post: operations["inquiry_outcome_api_v1_inquiries__ref_code__outcome_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2804,6 +2884,67 @@ export interface paths {
          */
         post: operations["add_reply_api_v1_reviews__review_id__reply_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/saves": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Saved Listing Ids
+         * @description Ids saved by the signed-in user, or by this device when not signed in. Public.
+         */
+        get: operations["list_saved_api_v1_saves_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/saves/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge Device Saves Into Account
+         * @description Call after sign-in with the device's X-Device-Id. Authenticated.
+         */
+        post: operations["merge_saves_api_v1_saves_merge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/saves/{listing_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save A Listing
+         * @description Save for the signed-in user, or for this device (X-Device-Id) when not signed in.
+         */
+        put: operations["save_listing_api_v1_saves__listing_id__put"];
+        post?: never;
+        /** Unsave A Listing */
+        delete: operations["unsave_listing_api_v1_saves__listing_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4480,6 +4621,45 @@ export interface components {
             /** Exists */
             exists: boolean;
         };
+        /** EventBatch */
+        EventBatch: {
+            /** Events */
+            events: components["schemas"]["EventIn"][];
+            /** Session Id */
+            session_id?: string | null;
+        };
+        /** EventBatchResult */
+        EventBatchResult: {
+            /** Accepted */
+            accepted: number;
+        };
+        /** EventIn */
+        EventIn: {
+            /**
+             * Event Id
+             * @description Client-generated UUID, used to ignore duplicates
+             */
+            event_id?: string | null;
+            /** Listing Id */
+            listing_id?: string | null;
+            /** Market */
+            market?: string | null;
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "session_started" | "intent_set" | "search_performed" | "results_impression" | "property_opened" | "media_engaged" | "property_dwell" | "save_toggled" | "share_clicked" | "contact_followup_answered" | "directions_opened" | "not_interested" | "alert_created" | "alert_opened" | "outcome_reported";
+            /** Occurred At */
+            occurred_at?: string | null;
+            /** Props */
+            props?: {
+                [key: string]: unknown;
+            };
+            /** Referrer Kind */
+            referrer_kind?: ("whatsapp" | "instagram" | "tiktok" | "facebook" | "google" | "direct" | "internal" | "other") | null;
+            /** Surface */
+            surface?: ("home" | "explore" | "property" | "saved" | "watch" | "share_landing" | "place" | "check" | "other") | null;
+        };
         /** FeedbackCreate */
         FeedbackCreate: {
             /** Category */
@@ -4796,6 +4976,63 @@ export interface components {
             thumbnail_key: string;
             /** Width */
             width: number;
+        };
+        /** InquiryCreate */
+        InquiryCreate: {
+            /**
+             * Channel
+             * @default whatsapp
+             * @enum {string}
+             */
+            channel: "whatsapp" | "call";
+            /** Listing Id */
+            listing_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @description Where the contact was made, e.g. 'property', 'card'
+             */
+            source?: string | null;
+        };
+        /** InquiryFollowup */
+        InquiryFollowup: {
+            /**
+             * Replied
+             * @enum {string}
+             */
+            replied: "yes" | "no" | "not_yet";
+        };
+        /** InquiryOutcome */
+        InquiryOutcome: {
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "moved_in" | "not_suitable" | "no_reply";
+        };
+        /** InquiryResult */
+        InquiryResult: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "whatsapp" | "call";
+            /** Contact Name */
+            contact_name: string;
+            /**
+             * Listing Is Full
+             * @default false
+             */
+            listing_is_full: boolean;
+            /** Message */
+            message: string;
+            /** Ref Code */
+            ref_code: string;
+            /** Tel Url */
+            tel_url?: string | null;
+            /** Whatsapp Url */
+            whatsapp_url?: string | null;
         };
         /** LeadContactAgent */
         LeadContactAgent: {
@@ -5789,6 +6026,11 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** MergeResult */
+        MergeResult: {
+            /** Merged */
+            merged: number;
+        };
         /**
          * MyTourBookingRead
          * @description A student's own booking with a brief of the toured listing embedded.
@@ -6547,6 +6789,11 @@ export interface components {
             listing_id: string;
             /** Message */
             message: string;
+        };
+        /** SavedIds */
+        SavedIds: {
+            /** Listing Ids */
+            listing_ids: string[];
         };
         /** SessionTokens */
         SessionTokens: {
@@ -9488,6 +9735,42 @@ export interface operations {
             };
         };
     };
+    ingest_events_api_v1_events_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventBatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventBatchResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_feedback_api_v1_feedback_get: {
         parameters: {
             query?: {
@@ -9993,6 +10276,112 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ImageUploadRead"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_inquiry_api_v1_inquiries_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiryResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inquiry_followup_api_v1_inquiries__ref_code__followup_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+            };
+            path: {
+                ref_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryFollowup"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inquiry_outcome_api_v1_inquiries__ref_code__outcome_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+            };
+            path: {
+                ref_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryOutcome"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -12757,6 +13146,134 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReviewReplyRead"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_saved_api_v1_saves_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedIds"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    merge_saves_api_v1_saves_merge_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_listing_api_v1_saves__listing_id__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsave_listing_api_v1_saves__listing_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

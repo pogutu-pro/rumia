@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.features.tours.service import TourService
 from app.core.security import AuthenticatedUser, require_roles
 from app.features.zones.schemas import CampusZoneRead, TourPriceRead, ZoneCreate, ZoneWrite
 from app.features.zones.service import ZoneService
@@ -41,6 +40,9 @@ async def get_tour_price(
     campus_id: Optional[str] = Query(None, description="Campus UUID"),
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> TourPriceRead:
+    # Imported here: tours.service imports zones.models, and zones/__init__ imports this router.
+    from app.features.tours.service import TourService
+
     return TourPriceRead(price=await TourService.get_zone_price(db, zone, campus_id))
 
 
