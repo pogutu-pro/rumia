@@ -19,7 +19,7 @@ import { ContactButton } from '@/app/(public)/listing/[id]/contact-button';
 import { BookTourButton } from '@/app/(public)/listing/[id]/book-tour-button';
 import { QuickFacts } from '@/app/(public)/listing/[id]/quick-facts';
 import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
-import { LocationSection } from '@/app/(public)/listing/[id]/location-section';
+import { LocationSummary } from './location-summary';
 import { RoomTypes } from '@/app/(public)/listing/[id]/room-types';
 import { SaveButton } from '@/components/ui/save-button';
 import { ShareListingButton } from '@/components/ui/share-listing-button';
@@ -453,17 +453,16 @@ export default async function ListingSlugPage({ params }: PageProps) {
             />
             <hr className="border-slate-100" />
 
-            {/* LocationSection hidden per product decision; code preserved for future use */}
-            {/* {hasCoordinates && (
-              <>
-                <LocationSection
-                  listingTitle={listing.title}
-                  latitude={listing.latitude}
-                  longitude={listing.longitude}
-                />
-                <hr className="border-slate-100" />
-              </>
-            )} */}
+            <LocationSummary
+              title={listing.title}
+              area={listing.area}
+              location={listing.location}
+              specificLocation={listing.specific_location}
+              distanceText={listing.distance_to_campus}
+              latitude={hasCoordinates ? listing.latitude : null}
+              longitude={hasCoordinates ? listing.longitude : null}
+            />
+            <hr className="border-slate-100" />
 
           </div>
 
