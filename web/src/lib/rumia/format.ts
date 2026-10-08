@@ -16,6 +16,24 @@ export function pricePerPeriod(amount: number | null | undefined, period: string
   return `${ksh(amount)} / ${PERIOD_LABEL[period ?? 'month'] ?? period}`;
 }
 
+/** Short plain-word label for a property's lifecycle status. */
+export function statusLabel(status: string | null | undefined): string {
+  switch (status) {
+    case 'live':
+      return 'Available now';
+    case 'let':
+      return 'Let';
+    case 'paused':
+      return 'Paused';
+    case 'stale':
+      return 'Not confirmed recently';
+    case 'unlisted':
+      return 'No longer listed';
+    default:
+      return 'Available';
+  }
+}
+
 export const UNIT_LABEL: Record<string, string> = {
   single_room: 'Single room',
   double_room: 'Double room',
