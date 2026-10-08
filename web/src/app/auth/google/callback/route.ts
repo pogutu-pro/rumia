@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
 
   let dest = safeNext(session.next);
   try {
-    const sync = await profilesApi.syncLoginWithToken(session.access_token, {});
-    if (sync.needs_profile_completion) dest = '/account';
+    // Post-login sync also creates/refreshes the profile row on first sign-in.
+    await profilesApi.syncLoginWithToken(session.access_token, {});
   } catch (syncError) {
     console.error('[auth/google/callback] post-login sync failed', syncError);
     reportAuthFailure({ stage: 'post_login_sync', cause: 'sync_failed' });

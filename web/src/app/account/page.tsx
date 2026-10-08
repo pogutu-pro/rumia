@@ -23,7 +23,6 @@ import { AccountSavedTab } from './account-saved-tab';
 import { AccountFeedbackTab } from './account-feedback-tab';
 import { AccountSettingsTab } from './account-settings-tab';
 import { AccountAgentApplicationTab } from './account-agent-application-tab';
-import { ProfileCompletionModal } from './profile-completion-modal';
 import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
 import {
   getRecentlyViewedHostels,
@@ -133,14 +132,6 @@ export default function AccountPage() {
   // True when /profiles/me could not be read. We must not guess "profile incomplete" from an
   // empty fallback: that showed the blocking completion modal to users who had already finished.
   const [profileLoadFailed, setProfileLoadFailed] = useState(false);
-  // Session-scoped fallback: if profile completion keeps failing the user can
-  // dismiss the modal for this session instead of being stranded on it. The
-  // draft is preserved and settings still lets them finish any time.
-  const [profileCompletionDismissed, setProfileCompletionDismissed] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      sessionStorage.getItem('rumia:pc:dismissed') === '1',
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -302,13 +293,6 @@ export default function AccountPage() {
     [router],
   );
 
-  const dismissProfileCompletion = useCallback(() => {
-    setProfileCompletionDismissed(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('rumia:pc:dismissed', '1');
-    }
-  }, []);
-
   useEffect(() => {
     if (hasAgent && activeTab === 'agent-application') {
       router.replace('/account?tab=overview', { scroll: false });
@@ -361,50 +345,8 @@ export default function AccountPage() {
     );
   }
 
-  const missingPhone = !profile.phone?.trim();
-  const missingCampus = !profile.home_campus_confirmed_at;
-  const needsProfileCompletion =
-    !profileLoadFailed && !profileCompletionDismissed && (missingPhone || missingCampus);
-
   return (
     <div className="min-h-screen bg-white">
-      {needsProfileCompletion && (
-        <ProfileCompletionModal
-          isOpen={true}
-          currentPhone={profile.phone}
-          currentCampusId={profile.home_campus_id ?? profile.campus_id ?? null}
-          currentCampusName={profile.home_campus_name}
-          campuses={campuses}
-          requirePhone={missingPhone}
-          requireCampus={missingCampus}
-          onSuccess={(data) => {
-            setProfile((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    ...(data.phone !== undefined
-                      ? { phone: data.phone }
-                      : {}),
-                    home_campus_id:
-                      data.home_campus_id !== undefined
-                        ? data.home_campus_id
-                        : prev.home_campus_id,
-                    home_campus_name:
-                      data.home_campus_name !== undefined
-                        ? data.home_campus_name
-                        : prev.home_campus_name,
-                    home_campus_confirmed_at:
-                      data.home_campus_confirmed_at !== undefined
-                        ? data.home_campus_confirmed_at
-                        : prev.home_campus_confirmed_at,
-                  }
-                : prev,
-            );
-          }}
-          onDismiss={dismissProfileCompletion}
-        />
-      )}
-
       {/* Clean Account Header */}
       <AccountHeader
         fullName={profile.full_name}

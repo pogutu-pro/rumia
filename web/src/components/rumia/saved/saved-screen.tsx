@@ -7,6 +7,7 @@ import { CheckCheck, GitCompareArrows, Heart, X } from 'lucide-react';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/rumia/property-card';
 import { CompareTable } from './compare-table';
 import { AlertsList } from './alerts-list';
+import { SignInSheet } from '@/components/rumia/sign-in/sign-in-sheet';
 import { rumia, type PropertyRead, type SearchCard } from '@/lib/api/rumia';
 import { hasStoredSession } from '@/lib/supabase/client';
 import { useWishlistStore } from '@/stores/wishlist-store';
@@ -25,6 +26,7 @@ export function SavedScreen({ initialTab }: { initialTab: Tab }) {
   const [comparing, setComparing] = useState(false);
   const [compareProps, setCompareProps] = useState<Record<string, PropertyRead>>({});
   const [mounted, setMounted] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
 
   const savedMap = useWishlistStore((s) => s.saved);
   const wishlistFetched = useWishlistStore((s) => s.fetched);
@@ -118,9 +120,9 @@ export function SavedScreen({ initialTab }: { initialTab: Tab }) {
             {suggestSignIn && (
               <>
                 {' · '}
-                <Link href="/auth/login" className="font-medium underline underline-offset-2">
+                <button type="button" onClick={() => setSignInOpen(true)} className="font-medium underline underline-offset-2">
                   Keep them on any device
-                </Link>
+                </button>
               </>
             )}
           </p>
@@ -262,6 +264,13 @@ export function SavedScreen({ initialTab }: { initialTab: Tab }) {
           )}
         </div>
       )}
+      <SignInSheet
+        open={signInOpen}
+        onOpenChange={setSignInOpen}
+        title="Keep your saved places on any phone"
+        description="Sign in and the places saved on this phone stay with your account."
+        next="/saved"
+      />
     </div>
   );
 }
