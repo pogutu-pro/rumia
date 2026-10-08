@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives.asymmetric import ec, rsa
 
 from app.core.config import settings
 from app.core.database import get_db_session
-from app.core.errors import ForbiddenException, UnauthorizedException
+from app.core.errors import ForbiddenException, ServiceUnavailableException, UnauthorizedException
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +209,8 @@ async def _resolve_authenticated_user(
     db: AsyncSession,
     token_data: TokenData,
 ) -> AuthenticatedUser:
-    # Query DB profiles for canonical user role & campus/region scope
+    # The profile row is the source of truth for role and campus/region scope. If it cannot be read we
+    # must not guess: answering as a plain "student" would silently downgrade staff and hide the outage.
     try:
         result = await db.execute(
             text("""
@@ -220,18 +221,20 @@ async def _resolve_authenticated_user(
             {"user_id": token_data.user_id},
         )
         row = result.fetchone()
-        if row:
-            return AuthenticatedUser(
-                id=str(row.id),
-                email=row.email or token_data.email,
-                role=row.role or "student",
-                managed_campus_id=str(row.managed_campus_id) if row.managed_campus_id else None,
-                managed_region_id=str(row.managed_region_id) if row.managed_region_id else None,
-            )
-    except Exception:
-        # DB query failed or table not seeded; fallback to token payload for safety
-        pass
+    except Exception as exc:
+        logger.error("Could not resolve user profile for authorization: %s", exc)
+        raise ServiceUnavailableException("We could not verify your account right now. Please try again.") from exc
 
+    if row:
+        return AuthenticatedUser(
+            id=str(row.id),
+            email=row.email or token_data.email,
+            role=row.role or "student",
+            managed_campus_id=str(row.managed_campus_id) if row.managed_campus_id else None,
+            managed_region_id=str(row.managed_region_id) if row.managed_region_id else None,
+        )
+
+    # A valid token for a user with no profile row yet (first request after sign-in): least privilege.
     return AuthenticatedUser(
         id=token_data.user_id,
         email=token_data.email,

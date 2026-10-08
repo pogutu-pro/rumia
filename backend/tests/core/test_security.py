@@ -205,3 +205,17 @@ async def test_check_ownership_helper():
 
     # Admin matches even if non-owner -> True
     assert check_ownership(admin_user, "user-20") is True
+
+
+@pytest.mark.asyncio
+async def test_role_lookup_failure_returns_503_not_a_downgraded_student():
+    from unittest.mock import AsyncMock, MagicMock
+
+    from app.core.errors import ServiceUnavailableException
+    from app.core.security import TokenData, _resolve_authenticated_user
+
+    db = MagicMock()
+    db.execute = AsyncMock(side_effect=RuntimeError("db down"))
+    with pytest.raises(ServiceUnavailableException) as exc:
+        await _resolve_authenticated_user(db, TokenData(user_id="00000000-0000-0000-0000-000000000001"))
+    assert exc.value.status_code == 503

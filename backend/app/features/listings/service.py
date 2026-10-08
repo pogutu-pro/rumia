@@ -31,7 +31,11 @@ class ListingService:
     async def assert_can_manage(db: AsyncSession, user: AuthenticatedUser, listing: Listing) -> None:
         """The listing's owning agent, an admin, or a manager whose campus/region covers it."""
         owner_user_id = listing.agent.user_id if listing.agent else None
-        if user.is_admin or (owner_user_id and str(owner_user_id) == user.id):
+        if user.is_admin:
+            return
+        if owner_user_id and str(owner_user_id) == user.id:
+            if getattr(listing.agent, "status", "active") == "suspended":
+                raise ForbiddenException("Your agent account is suspended. Contact your campus manager.")
             return
         if user.role == "manager" and listing.campus_id and await check_campus_scope(user, str(listing.campus_id), db):
             return
@@ -195,6 +199,8 @@ class ListingService:
         result = await db.execute(stmt)
         agent = result.scalar_one_or_none()
         if agent:
+            if getattr(agent, "status", "active") == "suspended":
+                raise ForbiddenException("Your agent account is suspended. Contact your campus manager.")
             return agent
 
         # Only staff get an agent record on demand; everyone else must be approved as an agent.

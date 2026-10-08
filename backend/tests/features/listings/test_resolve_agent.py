@@ -67,3 +67,24 @@ async def test_non_staff_without_agent_is_forbidden():
     db = _db(MockResult(single=None))
     with pytest.raises(ForbiddenException):
         await ListingService.resolve_agent_for_user(db, _staff(role="student"))
+
+
+@pytest.mark.asyncio
+async def test_suspended_agent_cannot_create_listings():
+    suspended = SimpleNamespace(id="agent-1", status="suspended")
+    db = _db(MockResult(single=suspended))
+    with pytest.raises(ForbiddenException):
+        await ListingService.resolve_agent_for_user(db, _staff(role="agent"))
+
+
+@pytest.mark.asyncio
+async def test_suspended_owner_cannot_manage_their_listing():
+    listing = SimpleNamespace(agent=SimpleNamespace(user_id="user-1", status="suspended"), campus_id=None)
+    with pytest.raises(ForbiddenException):
+        await ListingService.assert_can_manage(MagicMock(), _staff(role="agent"), listing)
+
+
+@pytest.mark.asyncio
+async def test_admin_can_still_manage_a_suspended_agents_listing():
+    listing = SimpleNamespace(agent=SimpleNamespace(user_id="someone", status="suspended"), campus_id=None)
+    await ListingService.assert_can_manage(MagicMock(), _staff(role="admin"), listing)
