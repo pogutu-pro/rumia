@@ -537,29 +537,21 @@ export default async function ListingSlugPage({ params }: PageProps) {
                   </div>
                 )}
               </div>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <BookTourButton
-                    listingId={listing.id}
-                    listingTitle={listing.title}
-                    listingZone={listing.area}
-                    agentId={listing.agents?.id}
-                    zoneTourPrice={zoneTourPrice}
-                    listingCampusId={embeddedCampus?.id || null}
-                  />
-                </div>
-                <div className="flex-1">
-                  <ContactButton
-                    listingId={listing.id}
-                    listingTitle={listing.title}
-                    agentId={listing.agents?.id}
-                    agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
-                    landlordPhone={listing.landlord_phone}
-                    paysCommission={listing.pays_commission ?? false}
-                    consultationFee={readCampusConsultationFee(listing.campuses)}
-                    isFull={isListingFull}
-                  />
-                </div>
+              <ContactButton
+                listingId={listing.id}
+                listingTitle={listing.title}
+                agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+                layout="card"
+              />
+              <div className="[&_button]:w-full [&_button]:min-h-11 [&_button]:text-sm [&_button]:font-semibold">
+                <BookTourButton
+                  listingId={listing.id}
+                  listingTitle={listing.title}
+                  listingZone={listing.area}
+                  agentId={listing.agents?.id}
+                  zoneTourPrice={zoneTourPrice}
+                  listingCampusId={embeddedCampus?.id || null}
+                />
               </div>
               {listing.agents && (
                 <div className="pt-4 border-t border-slate-100 space-y-4">
@@ -725,32 +717,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* Mobile sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <BookTourButton
-              listingId={listing.id}
-              listingTitle={listing.title}
-              listingZone={listing.area}
-              agentId={listing.agents?.id}
-              zoneTourPrice={zoneTourPrice}
-              listingCampusId={embeddedCampus?.id || null}
-            />
-          </div>
-            <div className="flex-1">
-              <ContactButton
-                listingId={listing.id}
-                listingTitle={listing.title}
-                agentId={listing.agents?.id}
-                agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
-                landlordPhone={listing.landlord_phone}
-                paysCommission={listing.pays_commission ?? false}
-                consultationFee={readCampusConsultationFee(listing.campuses)}
-                isFull={isListingFull}
-              />
-            </div>
-        </div>
+      {/* Sticky action bar below 1024px; the side card takes over from 1024px (same breakpoint) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+        <ContactButton
+          listingId={listing.id}
+          listingTitle={listing.title}
+          agentPhone={listing.agents?.whatsapp || listing.agents?.phone || ''}
+          layout="bar"
+        />
       </div>
     </div>
   );

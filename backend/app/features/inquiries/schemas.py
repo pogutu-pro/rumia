@@ -6,7 +6,8 @@ Channel = Literal["whatsapp", "call"]
 
 
 class InquiryCreate(BaseModel):
-    listing_id: str
+    listing_id: Optional[str] = Field(None, description="Legacy listing id")
+    property_id: Optional[str] = Field(None, description="Property id; resolved to its listing")
     channel: Channel = "whatsapp"
     session_id: Optional[str] = Field(None, max_length=64)
     source: Optional[str] = Field(None, max_length=40, description="Where the contact was made, e.g. 'property', 'card'")

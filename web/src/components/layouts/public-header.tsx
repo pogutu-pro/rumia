@@ -100,16 +100,16 @@ export const PublicHeader = React.memo(function PublicHeader() {
 
             <Link
               href="/saved"
-              aria-label="Wishlist"
+              aria-label="Saved places"
               className="hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 md:inline-flex"
             >
               <Heart className="h-4 w-4 text-slate-600" strokeWidth={1.9} />
-              Wishlist
+              Saved
             </Link>
 
             <Link
               href="/saved"
-              aria-label="Wishlist"
+              aria-label="Saved places"
               className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 hover:text-slate-900 md:hidden"
             >
               <Heart className="h-[18px] w-[18px]" strokeWidth={1.9} />

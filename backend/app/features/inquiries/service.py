@@ -74,7 +74,18 @@ class InquiryService:
 
         Returns (result, agent_user_id_to_notify, listing_title). Never requires an account.
         """
-        res = await db.execute(select(Listing).where(Listing.id == data.listing_id))
+        listing_id = data.listing_id
+        if not listing_id and data.property_id:
+            row = (
+                await db.execute(
+                    text("SELECT legacy_listing_id FROM properties WHERE slug = :p OR id::text = :p"),
+                    {"p": data.property_id},
+                )
+            ).first()
+            listing_id = str(row[0]) if row and row[0] else None
+        if not listing_id:
+            raise NotFoundException("This place is no longer listed.")
+        res = await db.execute(select(Listing).where(Listing.id == listing_id))
         listing = res.scalar_one_or_none()
         if not listing or not listing.is_active:
             raise NotFoundException("This place is no longer listed.")

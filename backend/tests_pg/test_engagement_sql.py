@@ -130,3 +130,18 @@ async def test_money_is_recorded_only_for_a_confirmed_move_in_and_only_once(db, 
     # A click on its own never creates money.
     await InquiryService.create(db, InquiryCreate(listing_id=listing), str(uuid.uuid4()), None, "h2")
     assert (await db.execute(text("SELECT count(*) FROM ledger_entries WHERE kind = 'move_in_fee'"))).scalar_one() == 1
+
+
+@pytest.mark.asyncio
+async def test_contact_works_from_a_property_slug_or_id(db):
+    from app.features.catalog.service import project_listing
+
+    listing, _ = await _listing(db)
+    await project_listing(db, listing)
+    slug, pid = (await db.execute(text("SELECT slug, id::text FROM properties WHERE legacy_listing_id = CAST(:l AS uuid)"), {"l": listing})).one()
+    device = str(uuid.uuid4())
+    by_slug, _, _ = await InquiryService.create(db, InquiryCreate(property_id=slug), device, None, "h")
+    by_id, _, _ = await InquiryService.create(db, InquiryCreate(property_id=pid), device, None, "h")
+    assert by_slug.whatsapp_url and by_id.whatsapp_url
+    with pytest.raises(NotFoundException):
+        await InquiryService.create(db, InquiryCreate(property_id="no-such-place"), device, None, "h")

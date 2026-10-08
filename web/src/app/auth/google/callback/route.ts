@@ -1,4 +1,5 @@
-import { clientIpFrom } from '@/lib/net/client-ip';
+import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
+import { getApiUrl } from '@/lib/api/config';
 import { reportAuthFailure, errorCodeForStatus } from '@/lib/auth/report';
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
@@ -76,6 +77,16 @@ export async function GET(request: NextRequest) {
   } catch (syncError) {
     console.error('[auth/google/callback] post-login sync failed', syncError);
     reportAuthFailure({ stage: 'post_login_sync', cause: 'sync_failed' });
+  }
+
+  // Saves made before signing in belong to the account now.
+  const deviceId = request.cookies.get('rumia_did')?.value;
+  if (deviceId) {
+    await fetch(getApiUrl('/saves/merge'), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}`, 'X-Device-Id': deviceId, ...clientIpHeaders(clientIpFrom(request.headers)) },
+      cache: 'no-store',
+    }).catch(() => null);
   }
 
   const response = NextResponse.redirect(new URL(dest, origin));

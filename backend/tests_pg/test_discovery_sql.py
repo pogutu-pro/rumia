@@ -141,3 +141,25 @@ async def test_alerts_email_only_new_matches_and_wait_when_nothing_is_new(db):
     assert result["sent"] == 1 and sent[0][0] == "a@b.c"
     assert "1 new place match bedsitters under 8k" in sent[0][1] and "Brand New Bedsit" in sent[0][2] and "Old Bedsit" not in sent[0][2]
     assert await send_due_alerts(db, fake_send) == {"sent": 0, "skipped": 0}  # not due again until tomorrow
+
+
+@pytest.mark.asyncio
+async def test_saved_cards_keep_order_and_say_when_a_place_was_taken(db):
+    await _clear(db)
+    a = await _place(db, "Saved A", 6000)
+    b = await _place(db, "Saved B", 7000)
+    listing_a = (await db.execute(text("SELECT legacy_listing_id::text FROM properties WHERE id = CAST(:p AS uuid)"), {"p": a})).scalar_one()
+    listing_b = (await db.execute(text("SELECT legacy_listing_id::text FROM properties WHERE id = CAST(:p AS uuid)"), {"p": b})).scalar_one()
+    await db.execute(text("UPDATE properties SET status = 'let' WHERE id = CAST(:p AS uuid)"), {"p": b})
+    cards = await service.cards_for_listing_ids(db, [listing_b, listing_a, "not-a-uuid"])
+    assert [c.name for c in cards] == ["Saved B", "Saved A"]
+    assert cards[0].freshness == "Let" and cards[0].status == "let"
+
+
+@pytest.mark.asyncio
+async def test_lister_profile_shows_live_places_and_hides_reply_rate_until_it_means_something(db):
+    await _clear(db)
+    pid = await _place(db, "Profile Place", 6500)
+    slug = (await db.execute(text("SELECT o.slug FROM lister_orgs o JOIN properties p ON p.org_id = o.id WHERE p.id = CAST(:p AS uuid)"), {"p": pid})).scalar_one()
+    profile = await service.org_profile(db, slug)
+    assert [c.name for c in profile["places"]] == ["Profile Place"] and profile["reply_rate"] is None

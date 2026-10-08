@@ -3,6 +3,7 @@ import { PublicHeader } from '@/components/layouts/public-header';
 import { Footer } from '@/components/layouts/public-footer';
 import { getCampusBySlug } from '@/lib/data/campuses';
 import { CampusProvider } from '@/lib/campus-context';
+import { PublicTelemetry } from '@/components/telemetry/public-telemetry';
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ export default async function PublicLayout({ children }: LayoutProps) {
       <div className="flex min-h-screen flex-col">
         <PublicHeader />
         <main className="flex-1">{children}</main>
+        <PublicTelemetry />
         <Footer whatsappNumber={campus.whatsapp_number} />
       </div>
     </CampusProvider>

@@ -322,3 +322,100 @@ async def similar(db: AsyncSession, slug: str, limit: int = 6) -> List[SearchCar
     cards = [c for c in cards if c.slug != slug]
     cards.sort(key=lambda c: (c.id not in same_place, abs((c.from_price or price) - price)))
     return cards[:limit]
+
+
+CARD_SELECT = """
+    SELECT p.id, p.slug, p.name, p.kind, p.status, p.lat, p.lng, p.last_confirmed_at, p.published_at,
+           pl.name AS place_name,
+           u.price_amount AS from_price, u.price_period, u.unit_kind,
+           CASE WHEN u.deposit_amount IS NOT NULL THEN u.price_amount + u.deposit_amount END AS move_in_total,
+           (SELECT a.url FROM property_media pm JOIN media_assets a ON a.id = pm.asset_id
+             WHERE pm.property_id = p.id AND a.kind = 'image' AND a.status = 'ready'
+             ORDER BY pm.is_cover DESC, pm.position LIMIT 1) AS cover_url,
+           (SELECT a.blur_data_url FROM property_media pm JOIN media_assets a ON a.id = pm.asset_id
+             WHERE pm.property_id = p.id AND a.kind = 'image' AND a.status = 'ready'
+             ORDER BY pm.is_cover DESC, pm.position LIMIT 1) AS cover_blur,
+           EXISTS (SELECT 1 FROM property_media pm JOIN media_assets a ON a.id = pm.asset_id WHERE pm.property_id = p.id AND a.kind = 'video') AS has_video,
+           EXISTS (SELECT 1 FROM verification_evidence e WHERE e.subject = 'property' AND e.subject_id = p.id AND e.kind = 'site_visit' AND e.status = 'valid') AS visited,
+           EXISTS (SELECT 1 FROM verification_evidence e WHERE e.subject = 'property' AND e.subject_id = p.id AND e.kind = 'registry_match' AND e.status = 'valid') AS registry,
+           (SELECT max(e.observed_at) FROM verification_evidence e WHERE e.subject = 'property' AND e.subject_id = p.id AND e.kind = 'availability_confirm') AS confirmed_at
+    FROM properties p
+    LEFT JOIN places pl ON pl.id = p.place_id
+    JOIN LATERAL (SELECT * FROM property_units WHERE property_id = p.id ORDER BY (count_available > 0) DESC, price_amount LIMIT 1) u ON true
+"""
+
+
+def _plain_card(r) -> SearchCard:
+    freshness = None
+    if r["status"] == "stale":
+        freshness = "Not confirmed recently"
+    elif r["status"] == "let":
+        freshness = "Let"
+    elif r["status"] == "paused":
+        freshness = "No longer available"
+    elif r["confirmed_at"]:
+        freshness = f"Confirmed {days_ago_text(r['confirmed_at'])}"
+    return SearchCard(
+        id=str(r["id"]), slug=r["slug"], name=r["name"], kind=r["kind"], status=r["status"], place_name=r["place_name"],
+        cover_url=r["cover_url"], cover_blur=r["cover_blur"], from_price=float(r["from_price"]), price_period=r["price_period"],
+        unit_kind=r["unit_kind"], move_in_total=float(r["move_in_total"]) if r["move_in_total"] is not None else None,
+        freshness=freshness, flags=SearchFlags(visited=r["visited"], registry=r["registry"], has_video=r["has_video"]),
+        lat=float(r["lat"]) if r["lat"] is not None else None, lng=float(r["lng"]) if r["lng"] is not None else None,
+    )
+
+
+async def cards_for_listing_ids(db: AsyncSession, listing_ids: List[str]) -> List[SearchCard]:
+    """Cards for saved places, in the order given, including let/paused ones (so a saved place that was taken says so)."""
+    import uuid as _uuid
+
+    clean = []
+    for i in listing_ids[:50]:
+        try:
+            clean.append(str(_uuid.UUID(i)))
+        except ValueError:
+            continue
+    if not clean:
+        return []
+    rows = (
+        await db.execute(
+            text(CARD_SELECT + " WHERE p.legacy_listing_id = ANY(CAST(:ids AS uuid[])) AND p.status IN ('live','stale','paused','let')"),
+            {"ids": clean},
+        )
+    ).mappings().all()
+    legacy = {
+        str(r[0]): str(r[1])
+        for r in (await db.execute(text("SELECT id, legacy_listing_id FROM properties WHERE legacy_listing_id = ANY(CAST(:ids AS uuid[]))"), {"ids": clean})).all()
+    }
+    by_listing = {legacy_id: pid for pid, legacy_id in legacy.items()}
+    order = {pid: i for i, lid in enumerate(clean) if (pid := by_listing.get(lid))}
+    return sorted((_plain_card(r) for r in rows), key=lambda c: order.get(c.id, 999))
+
+
+async def org_profile(db: AsyncSession, slug: str) -> Dict[str, Any]:
+    org = (
+        await db.execute(text("SELECT id, name, slug, created_at FROM lister_orgs WHERE slug = :s AND status <> 'suspended'"), {"s": slug})
+    ).mappings().first()
+    if not org:
+        raise NotFoundException("Lister not found.")
+    rows = (
+        await db.execute(text(CARD_SELECT + " WHERE p.org_id = :o AND p.status IN ('live','stale') ORDER BY p.published_at DESC NULLS LAST LIMIT 50"), {"o": org["id"]})
+    ).mappings().all()
+    stats = (
+        await db.execute(
+            text(
+                """
+                SELECT count(*) FILTER (WHERE i.replied IS NOT NULL) AS answered,
+                       count(*) FILTER (WHERE i.replied = 'yes') AS replied_yes
+                FROM inquiries i JOIN properties p ON p.legacy_listing_id = i.listing_id WHERE p.org_id = :o
+                """
+            ),
+            {"o": org["id"]},
+        )
+    ).mappings().one()
+    answered = int(stats["answered"])
+    return {
+        "name": org["name"], "slug": org["slug"], "since_year": org["created_at"].year,
+        "places": [_plain_card(r) for r in rows],
+        # Shown only once there are enough answers to mean something.
+        "reply_rate": round(int(stats["replied_yes"]) / answered, 2) if answered >= 5 else None,
+    }

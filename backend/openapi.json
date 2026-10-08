@@ -5986,8 +5986,28 @@
             "type": "string"
           },
           "listing_id": {
-            "title": "Listing Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Legacy listing id",
+            "title": "Listing Id"
+          },
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Property id; resolved to its listing",
+            "title": "Property Id"
           },
           "session_id": {
             "anyOf": [
@@ -6015,9 +6035,6 @@
             "title": "Source"
           }
         },
-        "required": [
-          "listing_id"
-        ],
         "title": "InquiryCreate",
         "type": "object"
       },
@@ -6672,6 +6689,48 @@
           "draft_content"
         ],
         "title": "LegalDraftUpdate",
+        "type": "object"
+      },
+      "ListerProfile": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "places": {
+            "items": {
+              "$ref": "#/components/schemas/SearchCard"
+            },
+            "title": "Places",
+            "type": "array"
+          },
+          "reply_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reply Rate"
+          },
+          "since_year": {
+            "title": "Since Year",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "since_year",
+          "places"
+        ],
+        "title": "ListerProfile",
         "type": "object"
       },
       "ListingCreate": {
@@ -18691,6 +18750,94 @@
           }
         },
         "summary": "Delete An Alert",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/cards": {
+      "get": {
+        "description": "Cards for up to 50 listing ids, in the order given, including places that are now let or paused.",
+        "operationId": "cards_by_listing_ids_api_v1_discovery_cards_get",
+        "parameters": [
+          {
+            "description": "Comma-separated listing ids",
+            "in": "query",
+            "name": "ids",
+            "required": true,
+            "schema": {
+              "description": "Comma-separated listing ids",
+              "title": "Ids",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cards For Saved Places",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/listers/{slug}": {
+      "get": {
+        "description": "A lister organisation's public page: who they are and their live places. Public.",
+        "operationId": "lister_profile_api_v1_discovery_listers__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListerProfile"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lister Profile",
         "tags": [
           "Discovery"
         ]

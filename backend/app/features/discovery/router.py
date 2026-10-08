@@ -2,6 +2,7 @@ import json
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Response, status
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +12,7 @@ from app.core.errors import BadRequestException, NotFoundException
 from app.core.ratelimit import limiter
 from app.core.security import AuthenticatedUser, get_optional_current_user
 from app.features.discovery import service
-from app.features.discovery.schemas import AlertCreate, AlertRead, SearchResponse, SimilarResponse
+from app.features.discovery.schemas import AlertCreate, AlertRead, SearchCard, SearchResponse, SimilarResponse
 
 router = APIRouter(prefix="/discovery", tags=["Discovery"])
 
@@ -55,6 +56,28 @@ async def similar_places(slug: str, response: Response, limit: int = Query(6, ge
                          db: AsyncSession = Depends(get_db_session, scope="function")) -> SimilarResponse:
     response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=300"
     return SimilarResponse(items=await service.similar(db, slug, limit))
+
+
+@router.get("/cards", response_model=SimilarResponse, summary="Cards For Saved Places",
+            description="Cards for up to 50 listing ids, in the order given, including places that are now let or paused.")
+async def cards_by_listing_ids(ids: str = Query(..., description="Comma-separated listing ids"),
+                               db: AsyncSession = Depends(get_db_session, scope="function")) -> SimilarResponse:
+    return SimilarResponse(items=await service.cards_for_listing_ids(db, _csv(ids)))
+
+
+class ListerProfile(BaseModel):
+    name: str
+    slug: str
+    since_year: int
+    places: List[SearchCard]
+    reply_rate: Optional[float] = None
+
+
+@router.get("/listers/{slug}", response_model=ListerProfile, summary="Lister Profile",
+            description="A lister organisation's public page: who they are and their live places. Public.")
+async def lister_profile(slug: str, response: Response, db: AsyncSession = Depends(get_db_session, scope="function")) -> ListerProfile:
+    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=300"
+    return ListerProfile(**await service.org_profile(db, slug))
 
 
 # ── Alerts (saved searches) ─────────────────────────────────────────────────────────────────────

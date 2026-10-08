@@ -19,7 +19,8 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "e2e": "start-server-and-test dev http://localhost:3000 cypress:run",
-    "e2e:open": "start-server-and-test dev http://localhost:3000 cypress:open"
+    "e2e:open": "start-server-and-test dev http://localhost:3000 cypress:open",
+    "generate:api": "openapi-typescript ../backend/openapi.json -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1062.0",
@@ -71,6 +72,7 @@
     "lucide-react": "0.556.0",
     "next": "^16.0.10",
     "next-themes": "^0.4.6",
+    "openapi-fetch": "^0.17.0",
     "posthog-js": "^1.407.2",
     "posthog-node": "^5.46.1",
     "qrcode.react": "^4.2.0",
@@ -129,6 +131,7 @@
     "fast-check": "^4.8.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "openapi-typescript": "^7.13.0",
     "postcss": "8.5.6",
     "prettier": "3.7.4",
     "tailwindcss": "4.1.17",
