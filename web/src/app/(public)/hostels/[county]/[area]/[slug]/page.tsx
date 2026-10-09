@@ -26,6 +26,7 @@ import { SaveButton } from '@/components/ui/save-button';
 import { ShareListingButton } from '@/components/ui/share-listing-button';
 import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
+import { PropertyFacts, ReportListing, SimilarPlaces } from '@/components/discovery/property-extras';
 import { ListingViewTracker } from './listing-view-tracker';
 import { IncludedUtilities } from './included-utilities';
 import { ListingDescription } from './listing-description';
@@ -402,6 +403,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
               <ListingDescription description={listing.description} />
             </div>
 
+            {listing.slug && <PropertyFacts slug={listing.slug} />}
+
             <hr className="border-slate-100" />
             <AmenitiesGrid amenities={listing.amenities || []} />
 
@@ -458,6 +461,13 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     Walkthrough video provided by the host.
                   </p>
                 </div>
+              </>
+            )}
+
+            {listing.slug && (
+              <>
+                <SimilarPlaces slug={listing.slug} />
+                <ReportListing slug={listing.slug} />
               </>
             )}
 
