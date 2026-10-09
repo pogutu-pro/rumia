@@ -146,7 +146,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
                 </ul>
               </div>
             )}
-            <ExploreResults filters={effective} initial={result.items} total={result.total} nextCursor={result.next_cursor ?? null} />
+            <ExploreResults filters={effective} initial={result.items} total={result.total} nextCursor={result.next_cursor ?? null} landmarks={landmarks} />
             {refined && <AlertPrompt filters={effective} label={label} />}
           </>
         )}
