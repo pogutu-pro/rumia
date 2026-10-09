@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
+import { TeamSection } from '@/components/dashboard/team-section';
 import { AgentProfileClient } from './agent-profile-client';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -34,6 +35,8 @@ export default async function AgentProfilePage() {
       </div>
 
       <AgentProfileClient agent={agent} />
+
+      <TeamSection />
     </div>
   );
 }

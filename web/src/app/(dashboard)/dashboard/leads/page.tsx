@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
+import { EnquiriesSection } from '@/components/dashboard/enquiries-section';
 import { LeadsTable } from '../leads-table';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -46,6 +47,8 @@ export default async function AgentLeadsPage() {
             : 'Leads will appear when students view your listings.'}
         </p>
       </div>
+
+      <EnquiriesSection />
 
       <LeadsTable leads={leads || []} listings={(listings as any) || []} />
     </div>
