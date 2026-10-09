@@ -6,7 +6,9 @@ import { rumiaServer } from '@/lib/api/rumia';
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
 
-export const revalidate = 86400;
+// Hourly, not daily: the area and landmark entries come from the API, and a sitemap built while the API was
+// unreachable (a deploy, a build) must repair itself quickly instead of staying incomplete for a day.
+export const revalidate = 3600;
 
 /** One page per area and per landmark in every live or pilot market. Fails soft: the rest of the sitemap still ships. */
 async function areaEntries(): Promise<MetadataRoute.Sitemap> {
