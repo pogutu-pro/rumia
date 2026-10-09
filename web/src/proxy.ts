@@ -108,6 +108,7 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/manager') ||
     pathname.startsWith('/workspace') ||
+    pathname.startsWith('/ops') ||
     pathname.startsWith('/account');
 
   // ── Session refresh ───────────────────────────────────────────────────────────
