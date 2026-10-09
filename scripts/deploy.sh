@@ -37,6 +37,14 @@ git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
 git stash list | grep -q 'deploy-sh-auto-stash' && \
   git stash list | grep 'deploy-sh-auto-stash' | sed 's/:.*//' | xargs -r -n1 git stash drop || true
 
+# Every build leaves cache behind and nothing ever removed it: it reached 36 GB and filled the disk to 95%.
+# If space is already tight, clear the cache first so the build itself cannot run out of disk.
+free_gb=$(df -BG --output=avail / | tail -1 | tr -dc '0-9')
+if [ "${free_gb:-0}" -lt 8 ]; then
+  echo "Only ${free_gb}G free; clearing the Docker build cache before building"
+  docker builder prune -a -f || true
+fi
+
 echo "=== [2/5] Building production Docker container images ==="
 docker compose build --pull
 
@@ -60,5 +68,10 @@ echo "=== [5/5] Restarting Nginx reverse proxy ==="
 # running container keeps pointing at the old inode and a reload re-reads
 # stale config. Restarting re-establishes the mount against the current file.
 docker compose restart nginx
+
+# Keep the last few days of build cache (so the next deploy is fast) and drop untagged leftovers.
+# Never fatal: a failed cleanup must not fail a deploy that already succeeded.
+docker builder prune -f --filter "until=72h" >/dev/null 2>&1 || true
+docker image prune -f >/dev/null 2>&1 || true
 
 echo "=== Rumia Production Deployment Successful! ==="
