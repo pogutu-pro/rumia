@@ -37,3 +37,18 @@ describe('follow-up prompt window', () => {
     expect(dueFollowUp(2000)).toBeNull();
   });
 });
+
+import { withReference } from '../contact';
+
+describe('withReference', () => {
+  it('appends the reference to the message text', () => {
+    const url = withReference('https://wa.me/254712345678?text=Hello%20there', 'RUM-42');
+    expect(new URL(url).searchParams.get('text')).toBe('Hello there\n\nRef: RUM-42');
+  });
+  it('adds a text param when the link has none', () => {
+    expect(new URL(withReference('https://wa.me/254712345678', 'RUM-42')).searchParams.get('text')).toBe('Ref: RUM-42');
+  });
+  it('leaves something that is not a URL alone', () => {
+    expect(withReference('not a url', 'RUM-42')).toBe('not a url');
+  });
+});

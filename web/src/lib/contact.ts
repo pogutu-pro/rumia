@@ -55,3 +55,15 @@ export function clearFollowUp(ref: string, store: Storage = window.localStorage)
     // ignore
   }
 }
+
+/** Adds the reference code to the message text of a wa.me link, so the owner can match it to the visit. */
+export function withReference(url: string, ref: string): string {
+  try {
+    const u = new URL(url);
+    const text = u.searchParams.get('text');
+    u.searchParams.set('text', `${text ?? ''}${text ? '\n\n' : ''}Ref: ${ref}`);
+    return u.toString();
+  } catch {
+    return url;
+  }
+}

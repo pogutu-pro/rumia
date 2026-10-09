@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertsList } from '@/components/discovery/alerts-list';
 import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -660,6 +661,13 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
           </div>
         </div>
       )}
+
+      <section aria-labelledby="alerts-heading" className="pt-2">
+        <h2 id="alerts-heading" className="mb-3 text-sm font-bold text-slate-900">
+          Alerts
+        </h2>
+        <AlertsList />
+      </section>
     </div>
   );
 }
