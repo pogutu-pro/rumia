@@ -7,6 +7,7 @@ import {
   ExploreDiscovery,
   type ExploreZone,
 } from '@/components/home/explore-discovery';
+import { ForYou } from '@/components/home/for-you';
 import { ListingSection } from '@/components/home/listing-section';
 import type { ExploreListing } from '@/components/home/explore-listing-card';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
@@ -263,6 +264,8 @@ export default async function HomePage() {
         zones={zones}
         items={exploreItems}
       />
+
+      <ForYou />
 
       <div className="pb-10 pt-2">
         <ListingSection

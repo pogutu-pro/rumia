@@ -260,6 +260,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
         county={listing.county || county}
         area={listing.area || area}
         imageUrl={images[0]?.r2_url}
+        kind={listing.property_type ?? undefined}
       />
 
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 pt-4 md:hidden">
