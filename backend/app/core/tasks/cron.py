@@ -69,8 +69,11 @@ async def freshness_and_scores() -> None:
     async with async_session_factory() as db:
         scored = await catalog.refresh_scores(db)
         located = await catalog.refresh_distances(db)
+        from app.features.media.processing import enqueue_missing_hashes
+
+        hashed = await enqueue_missing_hashes(db, limit=200)  # backfill and safety net for photo fingerprints
         await db.commit()
-    logger.info("freshness sweep %s; scored %d; distances for %d", result, scored, located)
+    logger.info("freshness sweep %s; scored %d; distances for %d; photo fingerprints queued %d", result, scored, located, hashed)
 
 
 async def send_alerts() -> None:

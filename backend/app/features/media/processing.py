@@ -9,12 +9,14 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
+import httpx
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy import text
 
+from app.core.config import settings
 from app.core.database import async_session_factory
 from app.core.storage.r2 import R2StorageService
-from app.core.tasks.jobs import register
+from app.core.tasks.jobs import enqueue, register
 
 logger = logging.getLogger(__name__)
 
@@ -140,5 +142,76 @@ async def process_media_asset(payload: dict) -> None:
             ),
             {"a": asset_id, "url": urls["gallery"], "v": json.dumps(urls), "w": processed.width, "h": processed.height,
              "blur": processed.blur_data_url, "hash": processed.content_hash},
+        )
+        await db.commit()
+
+
+# ── Photos uploaded through the original form ────────────────────────────────────────────────────
+# Those are resized and stored by the web app, so they arrive as ready media assets without the
+# duplicate-photo fingerprint the review queue relies on. This adds it, after the fact and out of band.
+
+def hash_image_bytes(data: bytes) -> str:
+    """The same fingerprint `process_image_bytes` stores, for an image that is already processed."""
+    if len(data) > MAX_BYTES:
+        raise InvalidImage("The photo is larger than 15 MB.")
+    try:
+        img = Image.open(io.BytesIO(data))
+        img.load()
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as exc:
+        raise InvalidImage("This file is not a usable image.") from exc
+    return dhash(ImageOps.exif_transpose(img).convert("RGB"))
+
+
+def is_own_storage_url(url: Optional[str]) -> bool:
+    """Only our own photo storage is ever fetched. Listing image URLs come from listers, so anything
+    else (an internal address, another site) must never be requested by the server."""
+    base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+    return bool(url and base and url.startswith(base + "/"))
+
+
+async def enqueue_missing_hashes(db, listing_id: Optional[str] = None, limit: int = 200) -> int:
+    """Queue a fingerprint job for ready photos that have none. Safe to call repeatedly."""
+    rows = (
+        await db.execute(
+            text(
+                """
+                SELECT m.id::text FROM media_assets m
+                WHERE m.kind = 'image' AND m.status = 'ready' AND m.content_hash IS NULL AND m.url IS NOT NULL
+                  AND m.legacy_image_id IS NOT NULL
+                  AND (CAST(:l AS uuid) IS NULL OR m.legacy_image_id IN (SELECT id FROM listing_images WHERE listing_id = CAST(:l AS uuid)))
+                ORDER BY m.created_at DESC LIMIT :n
+                """
+            ),
+            {"l": str(listing_id) if listing_id else None, "n": limit},
+        )
+    ).all()
+    queued = 0
+    for (asset_id,) in rows:
+        if await enqueue(db, "hash_legacy_media", {"asset_id": asset_id}, idempotency_key=f"hash:{asset_id}"):
+            queued += 1
+    return queued
+
+
+@register("hash_legacy_media")
+async def hash_legacy_media(payload: dict) -> None:
+    asset_id = payload["asset_id"]
+    async with async_session_factory() as db:
+        row = (await db.execute(text("SELECT url, content_hash FROM media_assets WHERE id = CAST(:a AS uuid)"), {"a": asset_id})).first()
+    if not row or row[1] or not is_own_storage_url(row[0]):
+        return  # gone, already done, or not ours to fetch
+    async with httpx.AsyncClient(timeout=15, follow_redirects=False) as client:
+        resp = await client.get(row[0])
+    if resp.status_code >= 500:
+        resp.raise_for_status()  # transient: let the queue retry
+    if resp.status_code != 200:
+        return
+    try:
+        digest = hash_image_bytes(resp.content)
+    except InvalidImage:
+        return  # not decodable: leave it unhashed rather than retry forever
+    async with async_session_factory() as db:
+        await db.execute(
+            text("UPDATE media_assets SET content_hash = :h WHERE id = CAST(:a AS uuid) AND content_hash IS NULL"),
+            {"a": asset_id, "h": digest},
         )
         await db.commit()

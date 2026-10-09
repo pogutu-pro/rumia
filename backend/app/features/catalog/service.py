@@ -93,6 +93,17 @@ async def _sync_registry_evidence(db: AsyncSession, listing_id: str, property_id
     )
 
 
+async def _queue_photo_fingerprints(db: AsyncSession, listing_id: str) -> None:
+    """Photos from the original upload form need a duplicate-detection fingerprint; do it in the worker."""
+    from app.features.media.processing import enqueue_missing_hashes
+
+    try:
+        async with db.begin_nested():
+            await enqueue_missing_hashes(db, listing_id=listing_id, limit=50)
+    except Exception:
+        logger.exception("could not queue photo fingerprints for listing %s", listing_id)  # never blocks the save
+
+
 async def project_listing(db: AsyncSession, listing_id: str) -> Optional[str]:
     """Copy a legacy listing into the property model. Never breaks the legacy write that triggered it."""
     try:
@@ -101,6 +112,7 @@ async def project_listing(db: AsyncSession, listing_id: str) -> Optional[str]:
             prop = str(row[0]) if row and row[0] else None
             if prop:
                 await _sync_registry_evidence(db, listing_id, prop)
+                await _queue_photo_fingerprints(db, listing_id)
             return prop
     except Exception:
         logger.exception("could not project listing %s into the property model", listing_id)

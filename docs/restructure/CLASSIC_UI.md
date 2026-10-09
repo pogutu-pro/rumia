@@ -22,6 +22,7 @@ features to the pages people already use.
 
 - Admin verify / un-verify now reaches the property model, and registry evidence is revoked as well as added.
 - Role changes made on the old Users / Managers / approval screens keep `staff_assignments` in step, so a newly promoted admin or manager can use the ops endpoints.
+- Photos uploaded through the original form are fingerprinted in the worker, so the review queue's "photos used elsewhere" signal now works for them. Only our own storage is ever fetched.
 - `scripts/check-projection-drift.sql` lists any listing that disagrees with its copy in the property model. Run it on a copy of production before deploying.
 
 ## Checks
@@ -36,7 +37,7 @@ psql "$DATABASE_URL" -f scripts/check-projection-drift.sql                      
 ## Not done / not verified
 
 - Not viewed in a browser (the browser extension was not available). Flows were exercised over HTTP against a local database.
-- Photo upload still uses the old uploader, not `/media/uploads`.
+- Photo upload keeps the original uploader in the browser (it also works for an agent with no organisation yet, which `/media/uploads` cannot). Its photos now get the new pipeline's duplicate-detection fingerprint through a worker job (`hash_legacy_media`), queued when a listing is saved and swept daily for older photos. `/media/uploads` is available for a future form.
 - WhatsApp alerts are accepted but not sent until a provider is connected; email alerts work.
 - Copy and URL defaults are still DeKUT / Nyeri / "students". The backend supports more markets and kinds.
 - The Alembic migrations have only run on scratch and local databases, never on a copy of production.
