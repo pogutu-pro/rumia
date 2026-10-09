@@ -5,6 +5,7 @@ Replaces role-string checks for the new catalog and ops endpoints. A user holds:
   * organisation memberships (owner | manager | agent) of lister organisations.
 Anyone else is a seeker with no special rights. Legacy `require_roles` keeps working for old routes.
 """
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, FrozenSet, Optional, Set, Tuple
 
@@ -108,3 +109,63 @@ async def get_access(
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> AccessContext:
     return await load_access(db, user.id)
+
+
+async def sync_staff_for_role(db: AsyncSession, user_id: str, role: Optional[str]) -> None:
+    """Keep staff assignments in step with the legacy profile role, which admin and manager screens still set.
+
+    admin/super_admin -> an everywhere `admin`; manager -> `market_lead` in the default market; anything else
+    loses those two derived assignments. Assignments made by hand in the ops console (reviewer, scout) are left alone.
+    Never raises: the role change that triggered it must not fail because of this.
+    """
+    try:
+        async with db.begin_nested():
+            params = {"u": str(user_id)}
+            if role in ("admin", "super_admin"):
+                await db.execute(
+                    text(
+                        "UPDATE staff_assignments SET active = true WHERE user_id = CAST(:u AS uuid) AND role = 'admin' AND market_id IS NULL"
+                    ),
+                    params,
+                )
+                await db.execute(
+                    text(
+                        """
+                        INSERT INTO staff_assignments (user_id, market_id, role)
+                        SELECT CAST(:u AS uuid), NULL, 'admin'
+                        WHERE NOT EXISTS (SELECT 1 FROM staff_assignments WHERE user_id = CAST(:u AS uuid) AND role = 'admin' AND market_id IS NULL)
+                        """
+                    ),
+                    params,
+                )
+                keep = ("admin",)
+            elif role == "manager":
+                await db.execute(
+                    text(
+                        """
+                        INSERT INTO staff_assignments (user_id, market_id, role)
+                        SELECT CAST(:u AS uuid), m.id, 'market_lead' FROM markets m WHERE m.slug = 'nyeri'
+                          AND NOT EXISTS (SELECT 1 FROM staff_assignments s WHERE s.user_id = CAST(:u AS uuid) AND s.role = 'market_lead' AND s.market_id = m.id)
+                        """
+                    ),
+                    params,
+                )
+                await db.execute(
+                    text(
+                        "UPDATE staff_assignments SET active = true WHERE user_id = CAST(:u AS uuid) AND role = 'market_lead' "
+                        "AND market_id = (SELECT id FROM markets WHERE slug = 'nyeri')"
+                    ),
+                    params,
+                )
+                keep = ("market_lead",)
+            else:
+                keep = ()
+            await db.execute(
+                text(
+                    "UPDATE staff_assignments SET active = false WHERE user_id = CAST(:u AS uuid) AND active "
+                    "AND role IN ('admin', 'market_lead') AND NOT (role = ANY(CAST(:keep AS text[])))"
+                ),
+                {**params, "keep": list(keep)},
+            )
+    except Exception:
+        logging.getLogger(__name__).exception("could not sync staff assignments for %s", user_id)

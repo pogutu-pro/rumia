@@ -1,5 +1,6 @@
 """Admin-only operations behind the admin console (listings, agents, users, commissions, analytics)."""
 import uuid
+from app.core.permissions import sync_staff_for_role
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from typing import List, Optional, Tuple
@@ -135,6 +136,7 @@ class AdminConsoleService:
             raise NotFoundException("User not found")
         profile.role = role
         await db.flush()
+        await sync_staff_for_role(db, str(target_id), role)
 
     @staticmethod
     async def promote_to_admin(db: AsyncSession, user: AuthenticatedUser, target_id: str) -> None:
@@ -150,6 +152,7 @@ class AdminConsoleService:
         profile.managed_campus_id = None
         profile.managed_region_id = None
         await db.flush()
+        await sync_staff_for_role(db, str(target_id), "admin")
 
     # ── Agents ─────────────────────────────────────────────────────────────
 

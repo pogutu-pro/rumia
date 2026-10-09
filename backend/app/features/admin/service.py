@@ -1,4 +1,5 @@
 import uuid
+from app.core.permissions import sync_staff_for_role
 from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 from sqlalchemy import func, select, text
@@ -94,6 +95,7 @@ class AdminService:
         prof.managed_campus_id = data.managed_campus_id
         prof.managed_region_id = data.managed_region_id
         await db.flush()
+        await sync_staff_for_role(db, str(data.user_id), "manager")
         return prof
 
     @staticmethod

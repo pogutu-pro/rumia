@@ -1,5 +1,6 @@
 import re
 import uuid
+from app.core.permissions import sync_staff_for_role
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import List, Optional, Tuple
@@ -198,6 +199,7 @@ class ManagerService:
         profile = (await db.execute(select(UserProfile).where(UserProfile.id == app.user_id))).scalar_one_or_none()
         if profile is not None:
             profile.role = "agent"  # strict boundary: an approval only ever grants 'agent'
+            await sync_staff_for_role(db, str(app.user_id), "agent")
         app.status = "approved"
         app.reviewed_by = user.id
         app.reviewed_at = datetime.now(timezone.utc)
@@ -447,6 +449,7 @@ class ManagerService:
         profile.managed_campus_id = campus_id or None
         profile.managed_region_id = region_id or None
         await db.flush()
+        await sync_staff_for_role(db, str(target_user_id), "manager")
         return profile
 
     @staticmethod
@@ -462,6 +465,7 @@ class ManagerService:
         profile.managed_campus_id = None
         profile.managed_region_id = None
         await db.flush()
+        await sync_staff_for_role(db, str(target_user_id), "agent")
 
     @staticmethod
     async def find_user_by_email(db: AsyncSession, user: AuthenticatedUser, email: str) -> FoundUser:
