@@ -46,6 +46,10 @@ const nextConfig = {
       { source: '/hostels/:path*', destination: '/', permanent: true },
       { source: '/agents/:path*', destination: '/', permanent: true },
       { source: '/agent/:path*', destination: '/', permanent: true },
+      // The old lister home and contacts list are replaced by the workspace.
+      // Exact matches only — create/edit/earnings/etc. still live under /dashboard.
+      { source: '/dashboard', destination: '/workspace', permanent: true },
+      { source: '/dashboard/leads', destination: '/workspace', permanent: true },
     ];
   },
   images: {
