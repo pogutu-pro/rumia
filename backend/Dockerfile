@@ -7,10 +7,10 @@ WORKDIR /app
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy dependency specification files
-COPY pyproject.toml README.md /app/
+COPY pyproject.toml uv.lock README.md /app/
 
-# Install production dependencies into virtual environment
-RUN uv sync --frozen --no-cache || uv sync --no-cache
+# Install exactly the locked production dependencies (no fallback to an unlocked resolve, no dev tools)
+RUN uv sync --frozen --no-cache --no-dev
 
 # Runtime stage
 FROM python:3.12-slim AS runner
@@ -24,6 +24,8 @@ RUN addgroup --system --gid 1001 appgroup && \
 # Copy virtual environment and application code from builder stage
 COPY --from=builder /app/.venv /app/.venv
 COPY app /app/app
+COPY alembic.ini /app/alembic.ini
+COPY alembic /app/alembic
 
 # Set environment
 ENV PATH="/app/.venv/bin:$PATH" \

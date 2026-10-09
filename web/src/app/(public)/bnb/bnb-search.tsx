@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -474,9 +475,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                 const sorted = [...(item.images ?? [])].sort(
                   (a, b) => a.display_order - b.display_order,
                 );
-                const imageUrl =
-                  sorted[0]?.r2_url ??
-                  'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+                const imageUrl = sorted[0]?.r2_url;
                 const blurDataUrl = sorted[0]?.blur_data_url;
                 const bnb = item.bnb;
                 const priceUnit = priceUnitLabel(bnb?.price_unit);
@@ -489,15 +488,19 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                     className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 md:hover:shadow-lg md:transition-shadow md:duration-200 h-full cursor-pointer"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                      <Image
-                        src={imageUrl}
-                        alt={item.title}
-                        fill
-                        className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        placeholder="blur"
-                        blurDataURL={blurDataUrl || FALLBACK_BLUR}
-                      />
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={item.title}
+                          fill
+                          className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          placeholder="blur"
+                          blurDataURL={blurDataUrl || FALLBACK_BLUR}
+                        />
+                      ) : (
+                        <NoPhotoTile />
+                      )}
                       <div className="absolute top-3 left-3 bg-white/95 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide text-slate-800 shadow-sm ring-1 ring-slate-900/5">
                         {listingType}
                       </div>

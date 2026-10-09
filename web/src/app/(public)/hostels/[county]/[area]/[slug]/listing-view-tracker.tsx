@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { recordRecentlyViewedHostel } from '@/lib/utils/recently-viewed';
+import { rememberInterest } from '@/lib/personalisation';
 import posthog from 'posthog-js';
 
 const VIEW_TRACKER_KEY = 'rumia_listing_view_tracked';
@@ -15,6 +16,7 @@ interface ListingViewTrackerProps {
   county?: string;
   area?: string;
   imageUrl?: string;
+  kind?: string;
 }
 
 function hasTrackedView(listingId: string): boolean {
@@ -50,6 +52,7 @@ export function ListingViewTracker({
   county,
   area,
   imageUrl,
+  kind,
 }: ListingViewTrackerProps) {
   useEffect(() => {
     if (!listingId) return;
@@ -77,12 +80,14 @@ export function ListingViewTracker({
       });
     }
 
+    rememberInterest({ kind, price });
+
     posthog.capture('listing_viewed', {
       listing_id: listingId,
       listing_zone: area ?? null,
       listing_county: county ?? null,
     });
-  }, [listingId, title, price, location, slug, county, area, imageUrl]);
+  }, [listingId, title, price, location, slug, county, area, imageUrl, kind]);
 
   return null;
 }

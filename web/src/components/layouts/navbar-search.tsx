@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import * as React from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -540,7 +541,7 @@ export function NavbarSearch() {
     if (selectedIndex >= 0 && selectedIndex < results.length) {
       const selected = results[selectedIndex];
       const targetUrl = selected.slug
-        ? `/hostels/${selected.county || 'nyeri'}/${selected.area || 'dekut'}/${selected.slug}`
+        ? `${listingPath(selected)}`
         : `/listing/${selected.id}`;
       router.push(targetUrl);
       handleClose();
@@ -553,10 +554,15 @@ export function NavbarSearch() {
       router.replace(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
     } else {
       const filterParams = toParams();
-      const parts: string[] = [];
-      if (trimmed) parts.push(`q=${encodeURIComponent(trimmed)}`);
-      if (filterParams.toString()) parts.push(filterParams.toString());
-      router.push(`/hostels${parts.length ? `?${parts.join('&')}` : ''}`);
+      if (trimmed.length >= 3 && !filterParams.toString()) {
+        // Plain words and no filters picked: understand the sentence ("bedsitter near DeKUT under 8k").
+        router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+      } else {
+        const parts: string[] = [];
+        if (trimmed) parts.push(`q=${encodeURIComponent(trimmed)}`);
+        if (filterParams.toString()) parts.push(filterParams.toString());
+        router.push(`/hostels${parts.length ? `?${parts.join('&')}` : ''}`);
+      }
     }
     setSelectedIndex(-1);
     handleClose();
@@ -861,7 +867,7 @@ function AutocompleteList({
             const isSelected = selectedIndex === idx;
             const firstImage = item.images?.[0]?.r2_url;
             const href = item.slug
-              ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+              ? `${listingPath(item)}`
               : `/listing/${item.id}`;
             const priceText = item.price_single
               ? `KES ${item.price_single.toLocaleString()}/mo`

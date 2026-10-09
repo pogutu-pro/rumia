@@ -7,6 +7,7 @@ from sqlalchemy import func, select, union_all
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.features.catalog.service import mark_removed_for_listing, project_listing
 from app.core.errors import BadRequestException, ForbiddenException, NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser, check_campus_scope
@@ -31,7 +32,11 @@ class ListingService:
     async def assert_can_manage(db: AsyncSession, user: AuthenticatedUser, listing: Listing) -> None:
         """The listing's owning agent, an admin, or a manager whose campus/region covers it."""
         owner_user_id = listing.agent.user_id if listing.agent else None
-        if user.is_admin or (owner_user_id and str(owner_user_id) == user.id):
+        if user.is_admin:
+            return
+        if owner_user_id and str(owner_user_id) == user.id:
+            if getattr(listing.agent, "status", "active") == "suspended":
+                raise ForbiddenException("Your agent account is suspended. Contact your campus manager.")
             return
         if user.role == "manager" and listing.campus_id and await check_campus_scope(user, str(listing.campus_id), db):
             return
@@ -186,36 +191,47 @@ class ListingService:
 
     @staticmethod
     async def resolve_agent_for_user(db: AsyncSession, user: AuthenticatedUser) -> Agent:
-        """Find or create Agent record for user."""
+        """Find or create the Agent record that owns listings created by this user.
+
+        Staff (manager/admin) get one on demand, built from their own profile. A listing is never
+        attributed to another agent, and the contact number seekers see is always a real one.
+        """
         stmt = select(Agent).where(Agent.user_id == user.id)
         result = await db.execute(stmt)
         agent = result.scalar_one_or_none()
+        if agent:
+            if getattr(agent, "status", "active") == "suspended":
+                raise ForbiddenException("Your agent account is suspended. Contact your campus manager.")
+            return agent
 
-        if not agent and user.is_admin:
-            # Fallback for admin user without dedicated agent row
-            stmt_any = select(Agent).limit(1)
-            any_result = await db.execute(stmt_any)
-            agent = any_result.scalar_one_or_none()
+        # Only staff get an agent record on demand; everyone else must be approved as an agent.
+        if user.role not in ("manager", "admin", "super_admin"):
+            raise ForbiddenException("Only approved agents can manage listings")
 
-        if not agent:
-            # Only staff get an agent record on demand; everyone else must be approved as an agent.
-            if user.role not in ("manager", "admin", "super_admin"):
-                raise ForbiddenException("Only approved agents can manage listings")
-            profile_campus = (await db.execute(
-                select(UserProfile.campus_id).where(UserProfile.id == user.id)
-            )).scalar_one_or_none()
-            agent = Agent(
-                id=str(uuid.uuid4()),
-                name=user.email.split("@")[0] if user.email else "Agent",
-                phone="+254700000000",
-                whatsapp="+254700000000",
-                user_id=user.id,
-                # agents.campus_id is NOT NULL
-                campus_id=user.managed_campus_id or (str(profile_campus) if profile_campus else None),
+        profile = (await db.execute(
+            select(UserProfile.full_name, UserProfile.phone, UserProfile.campus_id).where(UserProfile.id == user.id)
+        )).fetchone()
+        phone = (profile.phone or "").strip() if profile else ""
+        if not phone:
+            raise BadRequestException(
+                "Add your phone number to your profile before creating listings, so seekers can reach you."
             )
-            db.add(agent)
-            await db.flush()
+        # agents.campus_id is NOT NULL
+        campus_id = user.managed_campus_id or (str(profile.campus_id) if profile and profile.campus_id else None)
+        if not campus_id:
+            raise BadRequestException("Choose a campus for your profile before creating listings.")
 
+        agent = Agent(
+            id=str(uuid.uuid4()),
+            name=(profile.full_name if profile and profile.full_name else None)
+            or (user.email.split("@")[0] if user.email else "Agent"),
+            phone=phone,
+            whatsapp=phone,
+            user_id=user.id,
+            campus_id=campus_id,
+        )
+        db.add(agent)
+        await db.flush()
         return agent
 
     @staticmethod
@@ -396,6 +412,7 @@ class ListingService:
 
         # Auto-verify against official DeKUT records (best-effort)
         await ListingService._auto_verify_listing(db, listing, agent)
+        await project_listing(db, listing.id)
 
         return listing
 
@@ -453,6 +470,7 @@ class ListingService:
         # Re-run auto-verification (in case landlord_phone changed)
         if listing.agent:
             await ListingService._auto_verify_listing(db, listing, listing.agent)
+        await project_listing(db, listing.id)
 
         return listing
 
@@ -471,6 +489,7 @@ class ListingService:
 
         listing.is_full = is_full
         await db.flush()
+        await project_listing(db, listing.id)
         return listing
 
     @staticmethod
@@ -488,6 +507,7 @@ class ListingService:
 
         listing.is_active = is_active
         await db.flush()
+        await project_listing(db, listing.id)
         return listing
 
     @staticmethod
@@ -526,5 +546,6 @@ class ListingService:
 
             await ImageService.cleanup_listing_uploads(db, listing.id)
 
+        await mark_removed_for_listing(db, listing.id)
         await db.delete(listing)
         await db.flush()

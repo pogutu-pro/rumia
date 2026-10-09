@@ -5,11 +5,13 @@ import { toast } from 'sonner';
 import { MapPin, DollarSign, Eye, Edit, SwitchCamera, Loader2, CheckCircle2, XCircle, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { confirmAvailable, confirmedText, useWorkspace } from '@/components/dashboard/workspace';
 import { toggleListingActiveAction, toggleListingFullAction, toggleListingCommissionAction } from '@/app/actions/listings';
 
 interface Listing {
   id: string | number;
   title: string;
+  slug?: string | null;
   price: number;
   location: string;
   is_active: boolean;
@@ -28,7 +30,25 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
   const [listings, setListings] = useState<Listing[]>(initialListings);
   const [togglingId, setTogglingId] = useState<string | number | null>(null);
   const [togglingFullId, setTogglingFullId] = useState<string | number | null>(null);
+  const { ws, reload } = useWorkspace();
+  const [confirmingId, setConfirmingId] = useState<string | number | null>(null);
+  const propertyBySlug = new Map((ws?.properties ?? []).map((p) => [p.slug, p]));
   const [togglingCommissionId, setTogglingCommissionId] = useState<string | number | null>(null);
+
+  const handleConfirm = async (id: string | number, propertyId: string) => {
+    if (confirmingId) return;
+    setConfirmingId(id);
+    const ok = await confirmAvailable(propertyId);
+    setConfirmingId(null);
+    if (!ok) {
+      toast.error('Could not confirm. Please try again.');
+      return;
+    }
+    // Confirming makes it visible and available again.
+    setListings((prev) => prev.map((item) => (item.id === id ? { ...item, is_active: true, is_full: false } : item)));
+    toast.success('Confirmed as still available.');
+    reload();
+  };
 
   const handleToggleActive = async (id: string | number, currentStatus: boolean) => {
     if (togglingId) return;
@@ -194,6 +214,26 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                       </button>
                     )}
                   </div>
+
+                  {/* Freshness: people trust places the owner has recently confirmed */}
+                  {(() => {
+                    const property = item.slug ? propertyBySlug.get(item.slug) : undefined;
+                    if (!property) return null;
+                    return (
+                      <div className="flex items-center justify-between gap-2 pb-3">
+                        <p className="text-xs text-slate-500">{confirmedText(property.last_confirmed_at)}</p>
+                        <button
+                          type="button"
+                          onClick={() => handleConfirm(item.id, property.id)}
+                          disabled={confirmingId === item.id}
+                          className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+                        >
+                          {confirmingId === item.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                          Still available
+                        </button>
+                      </div>
+                    );
+                  })()}
 
                   {/* Actions & Toggle */}
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">

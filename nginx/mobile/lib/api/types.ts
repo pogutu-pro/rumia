@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+    "/api/v1/actions/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview A One-Tap Link
+         * @description What a reconfirmation link will do. Has no side effects, so link previewers (WhatsApp, email scanners) are harmless.
+         */
+        get: operations["preview_action_api_v1_actions__token__get"];
+        put?: never;
+        /**
+         * Do A One-Tap Action
+         * @description Performs the confirm / let / pause action carried by a signed, expiring link. No sign-in.
+         */
+        post: operations["do_action_api_v1_actions__token__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/agents": {
         parameters: {
             query?: never;
@@ -1127,6 +1151,104 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/discovery/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Alerts */
+        get: operations["list_alerts_api_v1_discovery_alerts_get"];
+        put?: never;
+        /**
+         * Create An Alert
+         * @description Save a search and be told when new places match. Works without an account (per device). Needs an email (sent today) or a phone number (WhatsApp, once a provider is connected).
+         */
+        post: operations["create_alert_api_v1_discovery_alerts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/alerts/{alert_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete An Alert */
+        delete: operations["delete_alert_api_v1_discovery_alerts__alert_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/properties/{slug}/similar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Similar Places Nearby
+         * @description Places of the same kind at a similar price, same area first. Public.
+         */
+        get: operations["similar_places_api_v1_discovery_properties__slug__similar_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Places
+         * @description Plain-language and filtered search with explainable ranking. `q` understands things like 'bedsitter near dekut under 8k with wifi'; explicit filters win over what is inferred. Cursor paged (max 50 per page). Public.
+         */
+        get: operations["search_places_api_v1_discovery_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ingest Behaviour Events
+         * @description Batched first-party analytics events (max 50). Pseudonymous: identified by the X-Device-Id header and, when signed in, the user. Only whitelisted event names are accepted. Rate limited. Public.
+         */
+        post: operations["ingest_events_api_v1_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/feedback": {
         parameters: {
             query?: never;
@@ -1409,6 +1531,66 @@ export interface paths {
         get: operations["get_image_upload_api_v1_images__image_upload_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Contact A Place
+         * @description Record a contact and return the WhatsApp link (with a pre-written message and reference code) or tel: link for the person who handles this place. No account needed. Identified by X-Device-Id. Rate limited. Public.
+         */
+        post: operations["create_inquiry_api_v1_inquiries_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inquiries/{ref_code}/followup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Did They Reply?
+         * @description The seeker says whether the place replied. Only the device that made the contact may answer.
+         */
+        post: operations["inquiry_followup_api_v1_inquiries__ref_code__followup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inquiries/{ref_code}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report The Outcome
+         * @description The seeker reports whether they moved in. Only the device that made the contact may answer.
+         */
+        post: operations["inquiry_outcome_api_v1_inquiries__ref_code__outcome_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2070,6 +2252,146 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/markets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Markets
+         * @description Towns Rumia currently serves (live or pilot). Public.
+         */
+        get: operations["list_markets_api_v1_markets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/markets/{market_slug}/landmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Landmarks In A Market
+         * @description Universities, town centres and other points people orient by. Public.
+         */
+        get: operations["list_landmarks_api_v1_markets__market_slug__landmarks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/markets/{market_slug}/places": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Places In A Market
+         * @description Neighbourhoods and towns of a market with the number of live listings in each. Public.
+         */
+        get: operations["list_places_api_v1_markets__market_slug__places_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Workspace
+         * @description The caller's organisations and places, each with what needs attention (unconfirmed, paused, drafts) and the last week's contacts. One call powers the lister home screen.
+         */
+        get: operations["my_workspace_api_v1_me_workspace_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start A Photo Upload
+         * @description Returns a short-lived URL to PUT the file straight to storage. Call /media/{id}/complete afterwards. Requires permission to add properties for the organisation.
+         */
+        post: operations["start_upload_api_v1_media_uploads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Upload Status
+         * @description Whether a photo is still processing, ready, or was rejected (with why).
+         */
+        get: operations["asset_status_api_v1_media__asset_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{asset_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish A Photo Upload
+         * @description Confirms the file arrived and queues processing (resizing, blur placeholder, duplicate hash).
+         */
+        post: operations["complete_upload_api_v1_media__asset_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -2333,6 +2655,240 @@ export interface paths {
         patch: operations["update_official_hostel_api_v1_official_hostels__record_id__patch"];
         trace?: never;
     };
+    "/api/v1/ops/markets/{market_slug}/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Market Health
+         * @description Fresh supply against searches per area.
+         */
+        get: operations["health_api_v1_ops_markets__market_slug__health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/properties/{property_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decide On A Place
+         * @description approve, request_changes or reject (with a note).
+         */
+        post: operations["decide_api_v1_ops_properties__property_id__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/properties/{property_id}/visit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record A Site Visit
+         * @description Adds 'Visited by Rumia' evidence, valid for 12 months.
+         */
+        post: operations["visit_api_v1_ops_properties__property_id__visit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/queues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Work Queues
+         * @description Counts and the age of the oldest item for review, reports, stale places and busy unverified places. Staff only.
+         */
+        get: operations["get_queues_api_v1_ops_queues_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Open Reports
+         * @description Highest priority first (scams, then not-available).
+         */
+        get: operations["get_reports_api_v1_ops_reports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/reports/{report_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve A Report */
+        post: operations["resolve_api_v1_ops_reports__report_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Review Queue
+         * @description Places waiting for a decision, with why and any duplicate-photo signals.
+         */
+        get: operations["get_review_api_v1_ops_review_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/staff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Assign A Staff Role
+         * @description Admins only.
+         */
+        put: operations["assign_staff_api_v1_ops_staff_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stale-orgs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Organisations With Unconfirmed Places */
+        get: operations["get_stale_orgs_api_v1_ops_stale_orgs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/inquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recent Contacts For An Organisation
+         * @description Reference code, place, channel and whether the seeker said they got a reply. No personal details.
+         */
+        get: operations["org_inquiries_api_v1_orgs__org_id__inquiries_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/inquiries/{ref_code}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm What Happened To A Contact
+         * @description The lister reports whether this contact moved in. This is the only event that can create a fee.
+         */
+        post: operations["lister_outcome_api_v1_orgs__org_id__inquiries__ref_code__outcome_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add A Team Member
+         * @description Add an existing Rumia user (by email) to the organisation. Owners only.
+         */
+        post: operations["add_member_api_v1_orgs__org_id__members_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles/check-email": {
         parameters: {
             query?: never;
@@ -2537,6 +3093,97 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/properties/{property_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Still Available */
+        post: operations["confirm_property_api_v1_properties__property_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{property_id}/let": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark As Let / Full */
+        post: operations["let_property_api_v1_properties__property_id__let_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{property_id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause A Listing */
+        post: operations["pause_property_api_v1_properties__property_id__pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Property
+         * @description One place with its units, media, dated facts and distances. Live, stale, paused and let places resolve (so a shared link never dead-ends); anything else is 404. Public.
+         */
+        get: operations["get_property_api_v1_properties__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/properties/{slug}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report A Listing
+         * @description Not available, wrong price, scam, wrong location or other. Repeated reports from different people trigger a reconfirmation or a review hold automatically. Public, rate limited.
+         */
+        post: operations["report_property_api_v1_properties__slug__reports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/agents/{slug_or_id}": {
         parameters: {
             query?: never;
@@ -2597,7 +3244,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/public/verify-candidates": {
+    "/api/v1/public/verify-lookup": {
         parameters: {
             query?: never;
             header?: never;
@@ -2605,10 +3252,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Verify-Before-You-Pay Dataset
-         * @description Contact and payment identifiers of active listings, used by the public Hakikisha checker to tell students whether a number or payment detail belongs to a known listing. Public.
+         * Verify-Before-You-Pay Lookup
+         * @description Active listings matching ONE phone number, payment detail or name the visitor typed into the Hakikisha checker (max 10). Payment details are returned only when the search was by payment detail. Rate limited. Public.
          */
-        get: operations["get_verify_candidates_api_v1_public_verify_candidates_get"];
+        get: operations["verify_lookup_api_v1_public_verify_lookup_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2809,6 +3456,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/saves": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Saved Listing Ids
+         * @description Ids saved by the signed-in user, or by this device when not signed in. Public.
+         */
+        get: operations["list_saved_api_v1_saves_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/saves/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge Device Saves Into Account
+         * @description Call after sign-in with the device's X-Device-Id. Authenticated.
+         */
+        post: operations["merge_saves_api_v1_saves_merge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/saves/{listing_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save A Listing
+         * @description Save for the signed-in user, or for this device (X-Device-Id) when not signed in.
+         */
+        put: operations["save_listing_api_v1_saves__listing_id__put"];
+        post?: never;
+        /** Unsave A Listing */
+        delete: operations["unsave_listing_api_v1_saves__listing_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/search": {
         parameters: {
             query?: never;
@@ -2993,6 +3701,24 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActionPreview */
+        ActionPreview: {
+            /** Action */
+            action: string;
+            /** Current Status */
+            current_status: string;
+            /** Property Name */
+            property_name: string;
+            /** Property Slug */
+            property_slug: string;
+        };
+        /** ActionResult */
+        ActionResult: {
+            /** Action */
+            action: string;
+            /** Status */
+            status: string;
+        };
         /** AdminAgentCommission */
         AdminAgentCommission: {
             /** Amount */
@@ -3767,6 +4493,52 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /** AlertCreate */
+        AlertCreate: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "email" | "whatsapp";
+            /** Email */
+            email?: string | null;
+            /**
+             * Frequency
+             * @default daily
+             * @enum {string}
+             */
+            frequency: "instant" | "daily" | "weekly";
+            /** Intent */
+            intent: {
+                [key: string]: unknown;
+            };
+            /** Label */
+            label?: string | null;
+            /** Phone */
+            phone?: string | null;
+        };
+        /** AlertRead */
+        AlertRead: {
+            /** Active */
+            active: boolean;
+            /** Channel */
+            channel: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Frequency */
+            frequency: string;
+            /** Id */
+            id: string;
+            /** Intent */
+            intent: {
+                [key: string]: unknown;
+            };
+            /** Label */
+            label?: string | null;
+        };
         /** AnnouncementCreate */
         AnnouncementCreate: {
             /** Campus Id */
@@ -4449,6 +5221,13 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** Decision */
+        Decision: {
+            /** Decision */
+            decision: string;
+            /** Note */
+            note?: string | null;
+        };
         /** DevLoginRequest */
         DevLoginRequest: {
             /** Email */
@@ -4479,6 +5258,54 @@ export interface components {
         EmailExistsResponse: {
             /** Exists */
             exists: boolean;
+        };
+        /** EventBatch */
+        EventBatch: {
+            /** Events */
+            events: components["schemas"]["EventIn"][];
+            /** Session Id */
+            session_id?: string | null;
+        };
+        /** EventBatchResult */
+        EventBatchResult: {
+            /** Accepted */
+            accepted: number;
+        };
+        /** EventIn */
+        EventIn: {
+            /**
+             * Event Id
+             * @description Client-generated UUID, used to ignore duplicates
+             */
+            event_id?: string | null;
+            /** Listing Id */
+            listing_id?: string | null;
+            /** Market */
+            market?: string | null;
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "session_started" | "intent_set" | "search_performed" | "results_impression" | "property_opened" | "media_engaged" | "property_dwell" | "save_toggled" | "share_clicked" | "contact_followup_answered" | "directions_opened" | "not_interested" | "alert_created" | "alert_opened" | "outcome_reported";
+            /** Occurred At */
+            occurred_at?: string | null;
+            /** Props */
+            props?: {
+                [key: string]: unknown;
+            };
+            /** Referrer Kind */
+            referrer_kind?: ("whatsapp" | "instagram" | "tiktok" | "facebook" | "google" | "direct" | "internal" | "other") | null;
+            /** Surface */
+            surface?: ("home" | "explore" | "property" | "saved" | "watch" | "share_landing" | "place" | "check" | "other") | null;
+        };
+        /** FactRead */
+        FactRead: {
+            /** Kind */
+            kind: string;
+            /** Observed At */
+            observed_at?: string | null;
+            /** Text */
+            text: string;
         };
         /** FeedbackCreate */
         FeedbackCreate: {
@@ -4797,6 +5624,99 @@ export interface components {
             /** Width */
             width: number;
         };
+        /** InquiryCreate */
+        InquiryCreate: {
+            /**
+             * Channel
+             * @default whatsapp
+             * @enum {string}
+             */
+            channel: "whatsapp" | "call";
+            /** Listing Id */
+            listing_id: string;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @description Where the contact was made, e.g. 'property', 'card'
+             */
+            source?: string | null;
+        };
+        /** InquiryFollowup */
+        InquiryFollowup: {
+            /**
+             * Replied
+             * @enum {string}
+             */
+            replied: "yes" | "no" | "not_yet";
+        };
+        /** InquiryOutcome */
+        InquiryOutcome: {
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "moved_in" | "not_suitable" | "no_reply";
+        };
+        /** InquiryResult */
+        InquiryResult: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "whatsapp" | "call";
+            /** Contact Name */
+            contact_name: string;
+            /**
+             * Listing Is Full
+             * @default false
+             */
+            listing_is_full: boolean;
+            /** Message */
+            message: string;
+            /** Ref Code */
+            ref_code: string;
+            /** Tel Url */
+            tel_url?: string | null;
+            /** Whatsapp Url */
+            whatsapp_url?: string | null;
+        };
+        /** LandmarkDistance */
+        LandmarkDistance: {
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Walk Min */
+            walk_min: number;
+        };
+        /** LandmarkRead */
+        LandmarkRead: {
+            /**
+             * Aliases
+             * @default []
+             */
+            aliases: string[];
+            /**
+             * Features
+             * @default {}
+             */
+            features: {
+                [key: string]: unknown;
+            };
+            /** Kind */
+            kind: string;
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
         /** LeadContactAgent */
         LeadContactAgent: {
             /** Expected Name */
@@ -4966,11 +5886,8 @@ export interface components {
              * @default []
              */
             amenities: string[];
-            /**
-             * Area
-             * @default dekut
-             */
-            area: string | null;
+            /** Area */
+            area?: string | null;
             /**
              * Bathroom Type
              * @default Shared
@@ -4983,11 +5900,8 @@ export interface components {
              * @default false
              */
             cooking_gas_included: boolean;
-            /**
-             * County
-             * @default nyeri
-             */
-            county: string | null;
+            /** County */
+            county?: string | null;
             /** Description */
             description: string;
             /** Distance Category */
@@ -5789,6 +6703,75 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** MarketRead */
+        MarketRead: {
+            /** Center Lat */
+            center_lat?: number | null;
+            /** Center Lng */
+            center_lng?: number | null;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+        };
+        /** MediaRead */
+        MediaRead: {
+            /** Blur Data Url */
+            blur_data_url?: string | null;
+            /** External Id */
+            external_id?: string | null;
+            /** Height */
+            height?: number | null;
+            /** Id */
+            id: string;
+            /**
+             * Is Cover
+             * @default false
+             */
+            is_cover: boolean;
+            /** Kind */
+            kind: string;
+            /**
+             * Position
+             * @default 0
+             */
+            position: number;
+            /**
+             * Room Tag
+             * @default other
+             */
+            room_tag: string;
+            /** Source */
+            source: string;
+            /** Url */
+            url?: string | null;
+            /**
+             * Variants
+             * @default {}
+             */
+            variants: {
+                [key: string]: unknown;
+            };
+            /** Width */
+            width?: number | null;
+        };
+        /** MemberAdd */
+        MemberAdd: {
+            /** Email */
+            email: string;
+            /**
+             * Role
+             * @default agent
+             */
+            role: string;
+        };
+        /** MergeResult */
+        MergeResult: {
+            /** Merged */
+            merged: number;
+        };
         /**
          * MyTourBookingRead
          * @description A student's own booking with a brief of the toured listing embedded.
@@ -5916,6 +6899,18 @@ export interface components {
             id: string;
             /** Sort Position */
             sort_position?: number | null;
+        };
+        /** OrgBrief */
+        OrgBrief: {
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
+        /** OutcomeBody */
+        OutcomeBody: {
+            /** Outcome */
+            outcome: string;
         };
         /** OwnerPhoneUpdate */
         OwnerPhoneUpdate: {
@@ -6147,6 +7142,29 @@ export interface components {
              */
             total: number;
         };
+        /** PlaceRead */
+        PlaceRead: {
+            /**
+             * Aliases
+             * @default []
+             */
+            aliases: string[];
+            /** Kind */
+            kind: string;
+            /** Lat */
+            lat?: number | null;
+            /**
+             * Listing Count
+             * @default 0
+             */
+            listing_count: number;
+            /** Lng */
+            lng?: number | null;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
         /** PlatformStats */
         PlatformStats: {
             /** Active Listings */
@@ -6248,6 +7266,89 @@ export interface components {
             /** Id */
             id: string;
         };
+        /** PropertyRead */
+        PropertyRead: {
+            /** Address Hint */
+            address_hint?: string | null;
+            /**
+             * Amenities
+             * @default []
+             */
+            amenities: string[];
+            /**
+             * Audience
+             * @default []
+             */
+            audience: string[];
+            /** Description */
+            description?: string | null;
+            /**
+             * Facts
+             * @default []
+             */
+            facts: components["schemas"]["FactRead"][];
+            /** From Price */
+            from_price?: number | null;
+            /** From Price Period */
+            from_price_period?: string | null;
+            /**
+             * House Rules
+             * @default {}
+             */
+            house_rules: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: string;
+            /**
+             * Included Utilities
+             * @default []
+             */
+            included_utilities: string[];
+            /** Kind */
+            kind: string;
+            /**
+             * Landmarks
+             * @default []
+             */
+            landmarks: components["schemas"]["LandmarkDistance"][];
+            /** Last Confirmed At */
+            last_confirmed_at?: string | null;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /**
+             * Location Precision
+             * @default approximate
+             */
+            location_precision: string;
+            /** Market Slug */
+            market_slug?: string | null;
+            /**
+             * Media
+             * @default []
+             */
+            media: components["schemas"]["MediaRead"][];
+            /** Name */
+            name: string;
+            org?: components["schemas"]["OrgBrief"] | null;
+            /** Place Name */
+            place_name?: string | null;
+            /** Place Slug */
+            place_slug?: string | null;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+            /** Tier */
+            tier?: string | null;
+            /**
+             * Units
+             * @default []
+             */
+            units: components["schemas"]["UnitRead"][];
+        };
         /**
          * PublicAgent
          * @description What the public may see of an agent. Deliberately excludes id numbers, owner contacts,
@@ -6330,6 +7431,31 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+        };
+        /** Relaxation */
+        Relaxation: {
+            /** Change */
+            change: {
+                [key: string]: unknown;
+            };
+            /** Count */
+            count: number;
+            /** Label */
+            label: string;
+        };
+        /** ReportCreate */
+        ReportCreate: {
+            /** Details */
+            details?: string | null;
+            /** Reason */
+            reason: string;
+        };
+        /** ReportResolution */
+        ReportResolution: {
+            /** Note */
+            note?: string | null;
+            /** Resolution */
+            resolution: string;
         };
         /** ReviewCreate */
         ReviewCreate: {
@@ -6548,6 +7674,104 @@ export interface components {
             /** Message */
             message: string;
         };
+        /** SavedIds */
+        SavedIds: {
+            /** Listing Ids */
+            listing_ids: string[];
+        };
+        /** SearchCard */
+        SearchCard: {
+            /** Cover Blur */
+            cover_blur?: string | null;
+            /** Cover Url */
+            cover_url?: string | null;
+            /**
+             * @default {
+             *       "has_video": false,
+             *       "registry": false,
+             *       "visited": false
+             *     }
+             */
+            flags: components["schemas"]["SearchFlags"];
+            /** Freshness */
+            freshness?: string | null;
+            /** From Price */
+            from_price?: number | null;
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Lat */
+            lat?: number | null;
+            /** Lng */
+            lng?: number | null;
+            /** Move In Total */
+            move_in_total?: number | null;
+            /** Name */
+            name: string;
+            /** Place Name */
+            place_name?: string | null;
+            /** Price Period */
+            price_period?: string | null;
+            /** Reason */
+            reason?: string | null;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+            /** Unit Kind */
+            unit_kind?: string | null;
+            /** Walk Min */
+            walk_min?: number | null;
+            /** Walk To */
+            walk_to?: string | null;
+        };
+        /** SearchFlags */
+        SearchFlags: {
+            /**
+             * Has Video
+             * @default false
+             */
+            has_video: boolean;
+            /**
+             * Registry
+             * @default false
+             */
+            registry: boolean;
+            /**
+             * Visited
+             * @default false
+             */
+            visited: boolean;
+        };
+        /** SearchResponse */
+        SearchResponse: {
+            /**
+             * Applied
+             * @default {}
+             */
+            applied: {
+                [key: string]: unknown;
+            };
+            /**
+             * Chips
+             * @default []
+             */
+            chips: {
+                [key: string]: string;
+            }[];
+            /** Items */
+            items: components["schemas"]["SearchCard"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+            /**
+             * Relaxations
+             * @default []
+             */
+            relaxations: components["schemas"]["Relaxation"][];
+            /** Total */
+            total: number;
+        };
         /** SessionTokens */
         SessionTokens: {
             /** Access Token */
@@ -6581,6 +7805,11 @@ export interface components {
             /** Campus Name */
             campus_name: string;
         };
+        /** SimilarResponse */
+        SimilarResponse: {
+            /** Items */
+            items: components["schemas"]["SearchCard"][];
+        };
         /** SitemapAgent */
         SitemapAgent: {
             /** Slug */
@@ -6605,6 +7834,15 @@ export interface components {
             agents: components["schemas"]["SitemapAgent"][];
             /** Listings */
             listings: components["schemas"]["SitemapListing"][];
+        };
+        /** StaffAssignment */
+        StaffAssignment: {
+            /** Market Slug */
+            market_slug?: string | null;
+            /** Role */
+            role: string;
+            /** User Email */
+            user_email: string;
         };
         /** StaffMember */
         StaffMember: {
@@ -6670,6 +7908,11 @@ export interface components {
             updated_at: string;
             /** Zone */
             zone: string;
+        };
+        /** StatusChange */
+        StatusChange: {
+            /** Reason */
+            reason?: string | null;
         };
         /** SupportAgentRow */
         SupportAgentRow: {
@@ -6894,10 +8137,78 @@ export interface components {
             /** Transferred By */
             transferred_by: string;
         };
+        /** UnitRead */
+        UnitRead: {
+            /** Bathroom */
+            bathroom?: string | null;
+            /** Bathrooms */
+            bathrooms?: number | null;
+            /** Bedrooms */
+            bedrooms?: number | null;
+            /** Count Available */
+            count_available: number;
+            /** Deposit Amount */
+            deposit_amount?: number | null;
+            /**
+             * Furnished
+             * @default none
+             */
+            furnished: string;
+            /**
+             * Gender Policy
+             * @default any
+             */
+            gender_policy: string;
+            /** Id */
+            id: string;
+            /** Label */
+            label?: string | null;
+            /** Max Guests */
+            max_guests?: number | null;
+            /** Min Stay */
+            min_stay?: number | null;
+            /** Move In Total */
+            move_in_total?: number | null;
+            /** Price Amount */
+            price_amount: number;
+            /** Price Period */
+            price_period: string;
+            /** Sharing */
+            sharing?: number | null;
+            /** Unit Kind */
+            unit_kind: string;
+        };
         /** UnreadCountResponse */
         UnreadCountResponse: {
             /** Count */
             count: number;
+        };
+        /** UploadRequest */
+        UploadRequest: {
+            /** Content Type */
+            content_type: string;
+            /** Filename */
+            filename: string;
+            /** Org Id */
+            org_id: string;
+            /** Size */
+            size: number;
+        };
+        /** UploadTicket */
+        UploadTicket: {
+            /** Asset Id */
+            asset_id: string;
+            /** Headers */
+            headers: {
+                [key: string]: unknown;
+            };
+            /**
+             * Method
+             * @default PUT
+             */
+            method: string;
+            /** Upload Url */
+            upload_url: string;
         };
         /** UploadUrlRequest */
         UploadUrlRequest: {
@@ -7011,6 +8322,11 @@ export interface components {
             today_count: number;
             /** Week Count */
             week_count: number;
+        };
+        /** VisitNote */
+        VisitNote: {
+            /** Note */
+            note?: string | null;
         };
         /** WishlistActionResponse */
         WishlistActionResponse: {
@@ -7182,6 +8498,68 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    preview_action_api_v1_actions__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    do_action_api_v1_actions__token__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_agents_api_v1_admin_agents_get: {
         parameters: {
             query?: never;
@@ -9488,6 +10866,225 @@ export interface operations {
             };
         };
     };
+    list_alerts_api_v1_discovery_alerts_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_alert_api_v1_discovery_alerts_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlertCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_alert_api_v1_discovery_alerts__alert_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                alert_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    similar_places_api_v1_discovery_properties__slug__similar_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimilarResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_places_api_v1_discovery_search_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                market?: string | null;
+                mode?: string;
+                /** @description Comma-separated place slugs */
+                place?: string | null;
+                kind?: string | null;
+                /** @description Comma-separated unit kinds */
+                unit_kind?: string | null;
+                min_price?: number | null;
+                max_price?: number | null;
+                /** @description Comma-separated */
+                amenities?: string | null;
+                has_video?: boolean | null;
+                /** @description Landmark slug */
+                near?: string | null;
+                max_walk?: number | null;
+                gender?: string | null;
+                sort?: string;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ingest_events_api_v1_events_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventBatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventBatchResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_feedback_api_v1_feedback_get: {
         parameters: {
             query?: {
@@ -9993,6 +11590,112 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ImageUploadRead"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_inquiry_api_v1_inquiries_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InquiryResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inquiry_followup_api_v1_inquiries__ref_code__followup_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+            };
+            path: {
+                ref_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryFollowup"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inquiry_outcome_api_v1_inquiries__ref_code__outcome_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+            };
+            path: {
+                ref_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InquiryOutcome"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -11263,6 +12966,226 @@ export interface operations {
             };
         };
     };
+    list_markets_api_v1_markets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketRead"][];
+                };
+            };
+        };
+    };
+    list_landmarks_api_v1_markets__market_slug__landmarks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                market_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandmarkRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_places_api_v1_markets__market_slug__places_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                market_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaceRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_workspace_api_v1_me_workspace_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_upload_api_v1_media_uploads_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTicket"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_status_api_v1_media__asset_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_upload_api_v1_media__asset_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_notifications_api_v1_notifications_get: {
         parameters: {
             query?: never;
@@ -11797,6 +13720,421 @@ export interface operations {
             };
         };
     };
+    health_api_v1_ops_markets__market_slug__health_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                market_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_api_v1_ops_properties__property_id__review_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Decision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    visit_api_v1_ops_properties__property_id__visit_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["VisitNote"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_queues_api_v1_ops_queues_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_reports_api_v1_ops_reports_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_api_v1_ops_reports__report_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportResolution"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_review_api_v1_ops_review_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_staff_api_v1_ops_staff_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffAssignment"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_stale_orgs_api_v1_ops_stale_orgs_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_inquiries_api_v1_orgs__org_id__inquiries_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lister_outcome_api_v1_orgs__org_id__inquiries__ref_code__outcome_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+                ref_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OutcomeBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_member_api_v1_orgs__org_id__members_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberAdd"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     check_email_api_v1_profiles_check_email_get: {
         parameters: {
             query: {
@@ -12269,6 +14607,184 @@ export interface operations {
             };
         };
     };
+    confirm_property_api_v1_properties__property_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    let_property_api_v1_properties__property_id__let_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pause_property_api_v1_properties__property_id__pause_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                property_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_property_api_v1_properties__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropertyRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_property_api_v1_properties__slug__reports_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_public_agent_api_v1_public_agents__slug_or_id__get: {
         parameters: {
             query?: never;
@@ -12340,9 +14856,12 @@ export interface operations {
             };
         };
     };
-    get_verify_candidates_api_v1_public_verify_candidates_get: {
+    verify_lookup_api_v1_public_verify_lookup_get: {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Phone number, M-Pesa detail or hostel name */
+                q: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -12356,6 +14875,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VerifyCandidate"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -12745,6 +15273,134 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReviewReplyRead"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_saved_api_v1_saves_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedIds"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    merge_saves_api_v1_saves_merge_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_listing_api_v1_saves__listing_id__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsave_listing_api_v1_saves__listing_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path: {
+                listing_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

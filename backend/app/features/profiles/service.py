@@ -6,6 +6,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.config import settings
 from app.core.errors import NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
@@ -17,7 +18,6 @@ from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, W
 
 
 STAFF_ROLES = ("agent", "admin", "manager", "super_admin")
-SCHOOL_EMAIL_DOMAIN = "@dkut.ac.ke"
 
 
 class ProfileService:
@@ -41,7 +41,7 @@ class ProfileService:
             profile.home_campus_id = profile.campus_id
 
         email = user.email.strip().lower() if user.email else None
-        is_school = bool(email) and email.endswith(SCHOOL_EMAIL_DOMAIN)
+        is_school = bool(email) and email.lower().endswith(tuple(f"@{d}" for d in settings.SCHOOL_EMAIL_DOMAINS))
         profile.email = email
         profile.school_verified = is_school
         profile.school_email = email if is_school else None
@@ -100,7 +100,7 @@ class ProfileService:
             # safe when no profile row exists yet.
             campus_id = None
             default = await db.execute(
-                select(Campus.id).where(Campus.slug == "dekut").limit(1)
+                select(Campus.id).where(Campus.slug == settings.DEFAULT_CAMPUS_SLUG).limit(1)
             )
             if default_id := default.scalar_one_or_none():
                 campus_id = str(default_id)

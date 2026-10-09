@@ -8,7 +8,6 @@ import {
   MessageCircle,
   Building2,
   UserCheck,
-  Phone,
   X,
   ArrowLeft,
   Loader2,
@@ -20,42 +19,11 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
+import { getSession } from '@/lib/supabase/auth';
 import { profilesApi } from '@/lib/api/profiles';
-import { isValidKenyanPhone } from '@/lib/utils/phone';
+import { rumia } from '@/lib/api/rumia';
+import { rememberFollowUp, withReference } from '@/lib/contact';
 import posthog from 'posthog-js';
-
-// ── localStorage key for resuming flow after OAuth redirect ───────────────────
-const PENDING_CONTACT_KEY = 'rumia_pending_contact';
-
-export interface PendingContact {
-  hostelId: string;
-  hostelTitle: string;
-  agentId: string;
-  agentPhone: string;
-  paysCommission: boolean;
-  contactType: 'hostel_owner' | 'rumia_agent';
-  returnPath: string;
-}
-
-/** Save pending contact state before Google OAuth redirect */
-export function savePendingContact(state: PendingContact) {
-  try {
-    sessionStorage.setItem(PENDING_CONTACT_KEY, JSON.stringify(state));
-  } catch {}
-}
-
-/** Read and clear pending contact state after OAuth redirect */
-export function consumePendingContact(): PendingContact | null {
-  try {
-    const raw = sessionStorage.getItem(PENDING_CONTACT_KEY);
-    if (!raw) return null;
-    sessionStorage.removeItem(PENDING_CONTACT_KEY);
-    return JSON.parse(raw) as PendingContact;
-  } catch {
-    return null;
-  }
-}
 
 // ── Animation variants (matches BookTourForm exactly) ────────────────────────
 
@@ -99,9 +67,23 @@ const mobileSheetVariants = {
   },
 };
 
+/** Best-effort: a failure here never blocks the contact. Returns the reference code. */
+async function logInquiry(listingId: string, title: string): Promise<string | null> {
+  try {
+    const { data } = await rumia.POST('/api/v1/inquiries', {
+      body: { listing_id: listingId, channel: 'whatsapp', source: 'property' },
+    });
+    if (!data) return null;
+    rememberFollowUp({ ref: data.ref_code, name: data.contact_name || title, at: Date.now() });
+    return data.ref_code;
+  } catch {
+    return null;
+  }
+}
+
 // ── Step types ────────────────────────────────────────────────────────────────
 
-type Step = 'choose' | 'full' | 'phone' | 'fee' | 'redirecting';
+type Step = 'choose' | 'full' | 'fee' | 'redirecting';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -116,7 +98,6 @@ interface ContactModalProps {
   paysCommission: boolean;
   consultationFee?: number | null;
   isFull?: boolean;
-  resumedContactType?: 'hostel_owner' | 'rumia_agent' | null;
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -132,7 +113,6 @@ export function ContactModal({
   paysCommission,
   consultationFee,
   isFull,
-  resumedContactType,
 }: ContactModalProps) {
   const isMobile = useIsMobile();
   // Returns true only after hydration, so createPortal never runs on the server.
@@ -155,11 +135,6 @@ export function ContactModal({
   const [fullLocked, setFullLocked] = useState(false);
   const isFullEffective = isFull || fullLocked;
 
-  // Phone capture state
-  const [phone, setPhone] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [savingPhone, setSavingPhone] = useState(false);
-  const [phoneAttempts, setPhoneAttempts] = useState(0);
 
   // Lock body scroll
   useScrollLock(isOpen);
@@ -168,9 +143,6 @@ export function ContactModal({
   const handleClose = useCallback(() => {
     setStep('choose');
     setContactType(null);
-    setPhone('');
-    setPhoneError('');
-    setPhoneAttempts(0);
     setFullLocked(false);
     onClose();
   }, [onClose]);
@@ -180,7 +152,6 @@ export function ContactModal({
   const continueToWhatsApp = useCallback(
     async (
       type: 'hostel_owner' | 'rumia_agent',
-      userPhone: string,
       feeAccepted: boolean,
     ) => {
       setIsLoading(true);
@@ -221,7 +192,6 @@ export function ContactModal({
             agent_id: agentId,
             contact_type: type,
             name,
-            phone: userPhone,
             fee_accepted: feeAccepted,
           }),
         });
@@ -251,6 +221,9 @@ export function ContactModal({
         }
 
         if (data.whatsappUrl) {
+          // Also log a reference-coded inquiry so the visitor can later say whether the place replied.
+          const ref = await logInquiry(listingId, listingTitle);
+          if (ref) data.whatsappUrl = withReference(data.whatsappUrl, ref);
           posthog.capture('contact_whatsapp_opened', {
             listing_id: listingId,
             contact_type: type,
@@ -299,7 +272,7 @@ export function ContactModal({
   );
 
   // Ref always holds the latest continueToWhatsApp, avoiding stale closures
-  // in handleContactTypeSelect / handlePhoneSubmit / handleFeeAccepted.
+  // in handleContactTypeSelect / handleFeeAccepted.
   const continueRef = useRef(continueToWhatsApp);
   useEffect(() => {
     continueRef.current = continueToWhatsApp;
@@ -316,110 +289,24 @@ export function ContactModal({
         return;
       }
 
+      // No account or phone number is needed to contact a place.
       setContactType(type);
       setIsLoading(true);
-
       try {
-        const { session } = await getSession();
-
-        if (!session?.user) {
-          const pending: PendingContact = {
-            hostelId: listingId,
-            hostelTitle: listingTitle,
-            agentId,
-            agentPhone,
-            paysCommission,
-            contactType: type,
-            returnPath: window.location.pathname,
-          };
-          savePendingContact(pending);
-          const { error } = await signInWithGoogle(window.location.pathname);
-          if (error) {
-            setIsLoading(false);
-            return;
-          }
-          return;
-        }
-
-        const profile = await profilesApi.getMe().catch(() => null);
-
-        if (!profile?.phone || !isValidKenyanPhone(profile.phone)) {
-          setIsLoading(false);
-          setStep('phone');
-          return;
-        }
-
-        await continueRef.current(type, profile.phone, false);
+        await continueRef.current(type, false);
       } catch (err) {
         console.error('Contact flow error:', err);
         toast.error('Something went wrong. Please try again.');
         setIsLoading(false);
       }
     },
-    [listingId, listingTitle, agentId, agentPhone, paysCommission, isFullEffective],
+    [isFullEffective],
   );
 
-  // Handle seamless resumption after OAuth. Deferred past the commit so the
-  // async contact flow never performs synchronous state updates in an effect.
-  useEffect(() => {
-    if (isOpen && resumedContactType) {
-      const timer = setTimeout(() => {
-        void handleContactTypeSelect(resumedContactType);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, resumedContactType, handleContactTypeSelect]);
-
-  // ── Step 2 (optional): Phone capture ────────────────────────────────────────
-  const handlePhoneSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setPhoneError('');
-
-      if (!isValidKenyanPhone(phone)) {
-        const attempts = phoneAttempts + 1;
-        setPhoneAttempts(attempts);
-        if (attempts >= 2) {
-          setPhoneError(
-            "That number still doesn't look right. Please try again — use a valid Kenyan number like 0712 345 678.",
-          );
-        } else {
-          setPhoneError(
-            "That doesn't look like a valid Kenyan number. Please try again (e.g. 0712 345 678).",
-          );
-        }
-        toast.error('Invalid phone number. Please try again.');
-        return;
-      }
-
-      setSavingPhone(true);
-      try {
-        const { session } = await getSession();
-        if (!session?.user) {
-          toast.error('Session expired. Please try again.');
-          setSavingPhone(false);
-          return;
-        }
-
-        await profilesApi.updateMe({ phone: phone.trim() });
-
-        setSavingPhone(false);
-        await continueRef.current(contactType!, phone.trim(), false);
-      } catch (err) {
-        console.error('Phone save error:', err);
-        toast.error('Failed to save phone number. Please try again.');
-        setSavingPhone(false);
-      }
-    },
-    [phone, contactType, phoneAttempts],
-  );
-
-  // ── Step 3 (optional): Fee disclosure accepted ───────────────────────────────
+  // ── Step 2 (optional): Fee disclosure accepted ───────────────────────────────
   const handleFeeAccepted = useCallback(async () => {
     posthog.capture('fee_disclosure_accepted', { listing_id: listingId });
-    const profile = await profilesApi.getMe().catch(() => null);
-
-    await continueRef.current(contactType!, profile?.phone ?? '', true);
+    await continueRef.current(contactType!, true);
   }, [contactType, listingId]);
 
   if (!mounted) return null;
@@ -429,17 +316,11 @@ export function ContactModal({
       step={step}
       contactType={contactType}
       isLoading={isLoading}
-      phone={phone}
-      setPhone={setPhone}
-      phoneError={phoneError}
-      setPhoneError={setPhoneError}
-      savingPhone={savingPhone}
       paysCommission={paysCommission}
       consultationFee={consultationFee}
       isFull={isFullEffective}
       onChooseHostelOwner={() => handleContactTypeSelect('hostel_owner')}
       onChooseRumiaAgent={() => handleContactTypeSelect('rumia_agent')}
-      onPhoneSubmit={handlePhoneSubmit}
       onFeeAccepted={handleFeeAccepted}
       onClose={handleClose}
     />
@@ -506,17 +387,11 @@ interface ModalContentProps {
   step: Step;
   contactType: 'hostel_owner' | 'rumia_agent' | null;
   isLoading: boolean;
-  phone: string;
-  setPhone: (v: string) => void;
-  phoneError: string;
-  setPhoneError: (v: string) => void;
-  savingPhone: boolean;
   paysCommission: boolean;
   consultationFee?: number | null;
   isFull?: boolean;
   onChooseHostelOwner: () => void;
   onChooseRumiaAgent: () => void;
-  onPhoneSubmit: (e: React.FormEvent) => void;
   onFeeAccepted: () => void;
   onClose: () => void;
 }
@@ -525,17 +400,11 @@ function ModalContent({
   step,
   contactType,
   isLoading,
-  phone,
-  setPhone,
-  phoneError,
-  setPhoneError,
-  savingPhone,
   paysCommission,
   consultationFee,
   isFull,
   onChooseHostelOwner,
   onChooseRumiaAgent,
-  onPhoneSubmit,
   onFeeAccepted,
   onClose,
 }: ModalContentProps) {
@@ -549,108 +418,6 @@ function ModalContent({
         <p className="text-sm font-semibold text-slate-600">
           Opening WhatsApp…
         </p>
-      </div>
-    );
-  }
-
-  // ── Phone step ──
-  if (step === 'phone') {
-    return (
-      <div>
-        <div className="flex items-center gap-3 mb-5">
-          <button
-            onClick={onClose}
-            className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">
-              Your WhatsApp Number
-            </h2>
-            <p className="text-xs text-gray-500">Required to continue</p>
-          </div>
-        </div>
-
-        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5">
-          <p className="text-sm font-semibold text-emerald-900 mb-1">
-            Why we need this
-          </p>
-          <p className="text-xs text-emerald-700 leading-relaxed">
-            Please enter the WhatsApp number you actually use. This number will
-            be used when contacting hostel owners and Rumia agents.
-          </p>
-        </div>
-
-        <form onSubmit={onPhoneSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label
-              htmlFor="contact-phone"
-              className="text-sm font-semibold text-gray-700"
-            >
-              Phone number
-            </Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                id="contact-phone"
-                type="tel"
-                placeholder="e.g. 0712 345 678"
-                value={phone}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setPhone(val);
-                  if (val.trim().length >= 9) {
-                    setPhoneError(
-                      isValidKenyanPhone(val)
-                        ? ''
-                        : 'Please enter a valid Kenyan number (07xx or 01xx)',
-                    );
-                  } else {
-                    setPhoneError('');
-                  }
-                }}
-                className={cn(
-                  'h-11 pl-10',
-                  phoneError
-                    ? 'border-rose-400 focus-visible:ring-rose-400'
-                    : 'border-gray-300 focus:border-gray-500',
-                )}
-                autoFocus
-                required
-              />
-            </div>
-            {phoneError && (
-              <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
-                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                {phoneError}
-              </p>
-            )}
-            <p className="text-[11px] text-gray-400 font-medium">
-              Kenyan numbers only · saved to your profile · never shown publicly
-            </p>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={
-              savingPhone ||
-              !phone.trim() ||
-              (phone.trim().length >= 9 && !isValidKenyanPhone(phone))
-            }
-            className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all duration-300 border-0"
-          >
-            {savingPhone ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Saving…
-              </>
-            ) : (
-              'Continue'
-            )}
-          </Button>
-        </form>
       </div>
     );
   }

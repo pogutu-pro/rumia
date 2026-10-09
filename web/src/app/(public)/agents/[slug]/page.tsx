@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { publicApi } from '@/lib/api/public';
 import { listingsApi } from '@/lib/api/listings';
 import { toLegacyListingShape } from '@/lib/api/legacy-listing';
@@ -302,7 +303,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
                     );
                     const imageUrl = sortedImages[0]?.r2_url;
                     const href = item.slug
-                      ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+                      ? `${listingPath(item)}`
                       : `/listing/${item.id}`;
 
                     return (

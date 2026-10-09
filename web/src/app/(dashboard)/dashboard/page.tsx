@@ -1,3 +1,4 @@
+import { TodayPanel } from '@/components/dashboard/today-panel';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import {
@@ -87,6 +88,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      <TodayPanel />
+
       {/* Welcome & Greeting Banner */}
       <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">

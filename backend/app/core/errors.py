@@ -80,3 +80,16 @@ class ConflictException(APIException):
             message=message,
             details=details,
         )
+
+
+class ServiceUnavailableException(APIException):
+    """503: a dependency we need to answer safely (e.g. the database) is not available. Clients may retry."""
+
+    def __init__(self, message: str = "Service temporarily unavailable", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            code="SERVICE_UNAVAILABLE",
+            message=message,
+            details=details,
+            headers={"Retry-After": "5"},
+        )

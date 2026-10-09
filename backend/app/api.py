@@ -3,6 +3,8 @@ from app.features.admin import admin_router
 from app.features.admin.console_router import router as admin_console_router
 from app.features.manager import manager_router
 from app.features.official_hostels import official_hostels_router
+from app.features.ops import ops_router
+from app.features.workspace import workspace_router
 from app.features.public import public_router
 from app.features.agents import agents_router
 from app.features.bnb import bnb_router
@@ -10,11 +12,17 @@ from app.features.auth import auth_router
 from app.features.analytics import analytics_router
 from app.features.announcements import announcements_router
 from app.features.campuses import campuses_router
+from app.features.catalog import catalog_router
+from app.features.discovery import discovery_router
+from app.features.events import events_router
 from app.features.feedback import feedback_router
+from app.features.geo import geo_router
 from app.features.health import health_router
 from app.features.hostel_requests import hostel_requests_router
 from app.features.images import images_router
+from app.features.inquiries import inquiries_router
 from app.features.leads import leads_router
+from app.features.media import media_router
 from app.features.legal import legal_router
 from app.features.listings import listings_router
 from app.features.notifications import notifications_router
@@ -22,6 +30,7 @@ from app.features.notifications.webhooks import router as webhooks_router
 from app.features.profiles import profiles_router
 from app.features.regions import regions_router
 from app.features.reviews import reviews_router
+from app.features.saves import saves_router
 from app.features.search import search_router
 from app.features.tours import tours_router
 from app.features.zones import zones_router
@@ -55,6 +64,15 @@ api_router.include_router(public_router)
 api_router.include_router(official_hostels_router)
 api_router.include_router(manager_router)
 api_router.include_router(admin_console_router)
+api_router.include_router(geo_router)
+api_router.include_router(catalog_router)
+api_router.include_router(ops_router)
+api_router.include_router(workspace_router)
+api_router.include_router(discovery_router)
+api_router.include_router(media_router)
+api_router.include_router(events_router)
+api_router.include_router(inquiries_router)
+api_router.include_router(saves_router)
 
 
 

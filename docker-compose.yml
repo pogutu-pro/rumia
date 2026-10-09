@@ -97,6 +97,34 @@ services:
       - ./backend/.env
     environment:
       - ENVIRONMENT=production
+      # Scheduled jobs run once, in the worker service below, not in every gunicorn worker.
+      - RUN_SCHEDULER=false
+    networks:
+      - rumia-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Scheduled jobs (delivery retries, announcement cleanup). Run exactly one replica.
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rumia_worker
+    restart: always
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - ./backend/.env
+    environment:
+      - ENVIRONMENT=production
+      - RUN_SCHEDULER=true
+    healthcheck:
+      disable: true
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - rumia-network
     logging:

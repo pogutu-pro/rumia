@@ -80,6 +80,26 @@ class Settings(BaseSettings):
     POSTHOG_PROJECT_TOKEN: str = ""
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
 
+    # Defaults for the first market. Nothing else in the code should name a campus, county or school.
+    DEFAULT_CAMPUS_SLUG: str = "dekut"
+    DEFAULT_COUNTY: str = "nyeri"
+    # Email domains that mark a student of a supported institution as school-verified.
+    SCHOOL_EMAIL_DOMAINS: List[str] = ["dkut.ac.ke"]
+
+    # Who a seeker's WhatsApp/call goes to when a listing has both an agent and a separate owner number.
+    # "agent_first" keeps today's behaviour (the listing's agent); "owner_first" prefers the owner's number.
+    INQUIRY_CONTACT_POLICY: str = "agent_first"
+    # Until the revenue model is decided, a contact on a commission-paying listing still accrues the legacy
+    # per-click commission (deduplicated per verified visitor). Turn off once outcome-based money replaces it.
+    INQUIRY_ACCRUES_LEGACY_COMMISSION: bool = True
+
+    # Fee recorded when a move-in is confirmed (KES). 0 = nothing is recorded; set once the revenue model is decided.
+    LEDGER_MOVE_IN_FEE_KES: float = 0
+
+    # Scheduled jobs (delivery retries, announcement cleanup). In production the API sets this to
+    # false and a single `worker` container runs them, so they never run once per web worker.
+    RUN_SCHEDULER: bool = True
+
     # Sentry Error Tracking
     SENTRY_DSN: str = ""
     SENTRY_TRACES_SAMPLE_RATE: float = 0.2  # 20% of transactions for performance tracking

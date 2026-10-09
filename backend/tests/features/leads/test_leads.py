@@ -145,7 +145,7 @@ async def test_track_endpoint_hashes_client_ip_and_schedules_push(client: AsyncC
         response = await client.post(
             "/api/v1/leads/track",
             json={"listing_id": LISTING_ID, "contact_type": "rumia_agent", "fee_accepted": True},
-            headers={"x-forwarded-for": "203.0.113.9"},
+            headers={"x-real-ip": "203.0.113.9"},
         )
     assert response.status_code == 200
     assert response.json()["recorded"] is True

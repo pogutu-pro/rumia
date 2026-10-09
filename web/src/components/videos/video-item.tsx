@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import * as React from 'react';
 import Link from 'next/link';
 import {
@@ -48,7 +49,7 @@ function getListingHref(listing: Listing): string {
     return `/bnb/${listing.id}`;
   }
   if (listing.slug && listing.county && listing.area) {
-    return `/hostels/${listing.county}/${listing.area}/${listing.slug}`;
+    return listingPath(listing);
   }
   if (listing.slug && listing.area) {
     return `/hostels/nyeri/${listing.area}/${listing.slug}`;

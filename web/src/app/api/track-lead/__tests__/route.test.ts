@@ -30,7 +30,7 @@ function req(body: unknown) {
   ipCounter += 1;
   return new Request('http://localhost/api/track-lead', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-forwarded-for': `198.51.100.${ipCounter}` },
+    headers: { 'content-type': 'application/json', 'x-real-ip': `198.51.100.${ipCounter}` },
     body: JSON.stringify(body),
   }) as unknown as Parameters<typeof POST>[0];
 }

@@ -66,8 +66,9 @@ export const publicApi = {
   getSupportTeam: (next?: Revalidate) =>
     fetchPublicApi<PublicAgent[]>('/public/support-team', opts(next)),
 
-  getVerifyCandidates: (next?: Revalidate) =>
-    fetchPublicApi<VerifyCandidate[]>('/public/verify-candidates', opts(next)),
+  /** Active listings matching one phone / payment detail / name the visitor typed (max 10). */
+  verifyLookup: (q: string): Promise<VerifyCandidate[]> =>
+    fetchPublicApi<VerifyCandidate[]>(`/public/verify-lookup?q=${encodeURIComponent(q)}`),
 
   getSitemap: (next?: Revalidate) => fetchPublicApi<SitemapData>('/public/sitemap', opts(next)),
 

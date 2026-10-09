@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { Metadata } from 'next';
 import { listingsApi } from '@/lib/api/listings';
 
@@ -6,6 +7,7 @@ import {
   ExploreDiscovery,
   type ExploreZone,
 } from '@/components/home/explore-discovery';
+import { ForYou } from '@/components/home/for-you';
 import { ListingSection } from '@/components/home/listing-section';
 import type { ExploreListing } from '@/components/home/explore-listing-card';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
@@ -13,6 +15,7 @@ import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
 import { getZonesByCampusSlug } from '@/lib/data/zones';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 import type { Campus, Listing } from '@/types';
+import { getStartingPrice } from '@/lib/utils/starting-price';
 
 export const revalidate = 300;
 
@@ -88,7 +91,7 @@ function buildPageSchemas(
           '@type': 'ListItem',
           position: idx + 1,
           name: item.title,
-          url: `${baseUrl}${item.slug ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}` : `/listing/${item.id}`}`,
+          url: `${baseUrl}${item.slug ? `${listingPath(item)}` : `/listing/${item.id}`}`,
           image: item.image_url || undefined,
         })),
       },
@@ -101,7 +104,7 @@ function toExploreListing(item: Listing): ExploreListing {
   return {
     id: String(item.id),
     title: item.title,
-    price: item.price,
+    price: getStartingPrice(item, item.room_types),
     location: item.location,
     slug: item.slug,
     county: item.county,
@@ -261,6 +264,8 @@ export default async function HomePage() {
         zones={zones}
         items={exploreItems}
       />
+
+      <ForYou />
 
       <div className="pb-10 pt-2">
         <ListingSection

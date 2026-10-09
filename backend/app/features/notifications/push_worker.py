@@ -17,6 +17,7 @@ from app.features.notifications.models import DeviceToken, PushSubscription
 logger = logging.getLogger(__name__)
 
 MAX_RETRY_COUNT = 3
+CLAIM_LEASE_SECONDS = 60  # a claimed or in-flight row is left alone for this long
 PUSH_PACING_DELAY = 0.3
 
 WEB_PUSH_STATUSES = {"pending", "sending", "failed"}
@@ -29,20 +30,29 @@ class PushDeliveryWorker:
         """Retry pending/sending/failed per-device push deliveries."""
         from sqlalchemy import text
 
+        # Claim rows with a short lease (updated_at) under FOR UPDATE SKIP LOCKED so two sweepers can
+        # never pick up the same row, and a row that is being sent right now is left alone.
         async with async_session_factory() as session:
             res = await session.execute(
                 text("""
-                    SELECT pd.id, pd.channel, pd.token_id, pd.notification_type,
-                           pd.user_id, pd.listing_id, pd.payload
-                    FROM push_deliveries pd
-                    WHERE pd.status IN ('pending', 'sending', 'failed')
-                      AND pd.retry_count < :max_retry
-                    ORDER BY pd.created_at ASC
-                    LIMIT 500
+                    UPDATE push_deliveries pd
+                    SET updated_at = now()
+                    WHERE pd.id IN (
+                        SELECT id FROM push_deliveries
+                        WHERE status IN ('pending', 'sending', 'failed')
+                          AND retry_count < :max_retry
+                          AND updated_at < now() - make_interval(secs => :lease)
+                        ORDER BY created_at ASC
+                        LIMIT 500
+                        FOR UPDATE SKIP LOCKED
+                    )
+                    RETURNING pd.id, pd.channel, pd.token_id, pd.notification_type,
+                              pd.user_id, pd.listing_id, pd.payload
                 """),
-                {"max_retry": MAX_RETRY_COUNT},
+                {"max_retry": MAX_RETRY_COUNT, "lease": CLAIM_LEASE_SECONDS},
             )
             rows = [dict(r) for r in res.mappings().all()]
+            await session.commit()
 
         for row in rows:
             row["payload"] = row.get("payload") or {}

@@ -1,5 +1,6 @@
 """Admin-only operations behind the admin console (listings, agents, users, commissions, analytics)."""
 import uuid
+from app.core.permissions import sync_staff_for_role
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from typing import List, Optional, Tuple
@@ -7,6 +8,8 @@ from typing import List, Optional, Tuple
 from sqlalchemy import func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.features.catalog.service import project_listing
 from app.core.auth_provider import get_auth_provider
 from app.core.errors import BadRequestException, ConflictException, ForbiddenException, NotFoundException
 from app.core.security import AuthenticatedUser
@@ -133,6 +136,7 @@ class AdminConsoleService:
             raise NotFoundException("User not found")
         profile.role = role
         await db.flush()
+        await sync_staff_for_role(db, str(target_id), role)
 
     @staticmethod
     async def promote_to_admin(db: AsyncSession, user: AuthenticatedUser, target_id: str) -> None:
@@ -148,6 +152,7 @@ class AdminConsoleService:
         profile.managed_campus_id = None
         profile.managed_region_id = None
         await db.flush()
+        await sync_staff_for_role(db, str(target_id), "admin")
 
     # ── Agents ─────────────────────────────────────────────────────────────
 
@@ -220,11 +225,11 @@ class AdminConsoleService:
 
     @staticmethod
     async def _agent_campus_id(db: AsyncSession, user_id: str) -> Optional[str]:
-        """The user's own campus (so promoted students keep it), else DeKUT. agents.campus_id is NOT NULL."""
+        """The user's own campus (so promoted students keep it), else the default campus. agents.campus_id is NOT NULL."""
         row = (await db.execute(select(UserProfile.campus_id, UserProfile.home_campus_id).where(UserProfile.id == user_id))).first()
         if row and (row.campus_id or row.home_campus_id):
             return str(row.campus_id or row.home_campus_id)
-        dekut = (await db.execute(select(Campus.id).where(Campus.slug == "dekut"))).scalar_one_or_none()
+        dekut = (await db.execute(select(Campus.id).where(Campus.slug == settings.DEFAULT_CAMPUS_SLUG))).scalar_one_or_none()
         return str(dekut) if dekut else None
 
     @staticmethod
@@ -435,6 +440,7 @@ class AdminConsoleService:
         listing.verified_source = "Admin Manual Verification" if verified else None
         listing.verified_date = date.today() if verified else None
         await db.flush()
+        await project_listing(db, listing.id)
         return listing
 
     @staticmethod
@@ -461,6 +467,7 @@ class AdminConsoleService:
         if not listing.manual_review_needed:
             listing.manual_review_needed = result.manual_review_needed
         await db.flush()
+        await project_listing(db, listing.id)
         return ListingVerificationResult(
             verified=result.verified, match_type=result.match_type, matched_hostel=result.matched_hostel, flags=result.flags,
         )
@@ -484,6 +491,8 @@ class AdminConsoleService:
             listing.discrepancy_review_needed = result.discrepancy_review_needed
             listing.shared_contact_detected = result.shared_contact_detected
             listing.manual_review_needed = result.manual_review_needed
+            await db.flush()
+            await project_listing(db, listing.id)
             if result.matched_hostel:
                 matched_records.add(result.matched_hostel)
             if result.verified:

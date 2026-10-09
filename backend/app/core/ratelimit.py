@@ -1,7 +1,9 @@
 """App-level rate limiting (slowapi) with the standard Rumia error envelope.
 
-Limits are keyed by the requesting client IP. Behind nginx the real client IP
-is carried in `X-Forwarded-For`, which nginx sets from `$proxy_add_x_forwarded_for`.
+Limits are keyed by the requesting client IP. nginx overwrites `X-Real-IP` with the verified client
+address on every request (Cloudflare's CF-Connecting-IP when the connection comes from Cloudflare, or
+the address the web tier forwarded for server-side calls), so that is the only header trusted here.
+`X-Forwarded-For` is deliberately ignored: a client can put anything in it.
 """
 
 from typing import Any, Dict, Optional
@@ -16,9 +18,9 @@ from app.core.config import settings
 
 
 def _client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    real_ip = (request.headers.get("x-real-ip") or "").strip()
+    if real_ip:
+        return real_ip
     return get_remote_address(request)
 
 

@@ -1,3 +1,6 @@
+import { reportAuthFailure } from '@/lib/auth/report';
+import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
+import { listingPath } from '@/lib/utils/listing-path';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getApiUrl } from '@/lib/api/config';
@@ -83,7 +86,7 @@ export default async function proxy(request: NextRequest) {
       if (res.ok) {
         const row = await res.json();
         if (row?.slug) {
-          const dest = `/hostels/${row.county || 'nyeri'}/${row.area || 'dekut'}/${row.slug}`;
+          const dest = `${listingPath(row)}`;
           return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
         }
       }
@@ -123,7 +126,7 @@ export default async function proxy(request: NextRequest) {
   let refreshUnavailable = false;
   const rt = request.cookies.get(RT_COOKIE)?.value;
   if (!isFresh(session) && rt) {
-    const result = await authBackend.refresh(rt).catch(() => null);
+    const result = await authBackend.refresh(rt, clientIpFrom(request.headers)).catch(() => null);
     if (result?.ok && result.data) {
       refreshed = sessionCookies(result.data);
       session = sessionFromToken(result.data.access_token);
@@ -133,6 +136,7 @@ export default async function proxy(request: NextRequest) {
       session = null; // refresh token revoked/expired: treat as signed out
     } else {
       refreshUnavailable = true;
+      reportAuthFailure({ stage: 'refresh', cause: result ? `backend_${result.status}` : 'backend_unreachable', status: result?.status });
     }
   }
   const user = isFresh(session, 0) ? session!.user : null;

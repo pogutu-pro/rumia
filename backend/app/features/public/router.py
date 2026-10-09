@@ -1,9 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
+from app.core.ratelimit import limiter
 from app.features.public.schemas import PublicAgent, SitemapResponse, VerifyCandidate
 from app.features.public.service import PublicService
 
@@ -35,17 +36,23 @@ async def get_support_team(db: AsyncSession = Depends(get_db_session, scope="fun
 
 
 @router.get(
-    "/verify-candidates",
+    "/verify-lookup",
     response_model=List[VerifyCandidate],
     status_code=status.HTTP_200_OK,
-    summary="Verify-Before-You-Pay Dataset",
+    summary="Verify-Before-You-Pay Lookup",
     description=(
-        "Contact and payment identifiers of active listings, used by the public Hakikisha checker "
-        "to tell students whether a number or payment detail belongs to a known listing. Public."
+        "Active listings matching ONE phone number, payment detail or name the visitor typed into the "
+        "Hakikisha checker (max 10). Payment details are returned only when the search was by payment "
+        "detail. Rate limited. Public."
     ),
 )
-async def get_verify_candidates(db: AsyncSession = Depends(get_db_session, scope="function")) -> List[VerifyCandidate]:
-    return await PublicService.verify_candidates(db)
+@limiter.limit("20/minute")
+async def verify_lookup(
+    request: Request,
+    q: str = Query(..., min_length=3, max_length=100, description="Phone number, M-Pesa detail or hostel name"),
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> List[VerifyCandidate]:
+    return await PublicService.verify_lookup(db, q)
 
 
 @router.get(

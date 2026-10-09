@@ -1,6 +1,9 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { getStartingPrice } from '@/lib/utils/starting-price';
+import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -419,12 +422,10 @@ export default function HostelsSearch({
                 const sorted = [...(item.listing_images || [])].sort(
                   (a, b) => a.display_order - b.display_order,
                 );
-                const imageUrl =
-                  sorted[0]?.r2_url ??
-                  'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+                const imageUrl = sorted[0]?.r2_url;
                 const blurDataUrl = sorted[0]?.blur_data_url;
                 const href = item.slug
-                  ? `/hostels/${item.county ?? 'nyeri'}/${item.area ?? 'dekut'}/${item.slug}`
+                  ? `${listingPath(item)}`
                   : `/listing/${item.id}`;
 
                 const distanceBadge = getDistanceBadgeText(
@@ -432,14 +433,7 @@ export default function HostelsSearch({
                 );
                 const isSelected = isCompareSelected(item.id);
 
-                let priceDisplay = `KES ${item.price.toLocaleString()}/mo`;
-                if (item.price_single && item.price_sharing) {
-                  priceDisplay = `KES ${item.price_single.toLocaleString()} for 1 person · KES ${item.price_sharing.toLocaleString()} sharing`;
-                } else if (item.price_single) {
-                  priceDisplay = `KES ${item.price_single.toLocaleString()}/mo for 1 person`;
-                } else if (item.price_sharing) {
-                  priceDisplay = `KES ${item.price_sharing.toLocaleString()}/mo sharing`;
-                }
+                const priceDisplay = `From KES ${getStartingPrice(item, item.listing_room_types).toLocaleString()}/mo`;
 
                 let areaDisplay = item.area || 'Hostel Area';
                 if (item.specific_location) {
@@ -457,15 +451,19 @@ export default function HostelsSearch({
                       }`}
                     >
                       <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                        <Image
-                          src={imageUrl}
-                          alt={`${item.title} — student hostel near DeKUT`}
-                          fill
-                          className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          placeholder="blur"
-                          blurDataURL={blurDataUrl || FALLBACK_BLUR}
-                        />
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={`${item.title} — student hostel near DeKUT`}
+                            fill
+                            className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            placeholder="blur"
+                            blurDataURL={blurDataUrl || FALLBACK_BLUR}
+                          />
+                        ) : (
+                          <NoPhotoTile />
+                        )}
 
                         {distanceBadge && (
                           <div className="absolute top-3 left-3 bg-slate-900/85 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white">

@@ -8,7 +8,7 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from app.core.database import async_session_factory
 from app.core.email import email_service
@@ -21,6 +21,7 @@ from app.core.email.templates import (
 logger = logging.getLogger(__name__)
 
 MAX_RETRY_COUNT = 3
+CLAIM_LEASE_SECONDS = 60  # a claimed or in-flight row is left alone for this long
 RETRY_BASE_DELAY_SECONDS = 60  # exponential backoff: 60s, 120s, 240s
 BREVO_PACING_DELAY = 0.2  # ~5 emails/sec, conservative vs provider limits
 
@@ -31,9 +32,9 @@ def _listening_url(listing: dict) -> str:
     slug = listing.get("slug")
     if not slug:
         return f"{settings.PUBLIC_BASE_URL}/hostels"
-    county = listing.get("county") or "nyeri"
-    area = listing.get("area") or "dekut"
-    return f"{settings.PUBLIC_BASE_URL}/hostels/{county}/{area}/{slug}"
+    from app.core.slug import listing_path
+
+    return f"{settings.PUBLIC_BASE_URL}{listing_path(listing.get('county'), listing.get('area'), slug)}"
 
 
 def _render_for_type(notification_type: str, user: dict, listing: dict, event_data: dict):
@@ -175,20 +176,32 @@ class EmailDeliveryWorker:
 
     @staticmethod
     async def retry_pending() -> None:
-        """Retry pending/sending/deferred/failed rows that are retry-eligible."""
-        from app.features.notifications.models import EmailDelivery
-
+        """Retry pending/sending/deferred rows that are retry-eligible."""
+        # Claim rows with a short lease (updated_at) under FOR UPDATE SKIP LOCKED so two sweepers can
+        # never pick up the same row, and a row that is being sent right now is left alone.
+        # "failed" is final (retries exhausted, or the provider rejected the send) and is not retried.
         async with async_session_factory() as session:
             res = await session.execute(
-                select(EmailDelivery.id)
-                .where(
-                    EmailDelivery.status.in_(("pending", "sending", "deferred", "failed")),
-                    EmailDelivery.retry_count < MAX_RETRY_COUNT,
-                )
-                .order_by(EmailDelivery.created_at.asc())
-                .limit(200)
+                text(
+                    """
+                    UPDATE email_deliveries
+                    SET updated_at = now()
+                    WHERE id IN (
+                        SELECT id FROM email_deliveries
+                        WHERE status IN ('pending', 'sending', 'deferred')
+                          AND retry_count < :max_retry
+                          AND updated_at < now() - make_interval(secs => :lease)
+                        ORDER BY created_at ASC
+                        LIMIT 200
+                        FOR UPDATE SKIP LOCKED
+                    )
+                    RETURNING id
+                    """
+                ),
+                {"max_retry": MAX_RETRY_COUNT, "lease": CLAIM_LEASE_SECONDS},
             )
             ids = [row[0] for row in res.all()]
+            await session.commit()
 
         for delivery_id in ids:
             await EmailDeliveryWorker.send_one(str(delivery_id))

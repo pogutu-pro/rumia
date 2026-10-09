@@ -11,6 +11,7 @@ import {
   type OfficialDeKutRecord,
   type ListingMatchCandidate,
 } from '@/lib/utils/dekut-verification';
+import { publicApi } from '@/lib/api/public';
 import officialRecordsData from '@/lib/data/dekut-official-records.json';
 
 const OFFICIAL_RECORDS: OfficialDeKutRecord[] = officialRecordsData.map((record) =>
@@ -270,7 +271,11 @@ const MODES: { key: SearchMode; label: string; icon: React.ReactNode }[] = [
   { key: 'till', label: 'Till Number', icon: <CreditCard className="h-3.5 w-3.5" /> },
 ];
 
-export function HakisaChecker({ rumiaListings = [] }: HakisaCheckerProps) {
+export function HakisaChecker({ rumiaListings: initialListings = [] }: HakisaCheckerProps) {
+  // Listings come from a per-query lookup (the API no longer hands out the full list).
+  const [fetched, setFetched] = useState<ListingMatchCandidate[] | null>(null);
+  const [checking, setChecking] = useState(false);
+  const rumiaListings = fetched ?? initialListings;
   const [searchMode, setSearchMode] = useState<SearchMode>('phone');
   const [value, setValue] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -460,8 +465,15 @@ export function HakisaChecker({ rumiaListings = [] }: HakisaCheckerProps) {
     }
   }, [outcome]);
 
-  const handleCheck = () => {
-    if (!value.trim()) return;
+  const handleCheck = async () => {
+    const q = value.trim();
+    if (!q || checking) return;
+    setChecking(true);
+    try {
+      setFetched((await publicApi.verifyLookup(q).catch(() => [])) as ListingMatchCandidate[]);
+    } finally {
+      setChecking(false);
+    }
     setSubmitted(true);
   };
 

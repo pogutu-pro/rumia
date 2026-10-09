@@ -46,6 +46,7 @@ const navLinks = [
   { label: 'Regions', href: '/admin/regions', icon: Globe, exact: false },
   { label: 'Managers', href: '/admin/managers', icon: ShieldCheck, exact: false },
   { label: 'Listings', href: '/admin/listings', icon: Building2, exact: false },
+  { label: 'Operations', href: '/admin/operations', icon: ShieldCheck, exact: false },
   { label: 'Hostels', href: '/admin/official-hostels', icon: Hotel, exact: false },
   { label: 'Tours', href: '/admin/tours', icon: CalendarCheck, exact: false },
   { label: 'Leads', href: '/admin/leads', icon: MousePointerClick, exact: false },

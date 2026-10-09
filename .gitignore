@@ -78,3 +78,6 @@ supabase/.temp/
 # Server-only secrets / backups
 .backup.env
 *.env.pre-*.bak
+
+# Mobile app: parked for now (still tracked; its CI job is paused in .github/workflows/ci.yml)
+nginx/mobile/
