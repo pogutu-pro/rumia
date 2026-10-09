@@ -8,6 +8,7 @@ from sqlalchemy import func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.features.catalog.service import project_listing
 from app.core.auth_provider import get_auth_provider
 from app.core.errors import BadRequestException, ConflictException, ForbiddenException, NotFoundException
 from app.core.security import AuthenticatedUser
@@ -436,6 +437,7 @@ class AdminConsoleService:
         listing.verified_source = "Admin Manual Verification" if verified else None
         listing.verified_date = date.today() if verified else None
         await db.flush()
+        await project_listing(db, listing.id)
         return listing
 
     @staticmethod
@@ -462,6 +464,7 @@ class AdminConsoleService:
         if not listing.manual_review_needed:
             listing.manual_review_needed = result.manual_review_needed
         await db.flush()
+        await project_listing(db, listing.id)
         return ListingVerificationResult(
             verified=result.verified, match_type=result.match_type, matched_hostel=result.matched_hostel, flags=result.flags,
         )
@@ -485,6 +488,8 @@ class AdminConsoleService:
             listing.discrepancy_review_needed = result.discrepancy_review_needed
             listing.shared_contact_detected = result.shared_contact_detected
             listing.manual_review_needed = result.manual_review_needed
+            await db.flush()
+            await project_listing(db, listing.id)
             if result.matched_hostel:
                 matched_records.add(result.matched_hostel)
             if result.verified:

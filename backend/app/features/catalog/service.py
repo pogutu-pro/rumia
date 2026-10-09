@@ -59,12 +59,49 @@ def build_facts(evidence: List[Dict[str, Any]], last_confirmed_at: Optional[date
     return facts
 
 
+async def _sync_registry_evidence(db: AsyncSession, listing_id: str, property_id: str) -> None:
+    """Make the property's registry-match evidence follow the listing's `verified` flag in both directions
+    (the SQL copy only ever adds it), so an admin un-verify also removes the trust badge."""
+    params = {"l": str(listing_id), "p": property_id}
+    await db.execute(
+        text(
+            """
+            UPDATE verification_evidence e
+            SET status = CASE WHEN l.verified AND l.verified_source IS NOT NULL THEN 'valid' ELSE 'revoked' END,
+                source = coalesce(l.verified_source, e.source),
+                observed_at = CASE WHEN l.verified AND e.status <> 'valid' THEN now() ELSE e.observed_at END
+            FROM listings l
+            WHERE l.id = CAST(:l AS uuid) AND e.subject = 'property' AND e.subject_id = CAST(:p AS uuid)
+              AND e.kind = 'registry_match'
+              AND e.status <> CASE WHEN l.verified AND l.verified_source IS NOT NULL THEN 'valid' ELSE 'revoked' END
+            """
+        ),
+        params,
+    )
+    await db.execute(
+        text(
+            """
+            INSERT INTO verification_evidence (subject, subject_id, kind, status, observed_at, source)
+            SELECT 'property', CAST(:p AS uuid), 'registry_match', 'valid', coalesce(l.verified_date::timestamptz, now()), l.verified_source
+            FROM listings l
+            WHERE l.id = CAST(:l AS uuid) AND coalesce(l.verified, false) AND l.verified_source IS NOT NULL
+              AND NOT EXISTS (SELECT 1 FROM verification_evidence e WHERE e.subject = 'property'
+                              AND e.subject_id = CAST(:p AS uuid) AND e.kind = 'registry_match')
+            """
+        ),
+        params,
+    )
+
+
 async def project_listing(db: AsyncSession, listing_id: str) -> Optional[str]:
     """Copy a legacy listing into the property model. Never breaks the legacy write that triggered it."""
     try:
         async with db.begin_nested():
             row = (await db.execute(text("SELECT project_listing(CAST(:l AS uuid))"), {"l": str(listing_id)})).first()
-            return str(row[0]) if row and row[0] else None
+            prop = str(row[0]) if row and row[0] else None
+            if prop:
+                await _sync_registry_evidence(db, listing_id, prop)
+            return prop
     except Exception:
         logger.exception("could not project listing %s into the property model", listing_id)
         return None
