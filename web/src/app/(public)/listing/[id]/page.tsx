@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { listingsApi } from '@/lib/api/listings';
 import { notFound, redirect } from 'next/navigation';
 
@@ -13,7 +14,7 @@ export default async function ListingLegacyRedirect({ params }: PageProps) {
   try {
     const listing = await listingsApi.getByIdServer(id);
     if (listing?.slug) {
-      redirect(`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`);
+      redirect(`${listingPath(listing)}`);
     }
   } catch (error) {
     // If not found or error, fall through to notFound()

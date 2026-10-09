@@ -1,5 +1,6 @@
 'use client';
 
+import { InAppBrowserNotice } from '@/components/auth/in-app-browser-notice';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { campusesApi } from '@/lib/api/campuses';
@@ -30,6 +31,12 @@ export default function LoginPage() {
     }
     if (error === 'access_denied') {
       return 'You cancelled the Google sign-in.';
+    }
+    if (error === 'rate_limited') {
+      return 'Too many sign-in attempts right now. Please wait a minute and try again.';
+    }
+    if (error === 'server_unavailable') {
+      return 'Rumia could not reach the sign-in service. Please try again in a moment.';
     }
     return null;
   }
@@ -113,6 +120,8 @@ export default function LoginPage() {
             Welcome back, or create an account to get started.
           </p>
         </div>
+
+<InAppBrowserNotice />
 
 {/* Google Sign-In — prominent */}
         <button

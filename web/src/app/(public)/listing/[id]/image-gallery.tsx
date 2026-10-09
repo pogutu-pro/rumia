@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Image from 'next/image';
 import { LayoutGrid, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
 import { GalleryImage, GalleryViewMode } from '@/components/gallery/gallery-types';
@@ -12,10 +13,7 @@ interface ImageGalleryProps {
   images: (string | GalleryImage)[];
 }
 
-export function ImageGallery({ images }: ImageGalleryProps) {
-  const fallbackImage =
-    'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200';
-
+function ImageGalleryInner({ images }: ImageGalleryProps) {
   // Normalize image objects
   const displayImages: GalleryImage[] =
     images && images.length > 0
@@ -30,7 +28,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
           }
           return {
             id: img.id || `img-${idx}`,
-            r2_url: img.r2_url || (img as any).url || fallbackImage,
+            r2_url: img.r2_url || (img as any).url || '',
             category: img.category || 'Room',
             blur_data_url: img.blur_data_url || undefined,
             width: img.width,
@@ -38,14 +36,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
             alt: img.alt || `Hostel photo ${idx + 1}`,
           };
         })
-      : [
-          {
-            id: 'fallback-0',
-            r2_url: fallbackImage,
-            category: 'Room',
-            alt: 'Hostel main view',
-          },
-        ];
+      : [];
 
   // Gallery state
   const [viewMode, setViewMode] = useState<GalleryViewMode | null>(null); // null means closed
@@ -254,7 +245,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               onClick={() => openGalleryAt(1, 'carousel')}
             >
               <Image
-                src={displayImages[1]?.r2_url || fallbackImage}
+                src={displayImages[1]?.r2_url}
                 alt="Property detail 1"
                 fill
                 className="object-cover hover:scale-[1.02] transition-transform duration-500"
@@ -269,7 +260,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               onClick={() => openGalleryAt(2, 'carousel')}
             >
               <Image
-                src={displayImages[2]?.r2_url || fallbackImage}
+                src={displayImages[2]?.r2_url}
                 alt="Property detail 2"
                 fill
                 className="object-cover hover:scale-[1.02] transition-transform duration-500"
@@ -285,7 +276,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               onClick={() => openGalleryAt(3, 'carousel')}
             >
               <Image
-                src={displayImages[3]?.r2_url || fallbackImage}
+                src={displayImages[3]?.r2_url}
                 alt="Property detail 3"
                 fill
                 className="object-cover hover:scale-[1.02] transition-transform duration-500"
@@ -391,4 +382,18 @@ export function ImageGallery({ images }: ImageGalleryProps) {
       )}
     </div>
   );
+}
+
+export function ImageGallery({ images }: ImageGalleryProps) {
+  const hasImages = (images ?? []).some((img) =>
+    typeof img === 'string' ? Boolean(img) : Boolean(img.r2_url || (img as any).url),
+  );
+  if (!hasImages) {
+    return (
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-slate-100 bg-slate-100">
+        <NoPhotoTile />
+      </div>
+    );
+  }
+  return <ImageGalleryInner images={images} />;
 }

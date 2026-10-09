@@ -1,13 +1,10 @@
+import { clientIpFrom } from '@/lib/net/client-ip';
 import { NextRequest, NextResponse } from 'next/server';
 import { analyticsApi } from '@/lib/api/analytics';
 import { checkRateLimit } from '@/lib/rate-limiter';
 
 function getClientIp(request: NextRequest) {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    '127.0.0.1'
-  );
+  return clientIpFrom(request.headers) || '127.0.0.1';
 }
 
 /**

@@ -549,7 +549,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
       </div>
 
       {/* Mobile sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-lg font-black text-slate-900 tracking-tight">

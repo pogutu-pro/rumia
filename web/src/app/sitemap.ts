@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { MetadataRoute } from 'next';
 import { publicApi } from '@/lib/api/public';
 import { getAllCampuses } from '@/lib/data/campuses';
@@ -23,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   const listingEntries: MetadataRoute.Sitemap = listings.map((l) => ({
-    url: `${BASE}/hostels/${l.county || 'nyeri'}/${l.area || 'dekut'}/${l.slug}`,
+    url: `${BASE}${listingPath(l)}`,
     lastModified: l.updated_at ? new Date(l.updated_at) : new Date(),
     changeFrequency: 'weekly',
     priority: 0.8,

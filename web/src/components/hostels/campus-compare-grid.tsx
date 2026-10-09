@@ -1,6 +1,8 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useCallback } from 'react';
+import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight, GitCompareArrows, Check } from 'lucide-react';
@@ -129,12 +131,10 @@ export function CampusCompareGrid({ listings }: { listings: CampusListing[] }) {
           const sortedImages = (item.listing_images || []).sort(
             (a: any, b: any) => a.display_order - b.display_order,
           );
-          const imageUrl =
-            sortedImages[0]?.r2_url ??
-            'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=600';
+          const imageUrl = sortedImages[0]?.r2_url;
           const blurDataUrl = sortedImages[0]?.blur_data_url;
           const href = item.slug
-            ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
+            ? `${listingPath(item)}`
             : `/listing/${item.id}`;
           const isSelected = isCompareSelected(item.id);
 
@@ -149,15 +149,19 @@ export function CampusCompareGrid({ listings }: { listings: CampusListing[] }) {
                 }`}
               >
                 <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                  <Image
-                    src={imageUrl}
-                    alt={`${item.title} — student hostel near ${shortName} ${city}`}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    placeholder={blurDataUrl ? 'blur' : undefined}
-                    blurDataURL={blurDataUrl || undefined}
-                  />
+                  {imageUrl ? (
+                    <Image
+                      src={imageUrl}
+                      alt={`${item.title} — student hostel near ${shortName} ${city}`}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      placeholder={blurDataUrl ? 'blur' : undefined}
+                      blurDataURL={blurDataUrl || undefined}
+                    />
+                  ) : (
+                    <NoPhotoTile />
+                  )}
                   <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900 border border-slate-100/50">
                     KES {item.price.toLocaleString()}/mo
                   </div>

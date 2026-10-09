@@ -1,6 +1,8 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import { cache } from 'react';
+import { getStartingPrice, pickBestRoomType } from '@/lib/utils/starting-price';
 import { listingsApi } from '@/lib/api/listings';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -30,11 +32,6 @@ import { ListingDescription } from './listing-description';
 import { ReviewsSection } from '@/components/reviews/reviews-section';
 import { readCampusConsultationFee } from '@/lib/utils/consultation-fee';
 import { getZoneTourPrice } from '@/lib/utils/zone-tour-price';
-import {
-  ListingViewCountsAllTime,
-  ListingViewCountsLine,
-} from './listing-view-counts';
-import { getListingViewCounts } from '@/lib/listing-views';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
 import { getCampusById, isFallbackCampus } from '@/lib/data/campuses';
@@ -56,6 +53,14 @@ export async function generateStaticParams() {
     }));
   } catch (error) {
     return [];
+  }
+}
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
   }
 }
 
@@ -110,6 +115,8 @@ export async function generateMetadata({
   const { county, area, slug } = await params;
   const listing = await getListing(slug);
   if (!listing) return { title: 'Hostel Not Found' };
+  void county;
+  void area;
 
   const roomType =
     listing.listing_room_types?.[0]?.room_type ??
@@ -122,7 +129,7 @@ export async function generateMetadata({
       155,
     );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
-  const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
+  const canonicalUrl = `${metadataBase}${listingPath({ ...listing, slug: listing.slug || slug })}`;
   const firstImage = listing.listing_images?.[0]?.r2_url;
 
   return {
@@ -151,6 +158,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const listing = await getListing(slug);
   if (!listing) notFound();
 
+  // Old links used raw area names ("Near Gate A"). Send them to the clean, lowercase URL permanently.
+  const canonicalPath = listingPath({ ...listing, slug: listing.slug || slug });
+  const requestedPath = `/hostels/${safeDecode(county)}/${safeDecode(area)}/${safeDecode(slug)}`;
+  if (requestedPath !== canonicalPath) permanentRedirect(canonicalPath);
+
   const embeddedCampus = Array.isArray(listing.campuses)
     ? listing.campuses[0]
     : listing.campuses;
@@ -159,13 +171,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
     embeddedCampus?.id || null,
   );
 
-  const initialViewCounts = await getListingViewCounts(listing.id);
 
   const images = (listing.listing_images || []).sort(
     (a: any, b: any) => a.display_order - b.display_order,
   );
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
-  const canonicalUrl = `${metadataBase}/hostels/${county}/${area}/${slug}`;
+  const canonicalUrl = `${metadataBase}${canonicalPath}`;
   const agentSlug = listing.agents?.slug;
   const nearbyListings = await getNearbyListings(listing);
 
@@ -175,24 +186,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const roomTypes = (listing.listing_room_types || []) as any[];
   const availableRooms = roomTypes.filter((rt) => rt.is_available !== false);
 
-  function pickBestVariant() {
-    if (availableRooms.length === 0) return null;
-
-    const shared = availableRooms.filter(
-      (rt) =>
-        Number(rt.occupancy) > 1 ||
-        rt.category === 'shared' ||
-        rt.room_type?.toLowerCase().includes('sharing') ||
-        rt.room_type?.toLowerCase().includes('shared'),
-    );
-    const pool = shared.length > 0 ? shared : availableRooms;
-    return pool.reduce((best, rt) =>
-      best == null || rt.price < best.price ? rt : best,
-    null as any);
-  }
-
-  const bestVariant = pickBestVariant();
-  const startingPrice = bestVariant?.price ?? listing.price_sharing ?? listing.price_single ?? listing.price ?? 0;
+  const bestVariant = pickBestRoomType(roomTypes);
+  const startingPrice = getStartingPrice(listing, roomTypes);
   const startingDeposit = bestVariant?.deposit != null && bestVariant.deposit > 0
     ? bestVariant.deposit
     : null;
@@ -276,12 +271,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <ArrowLeft className="h-5 w-5" />
         </Link>
           <div className="pointer-events-auto flex items-center gap-2">
-            <ListingViewCountsAllTime
-              listingId={listing.id}
-              initialCounts={initialViewCounts}
-              className="text-xs font-bold text-slate-500"
-              iconSize={3}
-            />
             <SaveButton listingId={listing.id} variant="icon" />
           <ShareListingButton
             variant="icon"
@@ -307,12 +296,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
             Back to hostels
           </Link>
           <div className="flex items-center gap-4">
-            <ListingViewCountsAllTime
-              listingId={listing.id}
-              initialCounts={initialViewCounts}
-              className="text-sm font-bold text-slate-500 gap-1.5"
-              iconSize={4}
-            />
             <ShareListingButton
               listing={{
                 name: listing.title,
@@ -372,11 +355,6 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     : '👨 Gents Only'}
                 </div>
               )}
-
-              <ListingViewCountsLine
-                listingId={listing.id}
-                initialCounts={initialViewCounts}
-              />
 
               <h2 className="flex items-center gap-1.5 text-slate-500 font-semibold text-sm">
                 <MapPin className="h-4 w-4 text-slate-400" />
@@ -547,10 +525,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     <span>Water Included</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Security {listing.security_type || 'Available'}</span>
-                </div>
+                {listing.security_type && (
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>Security {listing.security_type}</span>
+                  </div>
+                )}
                 {listing.wifi_included && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -685,7 +665,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 const imageUrl = sortedImages[0]?.r2_url;
                 const blurDataUrl = sortedImages[0]?.blur_data_url;
                 const href = item.slug
-                  ? `/hostels/${item.county || county}/${item.area || area}/${item.slug}`
+                  ? listingPath({ county: item.county || county, area: item.area || area, slug: item.slug })
                   : `/listing/${item.id}`;
 
                 return (
@@ -747,7 +727,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
       )}
 
       {/* Mobile sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex gap-2">
           <div className="flex-1">
             <BookTourButton

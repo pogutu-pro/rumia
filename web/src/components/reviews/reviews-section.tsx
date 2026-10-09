@@ -297,6 +297,9 @@ export function ReviewsSection({
 
   const hasReviews = summary.total_reviews > 0;
 
+  // An empty review block reads as "nobody likes this"; show the section only once there are reviews.
+  if (!hasReviews) return null;
+
   return (
     <section className="space-y-5">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
