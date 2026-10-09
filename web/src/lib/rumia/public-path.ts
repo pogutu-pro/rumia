@@ -17,6 +17,7 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith('/browse') ||
     pathname.startsWith('/compare') ||
     pathname.startsWith('/auth') ||
-    pathname === '/saved'
+    pathname === '/saved' ||
+    pathname.startsWith('/workspace')
   );
 }
