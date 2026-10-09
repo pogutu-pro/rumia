@@ -63,6 +63,15 @@ Goal: seekers, listers and ops use the new surfaces; old ones deleted.
 
 **Exit:** old route groups deleted; north-star and seeker-effort metrics baselined; lister create flow median < 5 min.
 
+**Status on `restructure/m1-live-fixes` (not deployed):** order 1–4 done (`/p/{slug}`, Explore
+search + place/landmark landings, home, Saved/compare/alerts). Order 5 partial — `/workspace`
+covers Today/places/contacts/team; the create/edit editor is still the legacy one, so the < 5 min
+exit is not yet measured. Order 6 core done (`/ops` queues/review/reports/market health); entity
+pages and admin settings are not built. Order 7 partial — old public trees (`/hostels`, `/bnb`,
+`/compare`, `/videos`, `/agents`, `/verify/*` public pages) are deleted/redirected, but `(admin)`,
+`(manager)` and the rest of `(dashboard)` are kept because they still own capabilities with no
+replacement. See `PROGRESS.md` and `HANDOFF.md` §8 for the deviations.
+
 ### Phase 3 · Intelligence and content (ongoing, from Phase 2 week 4)
 
 - Stage 1 ranking with explanations; similarity lists; alerts tuned.

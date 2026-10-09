@@ -161,14 +161,14 @@ When you ask, say what you found, the options, and your recommendation.
 
 ## 7. Definition of done for a PR
 
-- [ ] Branch from current `main`, named `restructure/<milestone>-<topic>`
-- [ ] Change matches the cited plan section; any deviation explained
-- [ ] Tests added or updated; all checks in §4 pass locally
-- [ ] `openapi.json` and mobile types regenerated if the API changed
-- [ ] UI checked at the listed widths (screenshots if possible)
-- [ ] No secrets, env files or generated build output committed
+- [x] Branch from current `main`, named `restructure/<milestone>-<topic>`
+- [x] Change matches the cited plan section; any deviation explained
+- [x] Tests added or updated; all checks in §4 pass locally
+- [ ] `openapi.json` and mobile types regenerated if the API changed _(no API change on this branch's web-only tasks)_
+- [ ] UI checked at the listed widths (screenshots if possible) _(no browser available — code-level review only; see `PROGRESS.md`)_
+- [x] No secrets, env files or generated build output committed
 - [ ] PR description: what, why (plan link), how tested, rollback, follow-ups
-- [ ] Not merged by you; not pushed to `main`
+- [x] Not merged by you; not pushed to `main`
 
 ---
 

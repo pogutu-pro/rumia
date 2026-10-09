@@ -40,6 +40,20 @@ pnpm install
 pnpm dev
 ```
 
+## 🗺️ Product surfaces
+
+The public experience was rebuilt (see [`docs/restructure/`](docs/restructure/)):
+
+- **Explore** `/` — search, filters, list/map split.
+- **Property** `/p/{slug}`; **Place** `/{market}/{place}`; **Landmark** `/{market}/near/{landmark}`.
+- **Saved** `/saved`; **Check** `/check`; **Help & safety** `/help`; lister profile `/l/{slug}`.
+- **Lister workspace** `/workspace` (signed in); **Ops console** `/ops` (staff).
+- Old public URLs (`/hostels/*`, `/bnb`, `/compare`, `/agents/*`, …) permanently redirect to the above
+  via `web/next.config.mjs`.
+
+The legacy `(admin)`, `(manager)` and remaining `(dashboard)` route groups are still served while
+their replacements are completed.
+
 ## 📦 Production Deployment
 
 Full step-by-step Oracle VPS deployment guide: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
