@@ -6,6 +6,7 @@ import { BadgeCheck, Clock, Footprints } from 'lucide-react';
 import { SaveButton } from '@/components/ui/save-button';
 import { formatCurrency } from '@/lib/utils/currency';
 import { listingPath } from '@/lib/utils/listing-path';
+import { rememberInterest } from '@/lib/personalisation';
 import type { SearchCard } from '@/lib/api/rumia';
 
 /** Where a card from the discovery API lives in the existing site. Short stays have their own pages. */
@@ -23,6 +24,7 @@ export function DiscoveryCard({ card }: { card: SearchCard }) {
     <div className="group relative">
       <Link
         href={cardHref(card)}
+        onClick={() => rememberInterest({ kind: card.kind, place: card.place_name, price: card.from_price })}
         className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
       >
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-900/[0.04]">

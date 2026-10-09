@@ -52,13 +52,22 @@ describe('NavbarSearch', () => {
     expect(input.value).toBe('dan');
   });
 
-  it('navigates to /hostels?q=... on submit when on another page', () => {
+  it('sends plain words to the sentence search when on another page', () => {
     renderOpenSearch();
     const input = screen.getByPlaceholderText(/search by name/i);
     fireEvent.change(input, { target: { value: 'boma bedsitter' } });
     fireEvent.submit(input.closest('form')!);
 
-    expect(mockPush).toHaveBeenCalledWith('/hostels?q=boma%20bedsitter');
+    expect(mockPush).toHaveBeenCalledWith('/search?q=boma%20bedsitter');
+  });
+
+  it('keeps very short text on the filtered hostels list', () => {
+    renderOpenSearch();
+    const input = screen.getByPlaceholderText(/search by name/i);
+    fireEvent.change(input, { target: { value: 'ab' } });
+    fireEvent.submit(input.closest('form')!);
+
+    expect(mockPush).toHaveBeenCalledWith('/hostels?q=ab');
   });
 
   it('navigates to /hostels on submit when query is empty', () => {

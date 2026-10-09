@@ -554,10 +554,15 @@ export function NavbarSearch() {
       router.replace(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
     } else {
       const filterParams = toParams();
-      const parts: string[] = [];
-      if (trimmed) parts.push(`q=${encodeURIComponent(trimmed)}`);
-      if (filterParams.toString()) parts.push(filterParams.toString());
-      router.push(`/hostels${parts.length ? `?${parts.join('&')}` : ''}`);
+      if (trimmed.length >= 3 && !filterParams.toString()) {
+        // Plain words and no filters picked: understand the sentence ("bedsitter near DeKUT under 8k").
+        router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+      } else {
+        const parts: string[] = [];
+        if (trimmed) parts.push(`q=${encodeURIComponent(trimmed)}`);
+        if (filterParams.toString()) parts.push(filterParams.toString());
+        router.push(`/hostels${parts.length ? `?${parts.join('&')}` : ''}`);
+      }
     }
     setSelectedIndex(-1);
     handleClose();
