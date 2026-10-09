@@ -11,9 +11,10 @@ units AS (
   FROM property_units GROUP BY property_id
 ),
 imgs AS (SELECT listing_id, count(*) AS n FROM listing_images GROUP BY listing_id),
-media AS (
+media AS (  -- photos only: a YouTube link is stored as media too but is not a legacy image
   SELECT p.legacy_listing_id AS listing_id, count(*) AS n
-  FROM property_media pm JOIN properties p ON p.id = pm.property_id GROUP BY 1
+  FROM property_media pm JOIN properties p ON p.id = pm.property_id
+  JOIN media_assets a ON a.id = pm.asset_id AND a.kind = 'image' GROUP BY 1
 )
 SELECT 'no_property_copy' AS check_name, l.id AS listing_id, l.title AS detail
   FROM l WHERE prop_id IS NULL
