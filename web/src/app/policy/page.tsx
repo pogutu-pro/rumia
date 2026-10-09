@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
-import { SiteFooter } from '@/components/rumia/site-footer';
+import { Footer } from '@/components/layouts/public-footer';
 import { getCampusBySlug } from '@/lib/data/campuses';
 import { getPublishedLegalDocument } from '@/lib/data/legal-documents';
 import { LegalDocumentBody } from '@/components/policies/legal-document-body';
@@ -83,7 +83,7 @@ export default async function PrivacyPolicyPage() {
         </div>
       </main>
 
-      <SiteFooter />
+      <Footer />
     </div>
   );
 }

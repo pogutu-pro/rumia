@@ -1,12 +1,19 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Heart, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { rumia } from '@/lib/api/rumia';
-import { track } from '@/lib/events';
+import { createClient } from '@/lib/supabase/client';
+import { apiClient } from '@/lib/api/client';
 import { useWishlistStore } from '@/stores/wishlist-store';
 import { cn } from '@/lib/utils/cn';
+import posthog from 'posthog-js';
+
+interface WishlistActionResponse {
+  message: string;
+  is_saved: boolean;
+  listing_id: string;
+}
 
 interface SaveButtonProps {
   listingId: string;
@@ -19,6 +26,8 @@ export function SaveButton({
   className = '',
   variant = 'text',
 }: SaveButtonProps) {
+  const router = useRouter();
+  const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
 
   const isSaved = useWishlistStore((s) => s.saved[listingId] ?? false);
@@ -29,33 +38,38 @@ export function SaveButton({
     requestCheck(listingId);
   }, [listingId, requestCheck]);
 
-  // Saving needs no account: it is kept for this browser and moves into the account on sign-in.
-  const handleToggle = useCallback(
-    async (e?: React.MouseEvent | React.TouchEvent) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (isLoading) return;
-      setIsLoading(true);
-      const previous = isSaved;
-      setSaved(listingId, !previous); // instant; undone below if the request fails
-      try {
-        const params = { params: { path: { listing_id: listingId } } };
-        const result = previous
-          ? await rumia.DELETE('/api/v1/saves/{listing_id}', params)
-          : await rumia.PUT('/api/v1/saves/{listing_id}', params);
-        if (result.error) throw new Error('save failed');
-        track('save_toggled', { surface: 'property', listingId, props: { on: !previous } });
-      } catch {
-        setSaved(listingId, previous);
-        toast.error('Could not update your saved places. Check your connection.');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [listingId, isSaved, setSaved, isLoading],
-  );
+  const handleToggle = useCallback(async (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (isLoading) return;
+    setIsLoading(true);
+    const previous = isSaved;
+    setSaved(listingId, !previous);
+
+    try {
+      await apiClient<WishlistActionResponse>(`/profiles/me/wishlist/${listingId}`, {
+        method: previous ? 'DELETE' : 'POST',
+      });
+      posthog.capture(previous ? 'hostel_unwishlisted' : 'hostel_wishlisted', {
+        listing_id: listingId,
+      });
+    } catch {
+      setSaved(listingId, previous);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [listingId, isSaved, router, supabase, setSaved, isLoading]);
 
   if (variant === 'icon') {
     return (
@@ -76,7 +90,7 @@ export function SaveButton({
           isLoading && 'opacity-70',
           className,
         )}
-        aria-label={isSaved ? 'Remove from saved' : 'Save this place'}
+        aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
         aria-busy={isLoading}
       >
         {isLoading ? (
@@ -103,7 +117,7 @@ export function SaveButton({
           : 'text-slate-600 hover:text-slate-900',
         className,
       )}
-      aria-label={isSaved ? 'Remove from saved' : 'Save this place'}
+      aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
       aria-busy={isLoading}
     >
       {isLoading ? (
@@ -113,7 +127,7 @@ export function SaveButton({
           className={`h-4 w-4 transition-colors ${isSaved ? 'fill-current' : ''}`}
         />
       )}
-      {isSaved ? 'Saved' : 'Save'}
+      {isSaved ? 'In wishlist' : 'Save'}
     </button>
   );
 }

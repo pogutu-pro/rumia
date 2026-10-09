@@ -1,4 +1,3 @@
-import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiUrl } from '@/lib/api/config';
 
@@ -10,11 +9,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ exists: false }, { status: 400 });
   }
 
-  const ip = clientIpFrom(request.headers);
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
   try {
     const res = await fetch(
       getApiUrl(`/profiles/check-email?email=${encodeURIComponent(email)}`),
-      { headers: clientIpHeaders(ip), cache: 'no-store' },
+      { headers: { 'X-Forwarded-For': ip }, cache: 'no-store' },
     );
     if (!res.ok) {
       return NextResponse.json({ exists: false }, { status: res.status === 429 ? 429 : 502 });

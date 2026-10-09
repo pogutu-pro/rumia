@@ -2,11 +2,13 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
-import { AppShell } from '@/components/pwa/AppShell';
+import { BottomNav } from '@/components/pwa/BottomNav';
 import { RouteProgress } from '@/components/pwa/RouteProgress';
+import { CompareTray } from '@/components/compare/compare-tray';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { ChunkErrorRecovery } from '@/components/pwa/ChunkErrorRecovery';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
+import { MobileMain } from '@/components/pwa/MobileMain';
 import '@/styles/globals.css';
 
 const inter = Inter({
@@ -85,12 +87,16 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          'min-h-screen bg-rum-surface font-sans text-rum-text antialiased overflow-x-hidden'
+          'min-h-screen bg-slate-50 font-sans antialiased overflow-x-hidden'
         )}
       >
         <Providers>
           <RouteProgress />
-          <AppShell>{children}</AppShell>
+          <MobileMain>
+            {children}
+          </MobileMain>
+          <CompareTray />
+          <BottomNav />
         </Providers>
         <ServiceWorkerRegister />
         <ChunkErrorRecovery />

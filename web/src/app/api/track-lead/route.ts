@@ -1,4 +1,3 @@
-import { clientIpFrom } from '@/lib/net/client-ip';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   cleanPhone,
@@ -25,7 +24,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing listing_id or agent_id' }, { status: 400 });
     }
 
-    const ip = clientIpFrom(request.headers) || '127.0.0.1';
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      '127.0.0.1';
 
     if (!checkRateLimit(`track-lead:${ip}:${listing_id}`, 1, 10_000)) {
       return NextResponse.json(

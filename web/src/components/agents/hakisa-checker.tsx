@@ -21,8 +21,7 @@ const OFFICIAL_RECORDS: OfficialDeKutRecord[] = officialRecordsData.map((record)
 const OFFICIAL_PHONE_INDEX = buildOfficialPhoneIndex(OFFICIAL_RECORDS);
 
 interface HakisaCheckerProps {
-  /** Test seam: results to use instead of calling the lookup endpoint. */
-  initialListings?: ListingMatchCandidate[];
+  rumiaListings?: ListingMatchCandidate[];
 }
 
 type ResultState = 'verified' | 'mismatch' | 'not-found' | 'multiple';
@@ -272,10 +271,11 @@ const MODES: { key: SearchMode; label: string; icon: React.ReactNode }[] = [
   { key: 'till', label: 'Till Number', icon: <CreditCard className="h-3.5 w-3.5" /> },
 ];
 
-export function HakisaChecker({ initialListings }: HakisaCheckerProps) {
-  const [rumiaListings, setRumiaListings] = useState<ListingMatchCandidate[]>(initialListings ?? []);
-  const [lookupError, setLookupError] = useState(false);
+export function HakisaChecker({ rumiaListings: initialListings = [] }: HakisaCheckerProps) {
+  // Listings come from a per-query lookup (the API no longer hands out the full list).
+  const [fetched, setFetched] = useState<ListingMatchCandidate[] | null>(null);
   const [checking, setChecking] = useState(false);
+  const rumiaListings = fetched ?? initialListings;
   const [searchMode, setSearchMode] = useState<SearchMode>('phone');
   const [value, setValue] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -466,21 +466,13 @@ export function HakisaChecker({ initialListings }: HakisaCheckerProps) {
   }, [outcome]);
 
   const handleCheck = async () => {
-    const query = value.trim();
-    if (!query || checking) return;
-    setLookupError(false);
-    if (initialListings === undefined) {
-      setChecking(true);
-      try {
-        setRumiaListings((await publicApi.lookupVerifyCandidates(query)) as ListingMatchCandidate[]);
-      } catch {
-        // Official DeKUT records are checked on the device, so the result is still useful;
-        // we only lose the match against Rumia's own listings.
-        setRumiaListings([]);
-        setLookupError(true);
-      } finally {
-        setChecking(false);
-      }
+    const q = value.trim();
+    if (!q || checking) return;
+    setChecking(true);
+    try {
+      setFetched((await publicApi.verifyLookup(q).catch(() => [])) as ListingMatchCandidate[]);
+    } finally {
+      setChecking(false);
     }
     setSubmitted(true);
   };

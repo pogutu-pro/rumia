@@ -1,6 +1,4 @@
-import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
 import { NextRequest, NextResponse } from 'next/server';
-import { reportAuthFailure } from '@/lib/auth/report';
 import { authBackend } from '@/lib/auth/backend';
 import { CLEAR_COOKIES, RT_COOKIE, isRefreshRejected, sessionCookies } from '@/lib/auth/session';
 
@@ -8,13 +6,9 @@ import { CLEAR_COOKIES, RT_COOKIE, isRefreshRejected, sessionCookies } from '@/l
 export async function POST(request: NextRequest) {
   const rt = request.cookies.get(RT_COOKIE)?.value;
   if (!rt) return NextResponse.json({ access_token: null }, { status: 401 });
-  const result = await authBackend.refresh(rt, clientIpFrom(request.headers)).catch(() => null);
-  if (!result) {
-    reportAuthFailure({ stage: 'refresh', cause: 'backend_unreachable' });
-    return NextResponse.json({ access_token: null }, { status: 503 }); // transient: keep cookies
-  }
+  const result = await authBackend.refresh(rt).catch(() => null);
+  if (!result) return NextResponse.json({ access_token: null }, { status: 503 }); // transient: keep cookies
   if (!result.ok && !isRefreshRejected(result.status)) {
-    reportAuthFailure({ stage: 'refresh', cause: `backend_${result.status}`, status: result.status });
     return NextResponse.json({ access_token: null }, { status: 503 }); // 429/5xx: transient, keep cookies
   }
   if (!result.ok || !result.data) {

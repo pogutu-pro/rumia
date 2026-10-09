@@ -1,0 +1,151 @@
+import { fetchPublicApi } from '@/lib/api/config';
+import { ImageResponse } from 'next/og';
+
+export const runtime = 'nodejs';
+export const alt = 'Hostel listing preview';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+
+interface Props {
+  params: Promise<{ county: string; area: string; slug: string }>;
+}
+
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const resp = await fetch(url, {
+      headers: { Accept: 'image/webp,image/jpeg,image/png,*/*' },
+    });
+    if (!resp.ok) return null;
+    const buffer = Buffer.from(await resp.arrayBuffer());
+    const sharp = (await import('sharp')).default;
+    const jpeg = await sharp(buffer).jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+    return `data:image/jpeg;base64,${jpeg.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
+export default async function ListingOgImage({ params }: Props) {
+  try {
+    const { slug } = await params;
+
+    const listing = await fetchPublicApi<{
+      title: string;
+      price: number;
+      location: string;
+      images?: { r2_url: string; display_order: number }[];
+    }>(`/listings/${encodeURIComponent(slug)}`).catch(() => null);
+
+    const title = listing?.title ?? 'Student Hostel Near DeKUT';
+    const price = listing?.price ? `KES ${Number(listing.price).toLocaleString()}/mo` : '';
+    const location = listing?.location ?? 'Nyeri, Kenya';
+    const images = (listing?.images ?? []).sort((a: any, b: any) => a.display_order - b.display_order);
+    const coverUrl = images[0]?.r2_url ?? null;
+    const coverDataUrl = coverUrl ? await fetchImageAsDataUrl(coverUrl) : null;
+
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            fontFamily: 'sans-serif',
+            position: 'relative',
+            backgroundColor: '#0f172a',
+          }}
+        >
+          {coverDataUrl && (
+            <img
+              src={coverDataUrl}
+              alt=""
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
+            />
+          )}
+
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
+            }}
+          />
+
+          <div style={{ position: 'relative', padding: '40px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '3px' }}>
+              {`Student Hostel · ${location}`}
+            </div>
+            <div style={{ fontSize: '44px', fontWeight: 900, color: '#ffffff', lineHeight: 1.1, maxWidth: '800px' }}>
+              {title}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+              {price && (
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#ffffff' }}>{price}</div>
+              )}
+              <div style={{ fontSize: '16px', color: '#94a3b8', fontWeight: 600 }}>Near DeKUT · Nyeri</div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              top: '32px',
+              right: '40px',
+              background: 'rgba(255,255,255,0.95)',
+              borderRadius: '10px',
+              padding: '10px 20px',
+              fontSize: '20px',
+              fontWeight: 900,
+              color: '#0f172a',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            RUMIA
+          </div>
+        </div>
+      ),
+      {
+        ...size,
+        headers: {
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        },
+      }
+    );
+  } catch {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'sans-serif',
+            backgroundColor: '#0f172a',
+            padding: '48px',
+          }}
+        >
+          <div style={{ fontSize: '60px', fontWeight: 900, color: '#34d399', marginBottom: '12px' }}>
+            RUMIA
+          </div>
+          <div style={{ fontSize: '28px', fontWeight: 700, color: '#ffffff', textAlign: 'center' }}>
+            Student Hostels Near DeKUT
+          </div>
+          <div style={{ fontSize: '18px', color: '#94a3b8', marginTop: '12px' }}>
+            Nyeri, Kenya
+          </div>
+        </div>
+      ),
+      {
+        ...size,
+        headers: {
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        },
+      }
+    );
+  }
+}

@@ -1,6 +1,3 @@
-import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
-import { getApiUrl } from '@/lib/api/config';
-import { reportAuthFailure, errorCodeForStatus } from '@/lib/auth/report';
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
 import { STATE_COOKIE, sessionCookies } from '@/lib/auth/session';
@@ -24,40 +21,27 @@ export async function GET(request: NextRequest) {
   const state = sp.get('state');
   const googleError = sp.get('error');
 
-  if (googleError) {
-    const cancelled = googleError === 'access_denied';
-    reportAuthFailure({ stage: 'google_error', cause: googleError, expected: cancelled });
-    return fail(origin, cancelled ? 'access_denied' : 'auth_failed');
-  }
-  if (!code || !state) {
-    reportAuthFailure({ stage: 'callback', cause: 'missing_code' });
-    return fail(origin, 'missing_code');
-  }
+  if (googleError) return fail(origin, googleError === 'access_denied' ? 'access_denied' : 'auth_failed');
+  if (!code || !state) return fail(origin, 'missing_code');
 
   // CSRF: the state must be the one we issued to this very browser.
-  const stateCookie = request.cookies.get(STATE_COOKIE)?.value;
-  if (stateCookie !== state) {
-    reportAuthFailure({ stage: 'state_cookie', cause: stateCookie ? 'state_mismatch' : 'state_cookie_missing' });
-    return fail(origin, 'oauth_state_expired');
-  }
+  if (request.cookies.get(STATE_COOKIE)?.value !== state) return fail(origin, 'oauth_state_expired');
 
   let result;
   try {
-    result = await authBackend.callback(code, state, clientIpFrom(request.headers));
+    result = await authBackend.callback(code, state);
   } catch (err) {
     console.error('[auth/google/callback] backend unreachable', err);
-    reportAuthFailure({ stage: 'callback', cause: 'backend_unreachable' });
-    return fail(origin, 'server_unavailable');
+    return fail(origin, 'auth_failed');
   }
   if (!result.ok || !result.data) {
     console.error('[auth/google/callback] backend rejected sign-in', result.status);
-    reportAuthFailure({ stage: 'callback', cause: `backend_${result.status}`, status: result.status });
     try {
       const ph = getPostHogClient();
       ph?.capture({ distinctId: 'oauth_callback', event: 'exchange_code_failed', properties: { status: result.status } });
       await ph?.flush().catch(() => {});
     } catch {}
-    return fail(origin, errorCodeForStatus(result.status));
+    return fail(origin, 'auth_failed');
   }
   const session = result.data;
 
@@ -72,21 +56,10 @@ export async function GET(request: NextRequest) {
 
   let dest = safeNext(session.next);
   try {
-    // Post-login sync also creates/refreshes the profile row on first sign-in.
-    await profilesApi.syncLoginWithToken(session.access_token, {});
+    const sync = await profilesApi.syncLoginWithToken(session.access_token, {});
+    if (sync.needs_profile_completion) dest = '/account';
   } catch (syncError) {
     console.error('[auth/google/callback] post-login sync failed', syncError);
-    reportAuthFailure({ stage: 'post_login_sync', cause: 'sync_failed' });
-  }
-
-  // Saves made before signing in belong to the account now.
-  const deviceId = request.cookies.get('rumia_did')?.value;
-  if (deviceId) {
-    await fetch(getApiUrl('/saves/merge'), {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.access_token}`, 'X-Device-Id': deviceId, ...clientIpHeaders(clientIpFrom(request.headers)) },
-      cache: 'no-store',
-    }).catch(() => null);
   }
 
   const response = NextResponse.redirect(new URL(dest, origin));

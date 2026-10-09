@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import { SupportTeamSection } from '@/components/agents/support-team-section';
 import { publicApi } from '@/lib/api/public';
 import { HakisaChecker } from '@/components/agents/hakisa-checker';
-import type { ListingMatchCandidate } from '@/lib/utils/dekut-verification';
 
 export const revalidate = 86400;
 

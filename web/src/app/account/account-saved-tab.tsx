@@ -1,6 +1,5 @@
 'use client';
 
-import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -374,7 +373,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
                   </th>
                   {selectedHostelsToCompare.map((item) => {
                     const href = item.slug
-                      ? `${listingPath(item)}`
+                      ? `/hostels/${item.county || 'nyeri'}/${item.area || 'dekut'}/${item.slug}`
                       : `/listing/${item.id}`;
                     return (
                       <th key={item.id} className="p-3 sm:p-4 min-w-[200px]">
@@ -565,7 +564,7 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
               )[0];
 
               const href = listing.slug
-                ? `${listingPath(listing)}`
+                ? `/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`
                 : `/listing/${listing.id}`;
 
               const isSelectedForCompare = selectedIds.includes(listing.id);

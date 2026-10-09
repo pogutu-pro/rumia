@@ -1,4 +1,3 @@
-import { clientIpHeaders } from '@/lib/net/client-ip';
 import { serverApi } from './server';
 
 export const analyticsApi = {
@@ -11,6 +10,6 @@ export const analyticsApi = {
     serverApi.post<{ inserted: boolean; dedupe?: string | null; reason?: string | null }>(
       '/analytics/track-view',
       { listing_id: listingId },
-      { headers: { ...clientIpHeaders(clientIp), 'User-Agent': userAgent } },
+      { headers: { 'X-Forwarded-For': clientIp, 'User-Agent': userAgent } },
     ),
 };

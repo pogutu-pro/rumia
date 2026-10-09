@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Banknote, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BookTourForm } from '@/components/legacy/book-tour-form';
+import { BookTourForm } from '@/app/(public)/listing/[id]/book-tour-form';
 import { useTourZones } from '@/hooks/use-tour-zones';
 import type { TourZoneOption } from '@/hooks/use-tour-zones';
 import { cn } from '@/lib/utils/cn';

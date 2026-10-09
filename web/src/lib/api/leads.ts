@@ -1,4 +1,3 @@
-import { clientIpHeaders } from '@/lib/net/client-ip';
 import { getApiUrl } from './config';
 
 export type LeadContactType = 'rumia_agent' | 'hostel_owner';
@@ -56,7 +55,7 @@ export const leadsApi = {
   trackServer: async (input: LeadTrackInput, clientIp: string): Promise<LeadTrackResult> => {
     const response = await fetch(getApiUrl('/leads/track'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...clientIpHeaders(clientIp) },
+      headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': clientIp },
       body: JSON.stringify(input),
       cache: 'no-store',
     });
