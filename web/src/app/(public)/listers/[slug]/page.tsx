@@ -17,7 +17,7 @@ async function load(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const lister = await load(slug);
-  return lister ? { title: `${lister.name} on Rumia`, description: `Places listed by ${lister.name}.` } : { title: 'Not found | Rumia' };
+  return lister ? { title: lister.name, description: `Places listed by ${lister.name}.` } : { title: 'Not found' };
 }
 
 export default async function ListerPage({ params }: Props) {

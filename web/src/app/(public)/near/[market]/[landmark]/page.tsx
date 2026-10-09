@@ -27,9 +27,9 @@ async function load(market: string, landmark: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { market, landmark } = await params;
   const data = await load(market, landmark);
-  if (!data) return { title: 'Not found | Rumia' };
+  if (!data) return { title: 'Not found' };
   return {
-    title: `Places to rent near ${data.current.name} | Rumia`,
+    title: `Places to rent near ${data.current.name}`,
     description: `Places to rent within walking distance of ${data.current.name}, closest first, with prices and move-in costs.`,
     alternates: { canonical: `${BASE}/near/${market}/${landmark}` },
   };

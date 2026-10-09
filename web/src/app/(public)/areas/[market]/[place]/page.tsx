@@ -27,8 +27,8 @@ async function load(market: string, place: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { market, place } = await params;
   const data = await load(market, place);
-  if (!data) return { title: 'Not found | Rumia' };
-  const title = `Places to rent in ${data.current.name} | Rumia`;
+  if (!data) return { title: 'Not found' };
+  const title = `Places to rent in ${data.current.name}`;
   return {
     title,
     description: `${data.cards.length || 'Verified'} places to rent in ${data.current.name}, with prices, move-in costs and when each was last confirmed.`,
