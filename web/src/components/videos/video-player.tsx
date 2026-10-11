@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { AlertCircle, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
-import { loadYouTubeAPI } from '@/lib/youtube-api-loader';
+import { loadYouTubeAPI, preloadYouTubeAPI } from '@/lib/youtube-api-loader';
 import { cn } from '@/lib/utils/cn';
 
 interface VideoPlayerProps {
@@ -13,12 +13,17 @@ interface VideoPlayerProps {
   portrait: boolean;
 }
 
-type Phase = 'poster' | 'loading' | 'ready' | 'error';
+/** `embed` is the fallback: YouTube's own player in a plain iframe, used when the API cannot be reached in time. */
+type Phase = 'poster' | 'loading' | 'ready' | 'embed' | 'error';
 
-const POSTERS = [
-  (id: string) => `https://img.youtube.com/vi/${id}/maxresdefault.jpg`,
-  (id: string) => `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
-];
+/** After this long on the spinner, say so and offer YouTube, without giving up. */
+const SLOW_HINT_MS = 6000;
+/** If the player was created but never reported ready, switch to the plain embed. */
+const READY_TIMEOUT_MS = 15000;
+
+// hqdefault exists for every video; maxresdefault often does not, and trying it first cost a failed request.
+// Its 4:3 frame has the bars of a 16:9 or 9:16 video at the edges, which the cover crop removes.
+const POSTERS = [(id: string) => `https://img.youtube.com/vi/${id}/hqdefault.jpg`];
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
@@ -46,15 +51,20 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
   const [posterFailed, setPosterFailed] = React.useState(false);
   const [fullscreen, setFullscreen] = React.useState(false);
   const [canFullscreen, setCanFullscreen] = React.useState(false);
+  const [slow, setSlow] = React.useState(false);
 
   const frameRef = React.useRef<HTMLDivElement>(null);
   const mountRef = React.useRef<HTMLDivElement>(null);
   const playerRef = React.useRef<YT.Player | null>(null);
   const aliveRef = React.useRef(true);
   const startTimer = React.useRef<number | null>(null);
+  const slowTimer = React.useRef<number | null>(null);
+  const readyTimer = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     aliveRef.current = true;
+    // The person opened the video panel to watch: get the player ready before they press Play.
+    preloadYouTubeAPI();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanFullscreen(!!document.fullscreenEnabled);
     const onFs = () => setFullscreen(document.fullscreenElement === frameRef.current);
@@ -63,6 +73,8 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
       aliveRef.current = false;
       document.removeEventListener('fullscreenchange', onFs);
       if (startTimer.current) window.clearTimeout(startTimer.current);
+      if (slowTimer.current) window.clearTimeout(slowTimer.current);
+      if (readyTimer.current) window.clearTimeout(readyTimer.current);
       try {
         playerRef.current?.destroy();
       } catch {
@@ -106,9 +118,33 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
     return () => window.clearInterval(id);
   }, [phase]);
 
+  const clearLoadingTimers = () => {
+    if (slowTimer.current) window.clearTimeout(slowTimer.current);
+    if (readyTimer.current) window.clearTimeout(readyTimer.current);
+    slowTimer.current = readyTimer.current = null;
+  };
+
+  /** Give up on the custom player and show YouTube's own, which needs no API script. */
+  const switchToEmbed = React.useCallback(() => {
+    clearLoadingTimers();
+    try {
+      playerRef.current?.destroy();
+    } catch {
+      /* already gone */
+    }
+    playerRef.current = null;
+    mountRef.current?.replaceChildren();
+    if (aliveRef.current) {
+      setSlow(false);
+      setPhase('embed');
+    }
+  }, []);
+
   const start = React.useCallback(async () => {
     if (phase === 'loading') return;
     setPhase('loading');
+    setSlow(false);
+    slowTimer.current = window.setTimeout(() => aliveRef.current && setSlow(true), SLOW_HINT_MS);
     try {
       const YTApi = await loadYouTubeAPI();
       if (!aliveRef.current || !mountRef.current) return;
@@ -132,6 +168,8 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
         events: {
           onReady: (e) => {
             if (!aliveRef.current) return;
+            clearLoadingTimers();
+            setSlow(false);
             setPhase('ready');
             e.target.setVolume(100);
             setMuted(e.target.isMuted());
@@ -152,14 +190,18 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
             setPlaying(e.data === YTApi.PlayerState.PLAYING || e.data === YTApi.PlayerState.BUFFERING);
           },
           onError: () => {
+            // A real player error (embedding switched off, video removed): nothing to fall back to.
+            clearLoadingTimers();
             if (aliveRef.current) setPhase('error');
           },
         },
       });
+      readyTimer.current = window.setTimeout(switchToEmbed, READY_TIMEOUT_MS);
     } catch {
-      if (aliveRef.current) setPhase('error');
+      // The API script could not be loaded in time: use the plain embed rather than a dead end.
+      switchToEmbed();
     }
-  }, [phase, youtubeId]);
+  }, [phase, youtubeId, switchToEmbed]);
 
   const togglePlay = () => {
     const p = playerRef.current;
@@ -265,6 +307,30 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
             </span>
           </button>
         </div>
+      )}
+
+      {phase === 'loading' && slow && (
+        <div role="status" className="absolute inset-x-0 bottom-0 z-10 bg-black/70 px-3 py-2 text-center text-xs text-white">
+          Still loading, the connection looks slow.{' '}
+          <a
+            href={`https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline"
+          >
+            Watch on YouTube
+          </a>
+        </div>
+      )}
+
+      {phase === 'embed' && (
+        <iframe
+          title={title}
+          src={`https://www.youtube.com/embed/${encodeURIComponent(youtubeId)}?autoplay=1&playsinline=1&rel=0&modestbranding=1`}
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowFullScreen
+          className="absolute inset-0 z-10 h-full w-full border-0"
+        />
       )}
 
       {phase === 'error' && (

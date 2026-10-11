@@ -16,7 +16,9 @@
  */
 
 const API_SCRIPT_SRC = 'https://www.youtube.com/iframe_api';
-const API_TIMEOUT_MS = 8000;
+// Generous: on a slow mobile connection the loader can legitimately take this long. The player shows a
+// "still loading" hint well before this and falls back to a plain embed when it is reached.
+const API_TIMEOUT_MS = 20000;
 
 let apiPromise: Promise<typeof YT> | null = null;
 
@@ -59,4 +61,22 @@ export function loadYouTubeAPI(): Promise<typeof YT> {
   });
 
   return apiPromise;
+}
+
+/**
+ * Start fetching the player API ahead of the press on Play, and open the connections it will need.
+ * Safe to call any number of times; failure is silent here and surfaces (with a fallback) when Play is pressed.
+ */
+export function preloadYouTubeAPI(): void {
+  if (typeof document === 'undefined') return;
+  for (const href of ['https://www.youtube.com', 'https://i.ytimg.com']) {
+    if (document.querySelector(`link[rel="preconnect"][href="${href}"]`)) continue;
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+  loadYouTubeAPI().catch(() => {
+    /* reported when the person presses Play */
+  });
 }
