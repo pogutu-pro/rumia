@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
@@ -31,6 +31,7 @@ export function usesBottomNav(pathname: string): boolean {
  */
 export function BottomNav() {
   const pathname = usePathname();
+  const tab = useSearchParams().get("tab");
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
   const [displayName, setDisplayName] = React.useState<string | null>(null);
   const [imgError, setImgError] = React.useState(false);
@@ -94,8 +95,11 @@ export function BottomNav() {
       <ul className="flex h-14 items-stretch">
         {MOBILE_NAV.map((item) => {
           const isAccount = item.label === "Account";
-          const href = isAccount && mounted && !signedIn ? "/auth/login" : item.href;
-          const active = isNavActive(pathname, item);
+          const isWishlist = item.label === "Wishlist";
+          // Signed-in people keep their saved places in the account page; send them straight there.
+          const href = isAccount && mounted && !signedIn ? "/auth/login" : isWishlist && signedIn ? "/account?tab=saved" : item.href;
+          const onSavedTab = pathname === "/account" && tab === "saved";
+          const active = isWishlist ? isNavActive(pathname, item) || onSavedTab : isNavActive(pathname, item) && !onSavedTab;
           const Icon = item.icon;
           const count = item.label === "Wishlist" ? savedCount : 0;
           return (

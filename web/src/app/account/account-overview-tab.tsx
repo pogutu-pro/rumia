@@ -315,6 +315,15 @@ export function AccountOverviewTab({
           </div>
         </section>
       )}
+      <nav aria-label="Legal" className="flex gap-4 text-sm text-ink-muted">
+        <Link href="/policy" className="inline-flex min-h-11 items-center underline-offset-2 hover:text-ink hover:underline">
+          Privacy
+        </Link>
+        <Link href="/terms" className="inline-flex min-h-11 items-center underline-offset-2 hover:text-ink hover:underline">
+          Terms of Service
+        </Link>
+      </nav>
+
     </div>
   );
 }
