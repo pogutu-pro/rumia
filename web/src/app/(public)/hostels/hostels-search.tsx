@@ -1,5 +1,7 @@
 'use client';
 
+import { formatAreaName } from '@/lib/utils/area-label';
+import { CategoryTabs } from '@/components/discovery/category-tabs';
 import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { getStartingPrice } from '@/lib/utils/starting-price';
@@ -342,6 +344,7 @@ export default function HostelsSearch({
   return (
     <div className="min-h-screen bg-slate-50/50 pt-0 pb-8 lg:pb-10">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
+        <CategoryTabs />
 
         {/* Active filter chips — rendered directly, no search card wrapper */}
         <ActiveFilterChips
@@ -372,7 +375,14 @@ export default function HostelsSearch({
         {/* Results count */}
         <div className="mb-5 mt-3 px-1">
           <h1 className="text-sm text-ink-muted font-semibold">
-            {totalCountState} {totalCountState === 1 ? 'hostel' : 'hostels'}{' '}
+            {totalCountState}{' '}
+            {propertyType === 'apartment'
+              ? totalCountState === 1
+                ? 'apartment'
+                : 'apartments'
+              : totalCountState === 1
+                ? 'hostel'
+                : 'hostels'}{' '}
             found
             {hasAnyFilters && (
               <span className="text-ink-muted">
@@ -388,30 +398,6 @@ export default function HostelsSearch({
               </span>
             )}
           </h1>
-          {propertyType && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-primary">
-              {propertyType === 'apartment'
-                ? 'Apartments'
-                : propertyType === 'short_stay'
-                  ? 'Short stays'
-                  : 'Hostels'}
-              <button
-                type="button"
-                aria-label="Clear category filter"
-                onClick={() => {
-                  const rest = new URLSearchParams(searchParams.toString());
-                  rest.delete('type');
-                  router.replace(
-                    `${basePath}${rest.toString() ? `?${rest.toString()}` : ''}`,
-                    { scroll: false },
-                  );
-                }}
-                className="text-primary hover:text-emerald-800 rounded-full p-0.5 hover:bg-emerald-100 cursor-pointer"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Listing Grid */}
@@ -435,7 +421,7 @@ export default function HostelsSearch({
 
                 const priceDisplay = `From KES ${getStartingPrice(item, item.listing_room_types).toLocaleString()}/mo`;
 
-                let areaDisplay = item.area || 'Hostel Area';
+                let areaDisplay = item.area ? formatAreaName(item.area) : 'Hostel Area';
                 if (item.specific_location) {
                   areaDisplay = `${areaDisplay} · ${item.specific_location}`;
                 }
@@ -512,8 +498,8 @@ export default function HostelsSearch({
                           </p>
                         </div>
 
-                        <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-500">
-                          <span>
+                        <div className="border-t border-slate-100 pt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs text-slate-500">
+                          <span className="min-w-0 truncate">
                             Agent: {item.agents?.name ?? 'Rumia Agent'}
                           </span>
                           <div className="flex items-center gap-2">
@@ -524,7 +510,7 @@ export default function HostelsSearch({
                                 e.stopPropagation();
                                 handleCompareToggle(item);
                               }}
-                              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors cursor-pointer border-2 touch-manipulation ${
+                              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors cursor-pointer border-2 touch-manipulation ${
                                 isSelected
                                   ? 'bg-primary text-white border-primary shadow-sm'
                                   : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-xs'

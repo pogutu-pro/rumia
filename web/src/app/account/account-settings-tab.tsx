@@ -105,7 +105,7 @@ export function AccountSettingsTab({
         {onBackToOverview ? (
           <button
             onClick={onBackToOverview}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
+            className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Overview
@@ -113,7 +113,7 @@ export function AccountSettingsTab({
         ) : (
           <Link
             href="/account?tab=overview"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
+            className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Overview
@@ -140,7 +140,7 @@ export function AccountSettingsTab({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               />
             </div>
@@ -155,7 +155,7 @@ export function AccountSettingsTab({
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="0712 345 678"
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               />
             </div>
@@ -171,7 +171,7 @@ export function AccountSettingsTab({
                 value={campusInput}
                 onChange={(e) => setCampusInput(e.target.value)}
                 placeholder="Start typing or choose from the list"
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
               <datalist id="settings-campus-list">
                 {campuses.map((c) => (
@@ -192,7 +192,7 @@ export function AccountSettingsTab({
                 type="email"
                 value={profile.email}
                 disabled
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line bg-subtle text-ink-muted cursor-not-allowed"
+                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line bg-subtle text-ink-muted cursor-not-allowed"
               />
             </div>
           </div>
@@ -201,7 +201,7 @@ export function AccountSettingsTab({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+              className="inline-flex min-h-11 items-center gap-1.5 px-4 py-2 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -240,7 +240,7 @@ export function AccountSettingsTab({
         <button
           type="button"
           onClick={() => setShowLogoutModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100/80 text-red-700 text-xs font-semibold transition-colors cursor-pointer"
+          className="inline-flex min-h-11 items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100/80 text-red-700 text-xs font-semibold transition-colors cursor-pointer"
         >
           <LogOut className="h-4 w-4" />
           Log Out of Rumia
@@ -275,14 +275,14 @@ export function AccountSettingsTab({
               <button
                 onClick={() => setShowLogoutModal(false)}
                 disabled={loggingOut}
-                className="flex-1 h-9 rounded-xl border border-line text-xs font-semibold text-slate-700 hover:bg-subtle transition-colors"
+                className="flex-1 h-11 rounded-xl border border-line text-xs font-semibold text-slate-700 hover:bg-subtle transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmLogout}
                 disabled={loggingOut}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-semibold text-white transition-colors disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-semibold text-white transition-colors disabled:opacity-50"
               >
                 {loggingOut ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                 {loggingOut ? 'Logging out...' : 'Log Out'}

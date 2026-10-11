@@ -27,15 +27,15 @@ export function PushNotificationPrompt() {
     <div
       role="region"
       aria-label="Enable notifications"
-      className="fixed left-0 right-0 z-50 p-4 pointer-events-none md:bottom-0"
-      style={{ bottom: "calc(4.25rem + env(safe-area-inset-bottom, 0px))" }}
+      className="fixed left-0 right-0 z-50 p-4 pointer-events-none"
+      style={{ bottom: "var(--bottom-nav-h)" }}
     >
       <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/15 border border-slate-200/80 overflow-hidden pointer-events-auto">
         <div className="relative p-4">
           <button
             onClick={dismiss}
             aria-label="Dismiss"
-            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-600 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -49,7 +49,7 @@ export function PushNotificationPrompt() {
               <h3 className="text-sm font-bold text-slate-900">
                 Stay in the loop
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+              <p className="mt-0.5 hidden text-xs leading-relaxed text-slate-500 sm:block">
                 Get instant alerts for new hostels, price drops, and tour updates
                 near DeKUT.
               </p>
@@ -59,13 +59,13 @@ export function PushNotificationPrompt() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={handleEnable}
-              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-primary text-xs font-bold text-white hover:bg-primary/90 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+              className="flex-1 inline-flex items-center justify-center h-11 rounded-xl bg-primary text-xs font-bold text-white hover:bg-primary/90 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
             >
               Enable notifications
             </button>
             <button
               onClick={dismiss}
-              className="h-9 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
+              className="h-11 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Not now
             </button>

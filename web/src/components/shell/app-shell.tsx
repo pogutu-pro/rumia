@@ -1,40 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname } from 'next/navigation';
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
-import { BrandLink, LegalLinks, NavList, SideNav } from './side-nav';
-import { ShellProvider, useShell } from './shell-provider';
+import { SideNav } from './side-nav';
+import { ShellProvider } from './shell-provider';
 import { TopBar } from './top-bar';
 import { NavHistoryTracker } from './nav-history';
 import { VideoProvider } from '@/components/videos/video-provider';
-
-function MobileNav() {
-  const { mobileNavOpen, setMobileNavOpen } = useShell();
-  const pathname = usePathname();
-
-  // Close after any route change, including browser back/forward.
-  React.useEffect(() => {
-    setMobileNavOpen(false);
-  }, [pathname, setMobileNavOpen]);
-
-  const close = () => setMobileNavOpen(false);
-  return (
-    <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-      <SheetContent side="left" className="flex w-72 flex-col bg-raised p-3 sm:max-w-xs lg:hidden">
-        <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <SheetDescription className="sr-only">Primary navigation and legal links</SheetDescription>
-        <div className="mb-4 flex h-10 items-center px-1">
-          <BrandLink onNavigate={close} />
-        </div>
-        <NavList onNavigate={close} />
-        <div className="mt-auto pb-2">
-          <LegalLinks onNavigate={close} />
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -59,7 +30,6 @@ export function AppShell({ children, rightPanel }: AppShellProps) {
       <div className="flex min-h-dvh bg-page text-ink">
         <NavHistoryTracker />
         <SideNav />
-        <MobileNav />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />
           <div className="flex min-w-0 flex-1">

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import { Providers } from './providers';
@@ -96,7 +97,9 @@ export default function RootLayout({
             {children}
           </MobileMain>
           <CompareTray />
-          <BottomNav />
+          <Suspense fallback={null}>
+            <BottomNav />
+          </Suspense>
         </Providers>
         <ServiceWorkerRegister />
         <ChunkErrorRecovery />

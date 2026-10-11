@@ -18,15 +18,15 @@ export function InstallBanner() {
 
   return createPortal(
     <div
-      className="fixed left-0 right-0 z-50 p-4 pointer-events-none md:bottom-0"
-      style={{ bottom: "calc(4.25rem + env(safe-area-inset-bottom, 0px))" }}
+      className="fixed left-0 right-0 z-50 p-4 pointer-events-none"
+      style={{ bottom: "var(--bottom-nav-h)" }}
     >
       <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/15 border border-slate-200/80 overflow-hidden pointer-events-auto">
         <div className="relative p-4">
           <button
             onClick={handleDismiss}
             aria-label="Dismiss install prompt"
-            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-600 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>

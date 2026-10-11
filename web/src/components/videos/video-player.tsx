@@ -72,6 +72,24 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
     };
   }, []);
 
+  // Backgrounding the tab or leaving the page pauses playback (it never resumes by itself).
+  React.useEffect(() => {
+    const pause = () => {
+      try {
+        playerRef.current?.pauseVideo();
+      } catch {
+        /* player not ready */
+      }
+    };
+    const onVisibility = () => document.visibilityState === 'hidden' && pause();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', pause);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', pause);
+    };
+  }, []);
+
   // Progress, only while a player exists.
   React.useEffect(() => {
     if (phase !== 'ready') return;

@@ -1,17 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { usesBottomNav } from "./BottomNav";
-
 /**
- * Adds bottom padding only where the BottomNav is shown (the role workspaces). Everything else uses the
- * application shell. A div, not <main>: pages render their own main landmark.
+ * Reserves room for the fixed bottom bar so the last piece of content is always reachable. `--bottom-nav-h` is 0
+ * whenever the bar is hidden (property pages, from `lg` up). A div, not <main>: pages render their own landmark.
  */
 export function MobileMain({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  return (
-    <div className={usesBottomNav(pathname) ? "pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0" : undefined}>
-      {children}
-    </div>
-  );
+  return <div className="pb-[var(--bottom-nav-h)]">{children}</div>;
 }

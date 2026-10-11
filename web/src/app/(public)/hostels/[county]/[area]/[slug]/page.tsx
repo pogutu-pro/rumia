@@ -1,3 +1,4 @@
+import { formatAreaName } from '@/lib/utils/area-label';
 import { listingPath } from '@/lib/utils/listing-path';
 import { cache } from 'react';
 import { getStartingPrice, pickBestRoomType } from '@/lib/utils/starting-price';
@@ -317,9 +318,9 @@ export default async function ListingSlugPage({ params }: PageProps) {
       </div>
 
       <div className="container mx-auto px-4 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_24rem] xl:gap-12">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-10">
+          <div className="min-w-0 space-y-10">
             <div className="space-y-4">
               <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
                 {listing.title}
@@ -327,7 +328,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
 
               {/* Area, Specific Location, and Distance Badge - directly below title */}
               <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-600">
-                <span>{listing.area || 'Hostel Area'}</span>
+                <span>{listing.area ? formatAreaName(listing.area) : 'Hostel Area'}</span>
                 {listing.specific_location && (
                   <>
                     <span className="text-slate-300">·</span>
@@ -362,22 +363,23 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 {listing.location}
               </h2>
 
-              <p className="text-sm text-slate-600 font-medium">
-                Room type:{' '}
-                <span className="font-semibold text-slate-900">
-                  {bestVariant?.room_type || listing.room_type || 'Self Contained'}
-                </span>
-                {' · '}Price from:{' '}
-                <span className="font-semibold text-slate-900">
-                  KES {startingPrice.toLocaleString()}/month
-                </span>
-                {listing.distance_to_campus && (
-                  <>
-                    {' · '}
-                    <span>{listing.distance_to_campus} from DeKUT</span>
-                  </>
-                )}
-              </p>
+              <div>
+                <p className="text-2xl font-extrabold tracking-tight text-primary">
+                  From KES {startingPrice.toLocaleString()}
+                  <span className="text-sm font-semibold text-slate-600"> /month</span>
+                </p>
+                <p className="mt-1 text-sm text-slate-600 font-medium">
+                  <span className="font-semibold text-slate-900">
+                    {bestVariant?.room_type || listing.room_type || 'Self Contained'}
+                  </span>
+                  {listing.distance_to_campus && (
+                    <>
+                      {' · '}
+                      <span>{listing.distance_to_campus} from DeKUT</span>
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
 
             <hr className="border-slate-100" />
@@ -736,8 +738,9 @@ export default async function ListingSlugPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* Mobile sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+      {/* Mobile sticky footer: the only fixed bar on this page (the bottom navigation steps aside). The spacer keeps the last section clear of it. */}
+      <div aria-hidden className="h-[calc(5.5rem+env(safe-area-inset-bottom))] lg:hidden" />
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex gap-2">
           <div className="flex-1">
             <BookTourButton

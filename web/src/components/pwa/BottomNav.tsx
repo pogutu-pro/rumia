@@ -2,51 +2,42 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { Home, Play, User, ShieldCheck } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { createClient } from "@/lib/supabase/client";
-
-function isTabActive(tabHref: string, pathname: string): boolean {
-  if (tabHref === "/") return pathname === "/";
-  if (tabHref === "/videos") return pathname === "/videos" || pathname.startsWith("/videos");
-  if (tabHref === "/verify") return pathname.startsWith("/verify");
-  if (tabHref.startsWith("/account") || tabHref.startsWith("/auth"))
-    return (
-      pathname.startsWith("/auth") ||
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/account") ||
-      pathname.startsWith("/admin") ||
-      pathname.startsWith("/saved")
-    );
-  return pathname === tabHref;
-}
+import { cn } from "@/lib/utils/cn";
+import { useWishlistStore } from "@/stores/wishlist-store";
+import { MOBILE_NAV, isBottomNavHidden, isNavActive } from "@/components/shell/nav-config";
 
 function getInitials(nameOrEmail: string | null | undefined): string | null {
   if (!nameOrEmail) return null;
   const trimmed = nameOrEmail.trim();
   if (!trimmed) return null;
-  if (trimmed.includes("@")) {
-    const local = trimmed.split("@")[0];
-    if (local.length >= 2) return local.slice(0, 2).toUpperCase();
-    if (local.length === 1) return local.toUpperCase();
-    return null;
-  }
+  if (trimmed.includes("@")) return trimmed.split("@")[0].slice(0, 2).toUpperCase() || null;
   const parts = trimmed.split(/\s+/).filter(Boolean);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+/** The bottom bar is on screen for this path (it is also hidden from `lg` up by CSS). */
 export function usesBottomNav(pathname: string): boolean {
-  return /^\/(dashboard|admin|manager)(\/|$)/.test(pathname);
+  return !isBottomNavHidden(pathname);
 }
 
+/**
+ * Primary navigation on phones and small tablets (below `lg`): Home, Explore, Videos, Wishlist, Account.
+ * While shown it sets `data-bottom-nav` on <html>, which defines `--bottom-nav-h`; <main> and every other fixed
+ * layer (compare tray, install and push prompts) use that variable so nothing sits under the bar.
+ */
 export function BottomNav() {
   const pathname = usePathname();
+  const tab = useSearchParams().get("tab");
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
   const [displayName, setDisplayName] = React.useState<string | null>(null);
   const [imgError, setImgError] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
+  const savedCount = useWishlistStore((s) => (s.fetched ? Object.values(s.saved).filter(Boolean).length : 0));
+  const visible = usesBottomNav(pathname);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -55,7 +46,7 @@ export function BottomNav() {
     let active = true;
     const sync = async () => {
       try {
-        const { data: { user } } = await (supabase as any).auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (!active) return;
         if (!user) {
           setAvatarUrl(null);
@@ -63,18 +54,8 @@ export function BottomNav() {
           return;
         }
         const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-        const avatar =
-          (meta.avatar_url as string) ||
-          (meta.picture as string) ||
-          (meta.avatar as string) ||
-          null;
-        const name =
-          (meta.full_name as string) ||
-          (meta.name as string) ||
-          (user.email as string) ||
-          null;
-        setAvatarUrl(avatar || null);
-        setDisplayName(name);
+        setAvatarUrl(((meta.avatar_url || meta.picture || meta.avatar) as string) || null);
+        setDisplayName(((meta.full_name || meta.name || user.email) as string) || null);
         setImgError(false);
       } catch {
         if (active) {
@@ -83,96 +64,93 @@ export function BottomNav() {
         }
       }
     };
-    sync();
-    const { data: sub } = (supabase as any).auth.onAuthStateChange(() => sync());
+    void sync();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => void sync());
     return () => {
       active = false;
       sub?.subscription?.unsubscribe?.();
     };
   }, []);
 
-  // The application shell provides navigation everywhere except the role workspaces.
-  if (!usesBottomNav(pathname)) return null;
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (visible) root.dataset.bottomNav = "on";
+    else delete root.dataset.bottomNav;
+    return () => {
+      delete root.dataset.bottomNav;
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   const initials = getInitials(displayName);
   const showImage = mounted && avatarUrl && !imgError;
-  const accountHref = displayName ? "/account" : "/auth/login";
-
-  const tabs = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Videos", href: "/videos", icon: Play },
-    { label: "Verify", href: "/verify", icon: ShieldCheck },
-    { label: "Account", href: accountHref, icon: User, isAccount: true },
-  ];
+  const signedIn = !!displayName;
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white md:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-raised pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      <div className="flex h-[64px] items-stretch">
-        {tabs.map((tab) => {
-          const active = isTabActive(tab.href, pathname);
-          const Icon = tab.icon;
-          const isAccountTab = (tab as any).isAccount;
-
+      <ul className="flex h-14 items-stretch">
+        {MOBILE_NAV.map((item) => {
+          const isAccount = item.label === "Account";
+          const isWishlist = item.label === "Wishlist";
+          // Signed-in people keep their saved places in the account page; send them straight there.
+          const href = isAccount && mounted && !signedIn ? "/auth/login" : isWishlist && signedIn ? "/account?tab=saved" : item.href;
+          const onSavedTab = pathname === "/account" && tab === "saved";
+          const active = isWishlist ? isNavActive(pathname, item) || onSavedTab : isNavActive(pathname, item) && !onSavedTab;
+          const Icon = item.icon;
+          const count = item.label === "Wishlist" ? savedCount : 0;
           return (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              prefetch
-              aria-label={tab.label}
-              aria-current={active ? "page" : undefined}
-              className="flex flex-1 flex-col items-center justify-center gap-1 py-1"
-            >
-              {isAccountTab ? (
-                <span
-                  className={[
-                    "flex h-6 w-6 items-center justify-center overflow-hidden rounded-full text-[11px] font-bold ring-1 transition-colors",
-                    active
-                      ? "bg-primary text-white ring-primary"
-                      : showImage || initials
-                        ? "bg-slate-900 text-white ring-slate-900"
-                        : "bg-slate-100 text-slate-500 ring-slate-200",
-                  ].join(" ")}
-                >
-                  {showImage ? (
-                    <Image
-                      src={avatarUrl!}
-                      alt={displayName ?? "Account"}
-                      width={24}
-                      height={24}
-                      className="h-full w-full object-cover"
-                      onError={() => setImgError(true)}
-                      unoptimized
-                    />
-                  ) : initials ? (
-                    initials
-                  ) : (
-                    <User className="h-3.5 w-3.5" strokeWidth={2} />
-                  )}
-                </span>
-              ) : (
-                <Icon
-                  className={[
-                    "h-[22px] w-[22px] transition-colors",
-                    active ? "text-primary" : "text-slate-500",
-                  ].join(" ")}
-                  strokeWidth={active ? 2.2 : 1.9}
-                />
-              )}
-              <span
-                className={[
-                  "text-[10px] font-semibold leading-none tracking-wide transition-colors",
-                  active ? "text-primary" : "text-slate-500",
-                ].join(" ")}
+            <li key={item.label} className="flex-1">
+              <Link
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative flex h-full min-w-12 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold leading-none transition-colors",
+                  "active:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary",
+                  active ? "text-primary" : "text-ink-muted",
+                )}
               >
-                {tab.label}
-              </span>
-            </Link>
+                {isAccount && (showImage || initials) ? (
+                  <span
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold ring-2",
+                      active ? "bg-primary text-primary-foreground ring-primary" : "bg-ink text-white ring-transparent",
+                    )}
+                  >
+                    {showImage ? (
+                      <Image
+                        src={avatarUrl!}
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="h-full w-full object-cover"
+                        onError={() => setImgError(true)}
+                        unoptimized
+                      />
+                    ) : (
+                      initials
+                    )}
+                  </span>
+                ) : (
+                  <span className="relative">
+                    <Icon className={cn("h-6 w-6", active && "fill-primary/15")} strokeWidth={active ? 2.2 : 1.8} aria-hidden />
+                    {count > 0 && (
+                      <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold tabular-nums text-primary-foreground">
+                        <span aria-hidden>{count > 99 ? "99+" : count}</span>
+                        <span className="sr-only">{count} saved</span>
+                      </span>
+                    )}
+                  </span>
+                )}
+                <span>{item.label}</span>
+              </Link>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </nav>
   );
 }

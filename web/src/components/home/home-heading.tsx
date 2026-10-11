@@ -33,7 +33,7 @@ export function HomeHeading({ campusName }: HomeHeadingProps) {
   const ready = greeting !== '' && auth.status !== 'loading';
 
   return (
-    <div className="px-4 pt-6 lg:px-8">
+    <div className="px-4 pt-4 sm:pt-6 lg:px-8">
       <p className="min-h-6 text-sm text-ink-muted" aria-live="polite">
         {ready && (
           <>
@@ -42,11 +42,11 @@ export function HomeHeading({ campusName }: HomeHeadingProps) {
           </>
         )}
       </p>
-      <h1 className="font-heading text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+      <h1 className="font-heading text-2xl font-extrabold tracking-tight text-ink sm:text-4xl">
         Find your next place
         <span className="sr-only"> — student accommodation, hostels, bedsitters and apartments near {campusName}</span>
       </h1>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted sm:text-base">
+      <p className="mt-2 hidden max-w-2xl text-sm leading-relaxed text-ink-muted sm:block sm:text-base">
         Student hostels, apartments and short stays near you. Real places, real people, better living.
       </p>
     </div>

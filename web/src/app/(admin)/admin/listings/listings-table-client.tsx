@@ -419,7 +419,7 @@ function SortableMobileCard({
           {listing.commission_locked_by_admin ? 'Locked' : 'Unlocked'}
         </button>
       </div>
-      <div className="flex items-center gap-3 pt-1 text-xs font-medium">
+      <div className="flex flex-wrap items-center gap-x-4 pt-1 text-xs font-medium [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>button]:min-h-11">
         <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View Live</a>
         <a href={`/admin/listings/edit/${listing.id}`} className="text-blue-600 hover:underline">Edit</a>
         <a href={`/admin/listings/${listing.id}/leads`} className="text-indigo-600 hover:underline">

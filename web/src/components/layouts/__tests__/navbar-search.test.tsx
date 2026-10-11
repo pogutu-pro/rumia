@@ -25,6 +25,19 @@ jest.mock('@/lib/api/search', () => ({
   },
 }));
 
+function mockViewport(phone: boolean) {
+  window.matchMedia = ((query: string) => ({
+    matches: phone && query.includes('max-width'),
+    media: query,
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    onchange: null,
+    dispatchEvent: jest.fn(),
+  })) as unknown as typeof window.matchMedia;
+}
+
 describe('NavbarSearch', () => {
   const renderOpenSearch = () => {
     render(<NavbarSearch />);
@@ -33,6 +46,8 @@ describe('NavbarSearch', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    mockViewport(false);
     mockPathname = '/';
     mockSearchParams = new URLSearchParams();
   });
@@ -94,5 +109,35 @@ describe('NavbarSearch', () => {
     ) as HTMLInputElement;
     expect(input.value).toBe('');
     expect(mockReplace).toHaveBeenCalled();
+  });
+
+  describe('on a phone', () => {
+    beforeEach(() => mockViewport(true));
+
+    it('opens a full-screen layer with a Show results button and no Book a Tour', () => {
+      renderOpenSearch();
+      expect(screen.getByRole('dialog')).toHaveClass('fixed', 'inset-0');
+      expect(screen.getByRole('button', { name: /browse all/i })).toBeInTheDocument();
+      expect(screen.queryByText(/book a tour/i)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^filters/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /bedsitter/i })).toBeInTheDocument();
+    });
+
+    it('replaces the search history entry when it navigates', () => {
+      renderOpenSearch();
+      const input = screen.getByPlaceholderText(/search by name/i);
+      fireEvent.change(input, { target: { value: 'boma bedsitter' } });
+      fireEvent.submit(input.closest('form')!);
+      expect(mockReplace).toHaveBeenCalledWith('/search?q=boma%20bedsitter');
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('remembers recent searches', () => {
+      renderOpenSearch();
+      const input = screen.getByPlaceholderText(/search by name/i);
+      fireEvent.change(input, { target: { value: 'kahawa' } });
+      fireEvent.submit(input.closest('form')!);
+      expect(JSON.parse(localStorage.getItem('rumia:recent-searches') ?? '[]')).toEqual(['kahawa']);
+    });
   });
 });

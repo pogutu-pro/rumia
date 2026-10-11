@@ -1,5 +1,7 @@
 import { listingPath } from '@/lib/utils/listing-path';
 import { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { listingsApi } from '@/lib/api/listings';
 
 import { JsonLd } from '@/components/seo/json-ld';
@@ -286,6 +288,24 @@ export default async function HomePage() {
         seeAllHref="/hostels?type=apartment"
         items={stayItems}
       />
+
+      <section className="px-4 pt-8 lg:px-8" aria-labelledby="verify-card-heading">
+        <Link
+          href="/verify"
+          className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-raised p-4 transition-colors active:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <ShieldCheck className="h-5 w-5" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span id="verify-card-heading" className="block text-base font-semibold text-ink">
+              Check before you pay
+            </span>
+            <span className="block text-sm text-ink-muted">Verify an agent or hostel, or report a problem.</span>
+          </span>
+          <ArrowRight className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden />
+        </Link>
+      </section>
     </div>
   );
 }

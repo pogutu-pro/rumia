@@ -259,6 +259,14 @@ export function AccountOverviewTab({
         </div>
       </section>
 
+      {/* Tools: Verify has no slot in the phone bottom bar, so it lives here */}
+      <section aria-labelledby="tools-heading">
+        <SectionHeading id="tools-heading" title="Tools" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <WorkspaceLink href="/verify" icon={ShieldCheck} title="Verify" text="Check an agent or hostel before you pay, or report a problem." />
+        </div>
+      </section>
+
       {/* Role tools: only what this account may use */}
       {(showWorkspaces || !hasAgent) && (
         <section aria-labelledby="workspace-heading">
@@ -307,6 +315,15 @@ export function AccountOverviewTab({
           </div>
         </section>
       )}
+      <nav aria-label="Legal" className="flex gap-4 text-sm text-ink-muted">
+        <Link href="/policy" className="inline-flex min-h-11 items-center underline-offset-2 hover:text-ink hover:underline">
+          Privacy
+        </Link>
+        <Link href="/terms" className="inline-flex min-h-11 items-center underline-offset-2 hover:text-ink hover:underline">
+          Terms of Service
+        </Link>
+      </nav>
+
     </div>
   );
 }

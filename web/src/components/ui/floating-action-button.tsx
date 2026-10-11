@@ -58,7 +58,7 @@ export function FloatingActionButton({
         className
       )}
       style={{
-        bottom: label ? 'calc(4rem + env(safe-area-inset-bottom))' : 'calc(4rem + env(safe-area-inset-bottom))',
+        bottom: 'calc(var(--bottom-nav-h) + 1rem)',
       }}
     >
       {icon}

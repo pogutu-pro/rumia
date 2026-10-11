@@ -1,5 +1,6 @@
 'use client';
 
+import { CategoryTabs } from '@/components/discovery/category-tabs';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -188,6 +189,14 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
   const debouncedQuery = useDebounce(query, 200);
   const [committedQuery, setCommittedQuery] = useState(qParamFromUrl);
 
+  // The header search sets ?q= on this page; follow it.
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setQuery(qParamFromUrl);
+    setCommittedQuery(qParamFromUrl);
+  }, [qParamFromUrl]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   const {
     amenities,
     minPrice,
@@ -309,21 +318,25 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-8 lg:pb-10">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
+        <CategoryTabs />
         <div className="bg-white rounded-2xl shadow-[0_1px_14px_rgba(0,0,0,0.06)] border border-slate-100 p-3 sm:p-4 mb-4">
-          <ListingSearchInput
-            value={query}
-            onChange={(v) => setQuery(v)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') setCommittedQuery(query);
-            }}
-            onBlur={() => setCommittedQuery(query)}
-            onClear={() => {
-              setQuery('');
-              setCommittedQuery('');
-            }}
-          />
+          {/* Below lg the header search is the only search box. */}
+          <div className="hidden lg:block">
+            <ListingSearchInput
+              value={query}
+              onChange={(v) => setQuery(v)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') setCommittedQuery(query);
+              }}
+              onBlur={() => setCommittedQuery(query)}
+              onClear={() => {
+                setQuery('');
+                setCommittedQuery('');
+              }}
+            />
+          </div>
 
-          <div className="flex flex-nowrap items-center gap-2 mt-3 overflow-x-auto scrollbar-none">
+          <div className="flex flex-nowrap items-center gap-2 lg:mt-3 overflow-x-auto scrollbar-none">
             {isDesktop ? (
               <Sheet
                 open={desktopFilterOpen}

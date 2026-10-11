@@ -27,7 +27,7 @@ export function CompareTray() {
   const mobileTray = (
     <div
       className="fixed left-0 right-0 z-50 px-3 md:hidden pointer-events-none"
-      style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}
+      style={{ bottom: 'calc(var(--bottom-nav-h) + 0.5rem)' }}
     >
       <div className="pointer-events-auto bg-white rounded-2xl border border-slate-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-4 py-3">
         {/* Selected names */}
