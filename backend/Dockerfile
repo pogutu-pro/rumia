@@ -39,5 +39,7 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/liveness')" || exit 1
 
-# Production Gunicorn worker process manager with Uvicorn async workers
-CMD ["gunicorn", "app.main:app", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "-w", "4", "--timeout", "120"]
+# Production Gunicorn worker process manager with Uvicorn async workers.
+# --no-control-socket: gunicorn 26's control socket wants a writable home directory, which this non-login user lacks,
+# so it logged 'Control server error: Permission denied' at every start. Nothing here uses it.
+CMD ["gunicorn", "app.main:app", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "-w", "4", "--timeout", "120", "--no-control-socket"]

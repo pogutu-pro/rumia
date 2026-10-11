@@ -1,12 +1,9 @@
-from pathlib import Path
-
 import pytest
 from sqlalchemy import text
 
+from app.features.catalog.drift import find_projection_drift
 from app.features.catalog.service import project_listing
 from tests_pg.conftest import make_agent, make_campus, make_listing, make_user
-
-DRIFT_SQL = (Path(__file__).resolve().parents[2] / "scripts" / "check-projection-drift.sql").read_text()
 
 
 async def _valid_registry(db, pid) -> int:
@@ -49,9 +46,27 @@ async def test_admin_verify_then_unverify_reaches_the_property_trust_badge(db):
 async def test_drift_check_is_clean_after_projection_and_catches_a_missed_one(db):
     listing = await _listing(db)
     await project_listing(db, listing)
-    ours = lambda rows: [r for r in rows if str(r[1]) == str(listing)]
-    assert ours((await db.execute(text(DRIFT_SQL.rstrip().rstrip(";")))).all()) == []
+    ours = lambda rows: [r for r in rows if str(r["listing_id"]) == str(listing)]
+    assert ours(await find_projection_drift(db)) == []
 
     # A write that skipped the copy is reported.
     await db.execute(text("UPDATE listings SET title = 'Edited Without Copy' WHERE id = CAST(:l AS uuid)"), {"l": listing})
-    assert [r[0] for r in ours((await db.execute(text(DRIFT_SQL.rstrip().rstrip(";")))).all())] == ["name_differs"]
+    assert [r["check_name"] for r in ours(await find_projection_drift(db))] == ["name_differs"]
+
+
+@pytest.mark.asyncio
+async def test_reporting_logs_an_error_only_when_something_disagrees(db, caplog):
+    from app.features.catalog.drift import report_projection_drift
+
+    listing = await _listing(db)
+    await project_listing(db, listing)
+    with caplog.at_level("ERROR", logger="app.features.catalog.drift"):
+        await report_projection_drift(db)
+    assert [r for r in caplog.records if listing in r.getMessage()] == []  # in sync: nothing about this listing
+
+    await db.execute(text("UPDATE listings SET title = 'Edited Without Copy' WHERE id = CAST(:l AS uuid)"), {"l": listing})
+    with caplog.at_level("ERROR", logger="app.features.catalog.drift"):
+        rows = await report_projection_drift(db)
+    assert any(str(r["listing_id"]) == listing for r in rows)
+    message = " ".join(r.getMessage() for r in caplog.records if r.levelname == "ERROR")
+    assert "projection drift" in message and "name_differs=" in message

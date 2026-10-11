@@ -87,6 +87,15 @@ async def send_alerts() -> None:
         logger.info("alerts: %s", result)
 
 
+async def check_projection_drift() -> None:
+    """Daily: alert if any listing disagrees with its copy in the property model."""
+    from app.core.database import async_session_factory
+    from app.features.catalog.drift import report_projection_drift
+
+    async with async_session_factory() as db:
+        await report_projection_drift(db)
+
+
 async def ensure_event_partitions() -> None:
     """Create the next three monthly partitions of `events` so inserts never fall into the default one."""
     from datetime import date
@@ -109,14 +118,19 @@ async def ensure_event_partitions() -> None:
         await db.commit()
 
 
-async def _run_cron_loop(interval_seconds: int, coro_fn) -> None:
-    """Run a coroutine on a fixed interval, logging errors without stopping the loop."""
+async def _run_cron_loop(interval_seconds: int, coro_fn, first_delay: int | None = None) -> None:
+    """Run a coroutine on a fixed interval, logging errors without stopping the loop.
+
+    `first_delay` is the wait before the first run (default: one interval). The worker restarts on every deploy, so
+    a slow job that waits a whole interval first may never run on a day with a deploy.
+    """
+    await asyncio.sleep(interval_seconds if first_delay is None else first_delay)
     while True:
-        await asyncio.sleep(interval_seconds)
         try:
             await coro_fn()
         except Exception as exc:
             logger.error("Cron job %s failed: %s", coro_fn.__name__, exc)
+        await asyncio.sleep(interval_seconds)
 
 
 def start_cron_jobs() -> None:
@@ -134,4 +148,6 @@ def start_cron_jobs() -> None:
     loop.create_task(_run_cron_loop(6 * 3600, freshness_and_scores))
     loop.create_task(_run_cron_loop(3600, send_alerts))
     loop.create_task(_run_cron_loop(24 * 3600, ensure_event_partitions))
-    logger.info("Cron jobs scheduled: announcements 15m, delivery retries 1m, job runner 5s, freshness+scores 6h, partitions daily")
+    # First check five minutes after the worker starts (it restarts on every deploy), then daily.
+    loop.create_task(_run_cron_loop(24 * 3600, check_projection_drift, first_delay=300))
+    logger.info("Cron jobs scheduled: announcements 15m, delivery retries 1m, job runner 5s, freshness+scores 6h, partitions daily, drift check daily")
