@@ -1,5 +1,6 @@
 'use client';
 
+import { KIND_PAGES } from '@/lib/seo/kinds';
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -130,6 +131,16 @@ export const Footer = React.memo(function Footer({
             </a>
           </div>
         </div>
+
+        {/* Browse by type: gives every page a crawlable path into the market pages */}
+        <nav aria-label="Places to rent in Nyeri" className="mb-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-medium text-ink-muted">
+          <Link href="/nyeri" className="hover:text-ink transition-colors">Rentals in Nyeri</Link>
+          {KIND_PAGES.map((k) => (
+            <Link key={k.slug} href={`/nyeri/${k.slug}`} className="hover:text-ink transition-colors">
+              {k.label} in Nyeri
+            </Link>
+          ))}
+        </nav>
 
         {/* Copyright & Legal Links */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-muted font-medium">

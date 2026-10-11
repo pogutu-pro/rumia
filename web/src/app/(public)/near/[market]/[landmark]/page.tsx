@@ -47,7 +47,7 @@ export default async function NearPage({ params }: Props) {
       alert={{ intent: { market, near: landmark }, label: `New places near ${data.current.name}` }}
       related={[
         ...data.all.filter((l) => l.slug !== landmark).slice(0, 6).map((l) => ({ href: `/near/${market}/${l.slug}`, label: `Near ${l.name}` })),
-        ...data.places.slice(0, 8).map((p) => ({ href: `/areas/${market}/${p.slug}`, label: p.name })),
+        ...data.places.slice(0, 8).map((p) => ({ href: `/${market}/${p.slug}`, label: p.name })),
       ]}
       relatedTitle="Other landmarks and areas"
     />
