@@ -36,7 +36,7 @@ export function ContactButton({
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className={`h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all duration-300 shadow-xs active:scale-[0.98] ${
+        className={`h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all duration-300 shadow-xs active:scale-[0.98] ${
           fullWidth ? 'w-full' : ''
         } ${className || ''}`}
       >

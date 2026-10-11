@@ -85,9 +85,11 @@ async def get_listings(
         if user
         else set()
     )
+    review_stats = await ListingService.get_review_stats(db, [str(item.id) for item in listings])
     items: list[ListingRead] = []
     for item in listings:
         read = ListingRead.model_validate(item)
+        read.rating, read.review_count = review_stats.get(str(item.id), (0.0, 0))
         read.views = view_counts.get(str(item.id), item.views)
         read.is_saved = str(item.id) in saved_ids
         items.append(read)
@@ -123,6 +125,8 @@ async def get_listing(
             # Keep inactive listings indistinguishable from missing listings to non-owners.
             raise NotFoundException(f"Listing '{id_or_slug}' not found")
     read = ListingRead.model_validate(listing)
+    stats = await ListingService.get_review_stats(db, [str(listing.id)])
+    read.rating, read.review_count = stats.get(str(listing.id), (0.0, 0))
     if user:
         saved_ids = await ProfileService.get_saved_listing_ids(db, user, [str(listing.id)])
         read.is_saved = str(listing.id) in saved_ids

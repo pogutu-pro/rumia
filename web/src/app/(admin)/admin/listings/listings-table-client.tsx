@@ -140,7 +140,7 @@ function SortableRow({
             <button
               {...attributes}
               {...listeners}
-              className="p-2.5 rounded-lg cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-700 hover:bg-slate-100 touch-none select-none"
+              className="p-2.5 rounded-lg cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-700 hover:bg-slate-100 touch-none select-none"
               title="Drag to reorder"
               aria-label={`Drag to reorder ${listing.title}`}
             >
@@ -151,17 +151,17 @@ function SortableRow({
                 type="button"
                 onClick={() => onMove(listing, -1)}
                 disabled={isFirst}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                className="p-1 rounded text-slate-600 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
                 aria-label={`Move ${listing.title} up`}
               >
                 <ChevronUp className="h-3.5 w-3.5" />
               </button>
-              <span className="text-xs font-semibold text-slate-400 tabular-nums">{index + 1}</span>
+              <span className="text-xs font-semibold text-slate-500 tabular-nums">{index + 1}</span>
               <button
                 type="button"
                 onClick={() => onMove(listing, 1)}
                 disabled={isLast}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                className="p-1 rounded text-slate-600 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
                 aria-label={`Move ${listing.title} down`}
               >
                 <ChevronDown className="h-3.5 w-3.5" />
@@ -182,7 +182,7 @@ function SortableRow({
       <td className="text-sm text-slate-600 px-5 py-4">{listing.leads_count}</td>
       <td className="px-5 py-4">
         {listing.is_active ? (
-          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-primary">Active</span>
         ) : (
           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Inactive</span>
         )}
@@ -193,7 +193,7 @@ function SortableRow({
           disabled={pendingId === listing.id}
           className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
             listing.verified
-              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              ? 'bg-emerald-50 text-primary hover:bg-emerald-100'
               : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
           }`}
           title={listing.verified ? 'Click to unverify' : 'Click to verify'}
@@ -212,7 +212,7 @@ function SortableRow({
           </span>
           <button
             onClick={() => onEditOwnerPhone(listing)}
-            className="text-xs font-medium text-emerald-600 hover:underline text-left"
+            className="text-xs font-medium text-primary hover:underline text-left"
           >
             Edit
           </button>
@@ -224,7 +224,7 @@ function SortableRow({
             onClick={() => onToggleCommission(listing)}
             className={`text-xs font-medium px-2 py-0.5 rounded-full transition-colors ${
               listing.pays_commission
-                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                ? 'bg-emerald-50 text-primary hover:bg-emerald-100'
                 : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
             }`}
           >
@@ -245,13 +245,13 @@ function SortableRow({
       <td className="text-sm text-slate-500 px-5 py-4">{new Date(listing.created_at).toLocaleDateString()}</td>
       <td className="px-5 py-4">
         <div className="flex items-center gap-2 text-sm">
-          <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">Live</a>
+          <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Live</a>
           <a href={`/admin/listings/edit/${listing.id}`} className="text-blue-600 hover:underline font-medium">Edit</a>
           <a href={`/admin/listings/${listing.id}/leads`} className="text-indigo-600 hover:underline font-medium">
             Leads {listing.leads_count > 0 ? `(${listing.leads_count})` : ''}
           </a>
           <button onClick={() => onToggleActive(listing)} disabled={pendingId === listing.id}
-            className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
+            className={`font-medium hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-700' : 'text-primary'}`}>
             {listing.is_active ? 'Deactivate' : 'Activate'}
           </button>
           <button onClick={() => onTransfer(listing)} className="text-indigo-600 font-medium hover:underline">Transfer</button>
@@ -325,8 +325,8 @@ function SortableMobileCard({
             title="Hold and drag to reorder"
             aria-label={`Drag to reorder ${listing.title}`}
           >
-            <GripVertical className="h-7 w-7 text-slate-400" />
-            <span className="text-xs font-medium text-slate-400">
+            <GripVertical className="h-7 w-7 text-slate-500" />
+            <span className="text-xs font-medium text-slate-500">
               Hold & drag · #{index + 1}
             </span>
           </button>
@@ -335,7 +335,7 @@ function SortableMobileCard({
               type="button"
               onClick={() => onMove(listing, -1)}
               disabled={isFirst}
-              className="p-2.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="p-2.5 rounded-xl text-slate-600 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
               aria-label={`Move ${listing.title} up`}
             >
               <ChevronUp className="h-5 w-5" />
@@ -344,7 +344,7 @@ function SortableMobileCard({
               type="button"
               onClick={() => onMove(listing, 1)}
               disabled={isLast}
-              className="p-2.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="p-2.5 rounded-xl text-slate-600 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent"
               aria-label={`Move ${listing.title} down`}
             >
               <ChevronDown className="h-5 w-5" />
@@ -363,7 +363,7 @@ function SortableMobileCard({
         </div>
         <div className="flex flex-col gap-1 items-end shrink-0">
           {listing.is_active ? (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-primary">Active</span>
           ) : (
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Inactive</span>
           )}
@@ -372,7 +372,7 @@ function SortableMobileCard({
             disabled={pendingId === listing.id}
             className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors disabled:opacity-50 ${
               listing.verified
-                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                ? 'bg-emerald-50 text-primary hover:bg-emerald-100'
                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
             }`}
           >
@@ -392,7 +392,7 @@ function SortableMobileCard({
         <span className="text-xs font-medium text-slate-500">Owner phone</span>
         <button
           onClick={() => onEditOwnerPhone(listing)}
-          className="text-xs font-mono font-medium text-emerald-700 hover:underline"
+          className="text-xs font-mono font-medium text-primary hover:underline"
         >
           {listing.landlord_phone || 'Set number'}
         </button>
@@ -402,7 +402,7 @@ function SortableMobileCard({
           onClick={() => onToggleCommission(listing)}
           className={`text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
             listing.pays_commission
-              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              ? 'bg-emerald-50 text-primary hover:bg-emerald-100'
               : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
           }`}
         >
@@ -420,13 +420,13 @@ function SortableMobileCard({
         </button>
       </div>
       <div className="flex items-center gap-3 pt-1 text-xs font-medium">
-        <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">View Live</a>
+        <a href={`/listing/${listing.id}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View Live</a>
         <a href={`/admin/listings/edit/${listing.id}`} className="text-blue-600 hover:underline">Edit</a>
         <a href={`/admin/listings/${listing.id}/leads`} className="text-indigo-600 hover:underline">
           Leads {listing.leads_count > 0 ? `(${listing.leads_count})` : ''}
         </a>
         <button onClick={() => onToggleActive(listing)} disabled={pendingId === listing.id}
-          className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-600' : 'text-emerald-600'}`}>
+          className={`hover:underline disabled:opacity-50 ${listing.is_active ? 'text-amber-700' : 'text-primary'}`}>
           {listing.is_active ? 'Deactivate' : 'Activate'}
         </button>
         <button onClick={() => onTransfer(listing)} className="text-indigo-600 hover:underline">Transfer</button>
@@ -493,7 +493,7 @@ function OwnerPhoneDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-lg p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-700"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -523,7 +523,7 @@ function OwnerPhoneDialog({
           <Button
             type="submit"
             disabled={isSaving || hasInvalidPhone}
-            className="rounded-lg bg-emerald-600 hover:bg-emerald-700"
+            className="rounded-lg bg-primary hover:bg-primary/90"
           >
             {isSaving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
             Save
@@ -740,7 +740,7 @@ export function ListingsTableClient({
                 size="sm"
                 onClick={handleSaveOrder}
                 disabled={isSavingOrder || !hasOrderChanges}
-                className="bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+                className="bg-primary hover:bg-primary/90 rounded-lg"
               >
                 {isSavingOrder ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -769,14 +769,14 @@ export function ListingsTableClient({
           {' · '}
           <span
             className={
-              hasCustomOrder ? 'font-medium text-amber-600' : 'font-medium text-emerald-600'
+              hasCustomOrder ? 'font-medium text-amber-700' : 'font-medium text-primary'
             }
           >
             {hasCustomOrder ? 'custom order applied' : 'newest first'}
           </span>
         </p>
         {lastReorderAt && (
-          <p className="text-xs text-slate-400 sm:ml-auto">
+          <p className="text-xs text-slate-500 sm:ml-auto">
             Last reordered {formatDistanceToNow(new Date(lastReorderAt), { addSuffix: true })}
           </p>
         )}
@@ -821,7 +821,7 @@ export function ListingsTableClient({
             <SortableContext items={orderedListings.map((l) => l.id)} strategy={verticalListSortingStrategy}>
               <tbody className="divide-y divide-slate-50">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={desktopColCount} className="text-sm text-slate-400 text-center px-5 py-8">No listings found.</td></tr>
+                  <tr><td colSpan={desktopColCount} className="text-sm text-slate-500 text-center px-5 py-8">No listings found.</td></tr>
                 ) : visible.map((listing, index) => (
                   <SortableRow
                     key={listing.id}
@@ -852,7 +852,7 @@ export function ListingsTableClient({
         <div className="md:hidden space-y-3">
           <SortableContext items={orderedListings.map((l) => l.id)} strategy={verticalListSortingStrategy}>
             {filtered.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No listings found.</div>
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">No listings found.</div>
             ) : visible.map((listing, index) => (
               <SortableMobileCard
                 key={listing.id}

@@ -505,7 +505,7 @@ function FormContent({
         <p className="text-sm font-semibold text-emerald-900 mb-1">
           How the tour fee works
         </p>
-        <p className="text-xs text-emerald-700 leading-relaxed">
+        <p className="text-xs text-primary leading-relaxed">
           The fee covers a verified agent who sets aside dedicated time to walk
           you through the room, answer your questions, and show you the actual
           space. You pay the agent directly when you arrive. No online payment
@@ -678,7 +678,7 @@ function FormContent({
         {price !== null && (
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Tour fee
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -769,7 +769,7 @@ function ConfirmationContent({
     <div className="text-center py-4">
       {/* Success icon */}
       <div className="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
-        <Check className="h-8 w-8 text-emerald-600" />
+        <Check className="h-8 w-8 text-primary" />
       </div>
 
       <h2 className="text-xl font-bold text-gray-900 mb-1">Tour Booked!</h2>

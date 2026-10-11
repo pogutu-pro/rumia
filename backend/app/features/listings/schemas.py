@@ -87,6 +87,8 @@ class ListingRead(BaseModel):
     is_full: bool = False
     sort_position: Optional[int] = None
     rating: float = 0.0
+    # Published reviews only; `rating` is their average (0.0 when there are none).
+    review_count: int = 0
     views: int = 0
     bathroom_type: Optional[str] = None
     distance_to_campus: Optional[str] = None

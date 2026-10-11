@@ -266,9 +266,9 @@ export function GoogleLocationInput({
           className={cn('pr-10', inputClassName)}
         />
         {isLoadingGoogle ? (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-500" />
         ) : (
-          <MapPin className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <MapPin className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
         )}
       </div>
 
@@ -288,7 +288,7 @@ export function GoogleLocationInput({
       </Button>
 
       {lookupError && (
-        <p className="text-xs font-semibold text-amber-600">{lookupError}</p>
+        <p className="text-xs font-semibold text-amber-700">{lookupError}</p>
       )}
 
       {coords && apiKey && (

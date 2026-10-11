@@ -87,7 +87,7 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
           </thead>
           <tbody className="divide-y divide-slate-50">
             {users.length === 0 ? (
-              <tr><td colSpan={8} className="text-sm text-slate-400 text-center px-5 py-8">No users found.</td></tr>
+              <tr><td colSpan={8} className="text-sm text-slate-500 text-center px-5 py-8">No users found.</td></tr>
             ) : users.map((user) => {
               const badge = ROLE_BADGES[user.role] ?? ROLE_BADGES.student;
               return (
@@ -98,12 +98,12 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                         <Image src={user.avatar_url} alt="" width={32} height={32} className="rounded-full object-cover shrink-0" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-slate-100 shrink-0 flex items-center justify-center">
-                          <span className="text-xs font-medium text-slate-400">{(user.full_name || '?')[0]}</span>
+                          <span className="text-xs font-medium text-slate-500">{(user.full_name || '?')[0]}</span>
                         </div>
                       )}
                       <div>
                         <p className="text-sm font-medium text-slate-900">{user.full_name || '—'}</p>
-                        <p className="text-xs text-slate-400 font-mono">{user.id.slice(0, 8)}...</p>
+                        <p className="text-xs text-slate-500 font-mono">{user.id.slice(0, 8)}...</p>
                       </div>
                     </div>
                   </td>
@@ -115,15 +115,15 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                   <td className="px-5 py-4 text-sm">
                     {user.has_agent ? (
                       <div>
-                        <Link href={`/admin/agents/${user.agent_slug || ''}`} className="text-emerald-600 hover:underline font-medium">
+                        <Link href={`/admin/agents/${user.agent_slug || ''}`} className="text-primary hover:underline font-medium">
                           {user.agent_name}
                         </Link>
-                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-primary' : 'bg-slate-100 text-slate-600'}`}>
                           {user.agent_status}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-500">—</span>
                     )}
                   </td>
                   <td className="text-sm text-slate-500 px-5 py-4 whitespace-nowrap">
@@ -152,14 +152,14 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                             {pendingUserId === user.id ? '...' : 'Make Admin'}
                           </button>
                           <button onClick={() => handleDemote(user.id, user.role)} disabled={pendingUserId === user.id}
-                            className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
+                            className="text-xs font-medium text-amber-700 hover:underline disabled:opacity-50">
                             {pendingUserId === user.id ? '...' : 'Revoke Agent'}
                           </button>
                         </>
                       )}
                       {user.role === 'admin' && (
                         <button onClick={() => handleDemote(user.id, user.role)} disabled={pendingUserId === user.id}
-                          className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
+                          className="text-xs font-medium text-amber-700 hover:underline disabled:opacity-50">
                           {pendingUserId === user.id ? '...' : 'Demote'}
                         </button>
                       )}
@@ -197,7 +197,7 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {users.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No users found.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">No users found.</div>
         ) : users.map((user) => {
           const badge = ROLE_BADGES[user.role] ?? ROLE_BADGES.student;
           return (
@@ -208,12 +208,12 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                     <Image src={user.avatar_url} alt="" width={40} height={40} className="rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 flex items-center justify-center">
-                      <span className="text-sm font-medium text-slate-400">{(user.full_name || '?')[0]}</span>
+                      <span className="text-sm font-medium text-slate-500">{(user.full_name || '?')[0]}</span>
                     </div>
                   )}
                   <div>
                     <p className="text-sm font-semibold text-slate-900">{user.full_name || '—'}</p>
-                    <p className="text-xs text-slate-400">{user.email}</p>
+                    <p className="text-xs text-slate-500">{user.email}</p>
                   </div>
                 </div>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.class}`}>{badge.label}</span>
@@ -227,8 +227,8 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
               {user.has_agent && (
                 <div className="text-xs bg-slate-50 rounded-lg p-2 flex items-center gap-2">
                   <span className="text-slate-500">Agent:</span>
-                  <Link href={`/admin/agents/${user.agent_slug || ''}`} className="text-emerald-600 hover:underline font-medium">{user.agent_name}</Link>
-                  <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                  <Link href={`/admin/agents/${user.agent_slug || ''}`} className="text-primary hover:underline font-medium">{user.agent_name}</Link>
+                  <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${user.agent_status === 'active' ? 'bg-emerald-50 text-primary' : 'bg-slate-100 text-slate-600'}`}>
                     {user.agent_status}
                   </span>
                 </div>
@@ -249,14 +249,14 @@ export function UsersTableClient({ users }: UsersTableClientProps) {
                       {pendingUserId === user.id ? '...' : 'Make Admin'}
                     </button>
                     <button onClick={() => handleDemote(user.id, user.role)} disabled={pendingUserId === user.id}
-                      className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
+                      className="text-xs font-medium text-amber-700 hover:underline disabled:opacity-50">
                       {pendingUserId === user.id ? '...' : 'Revoke Agent'}
                     </button>
                   </>
                 )}
                 {user.role === 'admin' && (
                   <button onClick={() => handleDemote(user.id, user.role)} disabled={pendingUserId === user.id}
-                    className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
+                    className="text-xs font-medium text-amber-700 hover:underline disabled:opacity-50">
                     {pendingUserId === user.id ? '...' : 'Demote'}
                   </button>
                 )}

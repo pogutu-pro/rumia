@@ -52,10 +52,10 @@ export function BnbListingsClient({ initialListings }: { initialListings: BnbLis
   if (listings.length === 0) {
     return (
       <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl shadow-xs">
-        <p className="text-slate-400 font-semibold text-sm">No BnB listings yet.</p>
-        <p className="text-slate-400 text-xs mt-1">Create your first short-stay listing to get started.</p>
+        <p className="text-slate-500 font-semibold text-sm">No BnB listings yet.</p>
+        <p className="text-slate-500 text-xs mt-1">Create your first short-stay listing to get started.</p>
         <Link href="/dashboard/bnb/new"
-          className="mt-5 inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-xs transition-colors">
+          className="mt-5 inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-sm font-bold shadow-xs transition-colors">
           Create first listing
         </Link>
       </div>
@@ -75,7 +75,7 @@ export function BnbListingsClient({ initialListings }: { initialListings: BnbLis
               <Image src={imageUrl} alt={item.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
               <div className="absolute top-3 left-3">
                 {item.is_active ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-primary border border-emerald-100 shadow-sm">
                     <CheckCircle2 className="h-3 w-3" /> Active
                   </span>
                 ) : (
@@ -90,7 +90,7 @@ export function BnbListingsClient({ initialListings }: { initialListings: BnbLis
             </div>
 
             <div className="p-4 flex-1 flex flex-col">
-              <div className="flex items-center gap-1 text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+              <div className="flex items-center gap-1 text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                 <MapPin className="h-3 w-3" />
                 <span className="truncate">{item.area || item.location}</span>
               </div>
@@ -111,14 +111,14 @@ export function BnbListingsClient({ initialListings }: { initialListings: BnbLis
 
                 <div className="flex items-center gap-2">
                   <button onClick={() => handleDelete(item.id)} disabled={!!deletingId}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-50">
+                    className="p-1.5 text-slate-500 hover:text-rose-600 transition-colors disabled:opacity-50">
                     {deletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </button>
                   <button onClick={() => handleToggle(item.id, item.is_active)} disabled={!!togglingId}
                     className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold transition-all border disabled:opacity-50 ${
                       item.is_active
                         ? 'bg-slate-50 text-slate-600 hover:bg-rose-50 hover:text-rose-600 border-slate-200'
-                        : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100'
+                        : 'bg-emerald-50 text-primary hover:bg-emerald-100 border-emerald-100'
                     }`}>
                     {togglingId === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : item.is_active ? 'Pause' : 'Publish'}
                   </button>

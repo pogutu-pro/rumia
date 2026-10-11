@@ -96,7 +96,7 @@ export default function ConfirmActionPage() {
       <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm p-6">
         {stage === 'done' ? (
           <div className="text-center">
-            <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" aria-hidden="true" />
+            <CheckCircle2 className="mx-auto h-8 w-8 text-primary" aria-hidden="true" />
             <h1 className="mt-2 text-xl font-semibold text-slate-900">Thanks — done.</h1>
             <p className="mt-1 text-sm text-slate-500">
               {action === 'confirm' && `${preview.property_name} is listed as available again.`}
@@ -121,7 +121,7 @@ export default function ConfirmActionPage() {
               {performing && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />}
               {performing ? 'Working…' : copy.button}
             </button>
-            <Link href={`/p/${preview.property_slug}`} className="mt-3 block text-center text-sm font-semibold text-emerald-700 underline underline-offset-2">
+            <Link href={`/p/${preview.property_slug}`} className="mt-3 block text-center text-sm font-semibold text-primary underline underline-offset-2">
               See the place first
             </Link>
           </>

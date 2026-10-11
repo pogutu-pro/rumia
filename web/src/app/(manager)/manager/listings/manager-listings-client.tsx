@@ -89,7 +89,7 @@ function OwnerPhoneDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-lg p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-700"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -128,7 +128,7 @@ function OwnerPhoneDialog({
           <Button
             type="submit"
             disabled={isSaving || hasInvalidPhone}
-            className="rounded-lg bg-emerald-600 hover:bg-emerald-700"
+            className="rounded-lg bg-primary hover:bg-primary/90"
           >
             {isSaving ? (
               <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -232,7 +232,7 @@ export function ManagerListingsClient({
         href={`/listing/${listing.id}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-emerald-600 hover:underline font-medium"
+        className="text-primary hover:underline font-medium"
       >
         Live
       </a>
@@ -246,7 +246,7 @@ export function ManagerListingsClient({
         onClick={() => handleToggleActive(listing)}
         disabled={pendingId === listing.id}
         className={`font-medium hover:underline disabled:opacity-50 ${
-          listing.is_active ? 'text-amber-600' : 'text-emerald-600'
+          listing.is_active ? 'text-amber-700' : 'text-primary'
         }`}
       >
         {pendingId === listing.id ? 'Working…' : listing.is_active ? 'Suspend' : 'Activate'}
@@ -282,7 +282,7 @@ export function ManagerListingsClient({
 
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-sm">
         <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             type="text"
             placeholder="Search title, location or area…"
@@ -319,7 +319,7 @@ export function ManagerListingsClient({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-sm text-slate-400 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-sm text-slate-500 shadow-sm">
           No listings found.
         </div>
       ) : (
@@ -373,7 +373,7 @@ export function ManagerListingsClient({
                     </td>
                     <td className="px-5 py-4">
                       {listing.is_active ? (
-                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-primary">
                           Active
                         </span>
                       ) : (
@@ -425,7 +425,7 @@ export function ManagerListingsClient({
                   </div>
                   <div className="shrink-0">
                     {listing.is_active ? (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-primary">
                         Active
                       </span>
                     ) : (

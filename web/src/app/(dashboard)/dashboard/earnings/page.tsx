@@ -60,11 +60,11 @@ export default async function AgentEarningsPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 flex items-center gap-3">
-          <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50 text-emerald-600">
+          <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50 text-primary">
             <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div>
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
               Total Earned
             </span>
             <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 tabular-nums">
@@ -73,11 +73,11 @@ export default async function AgentEarningsPage() {
           </div>
         </div>
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 flex items-center gap-3">
-          <div className="p-2.5 sm:p-3 rounded-xl bg-amber-50 text-amber-600">
+          <div className="p-2.5 sm:p-3 rounded-xl bg-amber-50 text-amber-700">
             <CalendarCheck className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div>
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
               Pending
             </span>
             <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 tabular-nums">
@@ -92,7 +92,7 @@ export default async function AgentEarningsPage() {
         <h2 className="text-sm font-bold text-slate-900">All Tour Bookings</h2>
         {tours.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center">
-            <p className="text-sm text-slate-400 font-semibold">
+            <p className="text-sm text-slate-500 font-semibold">
               No tour bookings yet.
             </p>
           </div>
@@ -119,7 +119,7 @@ export default async function AgentEarningsPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {tour.status === 'paid' || tour.status === 'completed' ? (
-                    <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                    <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-primary">
                       Paid
                     </span>
                   ) : tour.status === 'confirmed' ? (

@@ -297,59 +297,94 @@
    */
 
   .legal-document-prose {
-    @apply text-slate-700;
+    max-width: 68ch;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: hsl(var(--ink));
   }
 
   .legal-document-prose h2 {
-    @apply text-xl md:text-2xl font-bold text-slate-900 mb-4 mt-8;
+    margin-top: 3rem;
+    margin-bottom: 0.75rem;
+    padding-top: 2rem;
+    border-top: 1px solid hsl(var(--line));
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: hsl(var(--ink));
     text-wrap: balance;
   }
 
   .legal-document-prose h3 {
-    @apply text-lg font-bold text-slate-900 mb-3 mt-6;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: hsl(var(--ink));
     text-wrap: balance;
   }
 
   .legal-document-prose h4 {
-    @apply text-base font-bold text-slate-900 mb-2 mt-4;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: hsl(var(--ink));
   }
 
   .legal-document-prose h2:first-child,
   .legal-document-prose h3:first-child {
-    @apply mt-0;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
 
   .legal-document-prose p {
-    @apply my-3 leading-relaxed text-slate-700;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 
   .legal-document-prose ul,
   .legal-document-prose ol {
-    @apply my-3 space-y-2 pl-5 text-slate-700 leading-relaxed;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-left: 1.25rem;
+  }
+
+  .legal-document-prose li + li {
+    margin-top: 0.5rem;
   }
 
   .legal-document-prose ul {
-    @apply list-disc;
+    list-style: disc;
   }
 
   .legal-document-prose ol {
-    @apply list-decimal;
+    list-style: decimal;
   }
 
   .legal-document-prose a {
-    @apply font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-600;
+    font-weight: 500;
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .legal-document-prose strong {
-    @apply font-semibold text-slate-800;
+    font-weight: 600;
   }
 
   .legal-document-prose blockquote {
-    @apply my-3 border-l-2 border-slate-200 pl-4 text-slate-600 leading-relaxed;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-left: 2px solid hsl(var(--line));
+    padding-left: 1rem;
+    color: hsl(var(--ink-muted));
   }
 
   .legal-document-prose hr {
-    @apply my-6 border-slate-200;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-color: hsl(var(--line));
   }
 
 }
@@ -601,4 +636,18 @@
   abbr[title]::after {
     content: ' (' attr(title) ')';
   }
+}
+
+/* ========================================
+   APPLICATION SHELL UTILITIES
+   Token-backed helpers so shell and page components share one palette.
+   ======================================== */
+@layer components {
+  .bg-page { background-color: hsl(var(--page)); }
+  .bg-raised { background-color: hsl(var(--page-raised)); }
+  .bg-subtle { background-color: hsl(var(--page-subtle)); }
+  .bg-ink { background-color: hsl(var(--ink)); }
+  .text-ink { color: hsl(var(--ink)); }
+  .text-ink-muted { color: hsl(var(--ink-muted)); }
+  .border-line { border-color: hsl(var(--line)); }
 }

@@ -12,7 +12,7 @@ export function CommissionTable({ commissions, listings, leadsCountByListing }: 
   if (commissions.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-xs">
-        <p className="text-slate-400 font-semibold">No commission records found.</p>
+        <p className="text-slate-500 font-semibold">No commission records found.</p>
       </div>
     );
   }
@@ -31,11 +31,11 @@ export function CommissionTable({ commissions, listings, leadsCountByListing }: 
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   {commission.status === 'paid' ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Paid</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-primary border border-emerald-100">Paid</span>
                   ) : (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">Pending</span>
                   )}
-                  <span className="text-xs text-slate-400">{leadsCountByListing[String(commission.listing_id)] || 0} leads</span>
+                  <span className="text-xs text-slate-500">{leadsCountByListing[String(commission.listing_id)] || 0} leads</span>
                 </div>
               </div>
               <span className="font-black text-slate-900 text-sm shrink-0">
@@ -69,7 +69,7 @@ export function CommissionTable({ commissions, listings, leadsCountByListing }: 
                   <td className="px-6 py-4 text-slate-600 font-medium">{leadsCount}</td>
                   <td className="px-6 py-4">
                     {commission.status === 'paid' ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Paid</span>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-primary border border-emerald-100">Paid</span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">Pending</span>
                     )}

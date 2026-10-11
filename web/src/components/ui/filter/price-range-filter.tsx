@@ -91,7 +91,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500">
             KSh
           </span>
           <input
@@ -101,12 +101,12 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
             onChange={(e) => setMinInput(e.target.value)}
             onBlur={handleMinBlur}
             placeholder="Min"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 cursor-text"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 cursor-text"
           />
         </div>
         <span className="text-slate-300 text-sm font-medium">—</span>
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500">
             KSh
           </span>
           <input
@@ -116,7 +116,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
             onChange={(e) => setMaxInput(e.target.value)}
             onBlur={handleMaxBlur}
             placeholder="Max"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 cursor-text"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 cursor-text"
           />
         </div>
       </div>
@@ -138,20 +138,20 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
           <SliderPrimitive.Thumb className="block h-5 w-5 cursor-grab rounded-full border-2 border-emerald-500 bg-white shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 active:cursor-grabbing" />
         </SliderPrimitive.Root>
 
-        <div className="mt-1 flex justify-between text-xs font-medium text-slate-400">
+        <div className="mt-1 flex justify-between text-xs font-medium text-slate-500">
           <span>{formatCurrency(MIN_PRICE)}</span>
           <span>{formatCurrency(MAX_PRICE)}</span>
         </div>
       </div>
 
       {(minPrice || maxPrice) && (
-        <p className="text-center text-sm font-semibold text-emerald-600">
+        <p className="text-center text-sm font-semibold text-primary">
           {formatCurrency(minPrice ?? MIN_PRICE)} – {formatCurrency(maxPrice ?? MAX_PRICE)}
         </p>
       )}
 
       <div className="space-y-2 pt-2 border-t border-slate-100">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quick Presets</span>
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Quick Presets</span>
         <div className="grid grid-cols-2 gap-2">
           {PRESETS.map((preset) => {
             const isActive = minPrice === preset.min && maxPrice === preset.max;
@@ -163,7 +163,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, onChange }: PriceRangeFil
                 className={cn(
                   'rounded-xl border px-3 py-2 text-xs font-medium transition-all text-center cursor-pointer',
                   isActive
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold'
+                    ? 'bg-emerald-50 border-emerald-300 text-primary font-bold'
                     : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50',
                 )}
               >

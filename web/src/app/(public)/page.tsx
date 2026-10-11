@@ -8,6 +8,7 @@ import {
   type ExploreZone,
 } from '@/components/home/explore-discovery';
 import { ForYou } from '@/components/home/for-you';
+import { HomeHeading } from '@/components/home/home-heading';
 import { ListingSection } from '@/components/home/listing-section';
 import type { ExploreListing } from '@/components/home/explore-listing-card';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
@@ -16,6 +17,7 @@ import { getZonesByCampusSlug } from '@/lib/data/zones';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 import type { Campus, Listing } from '@/types';
 import { getStartingPrice } from '@/lib/utils/starting-price';
+import { formatAreaName, normaliseArea } from '@/lib/utils/area-label';
 
 export const revalidate = 300;
 
@@ -116,6 +118,7 @@ function toExploreListing(item: Listing): ExploreListing {
     wifi_included: item.wifi_included,
     rating:
       typeof item.rating === 'number' ? item.rating : Number(item.rating) || 0,
+    review_count: typeof item.review_count === 'number' ? item.review_count : null,
     views: item.views,
     created_at: item.created_at,
     image_url: firstImage?.r2_url ?? null,
@@ -211,49 +214,41 @@ export default async function HomePage() {
     excludeIds(affordablePool, new Set([...popularIds, ...newestIds])),
   ).slice(0, FEED_LIMIT);
 
-  // Consolidate real accommodation zones from campus_zones and listings feed
+  // Consolidate real accommodation zones from campus_zones and the listings feed. Areas arrive both as
+  // names ("Embassy Area") and slugs ("embassy-area"); they are one zone.
   const areaCounts = new Map<string, number>();
   for (const item of exploreItems) {
-    const areaName = (item.area || '').trim();
-    if (areaName) {
-      areaCounts.set(areaName, (areaCounts.get(areaName) ?? 0) + 1);
-    }
+    const key = normaliseArea(item.area);
+    if (key) areaCounts.set(key, (areaCounts.get(key) ?? 0) + 1);
   }
 
   const zoneMap = new Map<string, ExploreZone>();
   for (const z of campusZones) {
-    if (z.name) {
-      const trimmed = z.name.trim();
-      zoneMap.set(trimmed.toLowerCase(), {
-        name: trimmed,
-        slug: z.slug,
-        count: areaCounts.get(trimmed) ?? 0,
-      });
-    }
+    if (!z.name) continue;
+    const key = normaliseArea(z.name);
+    zoneMap.set(key, {
+      name: formatAreaName(z.name),
+      slug: z.slug,
+      count: areaCounts.get(key) ?? 0,
+    });
   }
-
-  for (const [areaName, count] of areaCounts.entries()) {
-    const key = areaName.toLowerCase();
-    if (!zoneMap.has(key)) {
-      zoneMap.set(key, {
-        name: areaName,
-        count,
-      });
-    }
+  for (const [key, count] of areaCounts.entries()) {
+    if (!zoneMap.has(key)) zoneMap.set(key, { name: formatAreaName(key), count });
   }
 
   const zones: ExploreZone[] = Array.from(zoneMap.values());
 
+  const stayItems = dedupeById([...apartFeed, ...shortStayFeed]).slice(0, FEED_LIMIT);
+  const shortName =
+    campus.short_name ?? (campus.slug === 'dekut' ? 'DeKUT' : campus.name);
+
   return (
-    <main id="main-content" className="flex flex-col min-h-screen bg-white">
-      <h1 className="sr-only">
-        Student Accommodation, Hostels, Bedsitters & Apartments near{' '}
-        {campus.name}
-      </h1>
+    <div id="main-content" className="flex flex-col pb-10">
+      <HomeHeading campusName={campus.name} />
       <JsonLd data={buildPageSchemas(campus, exploreItems)} />
 
       {activeAnnouncements.length > 0 && (
-        <section className="mx-auto w-full max-w-6xl px-4 pt-4 lg:px-8">
+        <section className="w-full px-4 pt-4 lg:px-8">
           <PublicAnnouncements announcements={activeAnnouncements} />
         </section>
       )}
@@ -267,51 +262,30 @@ export default async function HomePage() {
 
       <ForYou />
 
-      <div className="pb-10 pt-2">
-        <ListingSection
-          title={
-            <>
-              <span className="md:hidden">
-                Popular near{' '}
-                {campus.short_name ??
-                  (campus.slug === 'dekut' ? 'DeKUT' : campus.name)}
-              </span>
-              <span className="hidden md:inline">
-                Popular near {campus.name}
-              </span>
-            </>
-          }
-          subtitle="Most viewed this week"
-          seeAllHref="/hostels"
-          seeAllLabel="See all"
-          items={popularUnique}
-        />
-        <ListingSection
-          title="New on Rumia"
-          subtitle="Fresh listings"
-          seeAllHref="/hostels"
-          seeAllLabel="See all"
-          items={newestUnique}
-        />
-        <ListingSection
-          title={
-            <>
-              <span className="md:hidden">
-                Affordable near{' '}
-                {campus.short_name ??
-                  (campus.slug === 'dekut' ? 'DeKUT' : campus.name)}
-              </span>
-              <span className="hidden md:inline">
-                Affordable near {campus.name}
-              </span>
-            </>
-          }
-          subtitle="Budget-friendly hostels"
-          seeAllHref="/hostels?maxPrice=6500"
-          seeAllLabel="See all"
-          items={affordableUnique}
-        />
-      </div>
-    </main>
+      <ListingSection
+        title={`Popular near ${shortName}`}
+        subtitle="Most viewed on Rumia"
+        seeAllHref="/hostels"
+        items={popularUnique}
+      />
+      <ListingSection
+        title="New on Rumia"
+        subtitle="Recently added"
+        seeAllHref="/hostels"
+        items={newestUnique}
+      />
+      <ListingSection
+        title={`Affordable near ${shortName}`}
+        subtitle="Lowest monthly prices"
+        seeAllHref="/hostels?maxPrice=6500"
+        items={affordableUnique}
+      />
+      <ListingSection
+        title="Apartments & short stays"
+        subtitle="Other ways to stay"
+        seeAllHref="/hostels?type=apartment"
+        items={stayItems}
+      />
+    </div>
   );
 }

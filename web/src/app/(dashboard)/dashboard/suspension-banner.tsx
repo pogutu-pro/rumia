@@ -58,7 +58,7 @@ export function SuspensionBanner({ agentName, suspensionReason }: SuspensionBann
 
         {sent ? (
           <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-800">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
             Message sent. The admin/manager will review your appeal and get back to you.
           </div>
         ) : (

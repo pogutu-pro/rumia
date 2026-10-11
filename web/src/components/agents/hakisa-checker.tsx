@@ -80,7 +80,7 @@ function formatPhone(val: string) {
 function VerifiedResult({ data }: { data: VerifiedData }) {
   return (
     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 overflow-hidden">
-      <div className="bg-emerald-600 px-5 py-3 sm:px-6">
+      <div className="bg-primary px-5 py-3 sm:px-6">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-50">
           <ShieldCheck className="h-4 w-4" />
           Verified
@@ -89,7 +89,7 @@ function VerifiedResult({ data }: { data: VerifiedData }) {
       <div className="p-5 sm:p-6 space-y-5">
         <div>
           <h3 className="text-xl font-bold text-emerald-900">{data.hostelName}</h3>
-          <p className="mt-1 text-sm text-emerald-600 font-medium">Verified by Rumia</p>
+          <p className="mt-1 text-sm text-primary font-medium">Verified by Rumia</p>
         </div>
 
         <div className="space-y-3 rounded-xl bg-white border border-emerald-100 p-4 text-sm">
@@ -113,7 +113,7 @@ function VerifiedResult({ data }: { data: VerifiedData }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+        <div className="flex items-center gap-2 text-sm font-semibold text-primary">
           <Check className="h-4 w-4" />
           Safe to proceed.
         </div>
@@ -121,7 +121,7 @@ function VerifiedResult({ data }: { data: VerifiedData }) {
         {data.onRumia && data.listingUrl ? (
           <Link
             href={data.listingUrl}
-            className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-500 active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-all hover:bg-primary/90 active:scale-[0.98]"
           >
             View Listing
             <ExternalLink className="h-3.5 w-3.5" />
@@ -129,7 +129,7 @@ function VerifiedResult({ data }: { data: VerifiedData }) {
         ) : (
           <Link
             href="/verify/report"
-            className="flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-200 px-4 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+            className="flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-200 px-4 py-3 text-sm font-bold text-primary transition-colors hover:bg-emerald-100"
           >
             Report Information
           </Link>
@@ -482,10 +482,10 @@ export function HakisaChecker({ rumiaListings: initialListings = [] }: HakisaChe
       {/* Hero */}
       <div className="rounded-2xl border border-slate-200/60 bg-white p-5 sm:p-7 shadow-sm">
         <div className="flex items-center gap-2.5 mb-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-primary">
             <ShieldCheck className="h-5 w-5" />
           </span>
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Hakikisha</span>
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Hakikisha</span>
         </div>
         <h2 className="text-xl font-bold text-slate-900 leading-tight">
           Avoid hostel payment scams.
@@ -496,8 +496,8 @@ export function HakisaChecker({ rumiaListings: initialListings = [] }: HakisaChe
 
         {/* Search mode tabs */}
         <div className="mt-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">Search by</p>
-          <div className="flex gap-1.5">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">Search by</p>
+          <div className="flex flex-wrap gap-1.5">
             {MODES.map((m) => (
               <button
                 key={m.key}
@@ -507,7 +507,7 @@ export function HakisaChecker({ rumiaListings: initialListings = [] }: HakisaChe
                   'flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition-all',
                   searchMode === m.key
                     ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700',
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-700',
                 )}
               >
                 {m.icon}
@@ -589,19 +589,19 @@ export function HakisaChecker({ rumiaListings: initialListings = [] }: HakisaChe
       <div className="rounded-2xl border border-slate-200/60 bg-white p-5 sm:p-6">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-primary">
               <Check className="h-3.5 w-3.5" />
             </span>
             <span className="text-sm font-semibold text-slate-700">Verified by Rumia</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-primary">
               <Check className="h-3.5 w-3.5" />
             </span>
             <span className="text-sm font-semibold text-slate-700">Takes less than 10 seconds</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-primary">
               <Check className="h-3.5 w-3.5" />
             </span>
             <span className="text-sm font-semibold text-slate-700">Free to use</span>

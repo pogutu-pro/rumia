@@ -78,7 +78,7 @@ export function AgentsTableClient({ initialAgents }: AgentsTableClientProps) {
       {/* Search Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200">
         <div className="relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
@@ -114,7 +114,7 @@ export function AgentsTableClient({ initialAgents }: AgentsTableClientProps) {
                   <span
                     className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                       agent.status === 'active'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        ? 'bg-emerald-50 text-primary border border-emerald-200'
                         : 'bg-rose-50 text-rose-700 border border-rose-200'
                     }`}
                   >
@@ -126,7 +126,7 @@ export function AgentsTableClient({ initialAgents }: AgentsTableClientProps) {
                     {agent.status}
                   </span>
                   {agent.verified && (
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-emerald-50 text-primary border border-emerald-200 font-bold px-2 py-0.5 rounded-full">
                       Verified
                     </span>
                   )}
@@ -155,7 +155,7 @@ export function AgentsTableClient({ initialAgents }: AgentsTableClientProps) {
                   className={`w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${
                     agent.status === 'active'
                       ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                      : 'bg-primary hover:bg-primary/90 text-white'
                   }`}
                 >
                   {loadingId === agent.id ? (
@@ -222,7 +222,7 @@ export function AgentsTableClient({ initialAgents }: AgentsTableClientProps) {
                 className={`px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
                   activeModalAgent.status === 'active'
                     ? 'bg-rose-600 hover:bg-rose-500'
-                    : 'bg-emerald-600 hover:bg-emerald-500'
+                    : 'bg-primary hover:bg-primary/90'
                 }`}
               >
                 {loadingId === activeModalAgent.id && (

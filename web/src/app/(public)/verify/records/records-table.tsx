@@ -17,7 +17,7 @@ interface OfficialRecordsTableProps {
 }
 
 const ZONE_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  MAIN: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  MAIN: { bg: 'bg-emerald-50', text: 'text-primary', dot: 'bg-emerald-500' },
   'NYERI VIEW': { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
   EMBASSY: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500' },
   NYARIBO: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
@@ -90,22 +90,22 @@ export function OfficialRecordsTable({ records }: OfficialRecordsTableProps) {
 
         {/* Search */}
         <div className="relative w-full lg:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
           <input
             ref={searchRef}
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search hostel or payment…"
-            className="w-full pl-10 pr-12 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all"
+            className="w-full pl-10 pr-12 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all"
           />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center rounded border border-slate-200 bg-slate-50 px-1.5 text-[10px] font-bold text-slate-400">
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center rounded border border-slate-200 bg-slate-50 px-1.5 text-[10px] font-bold text-slate-500">
             /
           </kbd>
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 sm:right-9"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 sm:right-9"
             >
               <X className="h-4 w-4" />
             </button>
@@ -147,7 +147,7 @@ export function OfficialRecordsTable({ records }: OfficialRecordsTableProps) {
 
       {/* Result count */}
       {search && (
-        <p className="text-xs text-slate-400 mt-4 mb-3 font-medium">
+        <p className="text-xs text-slate-500 mt-4 mb-3 font-medium">
           {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &quot;{search}&quot;
         </p>
       )}
@@ -182,7 +182,7 @@ export function OfficialRecordsTable({ records }: OfficialRecordsTableProps) {
                     <p className="mt-3 font-semibold text-slate-600 text-sm">
                       No records match your search
                     </p>
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-slate-500">
                       Try a different hostel name, zone, or payment number.
                     </p>
                     <button
@@ -279,7 +279,7 @@ export function OfficialRecordsTable({ records }: OfficialRecordsTableProps) {
 
       {/* Footer note */}
       <div className="mt-5 flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-500">
-        <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" />
+        <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-500" />
         <p>
           Contact numbers are partially masked for privacy. If a number you were given does not appear here,{' '}
           <Link href="/verify" className="font-semibold text-slate-700 hover:underline">

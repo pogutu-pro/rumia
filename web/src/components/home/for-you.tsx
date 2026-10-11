@@ -43,15 +43,15 @@ export function ForYou() {
   if (!taste || (taste.searches.length === 0 && cards.length === 0)) return null;
 
   return (
-    <section aria-label="For you" className="mx-auto w-full max-w-6xl px-4 pt-6 lg:px-8">
+    <section aria-label="For you" className="w-full px-4 pt-6 lg:px-8">
       {taste.searches.length > 0 && (
         <div>
-          <h2 className="text-sm font-bold text-slate-900">Pick up where you left off</h2>
+          <h2 className="text-sm font-bold text-ink">Pick up where you left off</h2>
           <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {taste.searches.slice(0, 4).map((s) => (
               <li key={s} className="shrink-0">
-                <Link href={`/search?q=${encodeURIComponent(s)}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-sm text-slate-700 hover:border-slate-300">
-                  <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <Link href={`/search?q=${encodeURIComponent(s)}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line bg-raised px-3.5 text-sm text-ink hover:border-slate-300">
+                  <Clock className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
                   {s}
                 </Link>
               </li>
@@ -62,8 +62,8 @@ export function ForYou() {
       {cards.length > 0 && (
         <div className="mt-5">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-lg font-bold text-slate-900">Picked for you</h2>
-            <Link href="/search" className="text-sm font-semibold text-emerald-700 underline underline-offset-2">
+            <h2 className="text-lg font-bold text-ink">Picked for you</h2>
+            <Link href="/search" className="text-sm font-semibold text-primary underline underline-offset-2">
               See more
             </Link>
           </div>

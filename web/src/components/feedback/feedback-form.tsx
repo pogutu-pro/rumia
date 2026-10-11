@@ -61,7 +61,7 @@ export function FeedbackForm() {
     return (
       <div className="text-center py-10 space-y-3">
         <div className="w-14 h-14 rounded-full bg-emerald-100 mx-auto flex items-center justify-center">
-          <SendHorizonal className="h-6 w-6 text-emerald-600" />
+          <SendHorizonal className="h-6 w-6 text-primary" />
         </div>
         <p className="text-base font-semibold text-slate-800">
           Thanks, we read every message
@@ -77,7 +77,7 @@ export function FeedbackForm() {
             setMessage('');
             setCategory('general');
           }}
-          className="mt-2 text-emerald-600 hover:text-emerald-700"
+          className="mt-2 text-primary hover:text-primary"
         >
           Send another
         </Button>
@@ -110,7 +110,7 @@ export function FeedbackForm() {
       />
 
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-slate-500">
           {message.length > 0 &&
             `${message.length} character${message.length === 1 ? '' : 's'}`}
         </span>

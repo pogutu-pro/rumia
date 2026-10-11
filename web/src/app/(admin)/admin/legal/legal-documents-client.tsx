@@ -351,7 +351,7 @@ export function LegalDocumentsClient({
             {activeDoc.title}
           </h1>
           {activeDoc.status === 'published' ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               Published
             </span>
@@ -433,7 +433,7 @@ export function LegalDocumentsClient({
         {/* Editor */}
         <div className="relative rounded-xl border border-slate-200 bg-white shadow-sm">
           {!hasContent && (
-            <div className="pointer-events-none absolute inset-0 flex items-start px-5 pt-4 text-sm text-slate-400">
+            <div className="pointer-events-none absolute inset-0 flex items-start px-5 pt-4 text-sm text-slate-500">
               Start writing your {activeDoc.title.toLowerCase()}… Use the toolbar
               above for headings, lists and links.
             </div>
@@ -534,7 +534,7 @@ export function LegalDocumentsClient({
             <Card key={type} className="flex flex-col">
               <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-primary">
                     {doc.type === 'privacy' ? (
                       <ShieldCheck className="h-5 w-5" />
                     ) : (
@@ -587,11 +587,11 @@ export function LegalDocumentsClient({
                     Edit
                   </Button>
                   {doc.status === 'draft' ? (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-500">
                       Draft — not shown publicly
                     </span>
                   ) : hasPendingDraft ? (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-500">
                       Draft edits pending — live version is shown publicly
                     </span>
                   ) : null}
@@ -616,7 +616,7 @@ function HeaderRow({
     <button
       type="button"
       onClick={onBack}
-      className="mb-4 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+      className="mb-4 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
     >
       <ArrowLeft className="h-4 w-4" />
       {backLabel}
@@ -635,7 +635,7 @@ function Badge({
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${
         published
-          ? 'bg-emerald-50 text-emerald-700'
+          ? 'bg-emerald-50 text-primary'
           : 'bg-amber-50 text-amber-700'
       }`}
     >

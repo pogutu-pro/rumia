@@ -74,7 +74,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="space-y-1">
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-primary flex items-center justify-center shrink-0">
               <Wallet className="h-4 w-4" />
             </span>
             Payments & Fees
@@ -104,7 +104,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-3.5 sm:p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-emerald-600 shrink-0" />
+            <Wallet className="h-4 w-4 text-primary shrink-0" />
             <p className="text-sm font-bold text-slate-900">
               Hostel-Finding Service Fee
             </p>
@@ -128,7 +128,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
 
         <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-3.5 sm:p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <MessageSquareText className="h-4 w-4 text-emerald-600 shrink-0" />
+            <MessageSquareText className="h-4 w-4 text-primary shrink-0" />
             <p className="text-sm font-bold text-slate-900">
               Agent Consultation Fee
             </p>

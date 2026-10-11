@@ -62,7 +62,7 @@ export default async function BnbPage() {
             <h1 className="text-3xl font-black text-slate-950 tracking-tight">
               RumiaBnB
             </h1>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-primary text-[11px] font-bold uppercase tracking-wider">
               Short stays
             </span>
           </div>

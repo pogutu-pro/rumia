@@ -37,6 +37,10 @@ function getInitials(nameOrEmail: string | null | undefined): string | null {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+export function usesBottomNav(pathname: string): boolean {
+  return /^\/(dashboard|admin|manager)(\/|$)/.test(pathname);
+}
+
 export function BottomNav() {
   const pathname = usePathname();
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
@@ -87,7 +91,8 @@ export function BottomNav() {
     };
   }, []);
 
-  if (/^\/hostels\/[^/]+\/[^/]+\/[^/]+/.test(pathname)) return null;
+  // The application shell provides navigation everywhere except the role workspaces.
+  if (!usesBottomNav(pathname)) return null;
 
   const initials = getInitials(displayName);
   const showImage = mounted && avatarUrl && !imgError;
@@ -125,7 +130,7 @@ export function BottomNav() {
                   className={[
                     "flex h-6 w-6 items-center justify-center overflow-hidden rounded-full text-[11px] font-bold ring-1 transition-colors",
                     active
-                      ? "bg-emerald-600 text-white ring-emerald-600"
+                      ? "bg-primary text-white ring-primary"
                       : showImage || initials
                         ? "bg-slate-900 text-white ring-slate-900"
                         : "bg-slate-100 text-slate-500 ring-slate-200",
@@ -151,7 +156,7 @@ export function BottomNav() {
                 <Icon
                   className={[
                     "h-[22px] w-[22px] transition-colors",
-                    active ? "text-emerald-600" : "text-slate-400",
+                    active ? "text-primary" : "text-slate-500",
                   ].join(" ")}
                   strokeWidth={active ? 2.2 : 1.9}
                 />
@@ -159,7 +164,7 @@ export function BottomNav() {
               <span
                 className={[
                   "text-[10px] font-semibold leading-none tracking-wide transition-colors",
-                  active ? "text-emerald-700" : "text-slate-500",
+                  active ? "text-primary" : "text-slate-500",
                 ].join(" ")}
               >
                 {tab.label}

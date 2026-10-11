@@ -27,6 +27,9 @@ export function initPostHog() {
   const token = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 
+  // An explicitly empty token means analytics are switched off on purpose (for example local development): stay quiet.
+  if (token === '') return posthog;
+
   if (!token || !host) {
     const missing = [
       !token && 'NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN',

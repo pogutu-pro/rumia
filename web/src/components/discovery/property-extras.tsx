@@ -35,7 +35,7 @@ export function PropertyFacts({ slug }: { slug: string }) {
         const Icon = FACT_ICON[f.kind] ?? CheckCircle2;
         return (
           <li key={f.text} className="flex items-start gap-2.5 text-sm text-slate-700">
-            <Icon className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+            <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
             <span>{f.text}</span>
           </li>
         );

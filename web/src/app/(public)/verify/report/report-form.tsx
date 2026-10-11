@@ -74,7 +74,7 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
     return (
       <div className="rounded-2xl border border-[#1B1B18]/10 bg-white overflow-hidden">
         <div className="px-5 py-3 sm:px-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-600">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
             <CheckCircle2 className="h-4 w-4" />
             Report sent
           </div>
@@ -88,7 +88,7 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-emerald-700 hover:underline"
+              className="font-semibold text-primary hover:underline"
             >
               tap here to send it manually
             </a>
@@ -178,7 +178,7 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
                   <p className={cn('font-semibold text-sm', issueType === option.key ? 'text-white' : 'text-slate-800')}>
                     {option.label}
                   </p>
-                  <p className={cn('text-xs mt-0.5', issueType === option.key ? 'text-white/70' : 'text-slate-400')}>
+                  <p className={cn('text-xs mt-0.5', issueType === option.key ? 'text-white/70' : 'text-slate-500')}>
                     {option.description}
                   </p>
                 </div>
@@ -193,14 +193,14 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
             Phone or payment number you were given
           </label>
           <div className="relative">
-            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
             <input
               type="text"
               value={contactReported}
               onChange={(e) => setContactReported(e.target.value)}
               placeholder="e.g. 0712 345 678 or Paybill 247247"
               inputMode="text"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none focus:border-slate-400 focus:bg-white transition-colors"
             />
           </div>
         </div>
@@ -216,7 +216,7 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
             onChange={(e) => setDetails(e.target.value)}
             placeholder="Describe what happened…"
             rows={3}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-colors resize-none"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none focus:border-slate-400 focus:bg-white transition-colors resize-none"
           />
         </div>
 
@@ -237,7 +237,7 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
             'w-full flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-bold transition-all',
             issueType
               ? 'bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98]'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed',
+              : 'bg-slate-100 text-slate-500 cursor-not-allowed',
           )}
         >
           <Flag className="h-4 w-4" />
@@ -247,7 +247,7 @@ export function ReportForm({ whatsappNumber }: ReportFormProps) {
 
         {/* Alternate: email */}
         <div className="text-center">
-          <p className="text-xs text-slate-400 mb-2">Or send us an email</p>
+          <p className="text-xs text-slate-500 mb-2">Or send us an email</p>
           <a
             href="mailto:contact@rumia.co.ke?subject=Hostel%20Report"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"

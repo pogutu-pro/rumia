@@ -116,14 +116,14 @@ function ReplyRow({ reply, currentUserId, onChanged }: ReplyRowProps) {
             <p className="truncate text-xs font-bold text-slate-800">
               {reply.author_name || 'Student'}
             </p>
-            <p className="text-[10px] font-medium text-slate-400">{formatDate(reply.created_at)}</p>
+            <p className="text-[10px] font-medium text-slate-500">{formatDate(reply.created_at)}</p>
           </div>
         </div>
         {isMine && (
           <button
             type="button"
             onClick={handleDelete}
-            className="text-slate-400 hover:text-red-500 p-1 rounded"
+            className="text-slate-500 hover:text-red-500 p-1 rounded"
             aria-label="Delete reply"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -308,13 +308,13 @@ export function ReviewCard({
             <div className="flex items-center gap-1.5 flex-wrap">
               <p className="text-sm font-bold text-slate-900 truncate">{displayName}</p>
               {review.school_verified_at_review_time && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-primary">
                   <ShieldCheck className="h-3 w-3" />
                   Verified
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400">{formatDate(review.created_at)}</p>
+            <p className="text-xs text-slate-500">{formatDate(review.created_at)}</p>
           </div>
         </div>
 
@@ -323,7 +323,7 @@ export function ReviewCard({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-700"
                 aria-label="Review actions"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -392,7 +392,7 @@ export function ReviewCard({
         <CategoryChips review={review} />
         {review.text && <ReviewBody text={review.text} />}
         {review.updated_at !== review.created_at && (
-          <p className="mt-1 text-[10px] font-medium text-slate-400">Edited</p>
+          <p className="mt-1 text-[10px] font-medium text-slate-500">Edited</p>
         )}
       </div>
 
@@ -404,8 +404,8 @@ export function ReviewCard({
           onClick={handleLike}
           disabled={isLiking}
           className={cn(
-            'text-slate-500 hover:text-emerald-700',
-            likedByMe && 'text-emerald-700',
+            'text-slate-500 hover:text-primary',
+            likedByMe && 'text-primary',
           )}
           leftIcon={<ThumbsUp className={cn('h-4 w-4', likedByMe && 'fill-emerald-700')} />}
         >

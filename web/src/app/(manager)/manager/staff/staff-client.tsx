@@ -146,7 +146,7 @@ export function StaffClient({ staff: initialStaff, campuses, regions }: StaffCli
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                       member.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                      'bg-emerald-100 text-emerald-700'
+                      'bg-emerald-100 text-primary'
                     }`}>
                       {member.role.replace('_', ' ')}
                     </span>
@@ -155,18 +155,18 @@ export function StaffClient({ staff: initialStaff, campuses, regions }: StaffCli
                     {member.role === 'admin' ? (
                       <span className="text-slate-900 font-medium text-xs">Global</span>
                     ) : member.managed_region_id ? (
-                      <span className="text-emerald-600 font-medium text-xs bg-emerald-50 px-2 py-1 rounded">Region: {getRegionName(member.managed_region_id)}</span>
+                      <span className="text-primary font-medium text-xs bg-emerald-50 px-2 py-1 rounded">Region: {getRegionName(member.managed_region_id)}</span>
                     ) : member.managed_campus_id ? (
-                      <span className="text-emerald-600 font-medium text-xs bg-emerald-50 px-2 py-1 rounded">Campus: {getCampusName(member.managed_campus_id)}</span>
+                      <span className="text-primary font-medium text-xs bg-emerald-50 px-2 py-1 rounded">Campus: {getCampusName(member.managed_campus_id)}</span>
                     ) : (
-                      <span className="text-slate-400 italic text-xs">Unassigned</span>
+                      <span className="text-slate-500 italic text-xs">Unassigned</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEditModal(member)}
-                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+                        className="p-1.5 text-slate-600 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -226,7 +226,7 @@ export function StaffClient({ staff: initialStaff, campuses, regions }: StaffCli
             ) : (
               <div className="space-y-4">
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-lg">
+                  <div className="w-10 h-10 bg-emerald-100 text-primary rounded-full flex items-center justify-center font-bold text-lg">
                     {foundUser.full_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -235,7 +235,7 @@ export function StaffClient({ staff: initialStaff, campuses, regions }: StaffCli
                   </div>
                   <button 
                     onClick={() => { setFoundUser(null); setSearchEmail(''); }}
-                    className="ml-auto text-xs text-emerald-600 hover:underline font-semibold"
+                    className="ml-auto text-xs text-primary hover:underline font-semibold"
                   >
                     Change
                   </button>

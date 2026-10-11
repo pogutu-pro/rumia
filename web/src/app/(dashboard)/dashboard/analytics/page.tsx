@@ -75,7 +75,7 @@ export default async function AgentAnalyticsPage() {
               <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div>
-              <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
                 {label}
               </span>
               <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 tabular-nums">
@@ -93,7 +93,7 @@ export default async function AgentAnalyticsPage() {
           <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
-                <thead className="bg-slate-50 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">
+                <thead className="bg-slate-50 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
                   <tr>
                     <th className="px-4 sm:px-5 py-3">Listing</th>
                     <th className="px-4 sm:px-5 py-3 text-right">Today</th>
@@ -111,7 +111,7 @@ export default async function AgentAnalyticsPage() {
                     return (
                       <tr key={row.listing_id} className="hover:bg-slate-50/60">
                         <td className="px-4 sm:px-5 py-3.5 font-bold text-slate-900">
-                          <Link href={href} className="hover:text-emerald-600 transition-colors">
+                          <Link href={href} className="hover:text-primary transition-colors">
                             {row.listing_title}
                           </Link>
                         </td>
@@ -137,7 +137,7 @@ export default async function AgentAnalyticsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center">
-          <p className="text-sm text-slate-400 font-semibold">
+          <p className="text-sm text-slate-500 font-semibold">
             View analytics will appear after students visit your listings.
           </p>
         </div>

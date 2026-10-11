@@ -85,7 +85,7 @@ export function SupportTeamClient({ agents }: SupportTeamClientProps) {
         <Sparkles className="h-2.5 w-2.5" /> Founder
       </span>
     ) : agent.verified ? (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-primary text-[9px] font-bold uppercase tracking-wider">
         <ShieldCheck className="h-2.5 w-2.5" /> Verified
       </span>
     ) : null;
@@ -120,15 +120,15 @@ export function SupportTeamClient({ agents }: SupportTeamClientProps) {
               </span>
             )}
             {agent.is_support && !owner && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-white text-[9px] font-bold uppercase tracking-wider">
                 On Hakikisha
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-0.5 truncate">
+          <p className="text-xs text-slate-500 mt-0.5 truncate">
             {agent.whatsapp || agent.phone}
             {agent.is_support && (
-              <span className="ml-2 text-emerald-600 font-semibold">Rank {agent.support_rank}</span>
+              <span className="ml-2 text-primary font-semibold">Rank {agent.support_rank}</span>
             )}
           </p>
         </div>
@@ -189,7 +189,7 @@ export function SupportTeamClient({ agents }: SupportTeamClientProps) {
 
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 sm:p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
             <Crown className="h-5 w-5" />
           </div>
           <div>
@@ -205,7 +205,7 @@ export function SupportTeamClient({ agents }: SupportTeamClientProps) {
           <div className="text-center py-10">
             <Users className="h-10 w-10 mx-auto text-slate-300" />
             <p className="mt-3 text-sm font-semibold text-slate-600">No agents on the Hakikisha page yet</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Use “Show on Hakikisha” below to build your customer-support team.
             </p>
           </div>
@@ -232,7 +232,7 @@ export function SupportTeamClient({ agents }: SupportTeamClientProps) {
         </div>
 
         {unsupported.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-6">All agents are on the Hakikisha page.</p>
+          <p className="text-sm text-slate-500 text-center py-6">All agents are on the Hakikisha page.</p>
         ) : (
           <div className="space-y-3">
             {unsupported.map((agent) => (

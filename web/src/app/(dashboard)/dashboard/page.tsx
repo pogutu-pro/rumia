@@ -158,7 +158,7 @@ export default async function DashboardPage() {
         >
           <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-primary flex items-center justify-center">
                 <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
@@ -166,7 +166,7 @@ export default async function DashboardPage() {
               </span>
             </div>
             <div>
-              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-primary transition-colors leading-tight">
                 My Listings
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-emerald-700">
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-primary">
             <span>Manage Listings</span>
             <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -187,7 +187,7 @@ export default async function DashboardPage() {
         >
           <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
                 <CalendarCheck className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-100 text-slate-700 tabular-nums">
@@ -307,15 +307,15 @@ export default async function DashboardPage() {
         >
           <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-primary flex items-center justify-center">
                 <Bed className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-emerald-50 text-emerald-700 tabular-nums">
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-emerald-50 text-primary tabular-nums">
                 Short stays
               </span>
             </div>
             <div>
-              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-primary transition-colors leading-tight">
                 RumiaBnB
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
@@ -323,7 +323,7 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-emerald-700">
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-primary">
             <span>Manage BnB listings</span>
             <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -366,12 +366,12 @@ export default async function DashboardPage() {
         >
           <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-primary flex items-center justify-center">
                 <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
             </div>
             <div>
-              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 group-hover:text-primary transition-colors leading-tight">
                 Payment Details
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-2 hidden sm:block">
@@ -380,7 +380,7 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-emerald-700">
+          <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-[11px] sm:text-xs font-bold text-slate-900 group-hover:text-primary">
             <span>{hasPochi ? 'Payment set' : 'Add payment details'}</span>
             <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
           </div>

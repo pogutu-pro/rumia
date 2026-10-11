@@ -168,17 +168,17 @@ export function CampusCompareGrid({ listings }: { listings: CampusListing[] }) {
                 </div>
 
                 <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
+                  <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">
                     <MapPin className="h-3 w-3 shrink-0" />
                     <span className="truncate">{item.location}</span>
                   </div>
-                  <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                  <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
                     {item.title}
                   </h3>
                   <p className="text-slate-500 text-xs line-clamp-2 mt-1 mb-4 flex-1">
                     {item.description}
                   </p>
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                     <span>Agent: {item.agents?.name || 'Rumia Agent'}</span>
                     <div className="flex items-center gap-2">
                        <button
@@ -190,7 +190,7 @@ export function CampusCompareGrid({ listings }: { listings: CampusListing[] }) {
                          }}
                          className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200 cursor-pointer border-2 ${
                            isSelected
-                             ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20'
+                             ? 'bg-primary text-white border-primary shadow-lg shadow-emerald-600/20'
                              : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-sm'
                          }`}
                        >
@@ -206,7 +206,7 @@ export function CampusCompareGrid({ listings }: { listings: CampusListing[] }) {
                            </>
                          )}
                        </button>
-                      <span className="font-semibold text-emerald-600 flex items-center gap-0.5">
+                      <span className="font-semibold text-primary flex items-center gap-0.5">
                         View Details <ArrowRight className="h-3 w-3" />
                       </span>
                     </div>

@@ -70,7 +70,7 @@ export default async function ManagerDashboardPage() {
       desc: 'Approve or reject pending agent applications for your campus.',
       icon: FileCheck2,
       badge: `${pendingAppsCount} Pending`,
-      color: 'bg-amber-50 text-amber-600',
+      color: 'bg-amber-50 text-amber-700',
       hoverColor: 'group-hover:text-amber-700',
     },
     {
@@ -79,8 +79,8 @@ export default async function ManagerDashboardPage() {
       desc: 'Monitor standing, suspend, or reinstate active campus agents.',
       icon: Users,
       badge: `${totalAgentsCount} Agents`,
-      color: 'bg-emerald-50 text-emerald-600',
-      hoverColor: 'group-hover:text-emerald-700',
+      color: 'bg-emerald-50 text-primary',
+      hoverColor: 'group-hover:text-primary',
     },
     {
       href: '/manager/zones',
@@ -95,8 +95,8 @@ export default async function ManagerDashboardPage() {
       title: 'Payments & Fees',
       desc: 'Set hostel-finding and agent consultation fees.',
       icon: Wallet,
-      color: 'bg-emerald-50 text-emerald-600',
-      hoverColor: 'group-hover:text-emerald-700',
+      color: 'bg-emerald-50 text-primary',
+      hoverColor: 'group-hover:text-primary',
     },
     {
       href: '/manager/settings',
@@ -112,7 +112,7 @@ export default async function ManagerDashboardPage() {
       desc: 'Review student hostel-finding requests and contact them on WhatsApp.',
       icon: MessageSquareText,
       badge: `${waitingHostelRequestsCount} Waiting`,
-      color: 'bg-amber-50 text-amber-600',
+      color: 'bg-amber-50 text-amber-700',
       hoverColor: 'group-hover:text-amber-700',
     },
     {
@@ -165,7 +165,7 @@ export default async function ManagerDashboardPage() {
           href="/manager/applications"
           className="group bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs space-y-2 hover:border-slate-300 hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between text-amber-600">
+          <div className="flex items-center justify-between text-amber-700">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
               Pending Apps
             </span>
@@ -184,7 +184,7 @@ export default async function ManagerDashboardPage() {
           href="/manager/agents"
           className="group bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs space-y-2 hover:border-slate-300 hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between text-emerald-600">
+          <div className="flex items-center justify-between text-primary">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
               Campus Agents
             </span>
@@ -193,7 +193,7 @@ export default async function ManagerDashboardPage() {
           <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             {totalAgentsCount}
           </p>
-          <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-emerald-700 group-hover:text-emerald-800 pt-1">
+          <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-primary group-hover:text-emerald-800 pt-1">
             Manage{' '}
             <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
           </span>
@@ -203,7 +203,7 @@ export default async function ManagerDashboardPage() {
           href="/manager/listings"
           className="group bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs space-y-2 hover:border-slate-300 hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between text-emerald-600">
+          <div className="flex items-center justify-between text-primary">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
               Active Listings
             </span>
@@ -212,7 +212,7 @@ export default async function ManagerDashboardPage() {
           <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             {totalListingsCount}
           </p>
-          <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-emerald-700 group-hover:text-emerald-800 pt-1">
+          <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-primary group-hover:text-emerald-800 pt-1">
             View{' '}
             <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
           </span>
@@ -222,7 +222,7 @@ export default async function ManagerDashboardPage() {
           href="/manager/requests"
           className="group bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs space-y-2 hover:border-slate-300 hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between text-amber-600">
+          <div className="flex items-center justify-between text-amber-700">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
               Hostel Requests
             </span>

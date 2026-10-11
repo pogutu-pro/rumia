@@ -178,7 +178,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
           <tbody className="divide-y divide-slate-50">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-sm text-slate-400 text-center px-5 py-8">
+                <td colSpan={8} className="text-sm text-slate-500 text-center px-5 py-8">
                   No tour bookings found.
                 </td>
               </tr>
@@ -190,7 +190,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                 >
                   <td className="px-5 py-4">
                     <p className="text-sm font-medium text-slate-900">{t.student_name}</p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                       <Phone className="h-3 w-3" />
                       {t.phone}
                     </p>
@@ -203,7 +203,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                         year: 'numeric',
                       })}
                     </p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                       <Clock className="h-3 w-3" />
                       {t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1)}
                     </p>
@@ -228,12 +228,12 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                     {t.agents ? (
                       <Link
                         href={`/admin/agents/${t.agents.id}`}
-                        className="text-emerald-600 hover:underline font-medium"
+                        className="text-primary hover:underline font-medium"
                       >
                         {t.agents.name}
                       </Link>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-500">—</span>
                     )}
                   </td>
                   <td className="px-5 py-4">
@@ -248,7 +248,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                         type="button"
                         onClick={() => handleMessage(t)}
                         disabled={isMessaging === t.id}
-                        className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-semibold text-primary bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap disabled:opacity-50"
                       >
                         <MessageCircle className="h-3 w-3" />
                         {t.status === 'contacted' ? 'Message again' : 'Message'}
@@ -264,7 +264,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
 
       <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">
             No tour bookings found.
           </div>
         ) : (
@@ -285,18 +285,18 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <CalendarCheck className="h-3.5 w-3.5 text-slate-400" />
+                  <CalendarCheck className="h-3.5 w-3.5 text-slate-500" />
                   {new Date(t.preferred_date + 'T00:00:00').toLocaleDateString('en-KE', {
                     month: 'short',
                     day: 'numeric',
                   })}
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <Clock className="h-3.5 w-3.5 text-slate-400" />
+                  <Clock className="h-3.5 w-3.5 text-slate-500" />
                   {t.preferred_time.charAt(0).toUpperCase() + t.preferred_time.slice(1)}
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                  <MapPin className="h-3.5 w-3.5 text-slate-500" />
                   {t.zone}
                 </div>
                 <div className="font-bold text-slate-900">{formatTourPrice(t.amount)}</div>
@@ -315,7 +315,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   Agent:{' '}
                   <Link
                     href={`/admin/agents/${t.agents.id}`}
-                    className="text-emerald-600 hover:underline font-medium"
+                    className="text-primary hover:underline font-medium"
                   >
                     {t.agents.name}
                   </Link>
@@ -326,7 +326,7 @@ export function ToursTableClient({ tours, agents, zones }: ToursTableClientProps
                   type="button"
                   onClick={() => handleMessage(t)}
                   disabled={isMessaging === t.id}
-                  className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold text-primary bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50"
                 >
                   <MessageCircle className="h-3 w-3" />
                   {t.status === 'contacted' ? 'Message again' : 'Message'}

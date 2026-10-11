@@ -58,12 +58,12 @@ export function RoomTypes({ roomTypes, fallbackPrice, startingPrice }: RoomTypes
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h3 className="font-bold text-slate-900 flex items-center gap-2 text-[15px]">
-                      <BedDouble className="h-5 w-5 text-emerald-600 shrink-0" />
+                      <BedDouble className="h-5 w-5 text-primary shrink-0" />
                       <span className="truncate">{room.room_type}</span>
                     </h3>
                   </div>
                   {isStartingFrom && (
-                    <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-600 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+                    <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full bg-primary text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
                       Starting from
                     </span>
                   )}
@@ -77,7 +77,7 @@ export function RoomTypes({ roomTypes, fallbackPrice, startingPrice }: RoomTypes
                   <span className="text-2xl font-black text-slate-900 tracking-tight">
                     KES {room.price.toLocaleString()}
                   </span>
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">/mo</span>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">/mo</span>
                 </div>
 
                 {/* Deposit + Total to move in */}
@@ -85,14 +85,14 @@ export function RoomTypes({ roomTypes, fallbackPrice, startingPrice }: RoomTypes
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                        <Wallet className="h-3.5 w-3.5 text-slate-400" />
+                        <Wallet className="h-3.5 w-3.5 text-slate-500" />
                         Deposit
                       </span>
                       <span className="font-bold text-slate-700 tabular-nums">KES {room.deposit!.toLocaleString()}</span>
                     </div>
                     <div className="bg-gradient-to-r from-emerald-50 to-emerald-100/50 rounded-xl px-4 py-3 border border-emerald-200/60">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Total to move in</span>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Total to move in</span>
                         <span className="text-lg font-black text-emerald-900 tabular-nums">
                           KES {totalToMoveIn!.toLocaleString()}
                         </span>

@@ -137,7 +137,7 @@ export default function LoginPage() {
           className="w-full flex items-center justify-center gap-3 h-13 py-3.5 border-2 border-slate-200 rounded-xl font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {googleSigningIn ? (
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
           ) : (
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
               <path
@@ -161,7 +161,7 @@ export default function LoginPage() {
           {googleSigningIn ? 'Redirecting to Google...' : 'Continue with Google'}
         </button>
 
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-500">
           Everyone — students, agents and administrators — signs in with Google.
         </p>
         {comingCampuses.length > 0 && (

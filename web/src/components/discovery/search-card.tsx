@@ -25,7 +25,7 @@ export function DiscoveryCard({ card }: { card: SearchCard }) {
       <Link
         href={cardHref(card)}
         onClick={() => rememberInterest({ kind: card.kind, place: card.place_name, price: card.from_price })}
-        className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+        className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-900/[0.04]">
           {card.cover_url ? (
@@ -39,7 +39,7 @@ export function DiscoveryCard({ card }: { card: SearchCard }) {
               blurDataURL={card.cover_blur || undefined}
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-xs font-medium text-slate-400">No photo yet</div>
+            <div className="flex h-full items-center justify-center text-xs font-medium text-slate-500">No photo yet</div>
           )}
           {unavailable && (
             <span className="absolute left-2 top-2 rounded-full bg-slate-900/80 px-2.5 py-1 text-[11px] font-semibold text-white">
@@ -50,7 +50,7 @@ export function DiscoveryCard({ card }: { card: SearchCard }) {
         <div className="mt-2 space-y-0.5 px-0.5">
           <h3 className="line-clamp-1 flex items-center gap-1 text-sm font-semibold text-slate-900">
             {card.name}
-            {card.flags.registry && <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" aria-label="Verified" />}
+            {card.flags.registry && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" aria-label="Verified" />}
           </h3>
           {card.place_name && <p className="line-clamp-1 text-xs text-slate-500">{card.place_name}</p>}
           {card.from_price != null && (
@@ -76,7 +76,7 @@ export function DiscoveryCard({ card }: { card: SearchCard }) {
               </span>
             )}
           </p>
-          {card.reason && <p className="line-clamp-2 text-xs text-emerald-700">{card.reason}</p>}
+          {card.reason && <p className="line-clamp-2 text-xs text-primary">{card.reason}</p>}
         </div>
       </Link>
       {card.listing_id && <SaveButton listingId={card.listing_id} variant="icon" className="absolute right-2 top-2" />}

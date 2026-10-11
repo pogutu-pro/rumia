@@ -189,7 +189,7 @@ export function OfficialHostelsTableClient({
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-primary border border-emerald-200">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
         Available
       </span>
@@ -294,7 +294,7 @@ export function OfficialHostelsTableClient({
       <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
+            <span className="p-2 rounded-xl bg-emerald-50 text-primary">
               <ShieldCheck className="h-5 w-5" />
             </span>
             <h1 className="text-xl font-bold text-slate-900">
@@ -314,7 +314,7 @@ export function OfficialHostelsTableClient({
                   onClick={handleSeed}
                   disabled={isSeeding}
                   variant="outline"
-                  className="rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  className="rounded-xl border-emerald-200 text-primary hover:bg-emerald-50"
                 >
                   {isSeeding ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -327,7 +327,7 @@ export function OfficialHostelsTableClient({
 
               <Button
                 onClick={handleOpenAdd}
-                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Official Hostel
@@ -346,8 +346,8 @@ export function OfficialHostelsTableClient({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">All Hostels</span>
-            <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">All Hostels</span>
+            <span className="p-1.5 rounded-lg bg-emerald-100 text-primary">
               <Layers className="h-4 w-4" />
             </span>
           </div>
@@ -362,13 +362,13 @@ export function OfficialHostelsTableClient({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">DeKUT Official Records</span>
-            <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">DeKUT Official Records</span>
+            <span className="p-1.5 rounded-lg bg-emerald-100 text-primary">
               <ShieldCheck className="h-4 w-4" />
             </span>
           </div>
-          <p className="text-3xl font-extrabold text-emerald-700 mt-2">{officialHostels.length}</p>
-          <p className="text-xs text-emerald-600 mt-1 font-medium">93 Documented Hostels</p>
+          <p className="text-3xl font-extrabold text-primary mt-2">{officialHostels.length}</p>
+          <p className="text-xs text-primary mt-1 font-medium">93 Documented Hostels</p>
         </div>
 
         <div
@@ -378,7 +378,7 @@ export function OfficialHostelsTableClient({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Rumia Agent Uploads</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Rumia Agent Uploads</span>
             <span className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
               <UserCheck className="h-4 w-4" />
             </span>
@@ -389,7 +389,7 @@ export function OfficialHostelsTableClient({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Housing Zones</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Housing Zones</span>
             <span className="p-1.5 rounded-lg bg-slate-100 text-slate-600">
               <MapPin className="h-4 w-4" />
             </span>
@@ -407,7 +407,7 @@ export function OfficialHostelsTableClient({
             <button
               onClick={() => setActiveTab('all')}
               className={`flex-1 md:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                activeTab === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                activeTab === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'
               }`}
             >
               All Hostels ({combinedItems.length})
@@ -415,7 +415,7 @@ export function OfficialHostelsTableClient({
             <button
               onClick={() => setActiveTab('official')}
               className={`flex-1 md:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                activeTab === 'official' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                activeTab === 'official' ? 'bg-white text-primary shadow-sm' : 'text-slate-600 hover:text-slate-800'
               }`}
             >
               Official Records ({officialHostels.length})
@@ -423,7 +423,7 @@ export function OfficialHostelsTableClient({
             <button
               onClick={() => setActiveTab('agent')}
               className={`flex-1 md:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                activeTab === 'agent' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                activeTab === 'agent' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'
               }`}
             >
               Agent Uploads ({initialAgent.length})
@@ -432,12 +432,12 @@ export function OfficialHostelsTableClient({
 
           {/* View Toggle */}
           <div className="flex items-center gap-2 self-end md:self-auto">
-            <span className="text-xs font-medium text-slate-400 hidden sm:inline">View:</span>
+            <span className="text-xs font-medium text-slate-500 hidden sm:inline">View:</span>
             <div className="flex items-center bg-slate-100 p-1 rounded-xl">
               <button
                 onClick={() => setViewMode('cards')}
                 className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                  viewMode === 'cards' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  viewMode === 'cards' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'
                 }`}
                 title="Card Grid View"
               >
@@ -447,7 +447,7 @@ export function OfficialHostelsTableClient({
               <button
                 onClick={() => setViewMode('table')}
                 className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                  viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'
                 }`}
                 title="Table View"
               >
@@ -461,7 +461,7 @@ export function OfficialHostelsTableClient({
         {/* Search & Zone Dropdown */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-slate-100">
           <div className="relative flex-1">
-            <Search className="h-4 w-4 absolute left-3.5 top-3 text-slate-400" />
+            <Search className="h-4 w-4 absolute left-3.5 top-3 text-slate-500" />
             <input
               type="text"
               placeholder="Search hostel name, phone, paybill, till number, or zone..."
@@ -472,6 +472,7 @@ export function OfficialHostelsTableClient({
           </div>
 
           <select
+            aria-label="Filter by zone"
             value={zoneFilter}
             onChange={(e) => setZoneFilter(e.target.value)}
             className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -503,7 +504,7 @@ export function OfficialHostelsTableClient({
       {viewMode === 'cards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCombined.length === 0 ? (
-            <div className="col-span-full bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+            <div className="col-span-full bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
               No hostels match your filter or search query.
             </div>
           ) : (
@@ -515,12 +516,12 @@ export function OfficialHostelsTableClient({
                 <div className="space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Building2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                      <h3 className="text-base font-bold text-slate-900 line-clamp-1">{item.name}</h3>
+                      <Building2 className="h-4 w-4 text-primary shrink-0" />
+                      <h2 className="text-base font-bold text-slate-900 line-clamp-1">{item.name}</h2>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       {item.type === 'official' ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-primary border border-emerald-200">
                           Official Record
                         </span>
                       ) : (
@@ -533,7 +534,7 @@ export function OfficialHostelsTableClient({
                   </div>
 
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    <MapPin className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                     <span>{item.zone}</span>
                     {item.price && (
                       <>
@@ -545,32 +546,32 @@ export function OfficialHostelsTableClient({
 
                   <div className="space-y-1.5 text-xs pt-1 border-t border-slate-100">
                     <div className="flex items-center gap-2 text-slate-700">
-                      <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <Phone className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                       <span className="font-mono font-medium">{item.contacts || 'No contact specified'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-800 font-medium">
-                      <CreditCard className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <CreditCard className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span className="line-clamp-1">{item.payments || 'No payment details'}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-                  <span className="text-slate-400 font-medium line-clamp-1">{item.source}</span>
+                  <span className="text-slate-500 font-medium line-clamp-1">{item.source}</span>
 
                   <div className="flex items-center gap-2">
                     {item.type === 'official' && item.rawOfficial && !readOnly && (
                       <>
                         <button
                           onClick={() => handleOpenEdit(item.rawOfficial!)}
-                          className="p-1.5 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-slate-100 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-600 hover:text-primary hover:bg-slate-100 transition-colors"
                           title="Edit official hostel"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setDeletingHostel(item.rawOfficial!)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Delete official hostel"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -629,7 +630,7 @@ export function OfficialHostelsTableClient({
             <tbody className="divide-y divide-slate-100">
               {filteredCombined.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-400 text-sm">
+                  <td colSpan={7} className="text-center py-10 text-slate-500 text-sm">
                     No hostels match your query.
                   </td>
                 </tr>
@@ -638,7 +639,7 @@ export function OfficialHostelsTableClient({
                   <tr key={`${item.type}-${item.id}`} className="hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                        <Building2 className="h-4 w-4 text-primary shrink-0" />
                         <span className="text-sm font-bold text-slate-900">
                           {item.name}
                         </span>
@@ -646,7 +647,7 @@ export function OfficialHostelsTableClient({
                     </td>
                     <td className="px-5 py-4">
                       {item.type === 'official' ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-primary">
                           DeKUT Official Record
                         </span>
                       ) : (
@@ -657,19 +658,19 @@ export function OfficialHostelsTableClient({
                     </td>
                     <td className="px-5 py-4">
                       <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                        <MapPin className="h-3 w-3 text-slate-400" />
+                        <MapPin className="h-3 w-3 text-slate-500" />
                         {item.zone}
                       </span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5 text-sm font-mono font-medium text-slate-700">
-                        <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <Phone className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                         <span>{item.contacts || 'Not set'}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
-                        <CreditCard className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <CreditCard className="h-3.5 w-3.5 text-primary shrink-0" />
                         <span>{item.payments || 'Not set'}</span>
                       </div>
                     </td>
@@ -680,14 +681,14 @@ export function OfficialHostelsTableClient({
                           <>
                             <button
                               onClick={() => handleOpenEdit(item.rawOfficial!)}
-                              className="p-1.5 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-slate-100 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-600 hover:text-primary hover:bg-slate-100 transition-colors"
                               title="Edit official hostel"
                             >
                               <Edit2 className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => setDeletingHostel(item.rawOfficial!)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                               title="Delete official hostel"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -728,7 +729,7 @@ export function OfficialHostelsTableClient({
                   setIsAddOpen(false);
                   setEditingHostel(null);
                 }}
-                className="p-1 rounded-lg text-slate-400 hover:bg-slate-100"
+                className="p-1 rounded-lg text-slate-600 hover:bg-slate-100"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -768,7 +769,7 @@ export function OfficialHostelsTableClient({
                   placeholder="e.g. 0728XXXXXX, 0733XXXXXX"
                   className="rounded-xl mt-1"
                 />
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Separate multiple phone numbers with commas.
                 </p>
               </div>
@@ -782,7 +783,7 @@ export function OfficialHostelsTableClient({
                   placeholder="e.g. Paybill 247247, A/C 6020814 or Till 9383225"
                   className="rounded-xl mt-1"
                 />
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Enter Paybill number, Till number, or M-Pesa account details.
                 </p>
               </div>
@@ -802,7 +803,7 @@ export function OfficialHostelsTableClient({
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold"
                 >
                   {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   {editingHostel ? 'Save Changes' : 'Create Official Hostel'}

@@ -52,7 +52,7 @@ export function ShareAgentProfile({ name, url, shortName = 'DeKUT' }: ShareAgent
       aria-label="Share agent profile"
     >
       {loading ? (
-        <Check className="h-5 w-5 text-emerald-600" />
+        <Check className="h-5 w-5 text-primary" />
       ) : (
         <Share2 className="h-5 w-5" />
       )}

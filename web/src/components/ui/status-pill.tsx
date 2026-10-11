@@ -8,8 +8,8 @@ const statusPillVariants = cva(
     variants: {
       status: {
         default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        success: "border-transparent bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-200",
-        warning: "border-transparent bg-amber-500/15 text-amber-600 hover:bg-amber-500/25 border-amber-200",
+        success: "border-transparent bg-emerald-500/15 text-primary hover:bg-primary/90/25 border-emerald-200",
+        warning: "border-transparent bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 border-amber-200",
         danger: "border-transparent bg-red-500/15 text-red-600 hover:bg-red-500/25 border-red-200",
         info: "border-transparent bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 border-blue-200",
         neutral: "border-transparent bg-muted text-muted-foreground hover:bg-muted/80",

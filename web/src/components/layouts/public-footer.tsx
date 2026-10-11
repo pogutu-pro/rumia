@@ -40,9 +40,9 @@ export const Footer = React.memo(function Footer({
   });
 
   return (
-    <footer className="w-full bg-slate-950 border-t border-slate-800 text-slate-400">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-between pb-8 border-b border-slate-800">
+    <footer className="w-full border-t border-line bg-subtle text-ink-muted">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-between pb-6 border-b border-line">
           {/* Logo & Slogan */}
           <div className="flex flex-col items-center md:items-start gap-3">
             <Link href="/" className="flex items-center gap-2">
@@ -55,11 +55,11 @@ export const Footer = React.memo(function Footer({
                   sizes="40px"
                 />
               </div>
-              <span className="font-black text-2xl text-white tracking-tight">
+              <span className="font-heading font-extrabold text-xl text-ink tracking-tight">
                 RUMIA
               </span>
             </Link>
-            <p className="text-sm text-slate-500 font-medium text-center md:text-left">
+            <p className="text-sm text-ink-muted font-medium text-center md:text-left">
               {isBnbPage
                 ? 'Comfortable short stays and direct host connections.'
                 : 'Real places to rent, confirmed by owners.'}
@@ -70,13 +70,13 @@ export const Footer = React.memo(function Footer({
           <div className="flex justify-center gap-8 text-sm font-bold">
             <Link
               href={isBnbPage ? '/bnb' : '/hostels'}
-              className="hover:text-white transition-colors"
+              className="hover:text-ink transition-colors"
             >
               {isBnbPage ? 'Browse RumiaBnB' : 'Browse Hostels'}
             </Link>
             <Link
               href="/auth/login"
-              className="hover:text-white transition-colors"
+              className="hover:text-ink transition-colors"
             >
               Login
             </Link>
@@ -107,7 +107,7 @@ export const Footer = React.memo(function Footer({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.label}
-                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/30 hover:text-emerald-400 transition-all duration-300"
+                className="p-2.5 rounded-xl bg-raised border border-line hover:border-primary/40 hover:text-primary transition-colors"
               >
                 {social.icon}
               </a>
@@ -120,7 +120,7 @@ export const Footer = React.memo(function Footer({
               rel="noopener noreferrer"
               aria-label="WhatsApp"
               onClick={handleClick}
-              className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/30 hover:text-emerald-400 transition-all duration-300"
+              className="p-2.5 rounded-xl bg-raised border border-line hover:border-primary/40 hover:text-primary transition-colors"
             >
               {isGating ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -132,13 +132,13 @@ export const Footer = React.memo(function Footer({
         </div>
 
         {/* Copyright & Legal Links */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-muted font-medium">
           <p>&copy; {currentYear} RUMIA. All rights reserved.</p>
           <div className="flex gap-4">
-            <Link href="/policy" className="hover:text-white transition-colors">
+            <Link href="/policy" className="hover:text-ink transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link href="/terms" className="hover:text-ink transition-colors">
               Terms of Service
             </Link>
           </div>

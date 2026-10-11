@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { format } from 'date-fns';
-import { ArrowLeft } from 'lucide-react';
+import { AppShell } from '@/components/shell';
 import { Footer } from '@/components/layouts/public-footer';
 import { getCampusBySlug } from '@/lib/data/campuses';
 import { getPublishedLegalDocument } from '@/lib/data/legal-documents';
@@ -32,37 +31,15 @@ export default async function PrivacyPolicyPage() {
   const lastUpdated = formatLongDate(doc?.updated_at);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-slate-900 transition-colors hover:text-emerald-600"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            <span className="font-black text-xl font-heading tracking-tight">
-              RUMIA
-            </span>
-          </Link>
-          <nav className="flex gap-4 text-sm font-medium text-slate-500">
-            <Link
-              href="/terms"
-              className="transition-colors hover:text-emerald-600"
-            >
-              Terms
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      <main className="flex-1">
+    <AppShell>
+      <div className="min-h-[calc(100dvh-var(--shell-header-h))]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 md:py-16">
           <div className="mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold font-heading text-slate-900">
+            <h1 className="text-3xl md:text-4xl font-bold font-heading text-ink">
               Privacy Policy
             </h1>
             {doc ? (
-              <p className="mt-3 text-sm text-slate-500">
+              <p className="mt-3 text-sm text-ink-muted">
                 {doc.effective_date ? (
                   <>
                     Effective Date: {formatLongDate(doc.effective_date)} &middot;{' '}
@@ -76,14 +53,13 @@ export default async function PrivacyPolicyPage() {
           {doc ? (
             <LegalDocumentBody html={doc.content} />
           ) : (
-            <p className="text-slate-700 leading-relaxed">
+            <p className="text-ink leading-relaxed">
               The Privacy Policy is temporarily unavailable. Please check back shortly.
             </p>
           )}
         </div>
-      </main>
-
+      </div>
       <Footer />
-    </div>
+    </AppShell>
   );
 }

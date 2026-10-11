@@ -198,7 +198,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                 (h) => (
                   <th
                     key={h}
-                    className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left px-5 py-3"
+                    className="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-left px-5 py-3"
                   >
                     {h}
                   </th>
@@ -224,7 +224,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                     <p className="text-sm font-bold text-slate-900">
                       {b.student_name}
                     </p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                       <Phone className="h-3 w-3" />
                       {b.phone}
                     </p>
@@ -239,7 +239,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                         year: 'numeric',
                       })}
                     </p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                       <Clock className="h-3 w-3" />
                       {b.preferred_time.charAt(0).toUpperCase() +
                         b.preferred_time.slice(1)}
@@ -277,7 +277,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                         type="button"
                         onClick={() => handleMessage(b)}
                         disabled={isPending}
-                        className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-semibold text-primary bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap disabled:opacity-50"
                       >
                         <MessageCircle className="h-3 w-3" />
                         {b.status === 'contacted' ? 'Message again' : 'Message'}
@@ -313,7 +313,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                   <p className="text-sm font-bold text-slate-900">
                     {b.student_name}
                   </p>
-                  <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                     <Phone className="h-3 w-3" />
                     {b.phone}
                   </p>
@@ -326,7 +326,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <CalendarCheck className="h-3.5 w-3.5 text-slate-400" />
+                  <CalendarCheck className="h-3.5 w-3.5 text-slate-500" />
                   {new Date(
                     b.preferred_date + 'T00:00:00',
                   ).toLocaleDateString('en-KE', {
@@ -335,12 +335,12 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                   })}
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <Clock className="h-3.5 w-3.5 text-slate-400" />
+                  <Clock className="h-3.5 w-3.5 text-slate-500" />
                   {b.preferred_time.charAt(0).toUpperCase() +
                     b.preferred_time.slice(1)}
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                  <MapPin className="h-3.5 w-3.5 text-slate-500" />
                   {b.listings?.title || b.zone}
                 </div>
                 <div className="font-bold text-slate-900 tabular-nums">
@@ -367,7 +367,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                   type="button"
                   onClick={() => handleMessage(b)}
                   disabled={isPending}
-                  className="flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-primary bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-50"
                 >
                   <MessageCircle className="h-3 w-3" />
                   {b.status === 'contacted' ? 'Message again' : 'Message'}

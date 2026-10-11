@@ -66,7 +66,7 @@ export function GettingStarted({ agent, listings }: GettingStartedProps) {
             {step.href ? (
               <Link
                 href={step.href}
-                className="text-xs sm:text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors flex items-center gap-1.5"
+                className="text-xs sm:text-sm font-medium text-slate-700 hover:text-primary transition-colors flex items-center gap-1.5"
               >
                 {step.label}
                 <ArrowRight className="h-3 w-3" />
@@ -75,7 +75,7 @@ export function GettingStarted({ agent, listings }: GettingStartedProps) {
               <span
                 className={`text-xs sm:text-sm font-medium ${
                   step.done
-                    ? 'text-slate-400 line-through'
+                    ? 'text-slate-500 line-through'
                     : 'text-slate-700'
                 }`}
               >

@@ -31,7 +31,7 @@ function getContactBadge(type?: string | null) {
   }
   if (type === 'rumia_agent') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-primary border border-emerald-100">
         <UserCheck className="h-3 w-3" />
         Agent
       </span>
@@ -95,7 +95,7 @@ export default async function AdminListingLeadsPage({
 
       {totalLeads === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-xs">
-          <p className="text-slate-400 font-semibold">No leads yet for this listing.</p>
+          <p className="text-slate-500 font-semibold">No leads yet for this listing.</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -106,7 +106,7 @@ export default async function AdminListingLeadsPage({
               <span className="text-slate-500">total leads</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <span className="font-bold text-emerald-700">{agentGroups.length}</span>
+              <span className="font-bold text-primary">{agentGroups.length}</span>
               <span className="text-slate-500">agents contacted</span>
             </div>
             {unassignedLeads.length > 0 && (
@@ -151,11 +151,11 @@ export default async function AdminListingLeadsPage({
                           </td>
                           <td className="px-5 py-3">
                             {lead.phone ? (
-                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-emerald-50 px-2 py-0.5 rounded-md">
                                 {lead.phone}
                               </span>
                             ) : (
-                              <span className="text-xs text-slate-400 font-medium">No phone</span>
+                              <span className="text-xs text-slate-500 font-medium">No phone</span>
                             )}
                           </td>
                           <td className="px-5 py-3">{getContactBadge(lead.contact_type)}</td>
@@ -185,7 +185,7 @@ export default async function AdminListingLeadsPage({
                         {getContactBadge(lead.contact_type)}
                       </div>
                       {lead.phone && (
-                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
+                        <span className="text-xs font-bold text-primary bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
                           {lead.phone}
                         </span>
                       )}
@@ -229,11 +229,11 @@ export default async function AdminListingLeadsPage({
                           </td>
                           <td className="px-5 py-3">
                             {lead.phone ? (
-                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-emerald-50 px-2 py-0.5 rounded-md">
                                 {lead.phone}
                               </span>
                             ) : (
-                              <span className="text-xs text-slate-400 font-medium">No phone</span>
+                              <span className="text-xs text-slate-500 font-medium">No phone</span>
                             )}
                           </td>
                           <td className="px-5 py-3">{getContactBadge(lead.contact_type)}</td>
@@ -262,7 +262,7 @@ export default async function AdminListingLeadsPage({
                         {getContactBadge(lead.contact_type)}
                       </div>
                       {lead.phone && (
-                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
+                        <span className="text-xs font-bold text-primary bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
                           {lead.phone}
                         </span>
                       )}

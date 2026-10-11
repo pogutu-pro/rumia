@@ -101,7 +101,8 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <ChunkErrorRecovery />
         <InstallBanner />
-        {/* Cloudflare Web Analytics — injected dynamically to prevent Cloudflare edge SRI integrity mismatch */}
+        {/* Production only: on localhost the beacon is rejected by CORS and fills the console with errors. */}
+        {process.env.NODE_ENV === 'production' && (
         <script
           id="cloudflare-analytics"
           dangerouslySetInnerHTML={{
@@ -117,6 +118,7 @@ export default function RootLayout({
             `,
           }}
         />
+        )}
       </body>
     </html>
   );

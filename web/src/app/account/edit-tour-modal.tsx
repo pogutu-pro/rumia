@@ -66,12 +66,12 @@ export function EditTourModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <CalendarCheck className="h-4 w-4 text-slate-600" />
-            <h2 className="text-sm font-bold text-slate-900">Edit Tour Booking</h2>
+            <CalendarCheck className="h-4 w-4 text-ink-muted" />
+            <h2 className="text-sm font-bold text-ink">Edit Tour Booking</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-subtle transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -86,7 +86,7 @@ export function EditTourModal({
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1.5">Preferred Date</label>
+            <label className="block text-xs font-bold text-ink-muted mb-1.5">Preferred Date</label>
             <Input
               type="date"
               value={date}
@@ -97,7 +97,7 @@ export function EditTourModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1.5">Preferred Time</label>
+            <label className="block text-xs font-bold text-ink-muted mb-1.5">Preferred Time</label>
             <div className="grid grid-cols-3 gap-2">
               {TIME_OPTIONS.map((opt) => (
                 <button
@@ -105,8 +105,8 @@ export function EditTourModal({
                   onClick={() => setTime(opt.value)}
                   className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all cursor-pointer ${
                     time === opt.value
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'border-slate-900 bg-ink text-white'
+                      : 'border-line bg-white text-ink-muted hover:border-slate-300'
                   }`}
                 >
                   <Clock className="h-4 w-4" />
@@ -117,7 +117,7 @@ export function EditTourModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1.5">Phone Number</label>
+            <label className="block text-xs font-bold text-ink-muted mb-1.5">Phone Number</label>
             <Input
               type="tel"
               value={phone}
@@ -141,7 +141,7 @@ export function EditTourModal({
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 h-10 rounded-xl text-sm font-bold bg-slate-900 hover:bg-slate-800"
+            className="flex-1 h-10 rounded-xl text-sm font-bold bg-ink hover:opacity-90"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />

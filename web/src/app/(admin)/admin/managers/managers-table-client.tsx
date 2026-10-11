@@ -66,7 +66,7 @@ export default function ManagersTableClient({ initialManagers, campuses, regions
                 </td>
                 <td className="px-5 py-4">
                   {manager.managed_campus_id ? (
-                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 tabular-nums">Campus</span>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-primary tabular-nums">Campus</span>
                   ) : manager.managed_region_id ? (
                     <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 tabular-nums">Region</span>
                   ) : (

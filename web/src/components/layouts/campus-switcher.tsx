@@ -64,7 +64,7 @@ export function CampusSwitcher({ campuses, tone = 'light' }: CampusSwitcherProps
 
       {open && (
         <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl shadow-slate-900/10">
-          <div className="border-b border-slate-100 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="border-b border-slate-100 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
             Campuses
           </div>
           <ul role="listbox" className="max-h-72 overflow-y-auto py-1">
@@ -80,21 +80,21 @@ export function CampusSwitcher({ campuses, tone = 'light' }: CampusSwitcherProps
                       className={cn(
                         'flex items-center justify-between gap-2 px-4 py-2.5 text-sm font-semibold transition-colors',
                         isCurrent
-                          ? 'bg-emerald-50 text-emerald-700'
+                          ? 'bg-emerald-50 text-primary'
                           : 'text-slate-700 hover:bg-slate-50',
                       )}
                     >
                       <span className="truncate">{campus.short_name ?? campus.name}</span>
                       {isCurrent && (
-                        <span className="shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                        <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
                           Current
                         </span>
                       )}
                     </Link>
                   ) : (
-                    <span className="flex cursor-not-allowed items-center justify-between gap-2 px-4 py-2.5 text-sm font-semibold text-slate-400">
+                    <span className="flex cursor-not-allowed items-center justify-between gap-2 px-4 py-2.5 text-sm font-semibold text-slate-500">
                       <span className="truncate">{campus.short_name ?? campus.name}</span>
-                      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                         Coming soon
                       </span>
                     </span>
@@ -106,7 +106,7 @@ export function CampusSwitcher({ campuses, tone = 'light' }: CampusSwitcherProps
           <Link
             href="/#campuses"
             onClick={() => setOpen(false)}
-            className="block border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center text-xs font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
+            className="block border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center text-xs font-bold text-primary hover:bg-emerald-50 transition-colors"
           >
             All universities
           </Link>

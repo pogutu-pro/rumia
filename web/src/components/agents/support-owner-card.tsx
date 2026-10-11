@@ -60,7 +60,7 @@ export function SupportOwnerCard({ agent, className }: SupportOwnerCardProps) {
                 title="Platform owner"
                 aria-label="Platform owner"
               >
-                <Crown className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+                <Crown className="h-3.5 w-3.5 text-amber-700" aria-hidden="true" />
               </span>
             </div>
 
@@ -74,7 +74,7 @@ export function SupportOwnerCard({ agent, className }: SupportOwnerCardProps) {
                   Platform Owner
                 </span>
                 {agent.verified && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-primary text-[9px] font-bold uppercase tracking-wider">
                     <ShieldCheck className="h-2.5 w-2.5" aria-hidden="true" />
                     Verified
                   </span>
@@ -99,7 +99,7 @@ export function SupportOwnerCard({ agent, className }: SupportOwnerCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleClick}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm hover:shadow transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary/90 shadow-sm hover:shadow transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             aria-label={`Contact ${agent.name}, platform owner, on WhatsApp`}
           >
             {isGating ? (

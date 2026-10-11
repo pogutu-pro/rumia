@@ -85,22 +85,22 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
         </div>
 
         <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-700 border border-slate-100">
-          <Eye className="h-3 w-3 text-slate-400" />
+          <Eye className="h-3 w-3 text-slate-500" />
           {item.view_count.toLocaleString()}
         </div>
 
-        <div className="absolute bottom-3 right-3 bg-emerald-600 px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-xs">
+        <div className="absolute bottom-3 right-3 bg-primary px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-xs">
           KES {item.price.toLocaleString()}/mo
         </div>
       </div>
 
       <div className="p-4 flex-1 flex flex-col">
-        <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
-          <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+        <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">
+          <MapPin className="h-3 w-3 shrink-0 text-slate-500" />
           <span className="truncate">{item.location}</span>
         </div>
 
-        <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+        <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
           {item.title}
         </h3>
 
@@ -108,7 +108,7 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
           {item.description}
         </p>
 
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <span>Agent: {item.agent_name || 'Rumia Agent'}</span>
           <div className="flex items-center gap-2">
             <button
@@ -116,7 +116,7 @@ function PopularCard({ item, index }: { item: PopularListing; index: number }) {
               onClick={handleCompare}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200 cursor-pointer border-2 ${
                 isSelected
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20'
+                  ? 'bg-primary text-white border-primary shadow-lg shadow-emerald-600/20'
                   : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-sm'
               }`}
             >
@@ -160,7 +160,7 @@ export function PopularHostels({ listings }: { listings: PopularListing[] }) {
         </div>
         <Link
           href="/hostels"
-          className="group hidden sm:flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors"
+          className="group hidden sm:flex items-center text-sm font-semibold text-primary hover:text-primary transition-colors"
         >
           View all
           <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
@@ -176,7 +176,7 @@ export function PopularHostels({ listings }: { listings: PopularListing[] }) {
       <div className="mt-10 text-center sm:hidden">
         <Link
           href="/hostels"
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-500 transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-colors"
         >
           View All Listings
           <ArrowRight className="h-4 w-4" />

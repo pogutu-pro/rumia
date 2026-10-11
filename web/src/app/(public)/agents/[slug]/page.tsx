@@ -100,7 +100,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
       <div className="container mx-auto px-4 lg:px-8 pt-5">
         <Link
           href="/hostels"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors group"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           Back to listings
@@ -192,14 +192,14 @@ export default async function AgentSlugPage({ params }: PageProps) {
                 <span>Student Hostel Agent</span>
                 <span className="inline-block h-1 w-1 rounded-full bg-slate-300" aria-hidden="true" />
                 <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-500" />
                   Nyeri, Kenya
                 </span>
               </p>
 
               {agent.helping_since && (
                 <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full">
-                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                  <Calendar className="h-3.5 w-3.5 text-slate-500" />
                   Helping students since {agent.helping_since}
                 </p>
               )}
@@ -223,12 +223,12 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {agent.portfolio_url && (
               <div className="flex items-center gap-2">
-                <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                <ExternalLink className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
                 <a
                   href={agent.portfolio_url.startsWith('http') ? agent.portfolio_url : `https://${agent.portfolio_url}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline truncate transition-colors"
+                  className="text-sm font-semibold text-primary hover:text-primary hover:underline truncate transition-colors"
                   aria-label="Portfolio website"
                 >
                   {(() => {
@@ -243,14 +243,14 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {agent.bio && (
               <div className="space-y-3">
-                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">About</h2>
+                <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">About</h2>
                 <p className="text-[15px] text-slate-600 leading-relaxed">{agent.bio}</p>
               </div>
             )}
 
             {agent.service_areas && agent.service_areas.length > 0 && (
               <div className="space-y-3">
-                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Service Areas</h2>
+                <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Service Areas</h2>
                 <div className="flex flex-wrap gap-2">
                   {agent.service_areas.map((area: string) => (
                     <span
@@ -267,14 +267,14 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {agent.languages && agent.languages.length > 0 && (
               <div className="space-y-3">
-                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Languages</h2>
+                <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Languages</h2>
                 <div className="flex flex-wrap gap-2">
                   {agent.languages.map((lang: string) => (
                     <span
                       key={lang}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-600"
                     >
-                      <Globe className="h-3 w-3 shrink-0 text-slate-400" />
+                      <Globe className="h-3 w-3 shrink-0 text-slate-500" />
                       {lang}
                     </span>
                   ))}
@@ -289,7 +289,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
                   {listings.length > 0 ? `Listings by ${agent.name.split(' ')[0]}` : 'Current Hostels'}
                 </h2>
                 {listings.length > 0 && (
-                  <p className="text-sm text-slate-400 font-medium mt-0.5">
+                  <p className="text-sm text-slate-500 font-medium mt-0.5">
                     {listings.length} active {listings.length === 1 ? 'listing' : 'listings'}
                   </p>
                 )}
@@ -328,18 +328,18 @@ export default async function AgentSlugPage({ params }: PageProps) {
                           )}
                           <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm text-slate-900">
                             KES {item.price.toLocaleString()}
-                            <span className="font-medium text-slate-400">/mo</span>
+                            <span className="font-medium text-slate-500">/mo</span>
                           </div>
                         </div>
                         <div className="p-4 flex-1">
-                          <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold mb-1.5 uppercase tracking-wider">
+                          <div className="flex items-center gap-1 text-slate-500 text-[10px] font-bold mb-1.5 uppercase tracking-wider">
                             <MapPin className="h-3 w-3 shrink-0" />
                             <span className="truncate">{item.location}</span>
                           </div>
-                          <h3 className="font-bold text-[15px] text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                          <h3 className="font-bold text-[15px] text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
                             {item.title}
                           </h3>
-                          <p className="text-slate-400 text-xs line-clamp-2 mt-1 leading-relaxed">
+                          <p className="text-slate-500 text-xs line-clamp-2 mt-1 leading-relaxed">
                             {item.description}
                           </p>
                         </div>
@@ -351,7 +351,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
                 <div className="text-center py-16 bg-slate-50/80 border border-slate-100 rounded-2xl">
                   <div className="text-3xl mb-3">🏠</div>
                   <p className="text-slate-500 font-semibold">No active listings at the moment</p>
-                  <p className="text-slate-400 text-sm mt-1">Check back later or contact the agent directly.</p>
+                  <p className="text-slate-500 text-sm mt-1">Check back later or contact the agent directly.</p>
                 </div>
               )}
             </div>
@@ -367,7 +367,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
               {listings.length > 0 && (
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                   <div className="px-5 pt-4 pb-3 border-b border-slate-50">
-                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Summary</h3>
+                    <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Summary</h3>
                   </div>
                   <div className="px-5 py-4 space-y-3.5">
                     <div className="flex items-center justify-between">

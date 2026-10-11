@@ -168,7 +168,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{agent.name}</h1>
             <button
               onClick={() => setEditSheetOpen(true)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               title="Edit agent details"
             >
               <Pencil className="h-4 w-4" />
@@ -183,21 +183,21 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
               <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-700">Agent</span>
             )}
             {agent.status === 'active' ? (
-              <span className="text-xs font-medium px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-emerald-50 text-primary">Active</span>
             ) : (
               <span className="text-xs font-medium px-3 py-1 rounded-full bg-rose-100 text-rose-700">Suspended</span>
             )}
             {verified ? (
               <span className="text-xs font-medium px-3 py-1 rounded-full bg-green-50 text-green-700">Verified</span>
             ) : (
-              <span className="text-xs font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-500">Not Verified</span>
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-600">Not Verified</span>
             )}
             <button
               onClick={handleToggleVerified}
               className={`text-xs font-medium px-3 py-1 rounded-full border transition-colors ${
                 verified
                   ? 'border-green-200 text-green-700 hover:bg-green-50'
-                  : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+                  : 'border-emerald-200 text-primary hover:bg-emerald-50'
               }`}
             >
               {verified ? 'Remove Verification' : 'Verify Agent'}
@@ -214,7 +214,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
               <button
                 disabled={statusPending}
                 onClick={handleReactivate}
-                className="text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors disabled:opacity-50"
+                className="text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 text-primary hover:bg-emerald-50 transition-colors disabled:opacity-50"
               >
                 {statusPending ? '...' : 'Reactivate'}
               </button>
@@ -246,7 +246,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
             { label: 'ID', value: agent.id.slice(0, 8) + '...' },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{label}</p>
               <p className="text-sm font-medium text-slate-900">{value}</p>
             </div>
           ))}
@@ -259,7 +259,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
           <h2 className="text-sm font-semibold text-slate-900">Listings ({listings.length})</h2>
         </div>
         {listings.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-slate-400">No listings for this agent.</div>
+          <div className="px-5 py-8 text-center text-sm text-slate-500">No listings for this agent.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4 sm:p-5">
             {listings.map((listing) => (
@@ -269,13 +269,13 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
                 <p className="text-sm font-semibold text-slate-800 mb-3">KES {listing.price.toLocaleString()}</p>
                 <div className="flex items-center justify-between">
                   {listing.is_active ? (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-primary">Active</span>
                   ) : (
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Inactive</span>
                   )}
                   <button
                     onClick={() => handleToggleListing(listing.id, listing.is_active)}
-                    className={`text-xs font-medium hover:underline ${listing.is_active ? 'text-red-500' : 'text-emerald-600'}`}
+                    className={`text-xs font-medium hover:underline ${listing.is_active ? 'text-red-500' : 'text-primary'}`}
                   >
                     {listing.is_active ? 'Deactivate' : 'Activate'}
                   </button>
@@ -292,7 +292,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
           <h2 className="text-sm font-semibold text-slate-900">Leads ({sortedLeads.length})</h2>
         </div>
         {sortedLeads.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-slate-400">No leads attributed to this agent.</div>
+          <div className="px-5 py-8 text-center text-sm text-slate-500">No leads attributed to this agent.</div>
         ) : (
           <>
             <div className="hidden md:block overflow-x-auto">
@@ -316,7 +316,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
                 <div key={lead.id} className="px-5 py-3 flex items-center justify-between">
                   <div>
                     <p className="text-sm text-slate-900">{lead.listings?.title ?? 'Unknown'}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{new Date(lead.clicked_at).toLocaleDateString()} at {new Date(lead.clicked_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{new Date(lead.clicked_at).toLocaleDateString()} at {new Date(lead.clicked_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
               ))}
@@ -331,7 +331,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
           <h2 className="text-sm font-semibold text-slate-900">Commissions ({commissions.length})</h2>
         </div>
         {commissions.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-slate-400">No commission records.</div>
+          <div className="px-5 py-8 text-center text-sm text-slate-500">No commission records.</div>
         ) : (
           <>
             <div className="hidden md:block overflow-x-auto">
@@ -346,7 +346,7 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
                       <td className="text-sm text-slate-700 px-5 py-3 font-medium">{commission.amount.toLocaleString()}</td>
                       <td className="px-5 py-3">
                         {commission.status === 'paid' ? (
-                          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Paid</span>
+                          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-primary">Paid</span>
                         ) : (
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700">Pending</span>
                         )}
@@ -367,13 +367,13 @@ export function AgentDetailClient({ agent, listings, leads, commissions }: Agent
                 <div key={commission.id} className="px-5 py-4 space-y-2">
                   <div className="flex items-start justify-between">
                     <p className="text-sm font-medium text-slate-900">{commission.listings?.title ?? 'Unknown'}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${commission.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${commission.status === 'paid' ? 'bg-emerald-50 text-primary' : 'bg-amber-50 text-amber-700'}`}>
                       {commission.status === 'paid' ? 'Paid' : 'Pending'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold text-slate-900">KES {commission.amount.toLocaleString()}</p>
-                    <p className="text-xs text-slate-400">{new Date(commission.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-slate-500">{new Date(commission.created_at).toLocaleDateString()}</p>
                   </div>
                   {commission.status === 'pending' && (
                     <Button size="sm" variant="outline" onClick={() => handleMarkCommissionPaid(commission.id)} className="rounded-lg text-xs h-8 w-full">Mark as Paid</Button>

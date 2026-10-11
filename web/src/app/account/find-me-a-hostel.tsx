@@ -97,6 +97,10 @@ export function FindMeAHostel({
   const [draft, setDraft] = useState<CreateHostelRequestInput | null>(null);
   const draftHandled = useRef(false);
 
+  // Inline validation only appears once the person has tried to submit.
+  const [attempted, setAttempted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   // Payment acceptance modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAccepted, setPaymentAccepted] = useState(false);
@@ -228,8 +232,17 @@ export function FindMeAHostel({
     return phone.replace(/\D/g, '').length >= 9 && !!budget && hasCampus;
   }, [phone, budget, hasCampus]);
 
+  const phoneError =
+    phone.replace(/\D/g, '').length >= 9 ? null : 'Enter a phone number with at least 9 digits.';
+  const budgetError = budget ? null : 'Pick a monthly budget.';
+
   const handleSubmit = useCallback(async () => {
-    if (!canSubmit || submitting) return;
+    if (submitting) return;
+    if (!canSubmit) {
+      setAttempted(true);
+      return;
+    }
+    setSubmitError(null);
 
     if (isHome) {
       // Guest (or cold session): save the draft and go to Google OAuth — the
@@ -286,6 +299,19 @@ export function FindMeAHostel({
     setPaymentAccepted(false);
   }, []);
 
+  // Escape closes whichever dialog is open.
+  const dialogOpen = showPaymentModal || !!editing;
+  useEffect(() => {
+    if (!dialogOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (showPaymentModal) handlePaymentModalClose();
+      else setEditing(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [dialogOpen, showPaymentModal, handlePaymentModalClose]);
+
   const submitAfterPaymentAcceptance = useCallback(async () => {
     setShowPaymentModal(false);
     setSubmitting(true);
@@ -308,6 +334,7 @@ export function FindMeAHostel({
     setSubmitting(false);
 
     if (!res.success) {
+      setSubmitError(res.error);
       toast.error(res.error);
       // If this was a draft auto-submit that failed due to campus/profile
       // issues, keep the draft so it can retry.
@@ -317,6 +344,8 @@ export function FindMeAHostel({
       return;
     }
 
+    setSubmitError(null);
+    setAttempted(false);
     if (res.data) {
       setJustSubmitted(res.data);
       setRequests((prev) => [res.data as HostelRequest, ...prev]);
@@ -435,23 +464,37 @@ export function FindMeAHostel({
     cn(
       'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border text-center select-none',
       selected
-        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300',
+        ? 'bg-ink text-white border-slate-900 shadow-sm'
+        : 'bg-white text-slate-700 border-line hover:border-slate-300',
     );
 
-  const fieldLabel = (label: string, required = false) => (
-    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">
-      {label}
-      {required && <span className="text-rose-500 ml-0.5">*</span>}
-    </p>
-  );
+  const fieldLabel = (label: string, required = false, htmlFor?: string, id?: string) => {
+    const cls = 'block text-[11px] font-bold uppercase tracking-wide text-ink-muted mb-1.5';
+    const mark = required && (
+      <>
+        <span aria-hidden className="text-rose-500 ml-0.5">*</span>
+        <span className="sr-only"> (required)</span>
+      </>
+    );
+    return htmlFor ? (
+      <label htmlFor={htmlFor} className={cls}>
+        {label}
+        {mark}
+      </label>
+    ) : (
+      <p id={id} className={cls}>
+        {label}
+        {mark}
+      </p>
+    );
+  };
 
   const requestCard = (request: HostelRequest) => {
     const status = getHostelRequestStatus(request.status);
     return (
       <div
         key={request.id}
-        className="rounded-2xl border border-slate-200/80 bg-white p-4 space-y-3"
+        className="rounded-2xl border border-line bg-white p-4 space-y-3"
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -460,7 +503,7 @@ export function FindMeAHostel({
                 'w-8 h-8 rounded-xl flex items-center justify-center shrink-0',
                 request.status === 'cancelled'
                   ? 'bg-rose-50 text-rose-500'
-                  : 'bg-emerald-50 text-emerald-600',
+                  : 'bg-emerald-50 text-primary',
               )}
             >
               {request.status === 'cancelled' ? (
@@ -470,10 +513,10 @@ export function FindMeAHostel({
               )}
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900">
+              <p className="text-sm font-bold text-ink">
                 {getHostelRequestStatus(request.status).label}
               </p>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-ink-muted">
                 {formatDate(request.created_at, 'd MMM yyyy')}
               </p>
             </div>
@@ -490,46 +533,46 @@ export function FindMeAHostel({
         </div>
 
         {/* What the user chose — shown like the manager inbox */}
-        <div className="rounded-xl bg-slate-50/70 divide-y divide-slate-100 border border-slate-100 px-3.5 py-1 text-xs">
+        <div className="rounded-xl bg-subtle divide-y divide-slate-100 border border-slate-100 px-3.5 py-1 text-xs">
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Area</span>
-            <span className="font-semibold text-slate-900 text-right truncate">
+            <span className="text-ink-muted shrink-0">Area</span>
+            <span className="font-semibold text-ink text-right truncate">
               {request.preferred_zone || 'Any area'} • {campusName || 'campus'}
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Budget</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-ink-muted shrink-0">Budget</span>
+            <span className="font-semibold text-ink">
               {budgetLabel(request.budget_range)}/month
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Gender</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-ink-muted shrink-0">Gender</span>
+            <span className="font-semibold text-ink">
               {genderLabel(request.gender)}
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Room type</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-ink-muted shrink-0">Room type</span>
+            <span className="font-semibold text-ink">
               {roomTypeLabel(request.room_type)}
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Stay alone / sharing</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-ink-muted shrink-0">Stay alone / sharing</span>
+            <span className="font-semibold text-ink">
               {stayPreferenceLabel(request.stay_preference)}
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Furnishing</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-ink-muted shrink-0">Furnishing</span>
+            <span className="font-semibold text-ink">
               {furnishingLabel(request.furnishing)}
             </span>
           </div>
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Move-in</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-ink-muted shrink-0">Move-in</span>
+            <span className="font-semibold text-ink">
               {request.move_in_date
                 ? formatDate(request.move_in_date, 'd MMM yyyy')
                 : 'Flexible'}
@@ -537,15 +580,15 @@ export function FindMeAHostel({
           </div>
           {request.additional_requirements?.trim() && (
             <div className="flex items-start justify-between gap-4 py-1.5">
-              <span className="text-slate-500 shrink-0">Requirements</span>
-              <span className="font-semibold text-slate-900 text-right">
+              <span className="text-ink-muted shrink-0">Requirements</span>
+              <span className="font-semibold text-ink text-right">
                 {request.additional_requirements}
               </span>
             </div>
           )}
           <div className="flex items-start justify-between gap-4 py-1.5">
-            <span className="text-slate-500 shrink-0">Service fee</span>
-            <span className="font-bold text-slate-900 tabular-nums">
+            <span className="text-ink-muted shrink-0">Service fee</span>
+            <span className="font-bold text-ink tabular-nums">
               KSh {request.fee.toLocaleString()}
             </span>
           </div>
@@ -571,12 +614,12 @@ export function FindMeAHostel({
 
         {request.status === 'cancelled' && (
           <div className="flex items-center justify-between gap-3 pt-1">
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               You can remove this request to keep your dashboard tidy.
             </p>
             <button
               onClick={() => handleDelete(request.id)}
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg px-3 py-1.5"
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-muted hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg px-3 py-1.5"
             >
               <Trash2 className="h-3 w-3" />
               Delete
@@ -593,7 +636,7 @@ export function FindMeAHostel({
         e.preventDefault();
         handleSubmit();
       }}
-      className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 space-y-5"
+      className="rounded-2xl border border-line bg-white p-4 sm:p-5 space-y-5"
     >
       {!hasCampus && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3">
@@ -604,21 +647,34 @@ export function FindMeAHostel({
 
       {/* Phone */}
       <div>
-        {fieldLabel('Phone number', true)}
+        {fieldLabel('Phone number', true, 'hr-phone')}
         <div className="relative">
-          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
+            id="hr-phone"
             type="tel"
             inputMode="tel"
+            autoComplete="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="e.g. 0712 345 678"
-            className="w-full h-11 pl-10 pr-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none"
-            required
+            aria-invalid={attempted && !!phoneError}
+            aria-describedby={attempted && phoneError ? 'hr-phone-error' : undefined}
+            className={cn(
+              'w-full h-11 pl-10 pr-3 rounded-xl border text-sm focus:ring-2 outline-none',
+              attempted && phoneError
+                ? 'border-rose-400 focus:ring-rose-500 focus:border-rose-500'
+                : 'border-slate-300 focus:ring-primary focus:border-primary',
+            )}
           />
         </div>
+        {attempted && phoneError && (
+          <p id="hr-phone-error" role="alert" className="text-xs text-rose-600 mt-1">
+            {phoneError}
+          </p>
+        )}
         {!hasCampus && (
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-ink-muted mt-1">
             We use this to share your request with a campus manager.
           </p>
         )}
@@ -626,13 +682,14 @@ export function FindMeAHostel({
 
       {/* Preferred zone */}
       <div>
-        {fieldLabel('Preferred area / zone')}
+        {fieldLabel('Preferred area / zone', false, 'hr-zone')}
         <div className="relative">
           <select
+            id="hr-zone"
             value={preferredZone}
             onChange={(e) => setPreferredZone(e.target.value)}
             disabled={!hasCampus}
-            className="w-full h-11 px-3 pr-9 rounded-xl border border-slate-300 text-sm bg-white appearance-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none disabled:bg-slate-50 disabled:text-slate-400"
+            className="w-full h-11 px-3 pr-9 rounded-xl border border-slate-300 text-sm bg-white appearance-none focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:bg-subtle disabled:text-slate-500"
           >
             <option value="__none__">
               {zones.length > 0 ? 'Any area / no preference' : 'Any area'}
@@ -643,10 +700,10 @@ export function FindMeAHostel({
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
         </div>
         {zones.length === 0 && hasCampus && (
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-ink-muted mt-1">
             No areas configured yet. We&apos;ll cover the whole campus.
           </p>
         )}
@@ -654,19 +711,30 @@ export function FindMeAHostel({
 
       {/* Budget */}
       <div>
-        {fieldLabel('Monthly budget', true)}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {fieldLabel('Monthly budget', true, undefined, 'hr-budget-label')}
+        <div
+          role="group"
+          aria-labelledby="hr-budget-label"
+          aria-describedby={attempted && budgetError ? 'hr-budget-error' : undefined}
+          className="grid grid-cols-2 sm:grid-cols-3 gap-2"
+        >
           {BUDGET_OPTIONS.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => setBudget(option.value)}
+              aria-pressed={budget === option.value}
               className={chipClass(budget === option.value)}
             >
               {option.label}
             </button>
           ))}
         </div>
+        {attempted && budgetError && (
+          <p id="hr-budget-error" role="alert" className="text-xs text-rose-600 mt-1">
+            {budgetError}
+          </p>
+        )}
       </div>
 
       {/* Gender */}
@@ -678,6 +746,7 @@ export function FindMeAHostel({
               key={option.value}
               type="button"
               onClick={() => setGender(option.value as HostelRequestGender)}
+              aria-pressed={gender === option.value}
               className={chipClass(gender === option.value)}
             >
               {option.label}
@@ -695,13 +764,14 @@ export function FindMeAHostel({
               key={option.value}
               type="button"
               onClick={() => setRoomType(option.value as HostelRequestRoomType)}
+              aria-pressed={roomType === option.value}
               className={chipClass(roomType === option.value)}
             >
               {option.label}
             </button>
           ))}
         </div>
-        <p className="text-[11px] text-slate-400 mt-1">
+        <p className="text-[11px] text-ink-muted mt-1">
           Single room is a room without self-contained facilities; bedsitter is
           self-contained; one bedroom is a separate bedroom.
         </p>
@@ -718,13 +788,14 @@ export function FindMeAHostel({
               onClick={() =>
                 setStayPreference(option.value as HostelRequestStayPreference)
               }
+              aria-pressed={stayPreference === option.value}
               className={chipClass(stayPreference === option.value)}
             >
               {option.label}
             </button>
           ))}
         </div>
-        <p className="text-[11px] text-slate-400 mt-1">
+        <p className="text-[11px] text-ink-muted mt-1">
           Let the manager know if you want the room to yourself or if you&apos;re
           happy sharing a room with a roommate to cost-share.
         </p>
@@ -741,6 +812,7 @@ export function FindMeAHostel({
               onClick={() =>
                 setFurnishing(option.value as HostelRequestFurnishing)
               }
+              aria-pressed={furnishing === option.value}
               className={chipClass(furnishing === option.value)}
             >
               {option.label}
@@ -751,34 +823,41 @@ export function FindMeAHostel({
 
       {/* Move-in date */}
       <div>
-        {fieldLabel('Move-in date')}
+        {fieldLabel('Move-in date', false, 'hr-move-in')}
         <input
+          id="hr-move-in"
           type="date"
           value={moveInDate}
           min={new Date().toISOString().split('T')[0]}
           onChange={(e) => setMoveInDate(e.target.value)}
-          className="w-full h-11 px-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none"
+          className="w-full h-11 px-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
         />
       </div>
 
       {/* Additional requirements */}
       <div>
-        {fieldLabel('Important requirements', false)}
+        {fieldLabel('Important requirements', false, 'hr-requirements')}
         <textarea
+          id="hr-requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
           placeholder="Anything else you need? e.g. Hot water, parking, wifi…"
           rows={2}
-          className="w-full rounded-xl border border-slate-300 text-sm p-3 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none resize-none"
+          className="w-full rounded-xl border border-slate-300 text-sm p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
         />
       </div>
 
       {/* CTA */}
       <div className="pt-1 space-y-2.5">
+        {submitError && (
+          <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+            {submitError}
+          </div>
+        )}
         <button
           type="submit"
-          disabled={!canSubmit || submitting}
-          className="w-full h-12 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+          disabled={submitting}
+          className="w-full h-12 rounded-xl bg-ink hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -787,13 +866,8 @@ export function FindMeAHostel({
           )}
           {submitting ? 'Submitting…' : isHome ? 'Find My Hostel' : 'Submit Request'}
         </button>
-        {!canSubmit && (
-          <p className="text-[11px] text-slate-400 text-center">
-            Add your phone number and pick a budget to submit.
-          </p>
-        )}
         {isHome && (
-          <p className="text-[11px] text-slate-400 text-center leading-relaxed">
+          <p className="text-[11px] text-slate-500 text-center leading-relaxed">
             Your request is saved to your dashboard the moment you submit. If you
             are not signed in we&apos;ll quickly confirm your account first.
           </p>
@@ -806,12 +880,12 @@ export function FindMeAHostel({
   if (isHome) {
     return (
       <>
-      <section className="bg-white border-y border-slate-200/60 py-10 sm:py-16">
+      <section className="bg-raised border-y border-line py-10 sm:py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             {/* Left column: copy */}
             <div className="lg:pt-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-bold mb-5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-primary text-xs font-bold mb-5">
                 <CompassIcon />
                 Hostel Finding Service
               </div>
@@ -825,7 +899,7 @@ export function FindMeAHostel({
               {justSubmitted && (
                 <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5 space-y-2 mb-5">
                   <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
                     <p className="text-sm font-bold text-emerald-900">
                       Request Submitted · Waiting
                     </p>
@@ -860,44 +934,44 @@ export function FindMeAHostel({
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-                    <CreditCard className="h-5 w-5 text-amber-600" />
+                    <CreditCard className="h-5 w-5 text-amber-700" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="text-base font-bold text-ink">
                       Accept Service Fee
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-ink-muted mt-0.5">
                       You need to accept the fee before submitting
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handlePaymentModalClose}
-                  className="p-2 -mt-1 -mr-1 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"
+                  className="p-2 -mt-1 -mr-1 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+              <div className="bg-subtle rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Service fee</span>
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">
+                  <span className="text-sm text-ink-muted">Service fee</span>
+                  <span className="text-sm font-bold text-ink tabular-nums">
                     KSh {(campusFee ?? HOSTEL_REQUEST_FEE).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-                  <span className="text-sm font-semibold text-slate-900">
+                <div className="flex items-center justify-between border-t border-line pt-3">
+                  <span className="text-sm font-semibold text-ink">
                     Amount to pay now (50%)
                   </span>
-                  <span className="text-lg font-extrabold text-slate-900 tabular-nums">
+                  <span className="text-lg font-extrabold text-ink tabular-nums">
                     KSh {Math.ceil((campusFee ?? HOSTEL_REQUEST_FEE) / 2).toLocaleString()}
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-ink-muted leading-relaxed">
                 A Rumia manager will contact you on WhatsApp with payment
                 details after you submit.
               </p>
@@ -907,7 +981,7 @@ export function FindMeAHostel({
                   type="checkbox"
                   checked={paymentAccepted}
                   onChange={(e) => setPaymentAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-ink focus:ring-primary"
                 />
                 <span className="text-sm text-slate-700 leading-snug">
                   I agree to pay half of the service fee (KSh{' '}
@@ -919,14 +993,14 @@ export function FindMeAHostel({
               <div className="flex items-center gap-3 pt-1">
                 <button
                   onClick={handlePaymentModalClose}
-                  className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors"
+                  className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-subtle transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={submitAfterPaymentAcceptance}
                   disabled={!paymentAccepted || submitting}
-                  className="flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 h-11 rounded-xl bg-ink hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -946,13 +1020,13 @@ export function FindMeAHostel({
   }
 
   return (
-    <section className="pt-4 border-t border-slate-200/60 space-y-6">
+    <section className="pt-4 border-t border-line space-y-6">
       {/* Section header */}
       <div>
-        <h3 className="text-base sm:text-lg font-bold text-slate-900">
+        <h3 className="text-base sm:text-lg font-bold text-ink">
           Find Me a Hostel
         </h3>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-ink-muted mt-0.5">
           Tell us what you&apos;re looking for and Rumia will find it for you. A
           manager reviews your request and contacts you on WhatsApp.
         </p>
@@ -962,7 +1036,7 @@ export function FindMeAHostel({
       {justSubmitted && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5 space-y-2">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
             <p className="text-sm font-bold text-emerald-900">
               Request Submitted · Waiting
             </p>
@@ -980,9 +1054,9 @@ export function FindMeAHostel({
       {/* Existing requests */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-bold text-slate-900">Your Requests</h4>
+          <h4 className="text-sm font-bold text-ink">Your Requests</h4>
           {!loadingRequests && requests.length > 0 && (
-            <span className="text-[11px] font-bold text-slate-400">
+            <span className="text-[11px] font-bold text-slate-500">
               {requests.length} {requests.length === 1 ? 'request' : 'requests'}
             </span>
           )}
@@ -995,8 +1069,8 @@ export function FindMeAHostel({
             ))}
           </div>
         ) : requests.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
-            <p className="text-xs text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line bg-subtle p-6 text-center">
+            <p className="text-xs text-ink-muted">
               No requests yet. Submit the form above and we&apos;ll take it
               from here.
             </p>
@@ -1009,20 +1083,25 @@ export function FindMeAHostel({
       {/* Edit request modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/50">
-          <div className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto p-5">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit request"
+            className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto p-5"
+          >
             <div className="flex items-start justify-between gap-3 mb-4">
               <div>
-                <h4 className="text-base font-bold text-slate-900">
+                <h4 className="text-base font-bold text-ink">
                   Edit Request
                 </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-ink-muted mt-0.5">
                   Update your requirements — a manager will see the change
                   instantly.
                 </p>
               </div>
               <button
                 onClick={() => setEditing(null)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 text-ink-muted transition-colors"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -1033,7 +1112,7 @@ export function FindMeAHostel({
               <div>
                 {fieldLabel('Phone number', true)}
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                   <input
                     type="tel"
                     inputMode="tel"
@@ -1042,7 +1121,7 @@ export function FindMeAHostel({
                       setEditing({ ...editing, phone: e.target.value })
                     }
                     placeholder="e.g. 0712 345 678"
-                    className="w-full h-11 pl-10 pr-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none"
+                    className="w-full h-11 pl-10 pr-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   />
                 </div>
               </div>
@@ -1058,7 +1137,7 @@ export function FindMeAHostel({
                         preferred_zone: e.target.value,
                       })
                     }
-                    className="w-full h-11 px-3 pr-9 rounded-xl border border-slate-300 text-sm bg-white appearance-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none"
+                    className="w-full h-11 px-3 pr-9 rounded-xl border border-slate-300 text-sm bg-white appearance-none focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   >
                     <option value="__none__">
                       {zones.length > 0 ? 'Any area / no preference' : 'Any area'}
@@ -1069,7 +1148,7 @@ export function FindMeAHostel({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
                 </div>
               </div>
 
@@ -1086,7 +1165,8 @@ export function FindMeAHostel({
                           budget_range: option.value,
                         })
                       }
-                      className={chipClass(
+                      aria-pressed={editing.budget_range === option.value}
+              className={chipClass(
                         editing.budget_range === option.value,
                       )}
                     >
@@ -1109,7 +1189,8 @@ export function FindMeAHostel({
                           gender: option.value as HostelRequestGender,
                         })
                       }
-                      className={chipClass(editing.gender === option.value)}
+                      aria-pressed={editing.gender === option.value}
+              className={chipClass(editing.gender === option.value)}
                     >
                       {option.label}
                     </button>
@@ -1130,7 +1211,8 @@ export function FindMeAHostel({
                           room_type: option.value as HostelRequestRoomType,
                         })
                       }
-                      className={chipClass(editing.room_type === option.value)}
+                      aria-pressed={editing.room_type === option.value}
+              className={chipClass(editing.room_type === option.value)}
                     >
                       {option.label}
                     </button>
@@ -1152,7 +1234,8 @@ export function FindMeAHostel({
                             option.value as HostelRequestStayPreference,
                         })
                       }
-                      className={chipClass(
+                      aria-pressed={editing.stay_preference === option.value}
+              className={chipClass(
                         editing.stay_preference === option.value,
                       )}
                     >
@@ -1176,7 +1259,8 @@ export function FindMeAHostel({
                             option.value as HostelRequestFurnishing,
                         })
                       }
-                      className={chipClass(editing.furnishing === option.value)}
+                      aria-pressed={editing.furnishing === option.value}
+              className={chipClass(editing.furnishing === option.value)}
                     >
                       {option.label}
                     </button>
@@ -1185,15 +1269,16 @@ export function FindMeAHostel({
               </div>
 
               <div>
-                {fieldLabel('Move-in date')}
+                {fieldLabel('Move-in date', false, 'hr-edit-move-in')}
                 <input
+                  id="hr-edit-move-in"
                   type="date"
                   value={editing.move_in_date}
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) =>
                     setEditing({ ...editing, move_in_date: e.target.value })
                   }
-                  className="w-full h-11 px-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none"
+                  className="w-full h-11 px-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                 />
               </div>
 
@@ -1208,7 +1293,7 @@ export function FindMeAHostel({
                     })
                   }
                   rows={2}
-                  className="w-full rounded-xl border border-slate-300 text-sm p-3 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none resize-none"
+                  className="w-full rounded-xl border border-slate-300 text-sm p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
                 />
               </div>
             </div>
@@ -1216,14 +1301,14 @@ export function FindMeAHostel({
             <div className="flex items-center gap-3 pt-5">
               <button
                 onClick={() => setEditing(null)}
-                className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors"
+                className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-subtle transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
                 disabled={savingEdit}
-                className="flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                className="flex-1 h-11 rounded-xl bg-ink hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
               >
                 {savingEdit && <Loader2 className="h-4 w-4 animate-spin" />}
                 Save Changes
@@ -1250,44 +1335,44 @@ export function FindMeAHostel({
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-                    <CreditCard className="h-5 w-5 text-amber-600" />
+                    <CreditCard className="h-5 w-5 text-amber-700" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="text-base font-bold text-ink">
                       Accept Service Fee
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-ink-muted mt-0.5">
                       You need to accept the fee before submitting
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handlePaymentModalClose}
-                  className="p-2 -mt-1 -mr-1 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"
+                  className="p-2 -mt-1 -mr-1 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+              <div className="bg-subtle rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Service fee</span>
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">
+                  <span className="text-sm text-ink-muted">Service fee</span>
+                  <span className="text-sm font-bold text-ink tabular-nums">
                     KSh {(campusFee ?? HOSTEL_REQUEST_FEE).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-                  <span className="text-sm font-semibold text-slate-900">
+                <div className="flex items-center justify-between border-t border-line pt-3">
+                  <span className="text-sm font-semibold text-ink">
                     Amount to pay now (50%)
                   </span>
-                  <span className="text-lg font-extrabold text-slate-900 tabular-nums">
+                  <span className="text-lg font-extrabold text-ink tabular-nums">
                     KSh {Math.ceil((campusFee ?? HOSTEL_REQUEST_FEE) / 2).toLocaleString()}
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-ink-muted leading-relaxed">
                 A Rumia manager will contact you on WhatsApp with payment
                 details after you submit.
               </p>
@@ -1297,7 +1382,7 @@ export function FindMeAHostel({
                   type="checkbox"
                   checked={paymentAccepted}
                   onChange={(e) => setPaymentAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-ink focus:ring-primary"
                 />
                 <span className="text-sm text-slate-700 leading-snug">
                   I agree to pay half of the service fee (KSh{' '}
@@ -1309,14 +1394,14 @@ export function FindMeAHostel({
               <div className="flex items-center gap-3 pt-1">
                 <button
                   onClick={handlePaymentModalClose}
-                  className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors"
+                  className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-700 text-sm font-bold hover:bg-subtle transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={submitAfterPaymentAcceptance}
                   disabled={!paymentAccepted || submitting}
-                  className="flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 h-11 rounded-xl bg-ink hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

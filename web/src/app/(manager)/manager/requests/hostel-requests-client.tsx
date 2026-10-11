@@ -205,18 +205,18 @@ export function HostelRequestsClient({
                       {request.phone} • {request.preferred_zone || 'Any area'} •{' '}
                       {budgetLabel(request.budget_range)}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       {request.campuses?.name || 'Unknown campus'} •{' '}
                       {formatDate(request.created_at, 'd MMM yyyy, HH:mm')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="hidden sm:inline-flex text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full tabular-nums">
+                    <span className="hidden sm:inline-flex text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full tabular-nums">
                       KSh {request.fee.toLocaleString()}
                     </span>
                     <ChevronDown
                       className={cn(
-                        'h-4 w-4 text-slate-400 transition-transform',
+                        'h-4 w-4 text-slate-500 transition-transform',
                         expanded && 'rotate-180',
                       )}
                     />
@@ -289,7 +289,7 @@ export function HostelRequestsClient({
                     {/* WhatsApp message + copy */}
                     <div className="pt-2 space-y-2">
                       <div className="flex items-center gap-2">
-                        <MessageSquareText className="h-4 w-4 text-emerald-600" />
+                        <MessageSquareText className="h-4 w-4 text-primary" />
                         <p className="text-xs font-bold text-slate-900 uppercase tracking-wide">
                           WhatsApp Message
                         </p>
@@ -301,7 +301,7 @@ export function HostelRequestsClient({
                         type="button"
                         onClick={() => handleSendWhatsApp(request)}
                         disabled={statusUpdating === request.id}
-                        className="w-full h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                        className="w-full h-10 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors"
                       >
                         <MessageCircle className="h-4 w-4" />
                         Send on WhatsApp
@@ -310,9 +310,9 @@ export function HostelRequestsClient({
                         textToCopy={whatsappMessage}
                         label="Copy WhatsApp Message"
                         successMessage="WhatsApp message copied. Paste it to the student."
-                        className="w-full h-10 bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700 font-bold [&>span]:text-slate-700 [&>svg]:text-slate-500"
+                        className="w-full h-10 bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700 font-bold [&>span]:text-slate-700 [&>svg]:text-slate-600"
                       />
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-500">
                         Send opens WhatsApp directly on the student&apos;s number
                         ({request.phone}) with the message pre-filled — no need to
                         save the number. The request is marked as Contacted
@@ -343,13 +343,13 @@ className={cn(
                             </button>
                         ))}
                         {statusUpdating === request.id && (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
                             <Loader2 className="h-3 w-3 animate-spin" />
                             Updating…
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-500">
                         Follow the flow: Contact student → help them find a
                         suitable hostel → update the status as it progresses.
                       </p>

@@ -4327,6 +4327,11 @@ export interface components {
              * @default 0
              */
             rating: number;
+            /**
+             * Review Count
+             * @default 0
+             */
+            review_count: number;
             /** Room Type */
             room_type?: string | null;
             /** Room Type Enum */
@@ -6240,6 +6245,11 @@ export interface components {
              * @default 0
              */
             rating: number;
+            /**
+             * Review Count
+             * @default 0
+             */
+            review_count: number;
             /** Room Type */
             room_type?: string | null;
             /** Room Type Enum */

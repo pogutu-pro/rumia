@@ -35,6 +35,65 @@ async def test_listings_feed_with_filters(client: AsyncClient):
     assert "items" in data
 
 
+@pytest.fixture(autouse=True)
+def _no_review_stats():
+    """These tests mock the database; review aggregation has its own real-SQL test in tests_pg."""
+    with patch(
+        "app.features.listings.service.ListingService.get_review_stats",
+        new_callable=AsyncMock,
+        return_value={},
+    ):
+        yield
+
+
+@pytest.mark.asyncio
+async def test_listings_feed_and_detail_report_review_rating_and_count(client: AsyncClient):
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-1", slug="listing-one")
+    stats = {"listing-1": (4.5, 12)}
+    with (
+        patch(
+            "app.features.listings.service.ListingService.get_listings_feed",
+            new_callable=AsyncMock,
+            return_value=([listing], 1, {}),
+        ),
+        patch(
+            "app.features.listings.service.ListingService.get_listing_by_id_or_slug",
+            new_callable=AsyncMock,
+            return_value=listing,
+        ),
+        patch(
+            "app.features.listings.service.ListingService.get_review_stats",
+            new_callable=AsyncMock,
+            return_value=stats,
+        ),
+    ):
+        feed = await client.get("/api/v1/listings?page=1&limit=10")
+        detail = await client.get("/api/v1/listings/listing-one")
+
+    for body in (feed.json()["items"][0], detail.json()):
+        assert body["rating"] == 4.5
+        assert body["review_count"] == 12
+
+
+@pytest.mark.asyncio
+async def test_listing_without_reviews_reports_zero(client: AsyncClient):
+    from tests.conftest import _make_mock_listing
+
+    listing = _make_mock_listing(id="listing-1", slug="listing-one")
+    with patch(
+        "app.features.listings.service.ListingService.get_listings_feed",
+        new_callable=AsyncMock,
+        return_value=([listing], 1, {}),
+    ):
+        feed = await client.get("/api/v1/listings?page=1&limit=10")
+
+    item = feed.json()["items"][0]
+    assert item["rating"] == 0.0
+    assert item["review_count"] == 0
+
+
 @pytest.mark.asyncio
 async def test_listings_feed_marks_saved_for_authenticated_user(client: AsyncClient):
     from tests.conftest import _make_mock_listing

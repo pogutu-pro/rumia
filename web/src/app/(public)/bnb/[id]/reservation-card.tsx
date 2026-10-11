@@ -91,7 +91,7 @@ export function ReservationCard({
             Check-in
           </span>
           <span className="mt-1 flex items-center gap-1.5">
-            <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+            <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
             <input
               type="date"
               min={minimumDate}
@@ -108,7 +108,7 @@ export function ReservationCard({
             Check-out
           </span>
           <span className="mt-1 flex items-center gap-1.5">
-            <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+            <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
             <input
               type="date"
               min={checkIn || minimumDate}
@@ -125,7 +125,7 @@ export function ReservationCard({
         type="button"
         onClick={reserve}
         disabled={!hasPhone}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
         <MessageCircle className="h-4 w-4" />
         Reserve via WhatsApp

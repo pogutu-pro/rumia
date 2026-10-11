@@ -27,10 +27,17 @@ function canInitializeSync(): boolean {
 export function usePushSubscription() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [loading, setLoading] = useState(() => !canInitializeSync());
+  // Always starts as "checking" so the server render and the first client render are identical (reading
+  // `window` here made them differ and caused a hydration error). The effect below settles it after mount.
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!canInitializeSync()) return;
+    if (!canInitializeSync()) {
+      // Push is not available here (no service worker or no VAPID key): nothing to check.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
+      return;
+    }
 
     let cancelled = false;
 

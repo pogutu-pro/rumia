@@ -26,7 +26,8 @@ export default async function VerifyPage() {
   const activeAgents = await publicApi.getSupportTeam({ revalidate }).catch(() => []);
 
   return (
-    <div className="min-h-screen bg-[#F7F5F0] pb-[calc(4rem+env(safe-area-inset-bottom))]">
+    <div className="min-h-[calc(100dvh-var(--shell-header-h))] pb-10">
+      <h1 className="sr-only">Verify a hostel before you pay</h1>
       <div className="container mx-auto px-4 pt-10 sm:pt-16 lg:pt-20">
         {/* Mobile: owner on top · Desktop: owner left, checker right */}
         <div className="lg:grid lg:grid-cols-[minmax(0,32rem)_minmax(0,32rem)] lg:gap-4 lg:justify-center lg:items-start">

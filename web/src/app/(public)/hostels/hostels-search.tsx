@@ -371,11 +371,11 @@ export default function HostelsSearch({
 
         {/* Results count */}
         <div className="mb-5 mt-3 px-1">
-          <p className="text-sm text-slate-400 font-semibold">
+          <h1 className="text-sm text-ink-muted font-semibold">
             {totalCountState} {totalCountState === 1 ? 'hostel' : 'hostels'}{' '}
             found
             {hasAnyFilters && (
-              <span className="text-slate-300">
+              <span className="text-ink-muted">
                 {' '}
                 ·{' '}
                 <button
@@ -387,9 +387,9 @@ export default function HostelsSearch({
                 </button>
               </span>
             )}
-          </p>
+          </h1>
           {propertyType && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-emerald-700">
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-primary">
               {propertyType === 'apartment'
                 ? 'Apartments'
                 : propertyType === 'short_stay'
@@ -406,7 +406,7 @@ export default function HostelsSearch({
                     { scroll: false },
                   );
                 }}
-                className="text-emerald-600 hover:text-emerald-800 rounded-full p-0.5 hover:bg-emerald-100 cursor-pointer"
+                className="text-primary hover:text-emerald-800 rounded-full p-0.5 hover:bg-emerald-100 cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -493,9 +493,9 @@ export default function HostelsSearch({
                       </div>
 
                       <div className="p-4 flex-1 flex flex-col">
-                        <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                        <h2 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
                           {item.title}
-                        </h3>
+                        </h2>
 
                         <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mt-1 mb-2 truncate">
                           <MapPin className="h-3 w-3 shrink-0" />
@@ -507,12 +507,12 @@ export default function HostelsSearch({
                         </p>
 
                         <div className="mb-3 pt-2 border-t border-slate-100">
-                          <p className="text-sm font-bold text-emerald-600">
+                          <p className="text-sm font-bold text-primary">
                             {priceDisplay}
                           </p>
                         </div>
 
-                        <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-400">
+                        <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-500">
                           <span>
                             Agent: {item.agents?.name ?? 'Rumia Agent'}
                           </span>
@@ -526,7 +526,7 @@ export default function HostelsSearch({
                               }}
                               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors cursor-pointer border-2 touch-manipulation ${
                                 isSelected
-                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                  ? 'bg-primary text-white border-primary shadow-sm'
                                   : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-xs'
                               }`}
                             >
@@ -542,7 +542,7 @@ export default function HostelsSearch({
                                 </>
                               )}
                             </button>
-                            <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5 cursor-pointer">
+                            <span className="font-semibold text-primary group-hover:underline flex items-center gap-0.5 cursor-pointer">
                               <Eye className="h-3.5 w-3.5" /> View Details
                             </span>
                           </div>

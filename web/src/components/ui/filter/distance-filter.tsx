@@ -44,7 +44,7 @@ export function DistanceFilter({
                 className={cn(
                   'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 cursor-pointer',
                   isActive
-                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                    ? 'bg-emerald-50 text-primary ring-1 ring-emerald-200'
                     : 'bg-white text-slate-600 hover:bg-slate-50 ring-1 ring-slate-200',
                 )}
               >
@@ -71,7 +71,7 @@ export function DistanceFilter({
           <label className="text-sm font-semibold text-slate-900 cursor-pointer" htmlFor="sort-nearest-toggle">
             Sort by nearest first
           </label>
-          <p className="text-xs text-slate-400 font-medium">
+          <p className="text-xs text-slate-500 font-medium">
             Order results starting with the closest to campus center
           </p>
         </div>

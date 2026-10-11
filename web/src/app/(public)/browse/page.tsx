@@ -72,7 +72,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
           <aside className="lg:sticky lg:top-24 bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <h2 className="font-bold text-slate-900 flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4 text-emerald-600" />
+                <SlidersHorizontal className="h-4 w-4 text-primary" />
                 Filters
               </h2>
               {(search || minPrice || maxPrice) && (
@@ -88,11 +88,11 @@ export default async function BrowsePage({ searchParams }: PageProps) {
             <form action="/browse" method="GET" className="space-y-4">
               {/* Keyword Search */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Keywords
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 h-4 w-4" />
                   <Input
                     type="text"
                     name="search"
@@ -105,12 +105,12 @@ export default async function BrowsePage({ searchParams }: PageProps) {
 
               {/* Price Filters */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Monthly Budget (KES)
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="relative">
-                    <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
+                    <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 h-3.5 w-3.5" />
                     <Input
                       type="number"
                       name="minPrice"
@@ -120,7 +120,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
                     />
                   </div>
                   <div className="relative">
-                    <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
+                    <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 h-3.5 w-3.5" />
                     <Input
                       type="number"
                       name="maxPrice"
@@ -134,7 +134,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all duration-300 shadow-sm"
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold transition-all duration-300 shadow-sm"
               >
                 Apply Filters
               </Button>
@@ -143,7 +143,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
 
           {/* Listings Grid */}
           <div className="lg:col-span-3 space-y-6">
-            <div className="flex items-center justify-between text-sm text-slate-400 font-semibold px-1">
+            <div className="flex items-center justify-between text-sm text-slate-500 font-semibold px-1">
               <span>{listings ? listings.length : 0} Listings found</span>
             </div>
 
@@ -177,12 +177,12 @@ export default async function BrowsePage({ searchParams }: PageProps) {
                       </div>
 
                       <div className="p-4 flex-1 flex flex-col">
-                        <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
-                          <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+                        <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">
+                          <MapPin className="h-3 w-3 shrink-0 text-slate-500" />
                           <span className="truncate">{item.location}</span>
                         </div>
 
-                        <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                        <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
                           {item.title}
                         </h3>
 
@@ -190,9 +190,9 @@ export default async function BrowsePage({ searchParams }: PageProps) {
                           {item.description}
                         </p>
 
-                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                           <span>Agent: {item.agents?.name || 'Rumia Agent'}</span>
-                          <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5">
+                          <span className="font-semibold text-primary group-hover:underline flex items-center gap-0.5">
                             <Eye className="h-3.5 w-3.5" />
                             View
                           </span>
@@ -204,7 +204,7 @@ export default async function BrowsePage({ searchParams }: PageProps) {
               </div>
             ) : (
               <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
-                <p className="text-slate-400 font-medium">No results match your criteria.</p>
+                <p className="text-slate-500 font-medium">No results match your criteria.</p>
                 <Link
                   href="/browse"
                   className="mt-4 inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors"

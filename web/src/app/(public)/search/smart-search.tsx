@@ -100,7 +100,7 @@ function SearchResults({ q }: { q: string }) {
         <label htmlFor="smart-q" className="sr-only">
           Describe the place you want
         </label>
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" aria-hidden="true" />
         <input
           id="smart-q"
           value={draft}
@@ -117,7 +117,7 @@ function SearchResults({ q }: { q: string }) {
               setDraft('');
               router.push('/search');
             }}
-            className="absolute right-[4.5rem] top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+            className="absolute right-[4.5rem] top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -149,7 +149,7 @@ function SearchResults({ q }: { q: string }) {
                 {taste.searches.map((s) => (
                   <li key={s}>
                     <Link href={`/search?q=${encodeURIComponent(s)}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-sm text-slate-700 hover:border-slate-300">
-                      <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                      <Clock className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
                       {s}
                     </Link>
                   </li>

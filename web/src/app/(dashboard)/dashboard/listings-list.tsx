@@ -122,10 +122,10 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
     <div className="space-y-6">
       {listings.length === 0 ? (
         <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl shadow-xs">
-          <p className="text-slate-400 font-semibold">You haven&apos;t created any listings yet.</p>
+          <p className="text-slate-500 font-semibold">You haven&apos;t created any listings yet.</p>
           <Link
             href="/dashboard/new"
-            className="mt-4 inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-xs transition-colors"
+            className="mt-4 inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-sm font-bold shadow-xs transition-colors"
           >
             Create Your First Listing
           </Link>
@@ -159,7 +159,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                       </span>
                     ) : null}
                     {item.is_active ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-primary border border-emerald-100 shadow-sm">
                         <CheckCircle2 className="h-3 w-3" />
                         Active
                       </span>
@@ -177,7 +177,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                 </div>
 
                 <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-center gap-1 text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                  <div className="flex items-center gap-1 text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                     <MapPin className="h-3 w-3" />
                     <span className="truncate">{item.location}</span>
                   </div>
@@ -187,7 +187,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                   </h3>
 
                   <div className="flex items-center justify-between mb-4 flex-1">
-                    <div className="flex items-center gap-1.5 text-emerald-600">
+                    <div className="flex items-center gap-1.5 text-primary">
                       <MessageCircle className="h-4 w-4" />
                       <span className="text-sm font-bold">
                         {leadsCountByListing[String(item.id)] || 0} <span className="font-medium text-slate-500">Leads</span>
@@ -200,8 +200,8 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                         title={item.commission_locked_by_admin ? "Locked by admin" : "Toggle commission status"}
                         className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${
                           item.pays_commission
-                            ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100'
-                            : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-100'
+                            ? 'bg-emerald-50 text-primary hover:bg-emerald-100 border-emerald-100'
+                            : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-100'
                         } disabled:opacity-50`}
                       >
                         {togglingCommissionId === item.id ? (
@@ -263,7 +263,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                           className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                             item.is_full
                               ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-emerald-50 text-primary border-emerald-200'
                           } disabled:opacity-50`}
                         >
                           <span
@@ -292,7 +292,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                         className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                           item.is_active
                             ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-100'
-                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100'
+                            : 'bg-emerald-50 text-primary hover:bg-emerald-100 border-emerald-100'
                         } disabled:opacity-50`}
                       >
                         {togglingId === item.id ? (

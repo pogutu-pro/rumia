@@ -55,7 +55,7 @@ export default function RegionsClient({ regions, campuses }: { regions: Region[]
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-slate-400 italic">No campuses assigned</p>
+                    <p className="text-sm text-slate-500 italic">No campuses assigned</p>
                   )}
                 </div>
               </div>

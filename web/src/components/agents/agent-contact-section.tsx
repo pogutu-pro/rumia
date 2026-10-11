@@ -50,7 +50,7 @@ export function AgentContactSection({
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-emerald-600/10"
+          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-emerald-600/10"
           aria-label="Contact on WhatsApp"
         >
           <MessageCircle className="h-4 w-4 fill-current" />
@@ -92,7 +92,7 @@ export function AgentContactSection({
         href={waUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 inline-flex items-center justify-center gap-2 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-emerald-600/10 min-w-[160px]"
+        className="flex-1 inline-flex items-center justify-center gap-2 h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-emerald-600/10 min-w-[160px]"
         aria-label="Contact on WhatsApp"
       >
         <MessageCircle className="h-6 w-6 fill-current" />

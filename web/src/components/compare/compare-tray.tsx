@@ -41,7 +41,7 @@ export function CompareTray() {
                 <p className="text-sm font-bold text-slate-900 truncate leading-tight">
                   {names[0]}
                 </p>
-                <p className="text-xs text-emerald-600 font-semibold mt-0.5">
+                <p className="text-xs text-primary font-semibold mt-0.5">
                   Select one more to compare
                 </p>
               </>
@@ -53,7 +53,7 @@ export function CompareTray() {
                   </p>
                 ))}
                 {names.length > 2 && (
-                  <p className="text-xs text-slate-400 font-medium">
+                  <p className="text-xs text-slate-500 font-medium">
                     +{names.length - 2} more
                   </p>
                 )}
@@ -63,7 +63,7 @@ export function CompareTray() {
           <button
             type="button"
             onClick={clearSelection}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
             aria-label="Clear comparison"
           >
             <X className="h-4 w-4" />
@@ -80,7 +80,7 @@ export function CompareTray() {
                 key={id}
                 type="button"
                 onClick={() => removeSelection(id)}
-                className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer max-w-[45%] truncate"
+                className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer max-w-[45%] truncate"
                 aria-label={`Remove ${s.title}`}
               >
                 <span className="truncate">{s.title}</span>
@@ -96,7 +96,7 @@ export function CompareTray() {
             'mt-3 flex items-center justify-center gap-2 w-full rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-200',
             canCompare
               ? 'bg-slate-900 text-white shadow-sm hover:bg-slate-700 active:scale-[0.98]'
-              : 'bg-slate-100 text-slate-400 pointer-events-none',
+              : 'bg-slate-100 text-slate-500 pointer-events-none',
           )}
         >
           <GitCompareArrows className="h-4 w-4" />
@@ -119,7 +119,7 @@ export function CompareTray() {
             <p className="text-xs font-bold text-slate-900 uppercase tracking-wider">
               Compare
             </p>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-500 font-medium">
               {count} selected
             </p>
           </div>
@@ -132,7 +132,7 @@ export function CompareTray() {
               key={selectedIds[i]}
               className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5"
             >
-              <span className="text-[11px] font-bold text-slate-400 tabular-nums w-4">
+              <span className="text-[11px] font-bold text-slate-500 tabular-nums w-4">
                 {i + 1}.
               </span>
               <span className="text-xs font-semibold text-slate-700 truncate flex-1">
@@ -141,7 +141,7 @@ export function CompareTray() {
               <button
                 type="button"
                 onClick={() => removeSelection(selectedIds[i])}
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
                 aria-label={`Remove ${name}`}
               >
                 <X className="h-3 w-3" />
@@ -186,7 +186,7 @@ export function CompareTray() {
               'flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all duration-200',
               canCompare
                 ? 'bg-slate-900 text-white shadow-sm hover:bg-slate-700 active:scale-[0.98]'
-                : 'bg-slate-100 text-slate-400 pointer-events-none',
+                : 'bg-slate-100 text-slate-500 pointer-events-none',
             )}
           >
             <GitCompareArrows className="h-3.5 w-3.5" />

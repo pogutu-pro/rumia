@@ -237,7 +237,7 @@ export function ReviewComposer({
     return (
       <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
         <div className="flex items-center gap-2 min-w-0">
-          <PencilLine className="h-4 w-4 text-slate-400 shrink-0" />
+          <PencilLine className="h-4 w-4 text-slate-500 shrink-0" />
           <span className="text-sm font-semibold text-slate-600 truncate">
             {isEditing
               ? 'You already reviewed this hostel.'
@@ -269,7 +269,7 @@ export function ReviewComposer({
         </h3>
         <div className="flex items-center gap-2">
           {schoolVerified && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-primary">
               <ShieldCheck className="h-3 w-3" />
               Verified
             </span>
@@ -277,7 +277,7 @@ export function ReviewComposer({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="text-xs font-semibold text-slate-400 hover:text-slate-600"
+            className="text-xs font-semibold text-slate-500 hover:text-slate-600"
           >
             Cancel
           </button>
@@ -368,7 +368,7 @@ export function ReviewComposer({
           maxLength={2000}
           className="min-h-[120px] resize-y text-sm"
         />
-        <p className="flex items-center justify-between gap-2 text-[11px] text-slate-400">
+        <p className="flex items-center justify-between gap-2 text-[11px] text-slate-500">
           <span className="min-w-0">
             {!schoolVerified && (
               <>Written reviews are verified to help students trust experiences shared by other students.</>
@@ -382,7 +382,7 @@ export function ReviewComposer({
       {pendingVerification && !isVerifiedEnough && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
           <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
             <div>
               <p className="text-sm font-bold text-amber-900">
                 Your review is ready to post
@@ -415,7 +415,7 @@ export function ReviewComposer({
               </Button>
             </div>
           ) : (
-            <p className="text-xs font-semibold text-emerald-700">
+            <p className="text-xs font-semibold text-primary">
               You&apos;re now verified — you can post your written review.
             </p>
           )}

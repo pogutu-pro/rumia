@@ -105,7 +105,7 @@ export function AccountSettingsTab({
         {onBackToOverview ? (
           <button
             onClick={onBackToOverview}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Overview
@@ -113,7 +113,7 @@ export function AccountSettingsTab({
         ) : (
           <Link
             href="/account?tab=overview"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Overview
@@ -122,10 +122,10 @@ export function AccountSettingsTab({
       </div>
 
       {/* 1. Account Profile Details */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-5">
+      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-5">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">Personal Information</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h3 className="text-sm font-bold text-ink">Personal Information</h3>
+          <p className="text-xs text-ink-muted mt-0.5">
             Update your contact details and home university for hostel tour bookings.
           </p>
         </div>
@@ -134,13 +134,13 @@ export function AccountSettingsTab({
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
             <div className="relative">
-              <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               />
             </div>
@@ -149,13 +149,13 @@ export function AccountSettingsTab({
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
             <div className="relative">
-              <Phone className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Phone className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="0712 345 678"
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               />
             </div>
@@ -164,14 +164,14 @@ export function AccountSettingsTab({
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">University / Campus</label>
             <div className="relative">
-              <GraduationCap className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <GraduationCap className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 type="text"
                 list="settings-campus-list"
                 value={campusInput}
                 onChange={(e) => setCampusInput(e.target.value)}
                 placeholder="Start typing or choose from the list"
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
               <datalist id="settings-campus-list">
                 {campuses.map((c) => (
@@ -179,7 +179,7 @@ export function AccountSettingsTab({
                 ))}
               </datalist>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-ink-muted mt-1">
               Your home university, used to tailor listings and tours.
             </p>
           </div>
@@ -187,12 +187,12 @@ export function AccountSettingsTab({
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 type="email"
                 value={profile.email}
                 disabled
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line bg-subtle text-ink-muted cursor-not-allowed"
               />
             </div>
           </div>
@@ -201,7 +201,7 @@ export function AccountSettingsTab({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -215,10 +215,10 @@ export function AccountSettingsTab({
       </div>
 
       {/* 2. Notifications Preferences */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4">
+      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">Notifications & Alerts</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h3 className="text-sm font-bold text-ink">Notifications & Alerts</h3>
+          <p className="text-xs text-ink-muted mt-0.5">
             Manage alerts for tour updates and price drops on hostels in your wishlist.
           </p>
         </div>
@@ -229,10 +229,10 @@ export function AccountSettingsTab({
       </div>
 
       {/* 3. Log Out Section */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3">
+      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-3">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">Account Session</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h3 className="text-sm font-bold text-ink">Account Session</h3>
+          <p className="text-xs text-ink-muted mt-0.5">
             Sign out of your account on this device.
           </p>
         </div>
@@ -258,15 +258,15 @@ export function AccountSettingsTab({
               <button
                 onClick={() => setShowLogoutModal(false)}
                 disabled={loggingOut}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1 rounded-full text-slate-600 hover:text-ink-muted hover:bg-slate-100"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-base font-bold text-slate-900">Leave Rumia?</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <h4 className="text-base font-bold text-ink">Leave Rumia?</h4>
+              <p className="text-xs text-ink-muted leading-relaxed">
                 Are you sure you want to log out of your account? You will need to sign in again to access your wishlist and tour bookings.
               </p>
             </div>
@@ -275,7 +275,7 @@ export function AccountSettingsTab({
               <button
                 onClick={() => setShowLogoutModal(false)}
                 disabled={loggingOut}
-                className="flex-1 h-9 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                className="flex-1 h-9 rounded-xl border border-line text-xs font-semibold text-slate-700 hover:bg-subtle transition-colors"
               >
                 Cancel
               </button>

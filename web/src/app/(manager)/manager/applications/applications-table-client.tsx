@@ -102,7 +102,7 @@ export function ApplicationsTableClient({ initialApplications }: ApplicationsTab
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
@@ -155,7 +155,7 @@ export function ApplicationsTableClient({ initialApplications }: ApplicationsTab
                     <span className="text-xs text-slate-500">ID: {app.id_number}</span>
                   </div>
                   <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
-                    <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                    <Building2 className="h-3.5 w-3.5 text-slate-500" />
                     <span className="font-semibold text-slate-700">{app.hostel_name}</span> •{' '}
                     <span>{app.campuses?.name || 'Campus'}</span>
                   </p>
@@ -167,7 +167,7 @@ export function ApplicationsTableClient({ initialApplications }: ApplicationsTab
                       app.status === 'pending'
                         ? 'bg-amber-50 text-amber-700 border border-amber-200'
                         : app.status === 'approved'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        ? 'bg-emerald-50 text-primary border border-emerald-200'
                         : 'bg-rose-50 text-rose-700 border border-rose-200'
                     }`}
                   >
@@ -191,7 +191,7 @@ export function ApplicationsTableClient({ initialApplications }: ApplicationsTab
                     <strong>Owner Phone:</strong> {app.owner_contact}
                   </p>
                 )}
-                <p className="text-slate-400">
+                <p className="text-slate-500">
                   Submitted {new Date(app.created_at).toLocaleDateString()}
                 </p>
               </div>
@@ -224,7 +224,7 @@ export function ApplicationsTableClient({ initialApplications }: ApplicationsTab
                       setErrorMsg(null);
                     }}
                     disabled={loadingId === app.id}
-                    className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-1.5 bg-primary hover:bg-primary/90 text-white font-semibold text-xs rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     {loadingId === app.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -291,7 +291,7 @@ export function ApplicationsTableClient({ initialApplications }: ApplicationsTab
                 disabled={loadingId === activeApp.id}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
                   actionType === 'approve'
-                    ? 'bg-emerald-600 hover:bg-emerald-500'
+                    ? 'bg-primary hover:bg-primary/90'
                     : 'bg-rose-600 hover:bg-rose-500'
                 }`}
               >

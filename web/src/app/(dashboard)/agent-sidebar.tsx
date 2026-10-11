@@ -65,7 +65,7 @@ function SidebarContent({
               className={[
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                 isActive
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  ? 'bg-primary text-white shadow-md shadow-emerald-600/20'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
               ].join(' ')}
             >
@@ -78,7 +78,7 @@ function SidebarContent({
         <Link
           href="/dashboard/new"
           onClick={onNavigate}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 mt-2"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-primary hover:bg-emerald-50 hover:text-primary mt-2"
         >
           <Plus className="h-4 w-4 shrink-0" />
           New Listing
@@ -92,7 +92,7 @@ function SidebarContent({
         <div className="mb-3">
           <p className="text-sm font-semibold text-gray-900 truncate">{agentName}</p>
           <p className="text-xs text-gray-400 truncate">{userEmail}</p>
-          <p className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase mt-0.5">
+          <p className="text-[10px] font-bold tracking-widest text-primary uppercase mt-0.5">
             {isAdmin ? 'Administrator' : 'Agent'}
           </p>
         </div>

@@ -11,7 +11,7 @@ export function NotificationSettings() {
     return (
       <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
         <Loader2 className="h-5 w-5 text-slate-300 animate-spin" />
-        <span className="text-sm text-slate-400">Loading...</span>
+        <span className="text-sm text-slate-500">Loading...</span>
       </div>
     );
   }
@@ -23,9 +23,9 @@ export function NotificationSettings() {
       <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
         <div className="shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
           {isSubscribed ? (
-            <Bell className="h-5 w-5 text-emerald-600" />
+            <Bell className="h-5 w-5 text-primary" />
           ) : (
-            <BellOff className="h-5 w-5 text-slate-400" />
+            <BellOff className="h-5 w-5 text-slate-500" />
           )}
         </div>
 
@@ -48,7 +48,7 @@ export function NotificationSettings() {
             className={`shrink-0 h-9 px-4 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               isSubscribed
                 ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                : "bg-emerald-600 text-white hover:bg-emerald-500"
+                : "bg-primary text-white hover:bg-primary/90"
             }`}
           >
             {isSubscribed ? "Disable" : "Enable"}
@@ -57,7 +57,7 @@ export function NotificationSettings() {
       </div>
 
       {blocked && (
-        <p className="text-xs text-amber-600 px-1">
+        <p className="text-xs text-amber-700 px-1">
           Notifications are blocked. Tap the lock icon in your browser&apos;s
           address bar to re-enable.
         </p>

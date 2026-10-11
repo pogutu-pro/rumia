@@ -26,7 +26,7 @@ export function InstallBanner() {
           <button
             onClick={handleDismiss}
             aria-label="Dismiss install prompt"
-            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="absolute top-3 right-3 p-1.5 rounded-full text-slate-600 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -34,9 +34,9 @@ export function InstallBanner() {
           <div className="flex items-start gap-3 pr-8">
             <div className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
               {isIOS ? (
-                <Share className="h-5 w-5 text-emerald-600" />
+                <Share className="h-5 w-5 text-primary" />
               ) : (
-                <Download className="h-5 w-5 text-emerald-600" />
+                <Download className="h-5 w-5 text-primary" />
               )}
             </div>
 
@@ -55,7 +55,7 @@ export function InstallBanner() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={handleInstall}
-              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-500 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+              className="flex-1 inline-flex items-center justify-center h-9 rounded-xl bg-primary text-xs font-bold text-white hover:bg-primary/90 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
             >
               {isIOS ? "Got it" : "Add Shortcut"}
             </button>

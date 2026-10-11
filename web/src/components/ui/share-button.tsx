@@ -129,7 +129,7 @@ export function ShareButton({
       name: 'WhatsApp',
       description: 'Send with the listing preview',
       icon: MessageCircle,
-      iconClassName: 'bg-emerald-50 text-emerald-600',
+      iconClassName: 'bg-emerald-50 text-primary',
       onSelect: () =>
         openShareWindow(`https://wa.me/?text=${encodedMessage}`),
     },

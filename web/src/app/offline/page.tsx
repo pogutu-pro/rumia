@@ -7,7 +7,7 @@ export default function OfflinePage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="max-w-sm w-full text-center space-y-6">
         <div className="mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
-          <WifiOff className="h-8 w-8 text-slate-400" />
+          <WifiOff className="h-8 w-8 text-slate-500" />
         </div>
         <div className="space-y-2">
           <h1 className="text-xl font-bold text-slate-900">
