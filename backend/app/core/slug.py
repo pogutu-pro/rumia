@@ -26,8 +26,14 @@ def url_segment(value: Optional[str]) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
 
 
-def listing_path(county: Optional[str], area: Optional[str], slug: str) -> str:
-    """Canonical public path of a property."""
+TYPE_SEGMENTS = {"hostel": "student-hostels", "apartment": "apartments", "short_stay": "short-stays"}
+
+
+def listing_path(county: Optional[str], area: Optional[str], slug: str, property_type: Optional[str] = None) -> str:
+    """Canonical public path of a property: /{market}/{type}/{place}/{name} (matches web/src/lib/utils/listing-path.ts)."""
     from app.core.config import settings
 
-    return f"/hostels/{url_segment(county) or settings.DEFAULT_COUNTY}/{url_segment(area) or settings.DEFAULT_CAMPUS_SLUG}/{slug}"
+    return (
+        f"/{url_segment(county) or settings.DEFAULT_COUNTY}/{TYPE_SEGMENTS.get(property_type or 'hostel', 'student-hostels')}"
+        f"/{url_segment(area) or settings.DEFAULT_CAMPUS_SLUG}/{slug}"
+    )

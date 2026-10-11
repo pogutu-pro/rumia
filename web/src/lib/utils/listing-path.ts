@@ -8,17 +8,34 @@ export function slugifySegment(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/** URL segment for each property type, as in /nyeri/apartments/kamakwa/oserian. */
+export const TYPE_SEGMENT: Record<string, string> = {
+  hostel: 'student-hostels',
+  apartment: 'apartments',
+  short_stay: 'short-stays',
+};
+
 export interface ListingPathInput {
   county?: string | null;
   area?: string | null;
   slug?: string | null;
+  /** hostel | apartment | short_stay. Missing means hostel; the page redirects to the right URL if that was a guess. */
+  property_type?: string | null;
 }
 
 /**
- * Canonical public path for a property. Lowercase and hyphenated so links survive
+ * Canonical public path of a property: /{market}/{type}/{place}/{name}. Lowercase and hyphenated so links survive
  * WhatsApp, copy/paste and search engines. The slug alone identifies the listing.
  */
 export function listingPath(listing: ListingPathInput): string {
+  const market = slugifySegment(listing.county || 'nyeri') || 'nyeri';
+  const type = TYPE_SEGMENT[listing.property_type || 'hostel'] ?? TYPE_SEGMENT.hostel;
+  const area = slugifySegment(listing.area || 'dekut') || 'dekut';
+  return `/${market}/${type}/${area}/${listing.slug ?? ''}`;
+}
+
+/** The pre-2026 URL shape. Only used to recognise old links and redirect them. */
+export function legacyListingPath(listing: ListingPathInput): string {
   const county = slugifySegment(listing.county || 'nyeri') || 'nyeri';
   const area = slugifySegment(listing.area || 'dekut') || 'dekut';
   return `/hostels/${county}/${area}/${listing.slug ?? ''}`;

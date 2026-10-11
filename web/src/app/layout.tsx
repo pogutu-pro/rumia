@@ -42,18 +42,18 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke'
   ),
   title: {
-    default: 'Find Student Hostels Near DeKUT Nyeri | Rumia',
+    default: 'Rumia: Short Stays, Hostels & Apartments in Nyeri',
     template: '%s | Rumia',
   },
   description:
-    'Discover verified student hostels near Dedan Kimathi University of Technology in Nyeri. Browse self-contained and shared rooms with direct agent contact. No fees.',
+    'Find short stays, student hostels and apartments to rent in Nyeri. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.',
   keywords: [
+    'short stays Nyeri',
+    'Airbnb Nyeri',
+    'apartments to rent in Nyeri',
+    'bedsitters in Nyeri',
     'student hostels near DeKUT',
-    'student accommodation Nyeri',
-    'DeKUT hostels',
-    'Dedan Kimathi University hostels',
-    'student housing Nyeri Kenya',
-    'verified hostels near DeKUT',
+    'houses to rent Nyeri Kenya',
   ],
   authors: [{ name: 'Rumia', url: 'https://rumia.co.ke' }],
   creator: 'Rumia',

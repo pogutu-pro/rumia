@@ -10,6 +10,5 @@ export default async function ShortPropertyLink({ params }: { params: Promise<{ 
   const { slug } = await params;
   const listing = await listingsApi.getByIdServer(slug).catch(() => null);
   if (!listing) notFound();
-  if (listing.property_type === 'short_stay') redirect(`/bnb/${listing.id}`);
   redirect(listingPath({ ...listing, slug: listing.slug || slug }));
 }

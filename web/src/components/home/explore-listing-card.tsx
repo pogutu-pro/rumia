@@ -55,11 +55,7 @@ function attributeChips(item: ExploreListing): string[] {
 export function ExploreListingCard({ item }: { item: ExploreListing }) {
   const type = (item.property_type ?? 'hostel') as PropertyType;
   const href =
-    type === 'short_stay'
-      ? `/bnb/${item.id}`
-      : item.slug
-        ? `${listingPath(item)}`
-        : `/listing/${item.id}`;
+    item.slug ? `${listingPath(item)}` : type === 'short_stay' ? `/bnb/${item.id}` : `/listing/${item.id}`;
   const distance = item.distance_category
     ? getDistanceBadgeText(item.distance_category)
     : null;

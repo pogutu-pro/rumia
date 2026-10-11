@@ -101,7 +101,7 @@ class PublicService:
     @staticmethod
     async def sitemap(db: AsyncSession) -> SitemapResponse:
         listings = await db.execute(
-            select(Listing.slug, Listing.county, Listing.area, Listing.updated_at)
+            select(Listing.slug, Listing.county, Listing.area, Listing.property_type, Listing.updated_at)
             .where(Listing.is_active.is_(True), Listing.slug.is_not(None))
         )
         agents = await db.execute(
@@ -109,6 +109,6 @@ class PublicService:
             .where(AgentProfile.status == "active", AgentProfile.slug.is_not(None))
         )
         return SitemapResponse(
-            listings=[SitemapListing(slug=r.slug, county=r.county, area=r.area, updated_at=r.updated_at) for r in listings.all()],
+            listings=[SitemapListing(slug=r.slug, county=r.county, area=r.area, property_type=r.property_type, updated_at=r.updated_at) for r in listings.all()],
             agents=[SitemapAgent(slug=r.slug, updated_at=r.updated_at) for r in agents.all()],
         )

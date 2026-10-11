@@ -7,7 +7,7 @@ const base = { id: 'abc', title: 'T', description: '', price: 1, location: 'Nyer
 describe('video listing helpers', () => {
   it('links short stays to /bnb and slugged listings to their canonical path', () => {
     expect(listingHref({ ...base, property_type: 'short_stay' })).toBe('/bnb/abc');
-    expect(listingHref({ ...base, slug: 'sunrise', area: 'Near Gate A', county: 'Nyeri' })).toBe('/hostels/nyeri/near-gate-a/sunrise');
+    expect(listingHref({ ...base, slug: 'sunrise', area: 'Near Gate A', county: 'Nyeri' })).toBe('/nyeri/student-hostels/near-gate-a/sunrise');
     expect(listingHref(base)).toBe('/listing/abc');
   });
 

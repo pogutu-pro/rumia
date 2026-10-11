@@ -35,7 +35,7 @@ async function areaEntries(): Promise<MetadataRoute.Sitemap> {
       for (const p of places.data ?? []) {
         const [total, ...perKind] = await Promise.all([count(m.slug, p.slug), ...KIND_PAGES.map((k) => count(m.slug, p.slug, k))]);
         if (total >= MIN_INDEXABLE) add(`/${m.slug}/${p.slug}`, 0.8);
-        KIND_PAGES.forEach((k, i) => { if (perKind[i] >= MIN_INDEXABLE) add(`/${m.slug}/${p.slug}/${k.slug}`, 0.7); });
+        KIND_PAGES.forEach((k, i) => { if (perKind[i] >= MIN_INDEXABLE) add(`/${m.slug}/${k.slug}/${p.slug}`, 0.7); });
       }
       for (const l of landmarks.data ?? []) add(`/near/${m.slug}/${l.slug}`, 0.7);
     }

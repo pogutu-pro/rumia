@@ -15,11 +15,12 @@ import { AlertsList } from '../alerts-list';
 beforeEach(() => jest.clearAllMocks());
 
 describe('cardHref', () => {
-  it('sends hostels and apartments to the listing page by slug', () => {
-    expect(cardHref({ kind: 'hostel', slug: 'green-view', listing_id: 'l1' })).toBe('/hostels/nyeri/dekut/green-view');
+  it('puts the type, place and name in the URL', () => {
+    expect(cardHref({ kind: 'hostel', slug: 'green-view', place_name: 'Near Gate A' })).toBe('/nyeri/student-hostels/near-gate-a/green-view');
+    expect(cardHref({ kind: 'apartment', slug: 'oserian-1', place_name: 'Kamakwa' })).toBe('/nyeri/apartments/kamakwa/oserian-1');
   });
-  it('sends short stays to the BnB page by listing id', () => {
-    expect(cardHref({ kind: 'house', slug: 'cosy-house', listing_id: 'l9' })).toBe('/bnb/l9');
+  it('sends short stays to the short-stays path', () => {
+    expect(cardHref({ kind: 'house', slug: 'cosy-house', place_name: 'Kamakwa' })).toBe('/nyeri/short-stays/kamakwa/cosy-house');
   });
 });
 

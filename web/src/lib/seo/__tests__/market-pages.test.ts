@@ -11,7 +11,7 @@ describe('market page SEO', () => {
   it('builds clean paths', () => {
     expect(pathFor(base(0))).toBe('/nyeri');
     expect(pathFor(base(0, { kind: KIND_BY_SLUG['apartments'] }))).toBe('/nyeri/apartments');
-    expect(pathFor(base(0, { place: { slug: 'boma', name: 'Boma' }, kind: KIND_BY_SLUG['bedsitters'] }))).toBe('/nyeri/boma/bedsitters');
+    expect(pathFor(base(0, { place: { slug: 'boma', name: 'Boma' }, kind: KIND_BY_SLUG['bedsitters'] }))).toBe('/nyeri/bedsitters/boma');
   });
 
   it('indexes pages with enough places and noindexes thin ones', () => {

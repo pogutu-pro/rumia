@@ -20,5 +20,7 @@ def test_walk_minutes_has_a_floor_and_grows_with_distance():
 def test_listing_path_matches_the_web_helper():
     assert url_segment("Near Gate A") == "near-gate-a"
     assert url_segment("King'ong'o") == "king-ong-o"
-    assert listing_path("nyeri", "Near Gate A", "baraka-1a2b") == "/hostels/nyeri/near-gate-a/baraka-1a2b"
-    assert listing_path(None, None, "x") == "/hostels/nyeri/dekut/x"
+    assert listing_path("nyeri", "Near Gate A", "baraka-1a2b") == "/nyeri/student-hostels/near-gate-a/baraka-1a2b"
+    assert listing_path("nyeri", "Kamakwa", "oserian-1", "apartment") == "/nyeri/apartments/kamakwa/oserian-1"
+    assert listing_path("nyeri", "Kamakwa", "oserian-villa-1", "short_stay") == "/nyeri/short-stays/kamakwa/oserian-villa-1"
+    assert listing_path(None, None, "x") == "/nyeri/student-hostels/dekut/x"

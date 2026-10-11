@@ -34,7 +34,7 @@ def _listening_url(listing: dict) -> str:
         return f"{settings.PUBLIC_BASE_URL}/hostels"
     from app.core.slug import listing_path
 
-    return f"{settings.PUBLIC_BASE_URL}{listing_path(listing.get('county'), listing.get('area'), slug)}"
+    return f"{settings.PUBLIC_BASE_URL}{listing_path(listing.get('county'), listing.get('area'), slug, listing.get('property_type'))}"
 
 
 def _render_for_type(notification_type: str, user: dict, listing: dict, event_data: dict):
@@ -228,7 +228,7 @@ def select_listing(listing_id: str):
 
     return sa_text(
         """
-        SELECT id, title, slug, price, county, area, location
+        SELECT id, title, slug, price, county, area, property_type, location
         FROM listings
         WHERE id = CAST(:listing_id AS uuid)
         """

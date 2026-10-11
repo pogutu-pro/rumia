@@ -59,6 +59,7 @@ class SitemapListing(BaseModel):
     slug: str
     county: Optional[str] = None
     area: Optional[str] = None
+    property_type: Optional[str] = None
     updated_at: Optional[datetime] = None
 
 

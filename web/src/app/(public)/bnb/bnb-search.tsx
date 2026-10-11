@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { CategoryTabs } from '@/components/discovery/category-tabs';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
@@ -497,7 +498,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                 return (
                   <Link
                     key={item.id}
-                    href={`/bnb/${item.id}`}
+                    href={item.slug ? listingPath({ ...item, property_type: 'short_stay' }) : `/bnb/${item.id}`}
                     className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 md:hover:shadow-lg md:transition-shadow md:duration-200 h-full cursor-pointer"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">

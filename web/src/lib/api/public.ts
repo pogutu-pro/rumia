@@ -44,7 +44,7 @@ export interface VerifyCandidate {
 }
 
 export interface SitemapData {
-  listings: { slug: string; county?: string | null; area?: string | null; updated_at?: string | null }[];
+  listings: { slug: string; county?: string | null; area?: string | null; property_type?: string | null; updated_at?: string | null }[];
   agents: { slug: string; updated_at?: string | null }[];
 }
 

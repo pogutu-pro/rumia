@@ -28,31 +28,17 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
 const FEED_LIMIT = 12;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const campus = await getCampusBySlug('dekut');
-
+  // The tab title no longer comes from the campus row: the home page is for every kind of place, not only student housing.
+  const title = 'Rumia: Short Stays, Hostels & Apartments in Nyeri';
   const description =
-    campus.og_description ??
-    'Explore verified hostels, apartments and short stays in Nyeri. Browse by category, save favourites and contact agents directly on WhatsApp.';
+    'Find short stays, student hostels and apartments to rent in Nyeri. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.';
 
   return {
-    title:
-      campus.seo_title ??
-      'Rumia — Explore Hostels, Apartments & Short Stays in Kenya',
+    title: { absolute: title },
     description,
     alternates: { canonical: baseUrl },
-    openGraph: {
-      title: campus.og_title ?? `${campus.seo_title} | Rumia`,
-      description,
-      url: baseUrl,
-      siteName: 'Rumia',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: campus.og_title ?? `Find places to stay near your campus | Rumia`,
-      description:
-        'Explore verified hostels, apartments and short stays in Nyeri. Contact agents directly on WhatsApp.',
-    },
+    openGraph: { title, description, url: baseUrl, siteName: 'Rumia', type: 'website' },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 

@@ -57,7 +57,8 @@ export const MOBILE_NAV: NavItem[] = [
  * and sign-in / offline screens.
  */
 export function isBottomNavHidden(pathname: string): boolean {
-  if (/^\/hostels\/[^/]+\/[^/]+\/[^/]+\/?$/.test(pathname)) return true; // /hostels/[county]/[area]/[slug]
+  if (/^\/hostels\/[^/]+\/[^/]+\/[^/]+\/?$/.test(pathname)) return true; // old /hostels/[county]/[area]/[slug]
+  if (/^\/[^/]+\/(student-hostels|apartments|short-stays)\/[^/]+\/[^/]+\/?$/.test(pathname)) return true; // /[market]/[type]/[place]/[name]
   if (/^\/(bnb|listing|p)\/[^/]+\/?$/.test(pathname)) return true;
   return /^\/(auth|offline)(\/|$)/.test(pathname);
 }

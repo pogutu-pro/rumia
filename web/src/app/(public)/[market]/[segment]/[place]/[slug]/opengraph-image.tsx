@@ -7,7 +7,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 interface Props {
-  params: Promise<{ county: string; area: string; slug: string }>;
+  params: Promise<{ market: string; segment: string; place: string; slug: string }>;
 }
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {

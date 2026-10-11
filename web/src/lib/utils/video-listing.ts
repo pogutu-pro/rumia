@@ -4,8 +4,8 @@ import type { Listing } from '@/types';
 
 /** Canonical page for a listing (same rule the home cards use). */
 export function listingHref(listing: Listing): string {
-  if (listing.property_type === 'short_stay') return `/bnb/${listing.id}`;
   if (listing.slug) return listingPath(listing);
+  if (listing.property_type === 'short_stay') return `/bnb/${listing.id}`;
   return `/listing/${listing.id}`;
 }
 

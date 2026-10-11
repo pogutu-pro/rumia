@@ -51,7 +51,7 @@ export async function loadPage(marketSlug: string, placeSlug?: string, kindSlug?
 }
 
 export function pathFor(d: Pick<PageData, 'market' | 'place' | 'kind'>): string {
-  return ['', d.market.slug, d.place?.slug, d.kind?.slug].filter((s) => s !== undefined && s !== null).join('/') || '/';
+  return ['', d.market.slug, d.kind?.slug, d.place?.slug].filter((s) => s !== undefined && s !== null).join('/') || '/';
 }
 
 function priceRange(cards: SearchCard[]): { min: number; max: number; period: string } | null {
@@ -127,18 +127,17 @@ export function MarketPage({ d }: { d: PageData }) {
   const crumbs = [
     { name: 'Rumia', url: BASE },
     { name: d.market.name, url: `${BASE}/${d.market.slug}` },
-    ...(d.place ? [{ name: d.place.name, url: `${BASE}/${d.market.slug}/${d.place.slug}` }] : []),
-    ...(d.kind ? [{ name: d.kind.label, url: `${BASE}${path}` }] : []),
+    ...(d.kind ? [{ name: d.kind.label, url: `${BASE}/${d.market.slug}/${d.kind.slug}` }] : []),
+    ...(d.place ? [{ name: d.place.name, url: `${BASE}${path}` }] : []),
   ];
   const questions = faq(d);
   const m = d.market.slug;
-  const kindBase = d.place ? `/${m}/${d.place.slug}` : `/${m}`;
-
+  
   const related = [
-    ...KIND_PAGES.filter((k) => k.slug !== d.kind?.slug).map((k) => ({ href: `${kindBase}/${k.slug}`, label: k.label })),
+    ...KIND_PAGES.filter((k) => k.slug !== d.kind?.slug).map((k) => ({ href: d.place ? `/${m}/${k.slug}/${d.place.slug}` : `/${m}/${k.slug}`, label: k.label })),
     ...(d.place || d.kind
       ? d.places.filter((p) => p.slug !== d.place?.slug && (p.listing_count ?? 0) > 0).slice(0, 8).map((p) => ({
-          href: d.kind ? `/${m}/${p.slug}/${d.kind.slug}` : `/${m}/${p.slug}`,
+          href: d.kind ? `/${m}/${d.kind.slug}/${p.slug}` : `/${m}/${p.slug}`,
           label: p.name,
         }))
       : d.places.filter((p) => (p.listing_count ?? 0) > 0).slice(0, 12).map((p) => ({ href: `/${m}/${p.slug}`, label: p.name }))),
