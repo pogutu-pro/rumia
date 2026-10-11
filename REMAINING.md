@@ -12,10 +12,12 @@ Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
    enquiries, "Still available"). Also `/admin/operations` and `/manager/operations`.
 2. **Watch the first few days.** Check Sentry and `docker logs rumia_backend` / `rumia_worker` on the server. The photo
    fingerprint backfill (`hash_legacy_media`) runs on the worker's 6-hourly freshness sweep.
-3. **Delete the old Supabase backups on the server.** `~/rumia/backend/.env.pre-cutover.bak` and `.env.pre-swap.bak` still hold
-   the old Supabase connection details. Supabase is decommissioned, so remove them or rotate those credentials.
-4. **Sitemap.** Fixed by the PR that adds this file (revalidates hourly). After it deploys, confirm
-   `https://rumia.co.ke/sitemap.xml` lists `/areas/…` and `/near/…` entries.
+3. **Supabase leftovers on the server.** Done 2026-10-11: `backend/.env.pre-cutover.bak` and `.env.pre-swap.bak` (old Supabase
+   database credentials) were shredded. Still to decide: `backend/.env` has `SUPABASE_URL` and `web/.env.production` has
+   `NEXT_PUBLIC_SUPABASE_URL` (the project URL only, not a secret). They were left because the backend still has a code path
+   that reads `SUPABASE_URL`; remove them together with that code. Also tighten permissions: both files are `664`
+   (group/other readable); `chmod 600` them (the deploy runs as the file owner).
+4. **Sitemap.** Done: it revalidates hourly and now lists the area and landmark pages.
 
 ## Parked, with a known fix
 
@@ -23,8 +25,7 @@ Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
    `.gitignore` while still tracked. To bring it back: `cd nginx/mobile && pnpm run generate:api`, commit
    `lib/api/types.ts`, remove `if: false` and re-add `test-mobile` to the `needs` of `docker-build-test`. Decide whether to untrack it.
 6. **WhatsApp alerts** are accepted but not sent until a messaging provider is connected. Email alerts work.
-7. **Cosmetic log line.** The backend logs one `Control server error: Permission denied: '/nonexistent'` at startup (gunicorn's
-   control socket). The backend is healthy; silence it later.
+7. **Cosmetic log line.** Done: gunicorn now starts with `--no-control-socket`.
 8. **Photo upload.** The browser still uses the original uploader. `/media/uploads` is built and tested but unused, and it
    needs an organisation, which a first-time agent does not have yet. Switch only when the listing form is redesigned.
 
@@ -39,8 +40,10 @@ Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
    4. Review the commission, consultation-fee and agent-contact rules for non-student rentals (a product decision).
    Also still DeKUT-specific in the backend: `DEFAULT_CAMPUS_SLUG` / `DEFAULT_COUNTY`, the "verified DeKUT students" review
    rule, the official-records table behind the verify checker, and managers mapped to the `nyeri` market.
-10. **Drift monitoring.** `scripts/check-projection-drift.sql` lists any listing that disagrees with its copy in the property
-    model. It is clean today but nothing runs it on a schedule. Run it after deploys, or add a daily job that alerts on any row.
+10. **Drift monitoring.** Done: the worker runs the check five minutes after each start and then daily
+    (`check_projection_drift` in `backend/app/core/tasks/cron.py`) and logs an ERROR, which Sentry turns into an event, when any
+    listing disagrees with its property copy. The query lives in `backend/app/features/catalog/drift_check.sql`;
+    `scripts/check-projection-drift.sql` is a symlink to it, so there is one definition. Make sure Sentry alerts on that message.
 11. **The redesigned frontend** still lives on the branch `restructure/m1-live-fixes` (not merged). Keep it as a future option
     or delete it. `docs/restructure/` describes it.
 
