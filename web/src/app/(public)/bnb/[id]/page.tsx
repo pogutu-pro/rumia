@@ -547,8 +547,9 @@ export default async function BnbDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Mobile sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 py-3.5 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
+      {/* Mobile sticky footer: the only fixed bar on this page (the bottom navigation steps aside). The spacer keeps the last section clear of it. */}
+      <div aria-hidden className="h-[calc(5.5rem+env(safe-area-inset-bottom))] lg:hidden" />
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 px-4 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-lg font-black text-slate-900 tracking-tight">
