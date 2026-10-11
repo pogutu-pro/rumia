@@ -49,7 +49,7 @@ export function EarlyAccessBanner({ hostelCount }: EarlyAccessBannerProps) {
   if (checking || !visible) return null;
 
   return (
-    <div className="bg-gradient-to-r from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4">
+    <div className="bg-gradient-to-r from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-2xl p-4 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
           <Lightbulb className="h-4 w-4 text-primary" />
@@ -65,7 +65,7 @@ export function EarlyAccessBanner({ hostelCount }: EarlyAccessBannerProps) {
       </div>
       <Link
         href={href}
-        className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm whitespace-nowrap"
+        className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm whitespace-nowrap"
       >
         Give Feedback
         <ArrowRight className="h-3.5 w-3.5" />
