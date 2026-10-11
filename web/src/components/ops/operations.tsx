@@ -150,7 +150,7 @@ export function OverviewPanel({ goTo }: { goTo: (tab: 'review' | 'reports') => v
             <p className="text-xs text-slate-500">{hint}</p>
             {item.oldest_hours != null && item.count > 0 && <p className="mt-1 text-xs text-slate-500">Oldest {hoursText(item.oldest_hours)}</p>}
             {go && item.count > 0 && (
-              <button type="button" onClick={go} className="mt-2 text-xs font-semibold text-emerald-700 underline underline-offset-2">
+              <button type="button" onClick={go} className="mt-2 text-xs font-semibold text-primary underline underline-offset-2">
                 Open
               </button>
             )}

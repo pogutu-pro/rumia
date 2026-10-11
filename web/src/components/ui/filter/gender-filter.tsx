@@ -39,7 +39,7 @@ export function GenderFilter({ selected, onChange }: GenderFilterProps) {
               className={cn(
                 'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 cursor-pointer',
                 isActive
-                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                  ? 'bg-emerald-50 text-primary ring-1 ring-emerald-200'
                   : 'bg-white text-slate-600 hover:bg-slate-50 ring-1 ring-slate-200',
               )}
             >

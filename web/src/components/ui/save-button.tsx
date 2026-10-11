@@ -80,7 +80,7 @@ export function SaveButton({
         aria-busy={isLoading}
       >
         {isLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+          <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
         ) : (
           <Heart
             className={`h-5 w-5 transition-colors ${isSaved ? 'fill-current' : ''}`}

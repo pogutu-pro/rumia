@@ -78,7 +78,7 @@ export function WishlistNotificationPreferences({
     return (
       <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
         <Loader2 className="h-5 w-5 text-slate-300 animate-spin" />
-        <span className="text-sm text-slate-400">Loading wishlist alerts...</span>
+        <span className="text-sm text-slate-500">Loading wishlist alerts...</span>
       </div>
     );
   }
@@ -92,9 +92,9 @@ export function WishlistNotificationPreferences({
       <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
         <div className="shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
           {emailEnabled ? (
-            <Mail className="h-5 w-5 text-emerald-600" />
+            <Mail className="h-5 w-5 text-primary" />
           ) : (
-            <MailX className="h-5 w-5 text-slate-400" />
+            <MailX className="h-5 w-5 text-slate-500" />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -113,7 +113,7 @@ export function WishlistNotificationPreferences({
           className={`shrink-0 h-9 px-4 rounded-xl text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-60 ${
             emailEnabled
               ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              : 'bg-emerald-600 text-white hover:bg-emerald-500'
+              : 'bg-primary text-white hover:bg-primary/90'
           }`}
         >
           {saving === 'email' ? (
@@ -130,9 +130,9 @@ export function WishlistNotificationPreferences({
       <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
         <div className="shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
           {pushEnabled ? (
-            <BellRing className="h-5 w-5 text-emerald-600" />
+            <BellRing className="h-5 w-5 text-primary" />
           ) : (
-            <BellOff className="h-5 w-5 text-slate-400" />
+            <BellOff className="h-5 w-5 text-slate-500" />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -149,7 +149,7 @@ export function WishlistNotificationPreferences({
           className={`shrink-0 h-9 px-4 rounded-xl text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-60 ${
             pushEnabled
               ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              : 'bg-emerald-600 text-white hover:bg-emerald-500'
+              : 'bg-primary text-white hover:bg-primary/90'
           }`}
         >
           {saving === 'push' ? (

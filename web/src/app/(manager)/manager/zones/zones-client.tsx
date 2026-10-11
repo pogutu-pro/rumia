@@ -113,7 +113,7 @@ export function ZonesClient({ campuses, isSuperAdmin, allZones }: ZonesClientPro
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-emerald-600" />
+              <MapPin className="w-5 h-5 text-primary" />
               Configured Zones ({campusZones.length})
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -145,7 +145,7 @@ export function ZonesClient({ campuses, isSuperAdmin, allZones }: ZonesClientPro
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-900 text-sm">{zone.name}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-primary border border-emerald-100">
                       Active
                     </span>
                   </div>

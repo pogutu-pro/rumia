@@ -22,6 +22,7 @@ import { QuickFacts } from '@/app/(public)/listing/[id]/quick-facts';
 import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
 import { LocationSection } from '@/app/(public)/listing/[id]/location-section';
 import { RoomTypes } from '@/app/(public)/listing/[id]/room-types';
+import { ContextBackLink } from '@/components/shell/nav-history';
 import { SaveButton } from '@/components/ui/save-button';
 import { ShareListingButton } from '@/components/ui/share-listing-button';
 import { LazyYouTube } from '@/components/seo/lazy-youtube';
@@ -265,13 +266,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
       />
 
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 pt-4 md:hidden">
-        <Link
-          href="/hostels"
+        <ContextBackLink fallbackHref="/hostels"
           className="pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-slate-950"
           aria-label="Back to hostels"
         >
           <ArrowLeft className="h-5 w-5" />
-        </Link>
+        </ContextBackLink>
           <div className="pointer-events-auto flex items-center gap-2">
             <SaveButton listingId={listing.id} variant="icon" />
           <ShareListingButton
@@ -288,15 +288,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
       </div>
 
       {/* Top Bar */}
-      <div className="border-b border-slate-100 bg-white sticky top-0 z-30 hidden md:block">
+      <div className="border-b border-slate-100 bg-white sticky top-[var(--shell-header-h)] z-30 hidden md:block">
         <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
-          <Link
-            href="/hostels"
+          <ContextBackLink fallbackHref="/hostels"
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to hostels
-          </Link>
+          </ContextBackLink>
           <div className="flex items-center gap-4">
             <ShareListingButton
               listing={{
@@ -359,7 +358,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
               )}
 
               <h2 className="flex items-center gap-1.5 text-slate-500 font-semibold text-sm">
-                <MapPin className="h-4 w-4 text-slate-400" />
+                <MapPin className="h-4 w-4 text-slate-500" />
                 {listing.location}
               </h2>
 
@@ -498,7 +497,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
           <aside className="hidden lg:block">
             <div className="sticky top-28 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
                   Starting from
                 </span>
                 <div className="mt-3">
@@ -509,7 +508,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     <span className="text-sm font-semibold text-slate-500">/mo</span>
                   </div>
                   {bestVariant && (
-                    <p className="text-xs font-semibold text-slate-400 mt-1">
+                    <p className="text-xs font-semibold text-slate-500 mt-1">
                       {bestVariant.room_type}
                     </p>
                   )}
@@ -517,12 +516,12 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 {moveInFrom != null && (
                   <div className="mt-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 rounded-xl px-4 py-3 border border-emerald-200/60">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Move in from</span>
+                      <span className="text-xs font-bold text-primary uppercase tracking-wider">Move in from</span>
                       <span className="text-lg font-black text-emerald-900 tabular-nums">
                         KES {moveInFrom.toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">
+                    <p className="text-[10px] font-semibold text-primary mt-0.5">
                       KES {startingPrice.toLocaleString()} rent + KES {startingDeposit!.toLocaleString()} deposit
                     </p>
                   </div>
@@ -532,19 +531,19 @@ export default async function ListingSlugPage({ params }: PageProps) {
               <div className="space-y-3.5">
                 {listing.water_included && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <span>Water Included</span>
                   </div>
                 )}
                 {listing.security_type && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <span>Security {listing.security_type}</span>
                   </div>
                 )}
                 {listing.wifi_included && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <span>WiFi Included</span>
                   </div>
                 )}
@@ -576,14 +575,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
               {listing.agents && (
                 <div className="pt-4 border-t border-slate-100 space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm uppercase border border-emerald-100 shrink-0">
+                    <div className="w-11 h-11 rounded-full bg-emerald-50 text-primary flex items-center justify-center font-bold text-sm uppercase border border-emerald-100 shrink-0">
                       {listing.agents.name.substring(0, 2)}
                     </div>
                     <div className="min-w-0">
                       {agentSlug ? (
                         <Link
                           href={`/agents/${agentSlug}`}
-                          className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block truncate"
+                          className="font-bold text-sm text-slate-900 hover:text-primary leading-tight block truncate"
                         >
                           {listing.agents.name}
                         </Link>
@@ -592,7 +591,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                           {listing.agents.name}
                         </p>
                       )}
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary uppercase tracking-wider">
                         <ShieldCheck className="h-3 w-3" />
                         Verified Agent
                       </span>
@@ -601,7 +600,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                   {agentSlug && (
                     <Link
                       href={`/agents/${agentSlug}`}
-                      className="block w-full text-center h-11 rounded-xl border-2 border-slate-200 hover:border-emerald-200 text-slate-700 hover:text-emerald-700 text-sm font-bold transition-colors leading-[44px]"
+                      className="block w-full text-center h-11 rounded-xl border-2 border-slate-200 hover:border-emerald-200 text-slate-700 hover:text-primary text-sm font-bold transition-colors leading-[44px]"
                     >
                       View Profile
                     </Link>
@@ -617,18 +616,18 @@ export default async function ListingSlugPage({ params }: PageProps) {
       {listing.agents && (
         <div className="container mx-auto px-4 lg:px-8 pb-10 lg:hidden">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
               Your Agent
             </p>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-base uppercase border border-emerald-100 shrink-0">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 text-primary flex items-center justify-center font-bold text-base uppercase border border-emerald-100 shrink-0">
                 {listing.agents.name.substring(0, 2)}
               </div>
               <div className="min-w-0">
                 {agentSlug ? (
                   <Link
                     href={`/agents/${agentSlug}`}
-                    className="font-bold text-sm text-slate-900 hover:text-emerald-600 leading-tight block truncate"
+                    className="font-bold text-sm text-slate-900 hover:text-primary leading-tight block truncate"
                   >
                     {listing.agents.name}
                   </Link>
@@ -637,7 +636,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     {listing.agents.name}
                   </p>
                 )}
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary uppercase tracking-wider">
                   <ShieldCheck className="h-3 w-3" />
                   Verified Agent
                 </span>
@@ -661,7 +660,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
               </div>
               <Link
                 href={`/hostels/${county}/${area}`}
-                className="hidden sm:inline-flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700"
+                className="hidden sm:inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary"
               >
                 View all
                 <ArrowRight className="h-4 w-4" />
@@ -697,7 +696,7 @@ export default async function ListingSlugPage({ params }: PageProps) {
                           blurDataURL={blurDataUrl || undefined}
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-bold uppercase tracking-wider text-slate-600">
                           No image
                         </div>
                       )}
@@ -707,11 +706,11 @@ export default async function ListingSlugPage({ params }: PageProps) {
                     </div>
 
                     <div className="flex flex-1 flex-col p-4">
-                      <div className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      <div className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         <MapPin className="h-3 w-3 shrink-0" />
                         <span className="truncate">{item.location}</span>
                       </div>
-                      <h3 className="line-clamp-1 font-bold text-slate-900 transition-colors group-hover:text-emerald-600">
+                      <h3 className="line-clamp-1 font-bold text-slate-900 transition-colors group-hover:text-primary">
                         {item.title}
                       </h3>
                       <p className="mt-1 line-clamp-2 flex-1 text-sm text-slate-500">
@@ -720,10 +719,10 @@ export default async function ListingSlugPage({ params }: PageProps) {
                           item.description}
                       </p>
                       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-                        <span className="truncate font-semibold text-slate-400">
+                        <span className="truncate font-semibold text-slate-500">
                           {item.agents?.name || 'Verified agent'}
                         </span>
-                        <span className="inline-flex items-center gap-0.5 font-bold text-emerald-600">
+                        <span className="inline-flex items-center gap-0.5 font-bold text-primary">
                           View
                           <ArrowRight className="h-3 w-3" />
                         </span>

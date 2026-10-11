@@ -332,7 +332,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                 <SheetTrigger asChild>
                   <button
                     type="button"
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-primary"
                   >
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Filters
@@ -374,7 +374,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                 trigger={
                   <button
                     type="button"
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-primary"
                   >
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Filters
@@ -419,13 +419,13 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
             {amenities.map((a) => (
               <span
                 key={a}
-                className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-emerald-700"
+                className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/70 pl-3 pr-1.5 py-1 text-xs font-bold text-primary"
               >
                 {a}
                 <button
                   type="button"
                   onClick={() => setAmenities(amenities.filter((x) => x !== a))}
-                  className="text-emerald-600 hover:text-emerald-800 rounded-full p-0.5 hover:bg-emerald-100 cursor-pointer"
+                  className="text-primary hover:text-emerald-800 rounded-full p-0.5 hover:bg-emerald-100 cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -449,7 +449,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
 
         {/* Results count */}
         <div className="mb-5 mt-1 px-1">
-          <p className="text-sm text-slate-400 font-semibold">
+          <p className="text-sm text-slate-500 font-semibold">
             {filtered.length} {filtered.length === 1 ? 'stay' : 'stays'} found
             {hasAnyFilters && (
               <span className="text-slate-300">
@@ -505,7 +505,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                         {listingType}
                       </div>
                       {item.verified && (
-                        <div className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                        <div className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-white shadow-sm">
                           <BadgeCheck className="h-3 w-3" /> Verified
                         </div>
                       )}
@@ -525,7 +525,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
                     </div>
 
                     <div className="p-4 flex-1 flex flex-col">
-                      <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors text-[14px]">
+                      <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors text-[14px]">
                         {item.title}
                       </h3>
 
@@ -601,7 +601,7 @@ export default function BnbSearch({ allListings }: BnbSearchProps) {
           </>
         ) : (
           <div className="border border-slate-100 bg-white px-6 py-20 text-center sm:px-12">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-primary">
               <MapPin className="h-6 w-6" />
             </div>
             <h2 className="mt-5 text-xl font-bold tracking-tight text-slate-950">

@@ -116,7 +116,7 @@ export function ActiveFilterChips({
           key={chip.key}
           type="button"
           onClick={chip.onRemove}
-          className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 transition-all hover:bg-emerald-100 cursor-pointer"
+          className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-emerald-200 transition-all hover:bg-emerald-100 cursor-pointer"
         >
           {chip.label}
           <X className="h-3 w-3" />

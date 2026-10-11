@@ -157,7 +157,7 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
         {onBackToOverview ? (
           <button
             onClick={onBackToOverview}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Overview
@@ -165,7 +165,7 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
         ) : (
           <Link
             href="/account?tab=overview"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Overview
@@ -174,7 +174,7 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
 
         <Link
           href="/account/book-tour"
-          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-sm shrink-0"
+          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors shadow-sm shrink-0"
         >
           <CalendarPlus className="h-3.5 w-3.5" />
           Book Another Tour
@@ -182,15 +182,15 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
       </div>
 
       {/* Banner */}
-      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:px-6">
-        <h2 className="text-base font-bold text-slate-900">Your Tour Bookings</h2>
-        <p className="text-xs text-slate-500">
+      <div className="bg-subtle border border-line rounded-2xl p-4 sm:px-6">
+        <h2 className="text-base font-bold text-ink">Your Tour Bookings</h2>
+        <p className="text-xs text-ink-muted">
           {upcomingCount} upcoming · {completedCount} completed · {cancelledCount} cancelled
         </p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 pb-2">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-line pb-2">
         {(
           [
             { id: 'all', label: 'All Tours', count: bookings.length },
@@ -204,13 +204,13 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
             onClick={() => setActiveFilter(filter.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap ${
               activeFilter === filter.id
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-ink text-white'
+                : 'text-ink-muted hover:bg-slate-100'
             }`}
           >
             <span>{filter.label}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-              activeFilter === filter.id ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-600'
+              activeFilter === filter.id ? 'bg-slate-800 text-white' : 'bg-slate-200 text-ink-muted'
             }`}>
               {filter.count}
             </span>
@@ -220,28 +220,28 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
 
       {/* Bookings List or Empty State */}
       {bookings.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-slate-200/80 rounded-2xl p-6">
-          <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mx-auto mb-3">
+        <div className="text-center py-16 bg-raised border border-line rounded-2xl p-6">
+          <div className="w-12 h-12 rounded-full bg-slate-100 text-ink-muted flex items-center justify-center mx-auto mb-3">
             <CalendarCheck className="h-6 w-6" />
           </div>
-          <h3 className="text-base font-bold text-slate-900 mb-1">
+          <h3 className="text-base font-bold text-ink mb-1">
             No tours booked yet
           </h3>
-          <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
+          <p className="text-sm text-ink-muted mb-6 max-w-sm mx-auto">
             Book a guided tour to visit student hostels near DeKUT with a verified agent.
           </p>
 
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/account/book-tour"
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors shadow-sm"
             >
               <CalendarPlus className="h-4 w-4" />
               Book a Tour
             </Link>
             <Link
               href="/hostels"
-              className="inline-flex items-center gap-1 h-10 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-1 h-10 px-4 rounded-xl border border-line hover:bg-subtle text-slate-700 text-xs font-semibold transition-colors"
             >
               Browse hostels
               <ArrowRight className="h-3.5 w-3.5" />
@@ -249,7 +249,7 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
           </div>
         </div>
       ) : filteredBookings.length > 0 ? (
-        <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden divide-y divide-slate-100">
+        <div className="rounded-2xl border border-line bg-white overflow-hidden divide-y divide-slate-100">
           {filteredBookings.map((booking) => (
             <TourRow
               key={booking.id}
@@ -261,7 +261,7 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
           ))}
         </div>
       ) : (
-        <div className="py-12 text-center text-xs text-slate-500 bg-white border border-slate-200/80 rounded-2xl">
+        <div className="py-12 text-center text-xs text-ink-muted bg-raised border border-line rounded-2xl">
           No {activeFilter} tours found.
         </div>
       )}
@@ -314,13 +314,13 @@ function TourRow({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 transition-colors hover:bg-slate-50/80 ${
+      className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 transition-colors hover:bg-subtle ${
         isPast ? 'opacity-70' : ''
       }`}
     >
       {/* Thumbnail */}
       {image ? (
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/60">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-line">
           <Image
             src={image.r2_url}
             alt={listing?.title || 'Hostel'}
@@ -330,8 +330,8 @@ function TourRow({
           />
         </div>
       ) : (
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/60">
-          <CalendarCheck className="h-5 w-5 text-slate-400" />
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-line">
+          <CalendarCheck className="h-5 w-5 text-slate-500" />
         </div>
       )}
 
@@ -343,17 +343,17 @@ function TourRow({
               listingHref ? (
                 <Link
                   href={listingHref}
-                  className="text-sm font-bold text-slate-900 leading-tight truncate block hover:text-emerald-700 transition-colors"
+                  className="text-sm font-bold text-ink leading-tight truncate block hover:text-primary transition-colors"
                 >
                   {listing.title}
                 </Link>
               ) : (
-                <p className="text-sm font-bold text-slate-900 leading-tight truncate">
+                <p className="text-sm font-bold text-ink leading-tight truncate">
                   {listing.title}
                 </p>
               )
             ) : (
-              <p className="text-sm font-bold text-slate-900 leading-tight">
+              <p className="text-sm font-bold text-ink leading-tight">
                 Full Guided Search Tour
               </p>
             )}
@@ -369,22 +369,22 @@ function TourRow({
         </div>
 
         {/* Meta line */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
           <span className="inline-flex items-center gap-1 font-medium">
-            <CalendarCheck className="h-3 w-3 text-slate-400" />
+            <CalendarCheck className="h-3 w-3 text-slate-500" />
             {dateStr}
           </span>
           <span className="inline-flex items-center gap-1 font-medium">
-            <TimeIcon className="h-3 w-3 text-slate-400" />
+            <TimeIcon className="h-3 w-3 text-slate-500" />
             {timeLabel}
           </span>
           {listing?.area && (
             <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3 text-slate-400" />
+              <MapPin className="h-3 w-3 text-slate-500" />
               {listing.area}
             </span>
           )}
-          <span className="font-bold text-slate-900 tabular-nums">
+          <span className="font-bold text-ink tabular-nums">
             {formatTourPrice(booking.amount)}
           </span>
         </div>
@@ -407,7 +407,7 @@ function TourRow({
           {canEdit && onEdit && (
             <button
               onClick={onEdit}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-line text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <Pencil className="h-3 w-3" />
               Edit
@@ -417,7 +417,7 @@ function TourRow({
             <button
               onClick={onCancel}
               disabled={isCancelling}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-line text-xs font-semibold text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50"
             >
               {isCancelling ? (
                 <Loader2 className="h-3 w-3 animate-spin" />

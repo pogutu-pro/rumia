@@ -10,7 +10,6 @@ import { toursApi } from '@/lib/api/tours';
 import { signInWithGoogle } from '@/lib/supabase/auth';
 import { apiClient } from '@/lib/api/client';
 import posthog from 'posthog-js';
-import { AccountHeader } from './account-header';
 import type { AccountTab } from './account-tabs';
 import {
   AccountOverviewTab,
@@ -76,34 +75,20 @@ async function loadProfileWithRetry(): Promise<UserProfile | null> {
 
 function AccountSkeleton() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center gap-3">
-            <div className="skeleton h-10 w-10 rounded-full" />
-            <div className="space-y-2">
-              <div className="skeleton h-3.5 w-32" />
-              <div className="skeleton h-3 w-48" />
-            </div>
-          </div>
+    <div className="min-h-[calc(100dvh-var(--shell-header-h))]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        <div className="space-y-2">
+          <div className="skeleton h-7 w-40" />
+          <div className="skeleton h-4 w-64" />
         </div>
-      </div>
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mb-6 flex items-center gap-6">
-          <div className="skeleton h-4 w-16" />
-          <div className="skeleton h-4 w-16" />
-          <div className="skeleton h-4 w-16" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="skeleton h-44 rounded-2xl" />
           ))}
         </div>
-      </main>
-
-      <span className="sr-only">Loading your account</span>
+        <div className="skeleton h-72 rounded-2xl" />
+      </div>
+      <span className="sr-only" role="status">Loading your account</span>
     </div>
   );
 }
@@ -321,20 +306,20 @@ export default function AccountPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="min-h-[calc(100dvh-var(--shell-header-h))] flex items-center justify-center px-4">
         <div className="max-w-sm w-full text-center space-y-6">
           <div className="space-y-3">
-            <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+            <h1 className="text-xl font-semibold text-ink tracking-tight">
               Sign in to your account
             </h1>
-            <p className="text-sm text-slate-500 leading-relaxed">
+            <p className="text-sm text-ink-muted leading-relaxed">
               View your tours, wishlist, and manage your profile.
             </p>
           </div>
 
           <button
             onClick={() => signInWithGoogle('/account')}
-            className="w-full flex items-center justify-center gap-3 h-11 border border-slate-300 rounded-lg font-medium text-slate-800 hover:bg-slate-50 transition-colors text-sm cursor-pointer"
+            className="w-full flex items-center justify-center gap-3 h-11 border border-slate-300 rounded-lg font-medium text-ink hover:bg-subtle transition-colors text-sm cursor-pointer"
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
               <path
@@ -367,7 +352,7 @@ export default function AccountPage() {
     !profileLoadFailed && !profileCompletionDismissed && (missingPhone || missingCampus);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-[calc(100dvh-var(--shell-header-h))]">
       {needsProfileCompletion && (
         <ProfileCompletionModal
           isOpen={true}
@@ -405,18 +390,8 @@ export default function AccountPage() {
         />
       )}
 
-      {/* Clean Account Header */}
-      <AccountHeader
-        fullName={profile.full_name}
-        email={profile.email}
-        avatarUrl={profile.avatar_url}
-        isAdmin={profile.role === 'admin'}
-        isManager={profile.role === 'manager' || profile.role === 'admin'}
-        hasAgent={hasAgent}
-      />
-
       {profileLoadFailed && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div
             role="alert"
             className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
@@ -434,10 +409,13 @@ export default function AccountPage() {
       )}
 
       {/* Main Content Area */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
          {activeTab === 'overview' && (
            <AccountOverviewTab
              displayName={profile.full_name || 'Student'}
+             email={profile.email}
+             isManager={profile.role === 'manager' || profile.role === 'admin'}
+             isAdmin={profile.role === 'admin'}
              savedCount={savedCount}
              activeToursCount={activeToursCount}
              upcomingTour={upcomingTour}
@@ -506,7 +484,7 @@ export default function AccountPage() {
             hasAgent={hasAgent}
           />
         )}
-      </main>
+      </div>
 
       <PushNotificationPrompt />
     </div>

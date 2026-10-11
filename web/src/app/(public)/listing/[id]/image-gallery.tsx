@@ -317,7 +317,7 @@ function ImageGalleryInner({ images }: ImageGalleryProps) {
             onClick={() => openGalleryAt(0, 'grid')}
             className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-slate-900 font-bold text-xs py-2 px-4 rounded-xl border border-slate-200 shadow-md flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer z-20"
           >
-            <LayoutGrid className="h-4 w-4 text-emerald-600" />
+            <LayoutGrid className="h-4 w-4 text-primary" />
             <span>Show all photos</span>
             <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-extrabold">
               {displayImages.length}
@@ -390,7 +390,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   );
   if (!hasImages) {
     return (
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-slate-100 bg-slate-100">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 md:aspect-[21/6] md:max-h-60">
         <NoPhotoTile />
       </div>
     );

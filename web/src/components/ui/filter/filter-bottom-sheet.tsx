@@ -101,7 +101,7 @@ export function FilterBottomSheet({
         {trigger || (
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-600"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer bg-emerald-500 text-white shadow-sm shadow-emerald-200 hover:bg-primary"
           >
             <SlidersHorizontal className="h-4 w-4" />
             Filters
@@ -135,7 +135,7 @@ export function FilterBottomSheet({
             <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
               {getTitle()}
             </DialogPrimitive.Title>
-            <DialogPrimitive.Close className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer">
+            <DialogPrimitive.Close className="rounded-full p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer">
               <X className="h-5 w-5" />
             </DialogPrimitive.Close>
           </div>
@@ -226,7 +226,7 @@ export function FilterBottomSheet({
               <button
                 type="button"
                 onClick={handleApply}
-                className="flex-1 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-600 active:scale-[0.98] cursor-pointer"
+                className="flex-1 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary active:scale-[0.98] cursor-pointer"
               >
                 Apply
               </button>

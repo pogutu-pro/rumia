@@ -118,11 +118,11 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-[15px] text-slate-900 truncate group-hover:text-emerald-600 transition-colors duration-200 leading-snug">
+              <span className="font-extrabold text-[15px] text-slate-900 truncate group-hover:text-primary transition-colors duration-200 leading-snug">
                 {agent.name}
               </span>
               {(agent.total_views ?? 0) > 0 && (
-                <span className="shrink-0 inline-flex items-center gap-1 ml-auto text-[10px] font-bold text-slate-400">
+                <span className="shrink-0 inline-flex items-center gap-1 ml-auto text-[10px] font-bold text-slate-500">
                   <Eye className="h-3 w-3" />
                   {agent.total_views!.toLocaleString()}
                 </span>
@@ -133,7 +133,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
             {(isFeatured || isVerified || !!agent.is_founder) && (
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {isFeatured && (
-                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
+                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-primary text-[9px] font-bold uppercase tracking-wider">
                     <ShieldCheck className="h-2.5 w-2.5" aria-hidden="true" />
                     Official
                   </span>
@@ -144,7 +144,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
                   </span>
                 )}
                 {isVerified && !isFeatured && (
-                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
+                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-primary text-[9px] font-bold uppercase tracking-wider">
                     Verified
                   </span>
                 )}
@@ -164,7 +164,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
                     className={cn(
                       'text-[9px] font-semibold px-2 py-0.5 rounded-md border border-slate-100',
                       isFeatured
-                        ? 'bg-emerald-50/50 text-emerald-700 border-emerald-100/60'
+                        ? 'bg-emerald-50/50 text-primary border-emerald-100/60'
                         : 'bg-slate-50 text-slate-600',
                     )}
                   >
@@ -172,7 +172,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
                   </Badge>
                 ))}
                 {agent.service_areas.length > 3 && (
-                  <span className="text-[9px] font-bold text-slate-400 leading-5 pl-0.5">
+                  <span className="text-[9px] font-bold text-slate-500 leading-5 pl-0.5">
                     +{agent.service_areas.length - 3}
                   </span>
                 )}
@@ -190,12 +190,12 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 p-2 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 text-[11px] font-medium text-emerald-600 transition-colors"
+            className="flex items-center gap-2 p-2 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 text-[11px] font-medium text-primary transition-colors"
             title="Visit portfolio website"
           >
-            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
-            <span className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">Portfolio</span>
-            <span className="truncate flex-1 text-right text-slate-500 font-semibold group-hover/port:text-emerald-700">
+            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-slate-500" aria-hidden="true" />
+            <span className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">Portfolio</span>
+            <span className="truncate flex-1 text-right text-slate-500 font-semibold group-hover/port:text-primary">
               {getDisplayUrl(agent.portfolio_url!)}
             </span>
           </a>
@@ -215,8 +215,8 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
             'flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all duration-200',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
             isFeatured
-              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm hover:shadow active:scale-[0.97]'
-              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm hover:shadow active:scale-[0.97]',
+              ? 'bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow active:scale-[0.97]'
+              : 'bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow active:scale-[0.97]',
             isGating && 'opacity-70 pointer-events-none',
           )}
           aria-label={`Contact ${agent.name} on WhatsApp`}
@@ -235,7 +235,7 @@ export function AgentCard({ agent, showBio = true, className }: AgentCardProps) 
             'flex-1 inline-flex items-center justify-center gap-1 h-10 rounded-xl text-xs font-bold transition-all duration-200',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
             isFeatured
-              ? 'border border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50/20 text-emerald-700 active:scale-[0.97]'
+              ? 'border border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50/20 text-primary active:scale-[0.97]'
               : 'border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 active:scale-[0.97]',
           )}
           onClick={(e) => e.stopPropagation()}

@@ -17,7 +17,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
   if (leads.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-xs">
-        <p className="text-slate-400 font-semibold">No leads yet. Make sure your listings are active and attractive!</p>
+        <p className="text-slate-500 font-semibold">No leads yet. Make sure your listings are active and attractive!</p>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
     }
     if (type === 'rumia_agent') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-primary border border-emerald-100">
           <UserCheck className="h-3 w-3" />
           Agent
         </span>
@@ -78,7 +78,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
                 {lead.phone && (
                   <button
                     onClick={() => handleCopyPhone(lead.phone!, lead.id)}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
                   >
                     {copiedId === lead.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     {lead.phone}
@@ -119,19 +119,19 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
                       {lead.phone ? (
                         <button
                           onClick={() => handleCopyPhone(lead.phone!, lead.id)}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-emerald-600 transition-colors w-fit group"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-primary transition-colors w-fit group"
                         >
                           {copiedId === lead.id ? (
-                            <Check className="h-3.5 w-3.5 text-emerald-600" />
+                            <Check className="h-3.5 w-3.5 text-primary" />
                           ) : (
                             <Copy className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                           )}
-                          <span className={copiedId === lead.id ? 'text-emerald-600' : ''}>
+                          <span className={copiedId === lead.id ? 'text-primary' : ''}>
                             {lead.phone}
                           </span>
                         </button>
                       ) : (
-                        <span className="text-xs text-slate-400 font-medium">No phone provided</span>
+                        <span className="text-xs text-slate-500 font-medium">No phone provided</span>
                       )}
                     </div>
                   </td>

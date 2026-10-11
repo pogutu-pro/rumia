@@ -18,8 +18,8 @@ export default async function AdminAnalyticsPage() {
 
   const viewStats = [
     { label: 'Today', value: count(summary?.today_count), icon: TrendingUp, color: 'text-blue-600 bg-blue-50' },
-    { label: 'This Week', value: count(summary?.week_count), icon: CalendarDays, color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'This Month', value: count(summary?.month_count), icon: Eye, color: 'text-amber-600 bg-amber-50' },
+    { label: 'This Week', value: count(summary?.week_count), icon: CalendarDays, color: 'text-primary bg-emerald-50' },
+    { label: 'This Month', value: count(summary?.month_count), icon: Eye, color: 'text-amber-700 bg-amber-50' },
     { label: 'All Time', value: count(summary?.all_time_count), icon: TrendingUp, color: 'text-indigo-600 bg-indigo-50' },
     { label: 'Registered Students', value: totalStudents, icon: Users, color: 'text-purple-600 bg-purple-50' },
   ];
@@ -73,13 +73,13 @@ export default async function AdminAnalyticsPage() {
             <tbody className="divide-y divide-slate-50">
               {topListings.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-400">No listing views recorded yet.</td>
+                  <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-500">No listing views recorded yet.</td>
                 </tr>
               ) : (
                 topListings.map((listing: any) => (
                   <tr key={listing.listing_id} className="hover:bg-slate-50">
                     <td className="px-5 py-4 font-medium text-slate-900">
-                      <Link href={`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.listing_slug}`} className="hover:text-emerald-600">
+                      <Link href={`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.listing_slug}`} className="hover:text-primary">
                         {listing.listing_title}
                       </Link>
                     </td>
@@ -99,22 +99,22 @@ export default async function AdminAnalyticsPage() {
         {/* Mobile cards */}
         <div className="md:hidden divide-y divide-slate-50">
           {topListings.length === 0 ? (
-            <div className="px-5 py-8 text-center text-sm text-slate-400">No listing views recorded yet.</div>
+            <div className="px-5 py-8 text-center text-sm text-slate-500">No listing views recorded yet.</div>
           ) : (
             topListings.map((listing: any) => (
               <div key={listing.listing_id} className="px-5 py-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <Link href={`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.listing_slug}`} className="text-sm font-medium text-slate-900 hover:text-emerald-600 leading-snug">
+                  <Link href={`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.listing_slug}`} className="text-sm font-medium text-slate-900 hover:text-primary leading-snug">
                     {listing.listing_title}
                   </Link>
-                  <span className="text-xs font-semibold text-emerald-600 whitespace-nowrap">{count(listing.month_count).toLocaleString()} mo</span>
+                  <span className="text-xs font-semibold text-primary whitespace-nowrap">{count(listing.month_count).toLocaleString()} mo</span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                   <span>{listing.agent_name}</span>
                   <span>·</span>
                   <span>{listing.location}</span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
+                <div className="flex items-center gap-3 text-xs text-slate-500">
                   <span>{count(listing.today_count).toLocaleString()} today</span>
                   <span>{count(listing.week_count).toLocaleString()} week</span>
                   <span>{count(listing.all_time_count).toLocaleString()} all time</span>
@@ -128,7 +128,7 @@ export default async function AdminAnalyticsPage() {
       {/* Top Agents */}
       <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-          <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600">
+          <div className="rounded-lg bg-emerald-50 p-2 text-primary">
             <Users className="h-4 w-4" />
           </div>
           <div>
@@ -151,17 +151,17 @@ export default async function AdminAnalyticsPage() {
             <tbody className="divide-y divide-slate-50">
               {topAgents.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-5 py-10 text-center text-sm text-slate-400">No agent view data recorded yet.</td>
+                  <td colSpan={4} className="px-5 py-10 text-center text-sm text-slate-500">No agent view data recorded yet.</td>
                 </tr>
               ) : (
                 topAgents.map((agent: any) => (
                   <tr key={agent.agent_id} className="hover:bg-slate-50">
                     <td className="px-5 py-4 font-medium text-slate-900">
-                      <Link href={`/admin/agents/${agent.agent_id}`} className="hover:text-emerald-600">{agent.agent_name}</Link>
+                      <Link href={`/admin/agents/${agent.agent_id}`} className="hover:text-primary">{agent.agent_name}</Link>
                     </td>
                     <td className="px-5 py-4 text-right font-medium">
                       <span className="inline-flex items-center justify-end gap-1">
-                        <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                        <Building2 className="h-3.5 w-3.5 text-slate-500" />
                         {count(agent.active_listings_count).toLocaleString()}
                       </span>
                     </td>
@@ -177,22 +177,22 @@ export default async function AdminAnalyticsPage() {
         {/* Mobile cards */}
         <div className="md:hidden divide-y divide-slate-50">
           {topAgents.length === 0 ? (
-            <div className="px-5 py-8 text-center text-sm text-slate-400">No agent view data recorded yet.</div>
+            <div className="px-5 py-8 text-center text-sm text-slate-500">No agent view data recorded yet.</div>
           ) : (
             topAgents.map((agent: any) => (
               <div key={agent.agent_id} className="px-5 py-4 flex items-center justify-between">
                 <div>
-                  <Link href={`/admin/agents/${agent.agent_id}`} className="text-sm font-medium text-slate-900 hover:text-emerald-600">
+                  <Link href={`/admin/agents/${agent.agent_id}`} className="text-sm font-medium text-slate-900 hover:text-primary">
                     {agent.agent_name}
                   </Link>
-                  <div className="text-xs text-slate-400 mt-0.5">
+                  <div className="text-xs text-slate-500 mt-0.5">
                     <Building2 className="h-3 w-3 inline mr-1" />
                     {count(agent.active_listings_count).toLocaleString()} listings
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-slate-900">{count(agent.month_count).toLocaleString()}</p>
-                  <p className="text-xs text-slate-400">{count(agent.all_time_count).toLocaleString()} all time</p>
+                  <p className="text-xs text-slate-500">{count(agent.all_time_count).toLocaleString()} all time</p>
                 </div>
               </div>
             ))

@@ -51,7 +51,7 @@ export function SavedPlaces() {
       <h1 className="text-2xl font-bold text-slate-900">Saved places</h1>
       <p className="mt-1 text-sm text-slate-500">
         Kept on this device.{' '}
-        <Link href="/auth/login?next=/saved" className="font-semibold text-emerald-700 underline underline-offset-2">
+        <Link href="/auth/login?next=/saved" className="font-semibold text-primary underline underline-offset-2">
           Sign in
         </Link>{' '}
         to keep them across your devices.
@@ -71,7 +71,7 @@ export function SavedPlaces() {
         {state.kind === 'error' && <p className="text-sm text-slate-600">We could not load your saved places. Check your connection and refresh.</p>}
         {state.kind === 'ready' && state.cards.length === 0 && (
           <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center">
-            <Heart className="mx-auto h-6 w-6 text-slate-400" aria-hidden="true" />
+            <Heart className="mx-auto h-6 w-6 text-slate-500" aria-hidden="true" />
             <p className="mt-2 font-semibold text-slate-900">Nothing saved yet</p>
             <p className="mt-1 text-sm text-slate-500">Tap the heart on a place to keep it here.</p>
             <Link href="/hostels" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white">

@@ -40,7 +40,7 @@ export function UserAvatar({
       <AvatarImage src={imageUrl || undefined} alt={name} />
       <AvatarFallback
         className={cn(
-          'bg-primary/10 text-primary font-medium',
+          'bg-subtle text-primary font-medium',
           size === 'xl' && 'border-4 border-white',
         )}
       >

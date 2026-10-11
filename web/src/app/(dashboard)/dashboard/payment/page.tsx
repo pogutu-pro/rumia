@@ -75,7 +75,7 @@ export default function PaymentSettingsPage() {
               placeholder="Name registered to Pochi number"
             />
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             When set, these details replace your WhatsApp number and name in
             consultation messages. Both fields are optional — if not set, your
             base WhatsApp number and display name will be used instead.

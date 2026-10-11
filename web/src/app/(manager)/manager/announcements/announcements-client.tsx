@@ -82,8 +82,8 @@ const TYPE_OPTIONS: {
     value: 'encouragement',
     label: 'Encouragement',
     icon: Sparkles,
-    activeClass: 'bg-emerald-600 text-white border-emerald-600',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+    activeClass: 'bg-primary text-white border-primary',
+    badgeClass: 'bg-emerald-50 text-primary border-emerald-100',
   },
 ];
 
@@ -268,7 +268,7 @@ export function AnnouncementsClient({
       {/* Summary + CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-primary flex items-center justify-center shrink-0">
             <Megaphone className="h-5 w-5" />
           </div>
           <div>
@@ -299,7 +299,7 @@ export function AnnouncementsClient({
 
       {successMsg && (
         <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -311,7 +311,7 @@ export function AnnouncementsClient({
           <p className="font-semibold text-slate-600">
             No announcements yet.
           </p>
-          <p className="text-slate-400 mt-1">
+          <p className="text-slate-500 mt-1">
             Create one and it will appear at the top of the public site.
           </p>
           <button
@@ -350,7 +350,7 @@ export function AnnouncementsClient({
                         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                           expired
                             ? 'bg-slate-100 text-slate-500 border-slate-200'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                            : 'bg-emerald-50 text-primary border-emerald-100'
                         }`}
                       >
                         {expired ? 'Expired' : 'Active'}
@@ -415,7 +415,7 @@ export function AnnouncementsClient({
               <button
                 onClick={() => setEditing(null)}
                 aria-label="Close"
-                className="w-9 h-9 inline-flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="w-9 h-9 inline-flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>

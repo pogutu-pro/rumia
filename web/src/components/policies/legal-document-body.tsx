@@ -6,7 +6,7 @@
 export function LegalDocumentBody({ html }: { html: string }) {
   return (
     <div
-      className="legal-document-prose space-y-0"
+      className="legal-document-prose"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

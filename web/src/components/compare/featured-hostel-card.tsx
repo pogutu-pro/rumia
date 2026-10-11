@@ -144,13 +144,13 @@ export function FeaturedHostelCard({
       </Link>
 
       <div className="p-4 flex-1 flex flex-col">
-        <div className="flex items-center gap-1 text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">
-          <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+        <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">
+          <MapPin className="h-3 w-3 shrink-0 text-slate-500" />
           <span className="truncate">{item.location}</span>
         </div>
 
         <Link href={href}>
-          <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+          <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
             {item.title}
           </h3>
         </Link>
@@ -159,7 +159,7 @@ export function FeaturedHostelCard({
           {item.description}
         </p>
 
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <span>Agent: {item.agents?.name || 'Rumia Agent'}</span>
           <div className="flex items-center gap-2">
             <button
@@ -178,7 +178,7 @@ export function FeaturedHostelCard({
             </button>
             <Link
               href={href}
-              className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5"
+              className="font-semibold text-primary group-hover:underline flex items-center gap-0.5"
             >
               Details
               <ArrowRight className="h-3 w-3" />

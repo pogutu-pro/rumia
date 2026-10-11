@@ -94,7 +94,7 @@ export function ManagerHeader({
                 />
               </Link>
               <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full truncate max-w-[200px]">
-                <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <MapPin className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                 <span className="truncate">{campusName}</span>
               </span>
             </div>
@@ -122,7 +122,7 @@ export function ManagerHeader({
                   href={href}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
                     active
-                      ? 'text-emerald-700 bg-emerald-50 font-semibold'
+                      ? 'text-primary bg-emerald-50 font-semibold'
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                   }`}
                 >

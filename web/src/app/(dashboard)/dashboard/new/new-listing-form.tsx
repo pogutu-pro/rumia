@@ -419,7 +419,7 @@ function SortableImageCard({
           <button
             type="button"
             onClick={() => onSetCover(idx)}
-            className="p-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-lg shrink-0 transition-colors"
+            className="p-1.5 bg-primary/90 hover:bg-primary/90 text-white rounded-lg shrink-0 transition-colors"
             title="Set as cover photo"
           >
             <Star className="h-3.5 w-3.5" />
@@ -957,7 +957,7 @@ export function NewListingForm({
           <h2 className="text-xl font-bold text-slate-900">
             Basic Information
           </h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             What kind of property is this?
           </p>
         </div>
@@ -1005,7 +1005,7 @@ export function NewListingForm({
                     className={cn(
                       'flex min-h-[88px] items-start gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
                       selected
-                        ? 'border-emerald-600 bg-emerald-50 ring-1 ring-emerald-600'
+                        ? 'border-primary bg-emerald-50 ring-1 ring-primary'
                         : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white',
                     )}
                   >
@@ -1013,7 +1013,7 @@ export function NewListingForm({
                       className={cn(
                         'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
                         selected
-                          ? 'bg-emerald-600 text-white'
+                          ? 'bg-primary text-white'
                           : 'bg-white text-slate-500 ring-1 ring-slate-200',
                       )}
                     >
@@ -1069,7 +1069,7 @@ export function NewListingForm({
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="specificLocation">
               Specific Location{' '}
-              <span className="text-slate-400 font-normal">(optional)</span>
+              <span className="text-slate-500 font-normal">(optional)</span>
             </Label>
             <Input
               id="specificLocation"
@@ -1084,7 +1084,7 @@ export function NewListingForm({
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="description">
               Description{' '}
-              <span className="text-slate-400 font-normal">(optional)</span>
+              <span className="text-slate-500 font-normal">(optional)</span>
             </Label>
             <Textarea
               id="description"
@@ -1102,7 +1102,7 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Property Photos</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Upload images to showcase the hostel. Drag to reorder.
           </p>
         </div>
@@ -1115,16 +1115,16 @@ export function NewListingForm({
             disabled={isUploading}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          <UploadCloud className="h-10 w-10 text-slate-400 mb-3" />
+          <UploadCloud className="h-10 w-10 text-slate-500 mb-3" />
           <p className="text-sm font-bold text-slate-700">
             {isUploading ? 'Uploading...' : 'Click or drag photos here'}
           </p>
-          <p className="text-xs text-slate-400 mt-1 font-medium">
+          <p className="text-xs text-slate-500 mt-1 font-medium">
             PNG, JPG, or WEBP up to 10MB each
           </p>
         </div>
         {isUploading && (
-          <div className="flex items-center justify-center gap-2 text-emerald-600 text-xs font-bold py-2">
+          <div className="flex items-center justify-center gap-2 text-primary text-xs font-bold py-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             Uploading to Cloudflare R2...
           </div>
@@ -1172,7 +1172,7 @@ export function NewListingForm({
             <h2 className="text-xl font-bold text-slate-900">
               Rooms & Pricing
             </h2>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
               Add each room type with its price. At least one required.
             </p>
           </div>
@@ -1217,7 +1217,7 @@ export function NewListingForm({
                     <button
                       type="button"
                       onClick={() => removeRoomTypeField(idx)}
-                      className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-lg transition-colors"
+                      className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-lg transition-colors"
                       title="Remove"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -1226,7 +1226,7 @@ export function NewListingForm({
                 </div>
                 {label && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider">
                       Label:{' '}
                     </span>
                     <span className="text-sm font-semibold text-emerald-900">
@@ -1236,7 +1236,7 @@ export function NewListingForm({
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                    <Label className="text-xs text-slate-500 font-bold uppercase">
                       Room Type *
                     </Label>
                     <select
@@ -1273,7 +1273,7 @@ export function NewListingForm({
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                    <Label className="text-xs text-slate-500 font-bold uppercase">
                       Occupancy *
                     </Label>
                     <select
@@ -1302,7 +1302,7 @@ export function NewListingForm({
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                    <Label className="text-xs text-slate-500 font-bold uppercase">
                       Floor
                     </Label>
                     <select
@@ -1329,7 +1329,7 @@ export function NewListingForm({
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                    <Label className="text-xs text-slate-500 font-bold uppercase">
                       Size
                     </Label>
                     <select
@@ -1358,7 +1358,7 @@ export function NewListingForm({
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                    <Label className="text-xs text-slate-500 font-bold uppercase">
                       Rent (KES/mo) *
                     </Label>
                     <Input
@@ -1373,7 +1373,7 @@ export function NewListingForm({
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-400 font-bold uppercase">
+                    <Label className="text-xs text-slate-500 font-bold uppercase">
                       Deposit (KES){' '}
                       <span className="text-slate-300 font-normal">
                         optional
@@ -1403,7 +1403,7 @@ export function NewListingForm({
                             e.target.checked,
                           )
                         }
-                        className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
                       />
                       <Label
                         htmlFor={`avail-${idx}`}
@@ -1415,7 +1415,7 @@ export function NewListingForm({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-400 font-bold uppercase">
+                  <Label className="text-xs text-slate-500 font-bold uppercase">
                     Furnishing{' '}
                     <span className="text-slate-300 font-normal">
                       (optional)
@@ -1440,7 +1440,7 @@ export function NewListingForm({
                               newItems,
                             );
                           }}
-                          className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary"
                         />
                         <Label
                           htmlFor={`furnishing-${idx}-${item}`}
@@ -1452,7 +1452,7 @@ export function NewListingForm({
                     ))}
                   </div>
                   {furnishingLabel && (
-                    <p className="text-xs font-bold text-emerald-600 mt-1">
+                    <p className="text-xs font-bold text-primary mt-1">
                       {furnishingLabel}
                     </p>
                   )}
@@ -1467,7 +1467,7 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Property Details</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Details that help students find and choose your hostel.
           </p>
         </div>
@@ -1503,7 +1503,7 @@ export function NewListingForm({
           <div className="space-y-2">
             <Label htmlFor="distanceToCampus">
               Distance Description{' '}
-              <span className="text-slate-400 font-normal">(optional)</span>
+              <span className="text-slate-500 font-normal">(optional)</span>
             </Label>
             <Input
               id="distanceToCampus"
@@ -1513,7 +1513,7 @@ export function NewListingForm({
               placeholder="e.g. 5 minutes walk from DeKUT gate"
               className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm"
             />
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-500 font-medium">
               Shown below the listing title. e.g. “Near Main Gate” or “10
               minutes walk from DeKUT”
             </p>
@@ -1537,7 +1537,7 @@ export function NewListingForm({
           <div className="space-y-2">
             <Label htmlFor="mpesaDetails">
               M-Pesa Details{' '}
-              <span className="text-slate-400 font-normal">(optional)</span>
+              <span className="text-slate-500 font-normal">(optional)</span>
             </Label>
             <Input
               id="mpesaDetails"
@@ -1556,7 +1556,7 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-5">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Included in Rent</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Check what is already covered by the rent price.
           </p>
         </div>
@@ -1582,12 +1582,12 @@ export function NewListingForm({
                   className={`flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150 ${selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
                 >
                   <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'}`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
                   <span
-                    className={`text-xs font-bold leading-tight text-center ${selected ? 'text-emerald-700' : 'text-slate-600'}`}
+                    className={`text-xs font-bold leading-tight text-center ${selected ? 'text-primary' : 'text-slate-600'}`}
                   >
                     {util}
                   </span>
@@ -1602,7 +1602,7 @@ export function NewListingForm({
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-5">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Amenities</h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Additional facilities available at this hostel.
           </p>
         </div>
@@ -1628,12 +1628,12 @@ export function NewListingForm({
                   className={`flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150 ${selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`}
                 >
                   <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'}`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
                   <span
-                    className={`text-xs font-bold leading-tight text-center ${selected ? 'text-emerald-700' : 'text-slate-600'}`}
+                    className={`text-xs font-bold leading-tight text-center ${selected ? 'text-primary' : 'text-slate-600'}`}
                   >
                     {amenity}
                   </span>
@@ -1650,7 +1650,7 @@ export function NewListingForm({
           <h2 className="text-xl font-bold text-slate-900">
             Contact Information
           </h2>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             How students reach you and the hostel owner.
           </p>
         </div>
@@ -1691,7 +1691,7 @@ export function NewListingForm({
           <div className="sm:col-span-2 space-y-2">
             <Label htmlFor="landlordPhone">
               Hostel Owner Phone{' '}
-              <span className="text-slate-400 font-normal">(optional)</span>
+              <span className="text-slate-500 font-normal">(optional)</span>
             </Label>
             <Input
               id="landlordPhone"
@@ -1723,7 +1723,7 @@ export function NewListingForm({
                 {landlordPhoneError}
               </p>
             )}
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-500 font-medium">
               When a student chooses “Hostel Owner”, they contact this number
               directly. Falls back to your number if empty.
             </p>
@@ -1736,7 +1736,7 @@ export function NewListingForm({
         <div>
           <h2 className="text-xl font-bold text-slate-900">
             Video Tour{' '}
-            <span className="text-slate-400 font-normal text-base">
+            <span className="text-slate-500 font-normal text-base">
               (optional)
             </span>
           </h2>
@@ -1795,7 +1795,7 @@ export function NewListingForm({
           type="submit"
           onClick={(e) => handleSubmit(e, false)}
           disabled={isSaving || isUploading}
-          className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-8 border-0 shadow-md shadow-emerald-600/10"
+          className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold h-11 px-8 border-0 shadow-md shadow-emerald-600/10"
         >
           {isSaving && !isDraft ? (
             <>

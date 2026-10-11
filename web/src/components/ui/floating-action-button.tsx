@@ -49,7 +49,7 @@ export function FloatingActionButton({
       onClick={onClick}
       className={cn(
         "fixed z-40 shadow-2xl transition-all duration-300 touch-manipulation",
-        "bg-emerald-600 hover:bg-emerald-700 text-white",
+        "bg-primary hover:bg-primary/90 text-white",
         "active:scale-95",
         label ? "rounded-full px-6 h-14 gap-2" : "rounded-full h-14 w-14 p-0",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none",

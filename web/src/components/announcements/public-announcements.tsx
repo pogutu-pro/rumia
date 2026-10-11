@@ -19,7 +19,7 @@ const STYLES: Record<AnnouncementType, AnnouncementStyle> = {
     icon: AlertTriangle,
   },
   encouragement: {
-    chip: 'bg-emerald-100 text-emerald-700',
+    chip: 'bg-emerald-100 text-primary',
     accent: 'border-emerald-400',
     icon: Sparkles,
   },

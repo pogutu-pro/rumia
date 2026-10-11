@@ -81,7 +81,7 @@ export default function AccountBookTourPage() {
                 {sections.map((section) => (
                   <div key={section.campusId}>
                     <div className="flex items-center gap-2 mb-2">
-                      <GraduationCap className="h-4 w-4 text-slate-400" />
+                      <GraduationCap className="h-4 w-4 text-slate-500" />
                       <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                         {section.campusName}
                       </h3>
@@ -99,7 +99,7 @@ export default function AccountBookTourPage() {
                             className={cn(
                               'relative flex flex-col items-start rounded-xl border-2 p-3.5 text-left transition-all duration-200',
                               isSelected
-                                ? 'border-emerald-600 bg-emerald-50 shadow-sm shadow-emerald-600/10'
+                                ? 'border-primary bg-emerald-50 shadow-sm shadow-emerald-600/10'
                                 : 'border-slate-200 hover:border-slate-300 bg-white',
                             )}
                           >
@@ -117,7 +117,7 @@ export default function AccountBookTourPage() {
                               className={cn(
                                 'mt-1.5 inline-flex items-center gap-1 text-xs font-bold',
                                 isSelected
-                                  ? 'text-emerald-700'
+                                  ? 'text-primary'
                                   : 'text-slate-500',
                               )}
                             >

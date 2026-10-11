@@ -94,7 +94,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-primary bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
             University Locations
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mt-3 mb-3">
@@ -163,7 +163,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
                   {/* Status Badge */}
                   <div className="absolute top-3 left-3">
                     {isActive ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-white text-xs font-bold shadow-xs">
                         <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                         Live
                       </span>
@@ -177,7 +177,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
                   {/* City Badge */}
                   <div className="absolute top-3 right-3">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs text-slate-700 text-xs font-medium shadow-xs">
-                      <MapPin className="h-3 w-3 text-slate-400" />
+                      <MapPin className="h-3 w-3 text-slate-500" />
                       {campus.city}
                     </span>
                   </div>
@@ -193,7 +193,7 @@ export function CampusPickerCards({ campuses }: CampusPickerCardsProps) {
                 {/* Card Content */}
                 <div className="p-5 flex-1 flex flex-col">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider font-bold text-emerald-600 mb-2 line-clamp-1">
+                    <p className="text-[11px] uppercase tracking-wider font-bold text-primary mb-2 line-clamp-1">
                       {campus.name}
                     </p>
 

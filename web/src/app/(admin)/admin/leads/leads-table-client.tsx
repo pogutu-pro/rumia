@@ -61,7 +61,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
     }
     if (type === 'rumia_agent') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-primary border border-emerald-100">
           <UserCheck className="h-3 w-3" />
           Agent
         </span>
@@ -137,7 +137,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
           </thead>
           <tbody className="divide-y divide-slate-50">
             {filtered.length === 0 ? (
-              <tr><td colSpan={6} className="text-sm text-slate-400 text-center px-5 py-8">No leads recorded.</td></tr>
+              <tr><td colSpan={6} className="text-sm text-slate-500 text-center px-5 py-8">No leads recorded.</td></tr>
             ) : filtered.map((lead) => {
               const date = new Date(lead.clicked_at);
               return (
@@ -147,13 +147,13 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
                   </td>
                   <td className="text-sm px-5 py-4">
                     {lead.listings ? (
-                      <Link href={`/listing/${lead.listings.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline font-medium">{lead.listings.title}</Link>
-                    ) : <span className="text-slate-400">—</span>}
+                      <Link href={`/listing/${lead.listings.id}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">{lead.listings.title}</Link>
+                    ) : <span className="text-slate-500">—</span>}
                   </td>
                   <td className="text-sm px-5 py-4">
                     {lead.agents ? (
-                      <Link href={`/admin/agents/${lead.agents.id}`} className="text-emerald-600 hover:underline font-medium">{lead.agents.name}</Link>
-                    ) : <span className="text-slate-400">—</span>}
+                      <Link href={`/admin/agents/${lead.agents.id}`} className="text-primary hover:underline font-medium">{lead.agents.name}</Link>
+                    ) : <span className="text-slate-500">—</span>}
                   </td>
                   <td className="px-5 py-4 min-w-[200px]">
                     <div className="flex flex-col gap-1.5 items-start">
@@ -166,7 +166,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
                         {lead.phone && (
                           <button
                             onClick={() => handleCopyPhone(lead.phone!, lead.id)}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
                           >
                             {copiedId === lead.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                             {lead.phone}
@@ -189,7 +189,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No leads recorded.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">No leads recorded.</div>
         ) : filtered.map((lead) => (
           <div key={lead.id} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3">
             <div className="flex items-start justify-between">
@@ -200,7 +200,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
                   {getContactBadge(lead.contact_type)}
                 </div>
               </div>
-              <span className="text-xs text-slate-400 shrink-0 ml-2">
+              <span className="text-xs text-slate-500 shrink-0 ml-2">
                 {new Date(lead.clicked_at).toLocaleDateString()}
               </span>
             </div>
@@ -213,7 +213,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
                 {lead.phone && (
                   <button
                     onClick={() => handleCopyPhone(lead.phone!, lead.id)}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary transition-colors bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md"
                   >
                     {copiedId === lead.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     {lead.phone}
@@ -222,7 +222,7 @@ export function LeadsTableClient({ leads, agents, listings }: LeadsTableClientPr
               </div>
             )}
             <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-              <span className="text-xs text-slate-400 font-mono">{lead.ip_hash.slice(0, 12)}...</span>
+              <span className="text-xs text-slate-500 font-mono">{lead.ip_hash.slice(0, 12)}...</span>
               <Button size="sm" variant="outline" onClick={() => openCommissionModal(lead)} className="rounded-lg text-xs h-8">Create Commission</Button>
             </div>
           </div>

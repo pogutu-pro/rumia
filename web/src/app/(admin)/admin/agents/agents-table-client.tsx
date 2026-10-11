@@ -138,15 +138,15 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
           </thead>
           <tbody className="divide-y divide-slate-50">
             {agents.length === 0 ? (
-              <tr><td colSpan={10} className="text-sm text-slate-400 text-center px-5 py-8">No agents registered.</td></tr>
+              <tr><td colSpan={10} className="text-sm text-slate-500 text-center px-5 py-8">No agents registered.</td></tr>
             ) : agents.map((agent) => (
               <tr key={agent.id} className="hover:bg-slate-50 transition-colors">
                 <td className="text-sm px-5 py-4">
-                  <Link href={`/admin/agents/${agent.id}`} className="font-medium text-slate-900 hover:text-emerald-600">{agent.name}</Link>
+                  <Link href={`/admin/agents/${agent.id}`} className="font-medium text-slate-900 hover:text-primary">{agent.name}</Link>
                 </td>
                 <td className="text-sm text-slate-600 px-5 py-4">
                   <div>{agent.phone}</div>
-                  {agent.whatsapp && agent.whatsapp !== agent.phone && <div className="text-slate-400 text-xs">{agent.whatsapp}</div>}
+                  {agent.whatsapp && agent.whatsapp !== agent.phone && <div className="text-slate-500 text-xs">{agent.whatsapp}</div>}
                 </td>
                 <td className="text-sm text-slate-600 px-5 py-4">{agent.active_listings_count ?? 0}</td>
                 <td className="text-sm text-slate-600 px-5 py-4">{agent.total_leads_count ?? 0}</td>
@@ -160,7 +160,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                       <button
                         onClick={() => handleDemoteToAgent(agent.user_id, agent.id)}
                         disabled={pendingRoleId === agent.id}
-                        className="text-xs text-amber-600 hover:underline disabled:opacity-50 font-medium"
+                        className="text-xs text-amber-700 hover:underline disabled:opacity-50 font-medium"
                       >
                         {pendingRoleId === agent.id ? '...' : 'Demote to Agent'}
                       </button>
@@ -172,7 +172,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                         <button
                           onClick={() => handleDemoteToAgent(agent.user_id, agent.id)}
                           disabled={pendingRoleId === agent.id}
-                          className="text-xs text-amber-600 hover:underline disabled:opacity-50 font-medium"
+                          className="text-xs text-amber-700 hover:underline disabled:opacity-50 font-medium"
                         >
                           {pendingRoleId === agent.id ? '...' : 'Demote'}
                         </button>
@@ -248,7 +248,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                 {/* Status */}
                 <td className="px-5 py-4">
                   {agent.status === 'active' ? (
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-primary">Active</span>
                   ) : (
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Suspended</span>
                   )}
@@ -263,7 +263,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
                       agent.is_featured
                         ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-                        : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200'
+                        : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200'
                     }`}
                   >
                     {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Official' : '☆ Official'}
@@ -279,7 +279,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 ${
                       agent.is_founder
                         ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100'
-                        : 'bg-slate-50 text-slate-400 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'
+                        : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'
                     }`}
                   >
                     {pendingFounderId === agent.id ? '...' : agent.is_founder ? '🏅 Founder' : '○ Founder'}
@@ -289,7 +289,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                 {/* Actions */}
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3 text-sm">
-                    <Link href={`/admin/agents/${agent.id}`} className="text-emerald-600 hover:underline font-medium">View</Link>
+                    <Link href={`/admin/agents/${agent.id}`} className="text-primary hover:underline font-medium">View</Link>
                     <button
                       onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })}
                       className="text-slate-500 hover:text-slate-700 hover:underline font-medium"
@@ -301,7 +301,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                         {pendingAgentId === agent.id ? '...' : 'Suspend'}
                       </button>
                     ) : (
-                      <button onClick={() => handleActivate(agent.id)} disabled={pendingAgentId === agent.id} className="text-emerald-600 hover:underline disabled:opacity-50">
+                      <button onClick={() => handleActivate(agent.id)} disabled={pendingAgentId === agent.id} className="text-primary hover:underline disabled:opacity-50">
                         {pendingAgentId === agent.id ? '...' : 'Activate'}
                       </button>
                     )}
@@ -316,13 +316,13 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {agents.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No agents registered.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">No agents registered.</div>
         ) : agents.map((agent) => (
           <div key={agent.id} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3">
             <div className="flex items-start justify-between">
               <div>
-                <Link href={`/admin/agents/${agent.id}`} className="text-sm font-semibold text-slate-900 hover:text-emerald-600">{agent.name}</Link>
-                <p className="text-xs text-slate-400 mt-0.5">{agent.phone}</p>
+                <Link href={`/admin/agents/${agent.id}`} className="text-sm font-semibold text-slate-900 hover:text-primary">{agent.name}</Link>
+                <p className="text-xs text-slate-500 mt-0.5">{agent.phone}</p>
               </div>
               <div className="flex items-center gap-1.5 flex-wrap justify-end">
                 {agent.role === 'admin' ? (
@@ -333,7 +333,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">Agent</span>
                 )}
                 {agent.status === 'active' ? (
-                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Active</span>
+                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-primary">Active</span>
                 ) : (
                   <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Suspended</span>
                 )}
@@ -348,21 +348,21 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
 
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-slate-50 rounded-lg p-2">
-                <p className="text-xs text-slate-400">Listings</p>
+                <p className="text-xs text-slate-500">Listings</p>
                 <p className="text-sm font-semibold text-slate-900">{agent.active_listings_count ?? 0}</p>
               </div>
               <div className="bg-slate-50 rounded-lg p-2">
-                <p className="text-xs text-slate-400">Leads</p>
+                <p className="text-xs text-slate-500">Leads</p>
                 <p className="text-sm font-semibold text-slate-900">{agent.total_leads_count ?? 0}</p>
               </div>
               <div className="bg-slate-50 rounded-lg p-2">
-                <p className="text-xs text-slate-400">Commission</p>
+                <p className="text-xs text-slate-500">Commission</p>
                 <p className="text-sm font-semibold text-slate-900">{(agent.pending_commissions_sum ?? 0).toLocaleString()}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 pt-1 flex-wrap">
-              <Link href={`/admin/agents/${agent.id}`} className="text-xs font-medium text-emerald-600 hover:underline">View Profile</Link>
+              <Link href={`/admin/agents/${agent.id}`} className="text-xs font-medium text-primary hover:underline">View Profile</Link>
               <button
                 onClick={() => setEditAgent({ id: agent.id, name: agent.name, phone: agent.phone, whatsapp: agent.whatsapp })}
                 className="text-xs font-medium text-slate-500 hover:text-slate-700 hover:underline"
@@ -375,7 +375,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                 onClick={() => handleToggleOfficial(agent.id, !!agent.is_featured)}
                 disabled={pendingFeaturedId === agent.id}
                 className={`text-xs font-medium disabled:opacity-50 ${
-                  agent.is_featured ? 'text-amber-600 hover:underline' : 'text-slate-400 hover:text-amber-600 hover:underline'
+                  agent.is_featured ? 'text-amber-700 hover:underline' : 'text-slate-500 hover:text-amber-700 hover:underline'
                 }`}
               >
                 {pendingFeaturedId === agent.id ? '...' : agent.is_featured ? '★ Remove Official' : '☆ Grant Official'}
@@ -386,7 +386,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                 onClick={() => handleToggleFounder(agent.id, !!agent.is_founder)}
                 disabled={pendingFounderId === agent.id}
                 className={`text-xs font-medium disabled:opacity-50 ${
-                  agent.is_founder ? 'text-indigo-600 hover:underline' : 'text-slate-400 hover:text-indigo-600 hover:underline'
+                  agent.is_founder ? 'text-indigo-600 hover:underline' : 'text-slate-500 hover:text-indigo-600 hover:underline'
                 }`}
               >
                 {pendingFounderId === agent.id ? '...' : agent.is_founder ? '🏅 Remove Founder' : '○ Grant Founder'}
@@ -399,7 +399,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                 </button>
               )}
               {agent.role === 'admin' || agent.role === 'manager' ? (
-                <button onClick={() => handleDemoteToAgent(agent.user_id, agent.id)} disabled={pendingRoleId === agent.id} className="text-xs font-medium text-amber-600 hover:underline disabled:opacity-50">
+                <button onClick={() => handleDemoteToAgent(agent.user_id, agent.id)} disabled={pendingRoleId === agent.id} className="text-xs font-medium text-amber-700 hover:underline disabled:opacity-50">
                   {pendingRoleId === agent.id ? '...' : 'Demote to Agent'}
                 </button>
               ) : (
@@ -439,7 +439,7 @@ export function AgentsTableClient({ agents, campuses }: AgentsTableClientProps) 
                   {pendingAgentId === agent.id ? 'Suspending...' : 'Suspend'}
                 </button>
               ) : (
-                <button onClick={() => handleActivate(agent.id)} disabled={pendingAgentId === agent.id} className="text-xs font-medium text-emerald-600 hover:underline disabled:opacity-50">
+                <button onClick={() => handleActivate(agent.id)} disabled={pendingAgentId === agent.id} className="text-xs font-medium text-primary hover:underline disabled:opacity-50">
                   {pendingAgentId === agent.id ? 'Activating...' : 'Activate'}
                 </button>
               )}

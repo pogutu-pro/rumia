@@ -413,7 +413,7 @@ function ModalContent({
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4">
         <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
-          <Loader2 className="h-7 w-7 animate-spin text-emerald-600" />
+          <Loader2 className="h-7 w-7 animate-spin text-primary" />
         </div>
         <p className="text-sm font-semibold text-slate-600">
           Opening WhatsApp…
@@ -467,7 +467,7 @@ function ModalContent({
           <Button
             onClick={onChooseRumiaAgent}
             disabled={isLoading}
-            className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl border-0 transition-all"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl border-0 transition-all"
           >
             {isLoading ? (
               <>
@@ -527,7 +527,7 @@ function ModalContent({
           <Button
             onClick={onFeeAccepted}
             disabled={isLoading}
-            className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl border-0 transition-all"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl border-0 transition-all"
           >
             {isLoading ? (
               <>
@@ -601,21 +601,21 @@ function ModalContent({
           disabled={isLoading && contactType === 'rumia_agent'}
           className={cn(
             'flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 text-left',
-            'border-emerald-200 hover:border-emerald-600 hover:bg-emerald-50/50',
+            'border-emerald-200 hover:border-primary hover:bg-emerald-50/50',
             'disabled:opacity-60 disabled:cursor-wait',
             isLoading &&
               contactType === 'rumia_agent' &&
-              'border-emerald-600 bg-emerald-50/50',
+              'border-primary bg-emerald-50/50',
           )}
           aria-label="Contact Rumia Agent"
         >
           {isLoading && contactType === 'rumia_agent' ? (
             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-              <UserCheck className="h-5 w-5 text-emerald-600" />
+              <UserCheck className="h-5 w-5 text-primary" />
             </div>
           )}
           <div>
@@ -629,7 +629,7 @@ function ModalContent({
         </button>
       </div>
 
-      <p className="text-center text-[11px] text-slate-400 font-medium mt-4">
+      <p className="text-center text-[11px] text-slate-500 font-medium mt-4">
         <MessageCircle className="inline h-3 w-3 mr-0.5 -mt-0.5" />
         Connects via WhatsApp
       </p>

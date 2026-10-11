@@ -44,7 +44,7 @@ export function AlertsList({ reloadKey = 0 }: { reloadKey?: number }) {
     <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-200/60 bg-white">
       {alerts.map((a) => (
         <li key={a.id} className="flex items-center gap-3 p-4">
-          <BellRing className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
+          <BellRing className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-slate-900">{a.label || 'Saved search'}</p>
             <p className="text-xs text-slate-500">

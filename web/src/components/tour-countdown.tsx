@@ -60,7 +60,7 @@ export function TourCountdown({ preferredDate, preferredTime, compact }: TourCou
 
   if (remaining <= 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-emerald-50 px-2 py-0.5 rounded-md">
         <Timer className="h-3 w-3" />
         Tour time
       </span>
@@ -70,7 +70,7 @@ export function TourCountdown({ preferredDate, preferredTime, compact }: TourCou
   if (compact) {
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md">
-        <Timer className="h-3 w-3 text-slate-400" />
+        <Timer className="h-3 w-3 text-slate-500" />
         {parts.map((p, i) => (
           <span key={p.label}>
             {i > 0 && ' '}
@@ -83,13 +83,13 @@ export function TourCountdown({ preferredDate, preferredTime, compact }: TourCou
 
   return (
     <div className="flex items-center gap-1.5">
-      <Timer className="h-3 w-3 text-slate-400" />
+      <Timer className="h-3 w-3 text-slate-500" />
       <div className="flex items-center gap-1">
         {parts.map((p, i) => (
           <span key={p.label} className="inline-flex items-baseline gap-0.5">
             {i > 0 && <span className="text-slate-300 text-[10px]">:</span>}
             <span className="text-xs font-bold text-slate-700 tabular-nums">{p.value}</span>
-            <span className="text-[10px] text-slate-400 font-medium">{p.label}</span>
+            <span className="text-[10px] text-slate-500 font-medium">{p.label}</span>
           </span>
         ))}
       </div>

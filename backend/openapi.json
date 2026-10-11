@@ -1615,6 +1615,11 @@
             "title": "Rating",
             "type": "number"
           },
+          "review_count": {
+            "default": 0,
+            "title": "Review Count",
+            "type": "integer"
+          },
           "room_type": {
             "anyOf": [
               {
@@ -7604,6 +7609,11 @@
             "default": 0.0,
             "title": "Rating",
             "type": "number"
+          },
+          "review_count": {
+            "default": 0,
+            "title": "Review Count",
+            "type": "integer"
           },
           "room_type": {
             "anyOf": [

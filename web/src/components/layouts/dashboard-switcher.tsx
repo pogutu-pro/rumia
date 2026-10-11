@@ -75,7 +75,7 @@ export function DashboardSwitcher({
         className={cn(
           'flex items-center justify-center w-9 h-9 rounded-xl transition-colors shrink-0',
           active
-            ? 'bg-emerald-600 text-white shadow-sm'
+            ? 'bg-primary text-white shadow-sm'
             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100',
         )}
       >

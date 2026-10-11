@@ -45,7 +45,7 @@ export function GestureTutorial() {
         transition: fading ? "opacity 400ms ease-out" : "opacity 300ms ease-in",
       }}
     >
-      <div className="flex items-center gap-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 whitespace-nowrap select-none">
+      <div className="flex items-center gap-2.5 bg-gradient-to-r from-primary to-emerald-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 whitespace-nowrap select-none">
         <svg
           className="swipe-hint-icon shrink-0"
           width="18"

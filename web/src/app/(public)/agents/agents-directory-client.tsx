@@ -75,7 +75,7 @@ function FilterContent({
           type="checkbox"
           checked={verifiedOnly}
           onChange={(e) => onVerifiedOnlyChange(e.target.checked)}
-          className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+          className="h-5 w-5 rounded border-slate-300 text-primary focus:ring-emerald-500"
         />
         <span className="text-sm font-bold text-slate-700">Verified agents only</span>
       </label>
@@ -102,7 +102,7 @@ function FilterContent({
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all',
                 selectedAreas.includes(area)
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                  ? 'bg-emerald-50 border-emerald-300 text-primary'
                   : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300',
               )}
             >
@@ -123,7 +123,7 @@ function FilterContent({
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all',
                 selectedLanguages.includes(lang)
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                  ? 'bg-emerald-50 border-emerald-300 text-primary'
                   : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300',
               )}
             >
@@ -137,7 +137,7 @@ function FilterContent({
         <button
           type="button"
           onClick={handleClear}
-          className="text-sm font-bold text-emerald-600 hover:text-emerald-700"
+          className="text-sm font-bold text-primary hover:text-primary"
         >
           Clear all filters
         </button>
@@ -249,7 +249,7 @@ export function AgentsDirectoryClient({ agents }: AgentsDirectoryClientProps) {
                 <SlidersHorizontal className="h-4 w-4" />
                 Filters
                 {(selectedAreas.length > 0 || selectedLanguages.length > 0 || verifiedOnly) && (
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold">
                     {selectedAreas.length + selectedLanguages.length + (verifiedOnly ? 1 : 0)}
                   </span>
                 )}
@@ -289,13 +289,13 @@ export function AgentsDirectoryClient({ agents }: AgentsDirectoryClientProps) {
               <div className="text-center py-20 bg-white border border-slate-100 rounded-2xl">
                 <div className="text-5xl mb-4">🔍</div>
                 <p className="text-lg font-bold text-slate-700">No agents match your filters</p>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-slate-500 mt-1">
                   Try adjusting your search or filter criteria
                 </p>
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-4 text-sm font-bold text-emerald-600 hover:text-emerald-700"
+                  className="mt-4 text-sm font-bold text-primary hover:text-primary"
                 >
                   Clear all filters
                 </button>

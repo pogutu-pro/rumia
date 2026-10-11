@@ -31,7 +31,7 @@ function RumiaLogoLabelFallback({ className }: { className?: string }) {
       <h1
         className={cn(
           'text-6xl md:text-8xl font-black tracking-tighter',
-          'bg-gradient-to-r from-primary via-emerald-600 to-primary bg-clip-text text-transparent',
+          'bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent',
           'animate-in fade-in slide-in-from-bottom-4 duration-700',
           'drop-shadow-sm'
         )}
@@ -43,7 +43,7 @@ function RumiaLogoLabelFallback({ className }: { className?: string }) {
         Rumia
       </h1>
       <div
-        className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-emerald-600/20 blur-2xl -z-10 animate-pulse"
+        className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/20 blur-2xl -z-10 animate-pulse"
         aria-hidden="true"
       />
     </div>
@@ -265,7 +265,7 @@ export function RumiaLogoLabel({
       <h1
         className={cn(
           variants[variant],
-          'bg-gradient-to-r from-primary via-emerald-600 to-primary bg-clip-text text-transparent',
+          'bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent',
           'animate-in fade-in slide-in-from-bottom-4 duration-700',
           'drop-shadow-sm'
         )}
@@ -278,7 +278,7 @@ export function RumiaLogoLabel({
       </h1>
       {variant === 'hero' && (
         <div
-          className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-emerald-600/20 blur-2xl -z-10 animate-pulse"
+          className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/20 blur-2xl -z-10 animate-pulse"
           aria-hidden="true"
         />
       )}

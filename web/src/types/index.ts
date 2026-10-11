@@ -82,6 +82,8 @@ export interface Listing {
   sort_order?: number | null;
   sort_position?: number | null;
   rating?: number | null;
+  /** Published reviews behind `rating`. */
+  review_count?: number | null;
   views?: number | null;
   county?: string | null;
   slug?: string | null;

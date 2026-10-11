@@ -65,7 +65,7 @@ export function FeedbackTableClient({ feedback }: FeedbackTableClientProps) {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             type="text"
             placeholder="Search messages, names, or emails..."
@@ -90,7 +90,7 @@ export function FeedbackTableClient({ feedback }: FeedbackTableClientProps) {
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm px-5 py-12 text-center">
           <MessageSquare className="h-8 w-8 text-slate-300 mx-auto mb-3" />
-          <p className="text-sm text-slate-400 font-medium">No feedback to show.</p>
+          <p className="text-sm text-slate-500 font-medium">No feedback to show.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -106,7 +106,7 @@ export function FeedbackTableClient({ feedback }: FeedbackTableClientProps) {
                   className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-slate-50 transition-colors"
                 >
                   <div className="shrink-0 mt-0.5">
-                    <MessageSquare className="h-4 w-4 text-slate-400" />
+                    <MessageSquare className="h-4 w-4 text-slate-500" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -117,21 +117,21 @@ export function FeedbackTableClient({ feedback }: FeedbackTableClientProps) {
                         {f.user_name ?? f.user_email ?? 'Anonymous'}
                       </span>
                       {f.user_email && f.user_name && (
-                        <span className="text-xs text-slate-400">{f.user_email}</span>
+                        <span className="text-xs text-slate-500">{f.user_email}</span>
                       )}
                     </div>
                     <p className={`text-sm text-slate-900 mt-1 ${isOpen ? '' : 'line-clamp-2'}`}>
                       {f.message}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1.5">
+                    <p className="text-xs text-slate-500 mt-1.5">
                       {new Date(f.created_at).toLocaleString()}
                     </p>
                   </div>
                   <div className="shrink-0 mt-1">
                     {isOpen ? (
-                      <ChevronUp className="h-4 w-4 text-slate-400" />
+                      <ChevronUp className="h-4 w-4 text-slate-500" />
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                      <ChevronDown className="h-4 w-4 text-slate-500" />
                     )}
                   </div>
                 </button>

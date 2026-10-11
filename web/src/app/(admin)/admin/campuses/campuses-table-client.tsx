@@ -148,7 +148,7 @@ export function CampusesTableClient({
                           <button
                             disabled={isPending}
                             onClick={() => handleActivate(campus.id)}
-                            className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50"
+                            className="text-sm font-medium text-primary hover:text-primary transition-colors disabled:opacity-50"
                           >
                             Restore
                           </button>
@@ -157,7 +157,7 @@ export function CampusesTableClient({
                             <button
                               disabled={isPending}
                               onClick={() => handleActivate(campus.id)}
-                              className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50"
+                              className="text-sm font-medium text-primary hover:text-primary transition-colors disabled:opacity-50"
                             >
                               Activate
                             </button>
@@ -174,7 +174,7 @@ export function CampusesTableClient({
                             <button
                               disabled={isPending}
                               onClick={() => handleDeactivate(campus.id)}
-                              className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors disabled:opacity-50"
+                              className="text-sm font-medium text-amber-700 hover:text-amber-700 transition-colors disabled:opacity-50"
                             >
                               Deactivate
                             </button>

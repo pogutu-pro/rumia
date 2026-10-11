@@ -28,8 +28,8 @@ export function PushNotificationsCard() {
     <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-6 shadow-xs">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="space-y-1">
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
               {isSubscribed ? (
                 <Bell className="h-4 w-4" />
               ) : (
@@ -37,7 +37,7 @@ export function PushNotificationsCard() {
               )}
             </span>
             Notifications
-          </h3>
+          </h2>
           <p className="text-xs text-slate-500 max-w-md">
             {blocked
               ? 'Notifications are blocked in your browser settings. Re-enable them from the address bar to get alerts.'
@@ -54,7 +54,7 @@ export function PushNotificationsCard() {
               className={`px-4 h-10 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
                 isSubscribed
                   ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                  : 'bg-primary text-white hover:bg-primary/90'
               }`}
             >
               {isSubscribed ? 'Disable' : 'Enable'}

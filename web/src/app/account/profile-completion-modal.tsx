@@ -314,7 +314,7 @@ requirePhone = true,
       <Button
         type="submit"
         disabled={isSaving}
-        className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl"
+        className="w-full h-12 bg-ink hover:opacity-90 text-white font-bold rounded-xl"
       >
         {isSaving ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -344,7 +344,7 @@ requirePhone = true,
               <button
                 type="button"
                 onClick={onDismiss}
-                className="text-xs font-medium text-slate-500 hover:text-slate-700"
+                className="text-xs font-medium text-ink-muted hover:text-slate-700"
               >
                 Complete later
               </button>
@@ -404,7 +404,7 @@ requirePhone = true,
 
                   {/* Suggestions dropdown (simple substring match) */}
                   {suggestionsVisible && (
-                    <div className="absolute left-5 right-5 mt-2 bg-white border border-gray-200 rounded shadow z-50 max-h-40 overflow-y-auto">
+                    <div className="absolute left-5 right-5 mt-2 bg-raised border border-gray-200 rounded shadow z-50 max-h-40 overflow-y-auto">
                       {campuses
                         .filter((c) =>
                           campusInput.trim().length > 0
@@ -460,7 +460,7 @@ requirePhone = true,
 
                   {/* Suggestions dropdown (simple substring match) */}
                   {suggestionsVisible && campusInput.trim().length > 0 && (
-                    <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded shadow z-50 max-h-40 overflow-y-auto">
+                    <div className="absolute left-0 right-0 mt-2 bg-raised border border-gray-200 rounded shadow z-50 max-h-40 overflow-y-auto">
                       {campuses
                         .filter((c) =>
                           c.name

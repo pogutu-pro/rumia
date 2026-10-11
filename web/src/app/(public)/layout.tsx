@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { PublicHeader } from '@/components/layouts/public-header';
+import { AppShell } from '@/components/shell';
+import { HomeVideoDrawer } from '@/components/videos/video-drawer';
 import { Footer } from '@/components/layouts/public-footer';
 import { getCampusBySlug } from '@/lib/data/campuses';
 import { ContactFollowUp } from '@/components/contact/contact-follow-up';
@@ -14,12 +15,13 @@ export default async function PublicLayout({ children }: LayoutProps) {
 
   return (
     <CampusProvider campus={campus}>
-      <div className="flex min-h-screen flex-col">
-        <PublicHeader />
-        <main className="flex-1">{children}</main>
-        <Footer whatsappNumber={campus.whatsapp_number} />
+      <AppShell rightPanel={<HomeVideoDrawer />}>
+        <div className="flex min-h-[calc(100dvh-var(--shell-header-h))] flex-col">
+          <div className="flex-1">{children}</div>
+          <Footer whatsappNumber={campus.whatsapp_number} />
+        </div>
         <ContactFollowUp />
-      </div>
+      </AppShell>
     </CampusProvider>
   );
 }

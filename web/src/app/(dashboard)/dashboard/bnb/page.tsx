@@ -31,7 +31,7 @@ export default async function BnbDashboardPage() {
           </Link>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">RumiaBnB</h1>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-primary text-[10px] font-bold uppercase tracking-wider">
               Short stays
             </span>
           </div>

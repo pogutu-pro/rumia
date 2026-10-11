@@ -162,11 +162,11 @@ export default function AssignManagerSheet({
                         onClick={() => handleChoose(candidate)}
                         className="w-full flex items-start gap-3 p-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0"
                       >
-                        <span className="mt-0.5 text-emerald-600"><UserCheck className="w-4 h-4" /></span>
+                        <span className="mt-0.5 text-primary"><UserCheck className="w-4 h-4" /></span>
                         <span>
                           <span className="block text-sm font-semibold text-slate-900">{candidate.full_name}</span>
                           <span className="block text-xs text-slate-500">{candidate.email}</span>
-                          <span className="block text-xs text-slate-400 mt-0.5">{candidate.campus_name}</span>
+                          <span className="block text-xs text-slate-500 mt-0.5">{candidate.campus_name}</span>
                         </span>
                       </button>
                     ))
@@ -255,7 +255,7 @@ export default function AssignManagerSheet({
 
           {!selected && initialManager && (
             <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-100 p-3">
-              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
               <p className="text-xs text-amber-700">
                 Reassign the existing manager below to a new scope.
               </p>

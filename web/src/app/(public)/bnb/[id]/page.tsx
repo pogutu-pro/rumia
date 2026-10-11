@@ -20,6 +20,7 @@ import { bnbApi } from '@/lib/api/bnb';
 import { ImageGallery } from '@/app/(public)/listing/[id]/image-gallery';
 import { AmenitiesGrid } from '@/app/(public)/listing/[id]/amenities-grid';
 import { ReservationCard } from './reservation-card';
+import { ContextBackLink } from '@/components/shell/nav-history';
 import { SaveButton } from '@/components/ui/save-button';
 import { ShareListingButton } from '@/components/ui/share-listing-button';
 import { formatCurrency } from '@/lib/utils/currency';
@@ -148,15 +149,14 @@ export default async function BnbDetailPage({ params }: PageProps) {
   return (
     <div className="relative min-h-screen bg-white pb-24 md:pb-16 font-sans">
       {/* Top bar */}
-      <div className="border-b border-slate-100 bg-white sticky top-0 z-30 hidden md:block">
+      <div className="border-b border-slate-100 bg-white sticky top-[var(--shell-header-h)] z-30 hidden md:block">
         <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
-          <Link
-            href="/bnb"
+          <ContextBackLink fallbackHref="/bnb"
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to stays
-          </Link>
+          </ContextBackLink>
           <div className="flex items-center gap-4">
             <ShareListingButton
               listing={{
@@ -174,13 +174,12 @@ export default async function BnbDetailPage({ params }: PageProps) {
 
       {/* Mobile back + actions */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 pt-4 md:hidden">
-        <Link
-          href="/bnb"
+        <ContextBackLink fallbackHref="/bnb"
           className="pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
           aria-label="Back to stays"
         >
           <ArrowLeft className="h-5 w-5" />
-        </Link>
+        </ContextBackLink>
         <div className="pointer-events-auto flex items-center gap-2">
           <SaveButton listingId={String(listing.id)} variant="icon" />
           <ShareListingButton
@@ -212,7 +211,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
                   {listingType}
                 </span>
                 {listing.verified && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-primary text-xs font-bold">
                     <BadgeCheck className="h-3.5 w-3.5" /> Verified
                   </span>
                 )}
@@ -223,7 +222,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
               </h1>
 
               <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-600">
-                <MapPin className="h-4 w-4 text-slate-400" />
+                <MapPin className="h-4 w-4 text-slate-500" />
                 <span>{listing.location}</span>
                 {listing.area && listing.area !== listing.location && (
                   <>
@@ -238,19 +237,19 @@ export default async function BnbDetailPage({ params }: PageProps) {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 pt-1">
                   {bnb.max_guests && (
                     <span className="flex items-center gap-1.5">
-                      <Users className="h-4 w-4 text-slate-400" />
+                      <Users className="h-4 w-4 text-slate-500" />
                       {bnb.max_guests} guest{bnb.max_guests !== 1 ? 's' : ''}
                     </span>
                   )}
                   {bnb.bedrooms != null && (
                     <span className="flex items-center gap-1.5">
-                      <BedDouble className="h-4 w-4 text-slate-400" />
+                      <BedDouble className="h-4 w-4 text-slate-500" />
                       {bnb.bedrooms} bedroom{bnb.bedrooms !== 1 ? 's' : ''}
                     </span>
                   )}
                   {bnb.bathrooms != null && (
                     <span className="flex items-center gap-1.5">
-                      <Bath className="h-4 w-4 text-slate-400" />
+                      <Bath className="h-4 w-4 text-slate-500" />
                       {bnb.bathrooms} bathroom{bnb.bathrooms !== 1 ? 's' : ''}
                     </span>
                   )}
@@ -274,14 +273,14 @@ export default async function BnbDetailPage({ params }: PageProps) {
               <>
                 <div className="flex items-center justify-between gap-4 py-1">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-base font-bold uppercase text-emerald-700">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-base font-bold uppercase text-primary">
                       {agent.name.substring(0, 2)}
                     </div>
                     <div className="min-w-0">
                       {agentSlug ? (
                         <Link
                           href={`/agents/${agentSlug}`}
-                          className="block truncate font-bold leading-tight text-slate-900 hover:text-emerald-600"
+                          className="block truncate font-bold leading-tight text-slate-900 hover:text-primary"
                         >
                           Hosted by {agent.name}
                         </Link>
@@ -291,7 +290,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
                         </p>
                       )}
                       <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-slate-500">
-                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />{' '}
+                        <ShieldCheck className="h-3.5 w-3.5 text-primary" />{' '}
                         Rumia host
                       </span>
                     </div>
@@ -299,7 +298,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
                   {agentSlug && (
                     <Link
                       href={`/agents/${agentSlug}`}
-                      className="shrink-0 text-sm font-bold text-slate-700 underline underline-offset-4 hover:text-emerald-700"
+                      className="shrink-0 text-sm font-bold text-slate-700 underline underline-offset-4 hover:text-primary"
                     >
                       View profile
                     </Link>
@@ -367,9 +366,9 @@ export default async function BnbDetailPage({ params }: PageProps) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {bnb?.available_from && (
                       <div className="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
-                        <CalendarDays className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <CalendarDays className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             Available from
                           </p>
                           <p className="text-sm font-semibold text-slate-900 mt-0.5">
@@ -380,9 +379,9 @@ export default async function BnbDetailPage({ params }: PageProps) {
                     )}
                     {bnb?.available_until && (
                       <div className="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
-                        <CalendarDays className="h-5 w-5 text-slate-400 shrink-0 mt-0.5" />
+                        <CalendarDays className="h-5 w-5 text-slate-500 shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             Available until
                           </p>
                           <p className="text-sm font-semibold text-slate-900 mt-0.5">
@@ -393,9 +392,9 @@ export default async function BnbDetailPage({ params }: PageProps) {
                     )}
                     {bnb?.check_in_time && (
                       <div className="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
-                        <Clock className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             Check-in
                           </p>
                           <p className="text-sm font-semibold text-slate-900 mt-0.5">
@@ -406,9 +405,9 @@ export default async function BnbDetailPage({ params }: PageProps) {
                     )}
                     {bnb?.check_out_time && (
                       <div className="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
-                        <Clock className="h-5 w-5 text-slate-400 shrink-0 mt-0.5" />
+                        <Clock className="h-5 w-5 text-slate-500 shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             Check-out
                           </p>
                           <p className="text-sm font-semibold text-slate-900 mt-0.5">
@@ -419,9 +418,9 @@ export default async function BnbDetailPage({ params }: PageProps) {
                     )}
                     {bnb?.advance_notice_hours != null && (
                       <div className="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
-                        <Clock className="mt-0.5 h-5 w-5 shrink-0 text-slate-400" />
+                        <Clock className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                             Advance notice
                           </p>
                           <p className="mt-0.5 text-sm font-semibold text-slate-900">
@@ -476,7 +475,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
                     {houseRules.visitors === true && (
                       <RuleRow
                         icon={
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
                         }
                         label="Visitors allowed"
                       />
@@ -484,7 +483,7 @@ export default async function BnbDetailPage({ params }: PageProps) {
                     {houseRules.children === true && (
                       <RuleRow
                         icon={
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
                         }
                         label="Children welcome"
                       />

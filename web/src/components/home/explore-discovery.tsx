@@ -1,14 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, BedDouble, Building2, House, MapPin } from 'lucide-react';
+import { BedDouble, Building2, House, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import {
-  ExploreListingCard,
-  type ExploreListing,
-} from './explore-listing-card';
+import type { ExploreListing } from './explore-listing-card';
+import { ListingSection } from './listing-section';
+import { formatAreaName, normaliseArea } from '@/lib/utils/area-label';
 
 export interface ExploreZone {
   name: string;
@@ -24,7 +22,7 @@ const CATEGORIES: {
   Icon: typeof BedDouble;
 }[] = [
   { key: 'hostel', label: 'Hostels', Icon: BedDouble },
-  { key: 'short_stay', label: 'RumiaBnB', Icon: House },
+  { key: 'short_stay', label: 'Short stays', Icon: House },
   { key: 'apartment', label: 'Apartments', Icon: Building2 },
 ];
 
@@ -74,10 +72,10 @@ export function ExploreDiscovery({
       (item) => (item.property_type ?? 'hostel') === category,
     );
     if (selectedZone) {
-      const target = selectedZone.toLowerCase().trim();
+      const target = normaliseArea(selectedZone);
       result = result.filter((item) => {
-        const area = (item.area ?? '').toLowerCase().trim();
-        const loc = (item.location ?? '').toLowerCase().trim();
+        const area = normaliseArea(item.area);
+        const loc = normaliseArea(item.location);
         return area === target || loc.includes(target) || area.includes(target);
       });
     }
@@ -96,14 +94,14 @@ export function ExploreDiscovery({
       ? 'DeKUT'
       : (resolvedCampus?.name ?? ''));
   const sectionTitleShort = selectedZone
-    ? `${categoryLabel} in ${selectedZone}`
+    ? `${categoryLabel} in ${formatAreaName(selectedZone)}`
     : `${categoryLabel} near ${shortName}`;
   const sectionTitleFull = selectedZone
-    ? `${categoryLabel} in ${selectedZone}`
-    : `${categoryLabel} near ${resolvedCampus?.name ?? shortName}`;
+    ? `${categoryLabel} in ${formatAreaName(selectedZone)}`
+    : `${categoryLabel} near ${shortName}`;
 
   const sectionSubtitle = useMemo(() => {
-    if (selectedZone) return `Verified options in ${selectedZone}`;
+    if (selectedZone) return `Listings in ${formatAreaName(selectedZone)}`;
     if (category === 'hostel') return 'Student rooms near campus';
     if (category === 'apartment') return `Monthly rentals in ${city}`;
     return `Short stays in ${city}`;
@@ -124,9 +122,9 @@ export function ExploreDiscovery({
   }, [selectedZone, category]);
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 lg:px-8">
-      <div className="pt-5 sm:pt-6">
-        <div className="flex gap-2">
+    <section className="w-full">
+      <div className="px-4 pt-5 lg:px-8">
+        <div role="group" aria-label="Property category" className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {CATEGORIES.map(({ key, label, Icon }) => {
             const active = category === key;
             return (
@@ -139,22 +137,18 @@ export function ExploreDiscovery({
                     return;
                   }
                   setCategory(key);
+                  // The area chips belong to Hostels only, so drop any area filter when leaving it.
+                  if (key !== 'hostel') setSelectedZone(null);
                 }}
                 aria-pressed={active}
                 className={cn(
-                  'inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border px-3 py-3 text-sm font-semibold transition-colors sm:flex-none sm:px-4',
+                  'inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                   active
-                    ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50',
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                    : 'border-line bg-raised text-ink hover:bg-subtle',
                 )}
               >
-                <Icon
-                  className={cn(
-                    'h-4 w-4',
-                    active ? 'text-white' : 'text-slate-500',
-                  )}
-                  strokeWidth={2}
-                />
+                <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
                 {label}
               </button>
             );
@@ -162,11 +156,12 @@ export function ExploreDiscovery({
         </div>
       </div>
 
-      {zones.length > 0 && (
-        <div className="mt-6 border-t border-slate-100 pt-5">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-slate-900">
-              <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+      {/* Campus areas apply to hostels only; other categories are not tied to a campus. */}
+      {category === 'hostel' && zones.length > 0 && (
+        <div className="px-4 pt-5 lg:px-8">
+          <div className="mb-2 flex items-center justify-between gap-4">
+            <h2 className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-ink">
+              <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden />
               <span>
                 Explore near <ResponsiveCampusName campus={resolvedCampus} />
               </span>
@@ -175,23 +170,23 @@ export function ExploreDiscovery({
               <button
                 type="button"
                 onClick={() => setSelectedZone(null)}
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                className="text-xs font-semibold text-primary hover:underline"
               >
                 Clear
               </button>
             )}
           </div>
 
-          <div className="scrollbar-none flex gap-2 overflow-x-auto pb-1 pr-4 lg:gap-1.5 lg:px-0">
+          <div className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
             <button
               type="button"
               onClick={() => setSelectedZone(null)}
               aria-pressed={selectedZone === null}
               className={cn(
-                'min-h-10 shrink-0 rounded-full px-4 py-2.5 text-[13px] font-medium transition-colors',
+                'min-h-10 shrink-0 rounded-full px-4 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 selectedZone === null
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900',
+                  ? 'bg-ink text-white'
+                  : 'bg-subtle text-ink-muted hover:text-ink',
               )}
             >
               All areas
@@ -205,13 +200,13 @@ export function ExploreDiscovery({
                   onClick={() => setSelectedZone(active ? null : zone.name)}
                   aria-pressed={active}
                   className={cn(
-                    'min-h-10 shrink-0 rounded-full px-4 py-2.5 text-[13px] font-medium transition-colors',
+                    'min-h-10 shrink-0 rounded-full px-4 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     active
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900',
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-subtle text-ink-muted hover:text-ink',
                   )}
                 >
-                  {zone.name}
+                  {formatAreaName(zone.name)}
                 </button>
               );
             })}
@@ -219,49 +214,37 @@ export function ExploreDiscovery({
         </div>
       )}
 
-      <div className="mt-8 sm:mt-10">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="text-[19px] font-bold leading-7 tracking-tight text-slate-900 text-balance sm:text-xl sm:leading-7">
+      {filtered.length > 0 ? (
+        <ListingSection
+          minItems={1}
+          title={
+            <>
               <span className="md:hidden">{sectionTitleShort}</span>
               <span className="hidden md:inline">{sectionTitleFull}</span>
-            </h3>
-            <p className="mt-2 text-sm font-medium leading-5 text-slate-500">
-              {sectionSubtitle}
-            </p>
-          </div>
-          <Link
-            href={seeAllHref}
-            className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full px-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
-          >
-            See all <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        {filtered.length > 0 ? (
-          <div
-            aria-label="Scrollable property listings"
-            className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 pr-4 lg:gap-4 lg:px-0"
-          >
-            {filtered.map((item) => (
-              <ExploreListingCard key={item.id} item={item} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
-            <p className="text-sm font-medium text-slate-600">
-              No {categoryLabel.toLowerCase()} in {selectedZone} right now.
-            </p>
+            </>
+          }
+          subtitle={sectionSubtitle}
+          seeAllHref={seeAllHref}
+          items={filtered}
+        />
+      ) : (
+        <div className="mx-4 mt-8 rounded-2xl border border-line bg-subtle px-6 py-8 text-center lg:mx-8">
+          <p className="text-sm font-medium text-ink-muted">
+            {selectedZone
+              ? `No ${categoryLabel.toLowerCase()} in ${formatAreaName(selectedZone)} right now.`
+              : `No ${categoryLabel.toLowerCase()} listed right now.`}
+          </p>
+          {selectedZone && (
             <button
               type="button"
               onClick={() => setSelectedZone(null)}
-              className="mt-3 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+              className="mt-3 rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white hover:opacity-90"
             >
               Show all areas
             </button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

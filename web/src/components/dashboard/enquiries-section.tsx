@@ -118,7 +118,7 @@ export function EnquiriesSection() {
               ) : (
                 <div className="flex flex-wrap gap-1.5" role="group" aria-label={`What happened with ${q.ref_code}`}>
                   {busy === q.ref_code ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" aria-label="Saving" />
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-500" aria-label="Saving" />
                   ) : (
                     OUTCOMES.map(([value, label]) => (
                       <button

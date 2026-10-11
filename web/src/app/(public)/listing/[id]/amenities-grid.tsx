@@ -28,7 +28,7 @@ export function AmenitiesGrid({ amenities }: AmenitiesGridProps) {
         const hiddenCount = expanded ? 0 : Math.max(0, cat.items.length - COLLAPSE_THRESHOLD);
         return (
           <div key={cat.id} className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               {cat.label}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-4">

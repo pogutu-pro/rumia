@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
-from sqlalchemy import func, select, union_all
+from sqlalchemy import Numeric, cast, func, select, union_all
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +14,7 @@ from app.core.security import AuthenticatedUser, check_campus_scope
 from app.features.analytics.models import ListingView, ListingViewDailyRollup
 from app.features.campuses.models import Campus
 from app.features.profiles.models import UserProfile
+from app.features.reviews.models import Review
 from app.features.listings.models import Agent, Listing, ListingImage, ListingRoomType
 from app.features.listings.schemas import ListingCreate, ListingImageCreate, ListingRoomTypeCreate, ListingUpdate
 from app.features.listings.verification import verify_listing
@@ -70,6 +71,27 @@ class ListingService:
             .group_by(event_counts.c.listing_id)
             .subquery()
         )
+
+    @staticmethod
+    async def get_review_stats(db: AsyncSession, listing_ids: List[str]) -> dict:
+        """Average rating (one decimal) and review count per listing, from published reviews.
+
+        Same definition as the review summary on the property page (`get_review_summary`), computed for a whole
+        page of listings in one query. Listings with no published reviews are absent from the result.
+        """
+        if not listing_ids:
+            return {}
+        stmt = (
+            select(
+                Review.listing_id,
+                func.round(cast(func.avg(Review.rating), Numeric), 1),
+                func.count(Review.id),
+            )
+            .where(Review.listing_id.in_(listing_ids), Review.status == "published")
+            .group_by(Review.listing_id)
+        )
+        rows = (await db.execute(stmt)).all()
+        return {str(listing_id): (float(avg), int(count)) for listing_id, avg, count in rows}
 
     @staticmethod
     async def get_listings_feed(

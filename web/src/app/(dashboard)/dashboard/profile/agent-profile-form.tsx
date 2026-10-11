@@ -55,7 +55,7 @@ function ChipSelect({
             className={cn(
               'px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all',
               selected.includes(option)
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                ? 'bg-emerald-50 border-emerald-300 text-primary'
                 : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300',
             )}
             aria-pressed={selected.includes(option)}
@@ -292,7 +292,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all',
                 helpingSince === year
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                  ? 'bg-emerald-50 border-emerald-300 text-primary'
                   : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300',
               )}
               aria-pressed={helpingSince === year}
@@ -316,7 +316,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
               placeholder="https://yoursite.com"
               type="url"
             />
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Your personal website, portfolio, or LinkedIn profile
             </p>
           </div>

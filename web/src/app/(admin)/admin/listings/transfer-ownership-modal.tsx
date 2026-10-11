@@ -125,7 +125,7 @@ export function TransferOwnershipModal({
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <Input
                 placeholder="Search agents..."
                 value={search}
@@ -138,7 +138,7 @@ export function TransferOwnershipModal({
             {/* Agent list */}
             <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-lg divide-y">
               {filteredAgents.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-6">
+                <p className="text-sm text-slate-500 text-center py-6">
                   {search
                     ? 'No agents match your search.'
                     : 'No other active agents available.'}
@@ -152,7 +152,7 @@ export function TransferOwnershipModal({
                     className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between group"
                   >
                     <span className="font-medium text-slate-900">{agent.name}</span>
-                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-colors" />
                   </button>
                 ))
               )}
@@ -199,7 +199,7 @@ export function TransferOwnershipModal({
               type="button"
               onClick={handleConfirm}
               disabled={isPending}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-primary hover:bg-primary/90"
             >
               {isPending ? (
                 <>

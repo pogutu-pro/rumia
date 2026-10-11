@@ -75,7 +75,7 @@ export function RatingSummary({ summary, className }: RatingSummaryProps) {
                   style={{ width: `${row.percentage * 100}%` }}
                 />
               </div>
-              <span className="w-6 shrink-0 text-xs font-semibold text-slate-400 tabular-nums">
+              <span className="w-6 shrink-0 text-xs font-semibold text-slate-500 tabular-nums">
                 {row.count}
               </span>
             </div>

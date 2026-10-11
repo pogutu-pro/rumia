@@ -66,8 +66,8 @@ export function CommissionsTableClient({ commissions, agents, totalPending, tota
           <p className="text-sm text-slate-500 mt-1">{commissions.length} commission{commissions.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <span className="font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg">Pending: KES {totalPending.toLocaleString()}</span>
-          <span className="font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg">Paid: KES {totalPaid.toLocaleString()}</span>
+          <span className="font-medium text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg">Pending: KES {totalPending.toLocaleString()}</span>
+          <span className="font-medium text-primary bg-emerald-50 px-3 py-1.5 rounded-lg">Paid: KES {totalPaid.toLocaleString()}</span>
         </div>
       </div>
 
@@ -101,9 +101,9 @@ export function CommissionsTableClient({ commissions, agents, totalPending, tota
           </thead>
           <tbody className="divide-y divide-slate-50">
             {commissions.length === 0 ? (
-              <tr><td colSpan={7} className="text-sm text-slate-400 text-center px-5 py-8">No commission records.</td></tr>
+              <tr><td colSpan={7} className="text-sm text-slate-500 text-center px-5 py-8">No commission records.</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={7} className="text-sm text-slate-400 text-center px-5 py-8">No results match your filters.</td></tr>
+              <tr><td colSpan={7} className="text-sm text-slate-500 text-center px-5 py-8">No results match your filters.</td></tr>
             ) : filtered.map((c) => (
               <tr key={c.id} className="hover:bg-slate-50 transition-colors">
                 <td className="text-sm text-slate-700 px-5 py-4">{c.agents?.name ?? '—'}</td>
@@ -111,7 +111,7 @@ export function CommissionsTableClient({ commissions, agents, totalPending, tota
                 <td className="text-sm text-slate-700 px-5 py-4 font-medium">{c.amount.toLocaleString()}</td>
                 <td className="px-5 py-4">
                   {c.status === 'paid' ? (
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Paid</span>
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-primary">Paid</span>
                   ) : (
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700">Pending</span>
                   )}
@@ -134,9 +134,9 @@ export function CommissionsTableClient({ commissions, agents, totalPending, tota
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {commissions.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No commission records.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">No commission records.</div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-400 shadow-sm">No results match your filters.</div>
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 text-center text-sm text-slate-500 shadow-sm">No results match your filters.</div>
         ) : filtered.map((c) => (
           <div key={c.id} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-3">
             <div className="flex items-start justify-between">
@@ -145,14 +145,14 @@ export function CommissionsTableClient({ commissions, agents, totalPending, tota
                 <p className="text-xs text-slate-500 mt-0.5 truncate">{c.listings?.title ?? 'Unknown'}</p>
               </div>
               {c.status === 'paid' ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Paid</span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-primary">Paid</span>
               ) : (
                 <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Pending</span>
               )}
             </div>
             <div className="flex items-center justify-between">
               <p className="text-base font-bold text-slate-900">KES {c.amount.toLocaleString()}</p>
-              <p className="text-xs text-slate-400">{new Date(c.created_at).toLocaleDateString()}</p>
+              <p className="text-xs text-slate-500">{new Date(c.created_at).toLocaleDateString()}</p>
             </div>
             {c.status === 'pending' && (
               <Button size="sm" variant="outline" disabled={pendingId === c.id} onClick={() => handleMarkPaid(c.id)} className="rounded-lg text-xs h-9 w-full">
@@ -160,7 +160,7 @@ export function CommissionsTableClient({ commissions, agents, totalPending, tota
               </Button>
             )}
             {c.status === 'paid' && c.paid_at && (
-              <p className="text-xs text-slate-400">Paid on {new Date(c.paid_at).toLocaleDateString()}</p>
+              <p className="text-xs text-slate-500">Paid on {new Date(c.paid_at).toLocaleDateString()}</p>
             )}
           </div>
         ))}

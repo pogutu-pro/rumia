@@ -28,7 +28,7 @@ export function TodayPanel() {
   return (
     <section aria-labelledby="today-heading" className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5">
       <div className="flex items-center gap-2">
-        <TriangleAlert className="h-4 w-4 text-amber-600" aria-hidden="true" />
+        <TriangleAlert className="h-4 w-4 text-amber-700" aria-hidden="true" />
         <h2 id="today-heading" className="text-sm font-bold text-slate-900">
           Needs your attention
         </h2>
