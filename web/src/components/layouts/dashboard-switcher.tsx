@@ -47,9 +47,8 @@ const SITE_LINK: DashboardSwitcherLink = {
  * Desktop: labelled pills for every dashboard the user can access (excluding
  * the one they are already on).
  *
- * Mobile: a compact, horizontally scrollable icon bar with the current
- * dashboard highlighted and the current dashboard's section nav as icon
- * buttons — no dropdown required.
+ * Mobile: two horizontally scrollable rows of labelled chips (workspaces, then the
+ * current workspace's sections), each at least 44px tall. Primary navigation is the bottom bar.
  */
 export function DashboardSwitcher({
   links,
@@ -70,16 +69,17 @@ export function DashboardSwitcher({
       <Link
         key={link.href}
         href={link.href}
-        title={link.label}
-        aria-label={link.label}
+        aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex items-center justify-center w-9 h-9 rounded-xl transition-colors shrink-0',
+          'inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
           active
-            ? 'bg-primary text-white shadow-sm'
-            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100',
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-line bg-raised text-ink-muted active:bg-subtle',
         )}
       >
-        <Icon className="h-4.5 w-4.5" />
+        <Icon className="h-4 w-4 shrink-0" aria-hidden />
+        {link.label}
       </Link>
     );
   };
@@ -124,21 +124,22 @@ export function DashboardSwitcher({
           </nav>
         )}
 
-        <nav
-          aria-label="Dashboard navigation"
-          className="md:hidden flex items-center gap-0.5 overflow-x-auto scrollbar-hide py-2"
-        >
-          {mobileDashboards.map(iconButton)}
-          {sectionLinks.length > 0 && (
-            <>
-              <span
-                aria-hidden
-                className="mx-1.5 w-px h-6 bg-slate-200 shrink-0"
-              />
-              {sectionLinks.map(iconButton)}
-            </>
-          )}
-        </nav>
+        {mobileDashboards.length > 0 && (
+          <nav
+            aria-label="Workspaces"
+            className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide py-2"
+          >
+            {mobileDashboards.map(iconButton)}
+          </nav>
+        )}
+        {sectionLinks.length > 0 && (
+          <nav
+            aria-label="Sections"
+            className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide border-t border-line/70 py-2"
+          >
+            {sectionLinks.map(iconButton)}
+          </nav>
+        )}
       </div>
     </div>
   );
