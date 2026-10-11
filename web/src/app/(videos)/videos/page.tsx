@@ -13,7 +13,7 @@ export default function VideosPage() {
       {/* Preconnect to YouTube for faster poster and player loads */}
       <link rel="preconnect" href="https://www.youtube.com" />
       <link rel="preconnect" href="https://img.youtube.com" />
-      <div id="main-content" className="mx-auto h-[calc(100dvh-var(--shell-header-h))] max-w-md border-x border-line">
+      <div id="main-content" className="mx-auto h-[calc(100dvh-var(--shell-header-h)-var(--bottom-nav-h))] max-w-md border-x border-line">
         <h1 className="sr-only">Property video tours</h1>
         <VideoPanel variant="page" />
       </div>

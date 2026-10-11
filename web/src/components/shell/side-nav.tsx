@@ -19,7 +19,7 @@ export function BrandLink({ compact, onNavigate }: { compact?: boolean; onNaviga
       href="/"
       aria-label="Rumia home"
       onClick={onNavigate}
-      className="flex h-10 items-center gap-2 rounded-lg px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-1 lg:h-10 lg:min-w-0 lg:justify-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       <Image src="/images/logo/logo-icon.svg" alt="" width={28} height={28} priority unoptimized className="h-7 w-7 shrink-0" />
       {!compact && <span className="font-heading text-xl font-extrabold tracking-tight text-ink">Rumia</span>}

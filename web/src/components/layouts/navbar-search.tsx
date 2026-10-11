@@ -76,7 +76,7 @@ function IdleSearchPill({
         {displayQuery ? (
           <span className="truncate font-semibold text-slate-900">{displayQuery}</span>
         ) : (
-          <span className="font-medium text-slate-500">
+          <span className="block truncate font-medium text-slate-500">
             {isBnbPage ? 'Search stays, areas…' : 'Search hostels, areas…'}
           </span>
         )}

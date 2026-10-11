@@ -23,7 +23,7 @@ interface VideoPanelProps {
 }
 
 /** Height of the first screen: the viewport minus the shell header and the panel header. */
-const FIRST_SCREEN = 'h-[calc(100dvh-var(--shell-header-h)-3rem)]';
+const FIRST_SCREEN = 'h-[calc(100dvh-var(--shell-header-h)-var(--bottom-nav-h)-3rem)]';
 
 function ActiveVideoDetails({ listing }: { listing: Listing }) {
   const campus = useCampus();

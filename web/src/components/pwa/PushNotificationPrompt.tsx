@@ -27,8 +27,8 @@ export function PushNotificationPrompt() {
     <div
       role="region"
       aria-label="Enable notifications"
-      className="fixed left-0 right-0 z-50 p-4 pointer-events-none md:bottom-0"
-      style={{ bottom: "calc(4.25rem + env(safe-area-inset-bottom, 0px))" }}
+      className="fixed left-0 right-0 z-50 p-4 pointer-events-none"
+      style={{ bottom: "var(--bottom-nav-h)" }}
     >
       <div className="mx-auto max-w-lg rounded-2xl bg-white shadow-2xl shadow-black/15 border border-slate-200/80 overflow-hidden pointer-events-auto">
         <div className="relative p-4">

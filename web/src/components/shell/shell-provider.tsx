@@ -23,8 +23,6 @@ interface ShellContextValue {
   auth: AuthState;
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
-  mobileNavOpen: boolean;
-  setMobileNavOpen: (value: boolean) => void;
 }
 
 const ShellContext = React.createContext<ShellContextValue | null>(null);
@@ -47,7 +45,6 @@ function toShellUser(p: UserProfile): ShellUser {
 export function ShellProvider({ children }: { children: React.ReactNode }) {
   const [auth, setAuth] = React.useState<AuthState>({ status: 'loading' });
   const [collapsed, setCollapsedState] = React.useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
 
   React.useEffect(() => {
     try {
@@ -106,8 +103,8 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = React.useMemo(
-    () => ({ auth, collapsed, setCollapsed, mobileNavOpen, setMobileNavOpen }),
-    [auth, collapsed, setCollapsed, mobileNavOpen],
+    () => ({ auth, collapsed, setCollapsed }),
+    [auth, collapsed, setCollapsed],
   );
   return <ShellContext.Provider value={value}>{children}</ShellContext.Provider>;
 }

@@ -651,3 +651,18 @@
   .text-ink-muted { color: hsl(var(--ink-muted)); }
   .border-line { border-color: hsl(var(--line)); }
 }
+
+/* Mobile shell: header height and the fixed bottom bar. The bar sets data-bottom-nav on <html> while it is shown. */
+@media (min-width: 1024px) {
+  :root {
+    --shell-header-h: 4rem;
+  }
+}
+html[data-bottom-nav='on'] {
+  --bottom-nav-h: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 1024px) {
+  html[data-bottom-nav='on'] {
+    --bottom-nav-h: 0px;
+  }
+}

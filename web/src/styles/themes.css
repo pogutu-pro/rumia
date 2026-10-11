@@ -65,7 +65,8 @@
     --line: 220 13% 90%;           /* subtle borders */
     --shell-sidebar-w: 15rem;
     --shell-sidebar-w-collapsed: 4.5rem;
-    --shell-header-h: 4rem;
+    --shell-header-h: 3.5rem;      /* phones; 4rem from lg, see globals.css */
+    --bottom-nav-h: 0px;           /* set by html[data-bottom-nav] below lg; every fixed bottom layer sits above it */
 
     /* --- Visualization --- */
     --chart-1: 154 85% 30%;
