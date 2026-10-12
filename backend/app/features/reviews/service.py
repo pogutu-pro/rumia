@@ -80,7 +80,7 @@ class ReviewService:
         verified = bool(profile and profile.school_verified)
         if text_value and not verified:
             raise ForbiddenException(
-                "Only verified DeKUT students can write review text. You can still submit a rating."
+                "Only verified students can write review text. You can still submit a rating."
             )
 
         existing = await db.execute(
@@ -133,7 +133,7 @@ class ReviewService:
             if new_text and not review.text:
                 profile = await ReviewService._profile(db, user.id)
                 if not (profile and profile.school_verified):
-                    raise ForbiddenException("Only verified DeKUT students can add review text.")
+                    raise ForbiddenException("Only verified students can add review text.")
             review.text = new_text
         if data.rating is not None:
             review.rating = data.rating

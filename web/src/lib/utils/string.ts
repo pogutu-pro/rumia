@@ -9,10 +9,10 @@ export function slugify(text: string): string {
 
 /**
  * Generate a listing slug from hostel name + area keyword.
- * e.g. "Sunrise Court" + "dekut" → "sunrise-court-dekut"
+ * e.g. "Sunrise Court" + "boma" → "sunrise-court-boma"
  */
-export function generateListingSlug(name: string, area = 'dekut'): string {
-  return `${slugify(name)}-${slugify(area)}`;
+export function generateListingSlug(name: string, area = ''): string {
+  return area ? `${slugify(name)}-${slugify(area)}` : slugify(name);
 }
 
 /**

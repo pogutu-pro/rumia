@@ -7784,6 +7784,8 @@ export interface components {
             move_in_total?: number | null;
             /** Name */
             name: string;
+            /** Path */
+            path?: string | null;
             /** Place Name */
             place_name?: string | null;
             /** Price Period */
@@ -7898,6 +7900,8 @@ export interface components {
             area?: string | null;
             /** County */
             county?: string | null;
+            /** Property Type */
+            property_type?: string | null;
             /** Slug */
             slug: string;
             /** Updated At */

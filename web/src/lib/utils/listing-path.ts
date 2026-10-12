@@ -4,6 +4,7 @@ export function slugifySegment(value: string): string {
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
+    .replace(/['\u2019]/g, '') // King'ong'o -> kingongo, the same as the API and the place slug
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
@@ -28,15 +29,10 @@ export interface ListingPathInput {
  * WhatsApp, copy/paste and search engines. The slug alone identifies the listing.
  */
 export function listingPath(listing: ListingPathInput): string {
-  const market = slugifySegment(listing.county || 'nyeri') || 'nyeri';
+  const market = slugifySegment(listing.county || '');
+  const area = slugifySegment(listing.area || '');
+  // No county or area means no canonical place yet: use the short link, which resolves wherever the listing lives.
+  if (!market || !area) return `/p/${listing.slug ?? ''}`;
   const type = TYPE_SEGMENT[listing.property_type || 'hostel'] ?? TYPE_SEGMENT.hostel;
-  const area = slugifySegment(listing.area || 'dekut') || 'dekut';
   return `/${market}/${type}/${area}/${listing.slug ?? ''}`;
-}
-
-/** The pre-2026 URL shape. Only used to recognise old links and redirect them. */
-export function legacyListingPath(listing: ListingPathInput): string {
-  const county = slugifySegment(listing.county || 'nyeri') || 'nyeri';
-  const area = slugifySegment(listing.area || 'dekut') || 'dekut';
-  return `/hostels/${county}/${area}/${listing.slug ?? ''}`;
 }

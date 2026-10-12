@@ -15,12 +15,11 @@ import { AlertsList } from '../alerts-list';
 beforeEach(() => jest.clearAllMocks());
 
 describe('cardHref', () => {
-  it('puts the type, place and name in the URL', () => {
-    expect(cardHref({ kind: 'hostel', slug: 'green-view', place_name: 'Near Gate A' })).toBe('/nyeri/student-hostels/near-gate-a/green-view');
-    expect(cardHref({ kind: 'apartment', slug: 'oserian-1', place_name: 'Kamakwa' })).toBe('/nyeri/apartments/kamakwa/oserian-1');
+  it('uses the path the API gives, with the type, place and name', () => {
+    expect(cardHref({ slug: 'green-view', path: '/nyeri/student-hostels/near-gate-a/green-view' })).toBe('/nyeri/student-hostels/near-gate-a/green-view');
   });
-  it('sends short stays to the short-stays path', () => {
-    expect(cardHref({ kind: 'house', slug: 'cosy-house', place_name: 'Kamakwa' })).toBe('/nyeri/short-stays/kamakwa/cosy-house');
+  it('falls back to the short link when the place has no path yet', () => {
+    expect(cardHref({ slug: 'cosy-house', path: null })).toBe('/p/cosy-house');
   });
 });
 

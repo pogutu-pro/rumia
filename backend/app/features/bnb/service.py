@@ -30,7 +30,7 @@ class BnbService:
             property_type="short_stay",
             price=data.price,
             location=data.location,
-            county=data.county,
+            county=data.county or await ListingService.county_for_agent(db, agent),
             area=data.area,
             specific_location=data.specific_location,
             latitude=data.latitude,

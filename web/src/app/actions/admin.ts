@@ -1,5 +1,6 @@
 'use server';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { revalidatePath } from 'next/cache';
 import { ApiError } from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
@@ -261,7 +262,7 @@ export async function adminUpdateListingAction(
     };
     const listing = await listingsApi.updateServer(formData.listing_id, payload);
     for (const p of LISTING_PATHS) revalidatePath(p);
-    const url = `/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`;
+    const url = listingPath(listing);
     revalidatePath(url);
     return { success: true, listingId: String(listing.id), listingUrl: url };
   } catch (err) {

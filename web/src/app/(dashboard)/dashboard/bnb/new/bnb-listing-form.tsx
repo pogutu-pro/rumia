@@ -90,6 +90,8 @@ interface BnbListingFormProps {
   initialData?: BnbInitialData;
   agentWhatsapp?: string | null;
   campusId?: string | null;
+  /** Market slug for a new listing (from the agent's campus). Editing keeps the listing's own county. */
+  county?: string;
 }
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -276,7 +278,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp }: BnbListingFormProps) {
+export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, county }: BnbListingFormProps) {
   const router = useRouter();
   const isEditing = mode === 'edit' && !!initialData;
   const bnb = initialData?.bnb;
@@ -378,7 +380,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp }: 
         description: description.trim(),
         price: Number(price),
         location: location.trim() || area || 'Kenya',
-        county: initialData?.county ?? 'nyeri',
+        county: initialData?.county ?? county,
         area: area || undefined,
         specific_location: specificLocation || undefined,
         latitude: latitude ?? undefined,

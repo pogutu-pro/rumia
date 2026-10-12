@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ShieldCheck, CircleOff, ExternalLink, AlertTriangle, Check, Phone, Building2, CreditCard, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -654,7 +655,7 @@ function buildVerifiedData(
     onRumia,
     listingUrl: matchedListing
       ? matchedListing.slug
-        ? `/hostels/${matchedListing.county || 'nyeri'}/${matchedListing.area || 'dekut'}/${matchedListing.slug}`
+        ? listingPath(matchedListing)
         : `/listing/${matchedListing.id}`
       : undefined,
   };
@@ -663,12 +664,7 @@ function buildVerifiedData(
 function buildListingVerifiedData(listing: ListingMatchCandidate): VerifiedData {
   const contact =
     listing.landlord_phone || listing.agent_phone || listing.agent_whatsapp || 'Verified Agent';
-  const county = listing.county || 'nyeri';
-  const area = listing.area || 'dekut';
-  const slug = listing.slug;
-  const listingUrl = slug
-    ? `/hostels/${county}/${area}/${slug}`
-    : `/listing/${listing.id}`;
+  const listingUrl = listing.slug ? listingPath(listing) : `/listing/${listing.id}`;
 
   return {
     hostelName: listing.title,

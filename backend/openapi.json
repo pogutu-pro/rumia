@@ -12290,6 +12290,17 @@
             "title": "Name",
             "type": "string"
           },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path"
+          },
           "place_name": {
             "anyOf": [
               {
@@ -12603,6 +12614,17 @@
               }
             ],
             "title": "County"
+          },
+          "property_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Type"
           },
           "slug": {
             "title": "Slug",

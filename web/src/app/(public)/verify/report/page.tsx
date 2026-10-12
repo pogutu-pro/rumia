@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ReportForm } from './report-form';
-import { getCampusBySlug } from '@/lib/data/campuses';
+import { getDefaultCampus } from '@/lib/data/campuses';
 
 export const revalidate = 86400;
 
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ReportPage() {
-  const campus = await getCampusBySlug('dekut');
+  const campus = await getDefaultCampus();
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] pb-[calc(4rem+env(safe-area-inset-bottom))]">

@@ -11,7 +11,7 @@ from app.core.errors import NotFoundException
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser
 from app.core.telemetry import capture_error, capture_event
-from app.features.campuses.models import Campus
+from app.features.campuses.models import Campus, default_campus_id
 from app.features.listings.models import Agent, Listing
 from app.features.profiles.models import UserProfile, Wishlist
 from app.features.profiles.schemas import ProfileUpdate, SetHomeCampusRequest, WishlistActionResponse
@@ -95,15 +95,10 @@ class ProfileService:
         profile = res.scalar_one_or_none()
         if not profile:
             # The live profiles table constrains campus_id to NOT NULL. The
-            # signup auth hook normally stamps it with DeKUT before the API is
-            # ever called, so mirror that default here to keep the create path
-            # safe when no profile row exists yet.
-            campus_id = None
-            default = await db.execute(
-                select(Campus.id).where(Campus.slug == settings.DEFAULT_CAMPUS_SLUG).limit(1)
-            )
-            if default_id := default.scalar_one_or_none():
-                campus_id = str(default_id)
+            # signup auth hook normally stamps it before the API is ever called,
+            # so mirror that default here to keep the create path safe when no
+            # profile row exists yet.
+            campus_id = await default_campus_id(db)
             profile = UserProfile(
                 id=user.id,
                 email=user.email,

@@ -3,6 +3,7 @@ import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { marketForAgentCampus } from '@/lib/data/agent-market';
 import { BnbListingForm } from './bnb-listing-form';
 
 export const revalidate = 0;
@@ -27,7 +28,7 @@ export default async function NewBnbListingPage() {
         <p className="text-sm text-slate-500 mt-1">List your short-stay property on RumiaBnB.</p>
       </div>
 
-      <BnbListingForm agentWhatsapp={agent.whatsapp} />
+      <BnbListingForm agentWhatsapp={agent.whatsapp} county={await marketForAgentCampus(agent.campus_id)} />
     </div>
   );
 }

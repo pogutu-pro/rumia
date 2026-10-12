@@ -37,3 +37,14 @@ class Campus(Base):
     email: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     social_links: Mapped[Optional[dict]] = mapped_column(JSON, nullable=False, server_default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+async def default_campus_id(db) -> Optional[str]:
+    """The campus a new profile or agent is given when they have not chosen one.
+
+    `profiles.campus_id` and `agents.campus_id` are NOT NULL (a legacy constraint), so something has to fill them. It is the
+    oldest active campus, read from the data, not a hard-coded slug."""
+    from sqlalchemy import select
+
+    row = (await db.execute(select(Campus.id).where(Campus.status == "active").order_by(Campus.created_at, Campus.slug).limit(1))).scalar_one_or_none()
+    return str(row) if row else None

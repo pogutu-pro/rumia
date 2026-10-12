@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils/listing-path';
 import Link from 'next/link';
 import { Eye, Users, Building2, TrendingUp, CalendarDays } from 'lucide-react';
 import { adminConsoleApi } from '@/lib/api/admin-console';
@@ -79,7 +80,7 @@ export default async function AdminAnalyticsPage() {
                 topListings.map((listing: any) => (
                   <tr key={listing.listing_id} className="hover:bg-slate-50">
                     <td className="px-5 py-4 font-medium text-slate-900">
-                      <Link href={`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.listing_slug}`} className="hover:text-primary">
+                      <Link href={listingPath({ county: listing.county, area: listing.area, slug: listing.listing_slug })} className="hover:text-primary">
                         {listing.listing_title}
                       </Link>
                     </td>
@@ -104,7 +105,7 @@ export default async function AdminAnalyticsPage() {
             topListings.map((listing: any) => (
               <div key={listing.listing_id} className="px-5 py-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <Link href={`/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.listing_slug}`} className="text-sm font-medium text-slate-900 hover:text-primary leading-snug">
+                  <Link href={listingPath({ county: listing.county, area: listing.area, slug: listing.listing_slug })} className="text-sm font-medium text-slate-900 hover:text-primary leading-snug">
                     {listing.listing_title}
                   </Link>
                   <span className="text-xs font-semibold text-primary whitespace-nowrap">{count(listing.month_count).toLocaleString()} mo</span>

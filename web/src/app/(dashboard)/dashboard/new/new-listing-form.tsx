@@ -74,6 +74,8 @@ interface NewListingFormProps {
   mode?: 'create' | 'edit';
   campusId?: string | null;
   campusZones?: CampusAreaOption[];
+  /** Market slug for a new listing (from the agent's campus). Editing keeps the listing's own county. */
+  county?: string;
   successRedirectPath?: string;
   customUpdateAction?: (formData: any) => Promise<{
     success: boolean;
@@ -512,6 +514,7 @@ export function NewListingForm({
   mode = 'create',
   campusId,
   campusZones = [],
+  county,
   customUpdateAction,
   successRedirectPath = '/dashboard',
 }: NewListingFormProps) {
@@ -900,7 +903,7 @@ export function NewListingForm({
         proximity_description: specificLocation || area,
         latitude,
         longitude,
-        county: initialListing?.county || 'nyeri',
+        county: initialListing?.county || county,
         area,
         specific_location: specificLocation,
         price_single: derivedPriceSingle,

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { NewListingForm } from './new-listing-form';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { slugifySegment } from '@/lib/utils/listing-path';
 import { campusesServerApi } from '@/lib/api/campuses.server';
 
 export const revalidate = 0;
@@ -61,6 +62,7 @@ export default async function NewListingPage() {
         agentWhatsapp={agent.whatsapp || agent.phone || ''}
         campusId={agent.campus_id || null}
         campusZones={campusZones || []}
+        county={campus?.city ? slugifySegment(campus.city) : undefined}
       />
     </div>
   );

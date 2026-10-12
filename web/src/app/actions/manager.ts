@@ -1,5 +1,6 @@
 'use server';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { revalidatePath } from 'next/cache';
 import { ApiError } from '@/lib/api/client';
 import { listingsApi } from '@/lib/api/listings';
@@ -176,10 +177,7 @@ function revalidateManagerListingSurfaces(listing?: {
   revalidatePath('/manager/listings');
   revalidatePath('/manager');
   revalidatePath('/dashboard');
-  const county = listing?.county || 'nyeri';
-  const area = listing?.area || 'dekut';
-  revalidatePath(`/hostels/${county}/${area}`);
-  if (listing?.slug) revalidatePath(`/hostels/${county}/${area}/${listing.slug}`);
+  if (listing?.slug) revalidatePath(listingPath(listing));
   revalidatePath('/hostels');
   revalidatePath('/');
 }
@@ -250,7 +248,7 @@ export async function updateListingByManagerAction(
     return {
       success: true,
       listingId: String(listing.id),
-      listingUrl: `/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`,
+      listingUrl: listingPath(listing),
     };
   } catch (err) {
     return failure(err, 'An unexpected error occurred');

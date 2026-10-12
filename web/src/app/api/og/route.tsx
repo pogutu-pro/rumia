@@ -1,6 +1,6 @@
 import { fetchPublicApi } from '@/lib/api/config';
 import { ImageResponse } from 'next/og';
-import { getCampusBySlug } from '@/lib/data/campuses';
+import { getDefaultCampus } from '@/lib/data/campuses';
 import type { Campus } from '@/types';
 
 export const runtime = 'nodejs';
@@ -113,7 +113,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
 
-    const campus = await getCampusBySlug('dekut');
+    const campus = await getDefaultCampus();
 
     if (!slug) {
       return fallbackImage(campus);

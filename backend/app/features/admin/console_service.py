@@ -42,7 +42,7 @@ from app.features.admin.console_schemas import (
 )
 from app.features.admin.models import TransferHistory
 from app.features.agents.models import AgentProfile
-from app.features.campuses.models import Campus
+from app.features.campuses.models import Campus, default_campus_id
 from app.features.hostel_requests.service import clean_kenyan_phone
 from app.features.leads.models import Commission, Lead
 from app.features.listings.models import Listing
@@ -229,8 +229,7 @@ class AdminConsoleService:
         row = (await db.execute(select(UserProfile.campus_id, UserProfile.home_campus_id).where(UserProfile.id == user_id))).first()
         if row and (row.campus_id or row.home_campus_id):
             return str(row.campus_id or row.home_campus_id)
-        dekut = (await db.execute(select(Campus.id).where(Campus.slug == settings.DEFAULT_CAMPUS_SLUG))).scalar_one_or_none()
-        return str(dekut) if dekut else None
+        return await default_campus_id(db)
 
     @staticmethod
     def _auto_verified(phone: str, whatsapp: str) -> bool:

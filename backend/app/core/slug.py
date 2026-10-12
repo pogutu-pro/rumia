@@ -23,6 +23,7 @@ def url_segment(value: Optional[str]) -> str:
     """'Near Gate A' -> 'near-gate-a' (matches web/src/lib/utils/listing-path.ts)."""
     text = unicodedata.normalize("NFKD", value or "")
     text = "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
+    text = text.replace("'", "").replace("\u2019", "")  # King'ong'o -> kingongo, not king-ong-o
     return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
 
 
@@ -30,10 +31,10 @@ TYPE_SEGMENTS = {"hostel": "student-hostels", "apartment": "apartments", "short_
 
 
 def listing_path(county: Optional[str], area: Optional[str], slug: str, property_type: Optional[str] = None) -> str:
-    """Canonical public path of a property: /{market}/{type}/{place}/{name} (matches web/src/lib/utils/listing-path.ts)."""
-    from app.core.config import settings
+    """Canonical public path of a property: /{market}/{type}/{place}/{name} (matches web/src/lib/utils/listing-path.ts).
 
-    return (
-        f"/{url_segment(county) or settings.DEFAULT_COUNTY}/{TYPE_SEGMENTS.get(property_type or 'hostel', 'student-hostels')}"
-        f"/{url_segment(area) or settings.DEFAULT_CAMPUS_SLUG}/{slug}"
-    )
+    A listing with no county or area has no canonical place yet, so it gets the short link, which resolves wherever it lives."""
+    market, place = url_segment(county), url_segment(area)
+    if not market or not place:
+        return f"/p/{slug}"
+    return f"/{market}/{TYPE_SEGMENTS.get(property_type or 'hostel', 'student-hostels')}/{place}/{slug}"

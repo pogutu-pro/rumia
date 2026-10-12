@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
-import { getCampusBySlug } from "@/lib/data/campuses";
+import { getDefaultCampus } from "@/lib/data/campuses";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const campus = await getCampusBySlug("dekut");
+  const campus = await getDefaultCampus();
 
   return {
     name: campus.manifest_name ?? "Rumia",

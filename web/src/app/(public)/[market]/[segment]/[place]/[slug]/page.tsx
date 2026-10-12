@@ -1,5 +1,5 @@
 import { formatAreaName } from '@/lib/utils/area-label';
-import { listingPath, TYPE_SEGMENT } from '@/lib/utils/listing-path';
+import { listingPath, slugifySegment, TYPE_SEGMENT } from '@/lib/utils/listing-path';
 import { titleCase } from '@/lib/seo/markets';
 import { BnbDetail, bnbMetadata } from '@/app/(public)/bnb/bnb-detail';
 import { cache } from 'react';
@@ -51,10 +51,10 @@ interface PageProps {
 export async function generateStaticParams() {
   try {
     const feed = await listingsApi.getFeedServer({ limit: 1000, is_active: true });
-    return (feed.items || []).filter(l => l.slug).map((l: any) => ({
-      market: l.county || 'nyeri',
-      segment: TYPE_SEGMENT[l.property_type || 'hostel'] ?? 'student-hostels',
-      place: l.area || 'dekut',
+    return (feed.items || []).filter(l => l.slug && l.county && l.area).map((l: any) => ({
+      market: slugifySegment(l.county || ''),
+      segment: TYPE_SEGMENT[l.property_type || 'hostel'] ?? TYPE_SEGMENT.hostel,
+      place: slugifySegment(l.area || ''),
       slug: l.slug,
     }));
   } catch (error) {
@@ -94,10 +94,11 @@ const getListing = cache(async (slug: string) => {
 });
 
 async function getNearbyListings(listing: any) {
+  if (!listing.county || !listing.area) return [];
   try {
     const feed = await listingsApi.getFeedServer({
-      county: listing.county || 'nyeri',
-      area: listing.area || 'dekut',
+      county: listing.county,
+      area: listing.area,
       is_active: true,
       limit: 5,
     });
@@ -128,7 +129,7 @@ export async function generateMetadata({
     listing.room_type ??
     'Self Contained';
   const isHostel = (listing.property_type || 'hostel') === 'hostel';
-  const city = titleCase(listing.county || 'nyeri');
+  const city = listing.county ? titleCase(listing.county) : 'Kenya';
   const place = listing.area ? formatAreaName(listing.area) : city;
   const title = isHostel
     ? `${listing.title} — ${roomType} Near DeKUT`
@@ -233,8 +234,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
     address: {
       '@type': 'PostalAddress',
       streetAddress: listing.location,
-      addressLocality: titleCase(listing.county || 'nyeri'),
-      addressRegion: `${titleCase(listing.county || 'nyeri')} County`,
+      addressLocality: listing.county ? titleCase(listing.county) : undefined,
+      addressRegion: listing.county ? `${titleCase(listing.county)} County` : undefined,
       addressCountry: 'KE',
     },
     ...(listing.latitude && listing.longitude

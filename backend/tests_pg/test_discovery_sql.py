@@ -163,3 +163,13 @@ async def test_lister_profile_shows_live_places_and_hides_reply_rate_until_it_me
     slug = (await db.execute(text("SELECT o.slug FROM lister_orgs o JOIN properties p ON p.org_id = o.id WHERE p.id = CAST(:p AS uuid)"), {"p": pid})).scalar_one()
     profile = await service.org_profile(db, slug)
     assert [c.name for c in profile["places"]] == ["Profile Place"] and profile["reply_rate"] is None
+
+
+@pytest.mark.asyncio
+async def test_cards_carry_the_exact_page_path_with_type_place_and_name(db):
+    await _clear(db)
+    await _place(db, "Kamakwa Court", 9000, area="boma", room="Bedsitter")
+    await _place(db, "Pricey One Bed", 14000, area="nyaribo", room="1 Bedroom", property_type="apartment")
+    cards = {c.name: c for c in (await service.search(db, SearchParams())).items}
+    assert cards["Kamakwa Court"].path == f"/nyeri/student-hostels/boma/{cards['Kamakwa Court'].slug}"
+    assert cards["Pricey One Bed"].path == f"/nyeri/apartments/nyaribo/{cards['Pricey One Bed'].slug}"

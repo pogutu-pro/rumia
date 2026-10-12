@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { AppShell } from '@/components/shell';
 import { HomeVideoDrawer } from '@/components/videos/video-drawer';
 import { Footer } from '@/components/layouts/public-footer';
-import { getCampusBySlug } from '@/lib/data/campuses';
+import { getDefaultCampus } from '@/lib/data/campuses';
 import { ContactFollowUp } from '@/components/contact/contact-follow-up';
 import { CampusProvider } from '@/lib/campus-context';
 
@@ -12,7 +12,7 @@ interface LayoutProps {
 }
 
 export default async function PublicLayout({ children }: LayoutProps) {
-  const campus = await getCampusBySlug('dekut');
+  const campus = await getDefaultCampus();
   const markets = await getLiveMarkets();
 
   return (

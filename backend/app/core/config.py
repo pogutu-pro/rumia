@@ -81,8 +81,6 @@ class Settings(BaseSettings):
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
 
     # Defaults for the first market. Nothing else in the code should name a campus, county or school.
-    DEFAULT_CAMPUS_SLUG: str = "dekut"
-    DEFAULT_COUNTY: str = "nyeri"
     # Email domains that mark a student of a supported institution as school-verified.
     SCHOOL_EMAIL_DOMAINS: List[str] = ["dkut.ac.ke"]
 

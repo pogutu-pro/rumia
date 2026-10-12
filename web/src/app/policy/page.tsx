@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import { format } from 'date-fns';
 import { AppShell } from '@/components/shell';
 import { Footer } from '@/components/layouts/public-footer';
-import { getCampusBySlug } from '@/lib/data/campuses';
+import { getDefaultCampus } from '@/lib/data/campuses';
 import { getPublishedLegalDocument } from '@/lib/data/legal-documents';
 import { LegalDocumentBody } from '@/components/policies/legal-document-body';
 
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const campus = await getCampusBySlug('dekut');
+  const campus = await getDefaultCampus();
   const shortName = campus.short_name ?? 'DeKUT';
   const city = campus.city ?? 'Nyeri';
 

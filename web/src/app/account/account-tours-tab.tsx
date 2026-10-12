@@ -1,5 +1,6 @@
 'use client';
 
+import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -303,7 +304,7 @@ function TourRow({
 
   const listingHref =
     listing?.slug
-      ? `/hostels/${listing.county || 'nyeri'}/${listing.area || 'dekut'}/${listing.slug}`
+      ? listingPath(listing)
       : null;
 
   const isPast = booking.status === 'cancelled' || booking.status === 'completed' || booking.status === 'no_show';

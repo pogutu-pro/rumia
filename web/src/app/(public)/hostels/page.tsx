@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { listingsApi } from '@/lib/api/listings';
 import HostelsSearch, { type Listing } from './hostels-search';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
-import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
+import { getDefaultCampus, isFallbackCampus } from '@/lib/data/campuses';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
@@ -49,7 +49,7 @@ async function getAllActiveListings(): Promise<Listing[]> {
 }
 
 export default async function HostelsPage() {
-  const campus = await getCampusBySlug('dekut');
+  const campus = await getDefaultCampus();
 
   const [allListings, activeAnnouncements] = await Promise.all([
     getAllActiveListings(),

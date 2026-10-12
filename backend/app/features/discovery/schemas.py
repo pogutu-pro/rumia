@@ -18,6 +18,7 @@ class SearchCard(BaseModel):
     kind: str
     status: str
     place_name: Optional[str] = None
+    path: Optional[str] = None  # the place's own page; absent until it has a market and a place
     cover_url: Optional[str] = None
     cover_blur: Optional[str] = None
     from_price: Optional[float] = None

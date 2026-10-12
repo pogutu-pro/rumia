@@ -98,3 +98,13 @@ export async function getAllCampusesStatic(): Promise<Campus[]> {
   }
 }
 
+
+/**
+ * The campus the site shows by default (layout, home page, policy pages): the first active campus in the data.
+ * It is not named in the code, so a second campus or a different first one needs no change here.
+ * Falls back to the built-in campus record only when the API is unreachable.
+ */
+export const getDefaultCampus = cache(async (): Promise<Campus> => {
+  const campuses = await getAllCampuses();
+  return campuses.find((c) => c.status === 'active') ?? campuses[0] ?? DEKUT_CAMPUS_FALLBACK;
+});

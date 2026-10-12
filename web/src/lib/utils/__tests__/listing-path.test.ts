@@ -11,9 +11,9 @@ describe('listingPath', () => {
     expect(listingPath({ county: 'nyeri', area: 'boma', slug: 'baraka-boma' })).toBe('/nyeri/student-hostels/boma/baraka-boma');
   });
 
-  it('falls back to defaults for missing values', () => {
-    expect(listingPath({ slug: 'x' })).toBe('/nyeri/student-hostels/dekut/x');
-    expect(listingPath({ county: '???', area: '', slug: 'x' })).toBe('/nyeri/student-hostels/dekut/x');
+  it('uses the short link when the county or area is unknown', () => {
+    expect(listingPath({ slug: 'x' })).toBe('/p/x');
+    expect(listingPath({ county: '???', area: '', slug: 'x' })).toBe('/p/x');
   });
 
   it('puts the type in the path', () => {
@@ -22,6 +22,6 @@ describe('listingPath', () => {
   });
 
   it("handles apostrophes and punctuation (King'ong'o)", () => {
-    expect(slugifySegment("King'ong'o")).toBe('king-ong-o');
+    expect(slugifySegment("King'ong'o")).toBe('kingongo');
   });
 });

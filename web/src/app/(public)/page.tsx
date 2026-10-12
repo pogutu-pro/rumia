@@ -15,7 +15,7 @@ import { HomeHeading } from '@/components/home/home-heading';
 import { ListingSection } from '@/components/home/listing-section';
 import type { ExploreListing } from '@/components/home/explore-listing-card';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
-import { getCampusBySlug, isFallbackCampus } from '@/lib/data/campuses';
+import { getDefaultCampus, isFallbackCampus } from '@/lib/data/campuses';
 import { getZonesByCampusSlug } from '@/lib/data/zones';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
 import type { Campus, Listing } from '@/types';
@@ -149,7 +149,7 @@ async function fetchFeed(params: {
 }
 
 export default async function HomePage() {
-  const campus = await getCampusBySlug('dekut');
+  const campus = await getDefaultCampus();
   const campusSlug = isFallbackCampus(campus) ? undefined : campus.slug;
   const city = campus.city ?? 'Nyeri';
 
@@ -229,7 +229,7 @@ export default async function HomePage() {
 
   const stayItems = dedupeById([...apartFeed, ...shortStayFeed]).slice(0, FEED_LIMIT);
   const shortName =
-    campus.short_name ?? (campus.slug === 'dekut' ? 'DeKUT' : campus.name);
+    campus.short_name ?? campus.name;
 
   return (
     <div id="main-content" className="flex flex-col pb-10">

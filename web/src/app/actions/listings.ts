@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { listingsApi } from '@/lib/api/listings';
+import { listingPath } from '@/lib/utils/listing-path';
 import {
   listingPayload,
   mapListingImages,
@@ -13,30 +14,27 @@ import type {
 } from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
 import { officialHostelsApi } from '@/lib/api/official-hostels';
 
-function revalidateListingSurfaces(
-  county = 'nyeri',
-  area = 'dekut',
-  slug?: string | null,
-) {
+/** Refresh every page that shows a listing. The listing's own address decides its paths; nothing is assumed. */
+function revalidateListingSurfaces(listing: { county?: string | null; area?: string | null; slug?: string | null; property_type?: string | null }) {
   revalidatePath('/hostels');
   revalidatePath('/dashboard');
   revalidatePath('/admin/listings');
-  revalidatePath(`/hostels/${county}/${area}`);
-
-  if (slug) {
-    revalidatePath(`/hostels/${county}/${area}/${slug}`);
+  if (listing.slug) {
+    const path = listingPath(listing);
+    revalidatePath(path);
+    // The place page above the listing: /{market}/{type}/{place}
+    revalidatePath(path.split('/').slice(0, -1).join('/'));
   }
 }
 
 export async function createListingAction(formData: any) {
   try {
+    if (!formData.county) return { success: false, error: 'Choose where this place is before saving it.' };
     const images = mapListingImages(formData.images);
     const room_types = mapRoomTypes(formData.roomTypes);
 
     const payload = {
       ...listingPayload(formData, formData.agent_id),
-      county: formData.county || 'nyeri',
-      area: formData.area || 'dekut',
       images,
       room_types,
       agent_whatsapp: formData.agent_whatsapp || null,
@@ -44,15 +42,12 @@ export async function createListingAction(formData: any) {
 
     const listing = await listingsApi.createServer(payload);
 
-    const county = listing.county || formData.county || 'nyeri';
-    const area = listing.area || formData.area || 'dekut';
-
-    revalidateListingSurfaces(county, area, listing.slug);
+    revalidateListingSurfaces(listing);
 
     return {
       success: true,
       listingId: listing.id,
-      listingUrl: `/hostels/${county}/${area}/${listing.slug}`,
+      listingUrl: listingPath(listing),
     };
   } catch (error: any) {
     console.error('createListingAction error:', error);
@@ -71,8 +66,6 @@ export async function updateListingAction(formData: any) {
   try {
     const payload: any = {
       ...listingPayload(formData, formData.agent_id),
-      county: formData.county || 'nyeri',
-      area: formData.area || 'dekut',
       agent_whatsapp: formData.agent_whatsapp || null,
     };
 
@@ -81,15 +74,12 @@ export async function updateListingAction(formData: any) {
 
     const listing = await listingsApi.updateServer(formData.listing_id, payload);
 
-    const county = listing.county || formData.county || 'nyeri';
-    const area = listing.area || formData.area || 'dekut';
-
-    revalidateListingSurfaces(county, area, listing.slug);
+    revalidateListingSurfaces(listing);
 
     return {
       success: true,
       listingId: listing.id,
-      listingUrl: `/hostels/${county}/${area}/${listing.slug}`,
+      listingUrl: listingPath(listing),
     };
   } catch (error: any) {
     console.error('updateListingAction error:', error);
@@ -111,13 +101,8 @@ export async function toggleListingActiveAction(
     revalidatePath('/dashboard/listings');
     revalidatePath('/hostels');
     revalidatePath('/');
-    const county = updated.county || 'nyeri';
-    const area = updated.area || 'dekut';
-    revalidatePath(`/hostels/${county}/${area}`);
-    if (updated.slug) {
-      revalidatePath(`/hostels/${county}/${area}/${updated.slug}`);
-      revalidatePath(`/listing/${updated.id}`);
-    }
+    revalidateListingSurfaces(updated);
+    if (updated.slug) revalidatePath(`/listing/${updated.id}`);
 
     return { success: true, isActive: updated.is_active ?? true };
   } catch (error: any) {
@@ -140,13 +125,8 @@ export async function toggleListingFullAction(
     revalidatePath('/dashboard/listings');
     revalidatePath('/hostels');
     revalidatePath('/');
-    const county = updated.county || 'nyeri';
-    const area = updated.area || 'dekut';
-    revalidatePath(`/hostels/${county}/${area}`);
-    if (updated.slug) {
-      revalidatePath(`/hostels/${county}/${area}/${updated.slug}`);
-      revalidatePath(`/listing/${updated.id}`);
-    }
+    revalidateListingSurfaces(updated);
+    if (updated.slug) revalidatePath(`/listing/${updated.id}`);
 
     return { success: true, isFull: updated.is_full ?? false };
   } catch (error: any) {
@@ -169,13 +149,8 @@ export async function toggleListingCommissionAction(
     revalidatePath('/dashboard/listings');
     revalidatePath('/hostels');
     revalidatePath('/');
-    const county = updated.county || 'nyeri';
-    const area = updated.area || 'dekut';
-    revalidatePath(`/hostels/${county}/${area}`);
-    if (updated.slug) {
-      revalidatePath(`/hostels/${county}/${area}/${updated.slug}`);
-      revalidatePath(`/listing/${updated.id}`);
-    }
+    revalidateListingSurfaces(updated);
+    if (updated.slug) revalidatePath(`/listing/${updated.id}`);
 
     return { success: true, paysCommission: updated.pays_commission ?? false };
   } catch (error: any) {

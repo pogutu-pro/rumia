@@ -70,7 +70,6 @@ export function hostelOwnerMessage(params: HostelOwnerMessageParams): string {
     price,
     zone,
     slug,
-    county = 'nyeri',
     hasVideo = false,
   } = params;
 
@@ -107,8 +106,9 @@ export function hostelOwnerMessage(params: HostelOwnerMessageParams): string {
 
   let message = parts.join(' ');
 
-  if (slug && zone) {
-    message = `${message}\n\nListing: rumia.co.ke/hostels/${county}/${zone}/${slug}`;
+  if (slug) {
+    // The short link resolves to the listing's own page whatever its market, type or place.
+    message = `${message}\n\nListing: rumia.co.ke/p/${slug}`;
   }
 
   return message;

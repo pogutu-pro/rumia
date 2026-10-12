@@ -114,7 +114,7 @@ async def get_access(
 async def sync_staff_for_role(db: AsyncSession, user_id: str, role: Optional[str]) -> None:
     """Keep staff assignments in step with the legacy profile role, which admin and manager screens still set.
 
-    admin/super_admin -> an everywhere `admin`; manager -> `market_lead` in the default market; anything else
+    admin/super_admin -> an everywhere `admin`; manager -> `market_lead` in the market of the campus they manage (none if that campus has no market); anything else
     loses those two derived assignments. Assignments made by hand in the ops console (reviewer, scout) are left alone.
     Never raises: the role change that triggered it must not fail because of this.
     """
@@ -144,7 +144,7 @@ async def sync_staff_for_role(db: AsyncSession, user_id: str, role: Optional[str
                     text(
                         """
                         INSERT INTO staff_assignments (user_id, market_id, role)
-                        SELECT CAST(:u AS uuid), m.id, 'market_lead' FROM markets m WHERE m.slug = 'nyeri'
+                        SELECT CAST(:u AS uuid), m.id, 'market_lead' FROM markets m WHERE m.id = (SELECT mm.id FROM profiles pr JOIN campuses c ON c.id = pr.managed_campus_id JOIN markets mm ON mm.slug = regexp_replace(lower(c.city), '[^a-z0-9]+', '-', 'g') WHERE pr.id = CAST(:u AS uuid))
                           AND NOT EXISTS (SELECT 1 FROM staff_assignments s WHERE s.user_id = CAST(:u AS uuid) AND s.role = 'market_lead' AND s.market_id = m.id)
                         """
                     ),
@@ -153,7 +153,7 @@ async def sync_staff_for_role(db: AsyncSession, user_id: str, role: Optional[str
                 await db.execute(
                     text(
                         "UPDATE staff_assignments SET active = true WHERE user_id = CAST(:u AS uuid) AND role = 'market_lead' "
-                        "AND market_id = (SELECT id FROM markets WHERE slug = 'nyeri')"
+                        "AND market_id = (SELECT mm.id FROM profiles pr JOIN campuses c ON c.id = pr.managed_campus_id JOIN markets mm ON mm.slug = regexp_replace(lower(c.city), '[^a-z0-9]+', '-', 'g') WHERE pr.id = CAST(:u AS uuid))"
                     ),
                     params,
                 )

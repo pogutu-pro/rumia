@@ -31,15 +31,17 @@ Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
 
 ## Decisions for you
 
-9. **Opening up beyond DeKUT students.** The backend supports markets, places, landmarks, other property kinds and an
-   audience per place. The frontend does not yet: the layout and home page load the `dekut` campus, listing links default to
-   `nyeri` / `dekut`, and the copy says "students" and "hostels". Suggested order:
-   1. Take the campus on the layout and home page from the visitor's market.
-   2. Neutralise the copy and URL defaults.
-   3. Add a second test market and run the whole site against it.
-   4. Review the commission, consultation-fee and agent-contact rules for non-student rentals (a product decision).
-   Also still DeKUT-specific in the backend: `DEFAULT_CAMPUS_SLUG` / `DEFAULT_COUNTY`, the "verified DeKUT students" review
-   rule, the official-records table behind the verify checker, and managers mapped to the `nyeri` market.
+9. **Opening up beyond DeKUT students.** Branch `feat/open-markets` (PR #11). Done there: SEO pages by market, type and place
+   (`/nyeri`, `/nyeri/apartments`, `/nyeri/bedsitters/boma`); every listing at `/{market}/{type}/{place}/{name}` with 308 redirects
+   from `/hostels/...`, `/bnb/{id}`, `/areas/...`; search cards carry their exact `path`; no `nyeri`/`dekut` literals left in URL
+   building (a listing without county or area uses `/p/{slug}`); the default campus is the first active campus in the data
+   (`getDefaultCampus`, `default_campus_id`); `DEFAULT_COUNTY` / `DEFAULT_CAMPUS_SLUG` removed; a new listing takes its market
+   from the agent's campus city; managers get the market of the campus they manage; review text rule says "verified students".
+   **Migration `0007` (King'ong'o place match) must be applied to production BEFORE the merge deploys**: it was rehearsed on a restored
+   copy (3 listings get their place, zero drift) and a named backup `~/backups/rumia_pre0007_20261012_1847.dump` exists on the server.
+   Still open: the second test market run, the `/verify` official-records feature (DeKUT-only data, 93 rows; left in place because
+   removing it removes a user-facing feature), commission / consultation-fee / agent-contact rules for non-student rentals (product
+   decision), `/hostels` page and OG image wording.
 10. **Drift monitoring.** Done: the worker runs the check five minutes after each start and then daily
     (`check_projection_drift` in `backend/app/core/tasks/cron.py`) and logs an ERROR, which Sentry turns into an event, when any
     listing disagrees with its property copy. The query lives in `backend/app/features/catalog/drift_check.sql`;

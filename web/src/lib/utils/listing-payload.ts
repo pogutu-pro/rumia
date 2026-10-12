@@ -12,8 +12,8 @@ function nullableCoordinate(value: unknown) {
 export function listingPayload(formData: any, agentId?: string) {
   return {
     title: formData.title,
-    county: formData.county || 'nyeri',
-    area: formData.area || 'dekut',
+    county: formData.county || undefined,
+    area: formData.area || undefined,
     description: formData.description,
     property_type:
       ['apartment', 'short_stay', 'hostel'].includes(formData.property_type)

@@ -102,11 +102,11 @@ export default async function CampusLandingPage({ params }: PageProps) {
   const campus = await resolveCampusFromSegments(county, area);
   if (!campus) notFound();
 
-  // The 'dekut' fallback pseudo-campus has no real id: filter by the legacy area slug instead.
+  // The built-in fallback campus (used when the API is down) has no real id: filter by the legacy area slug instead.
   const feed = await listingsApi
     .getFeedServer({
       limit: 50,
-      ...(campus.id && campus.id !== 'dekut'
+      ...(campus.id && !isFallbackCampus(campus)
         ? { campus_id: campus.id }
         : campus.slug
           ? { area: campus.slug }

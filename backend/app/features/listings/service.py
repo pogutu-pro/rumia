@@ -12,6 +12,7 @@ from app.core.errors import BadRequestException, ForbiddenException, NotFoundExc
 from app.core.pagination import PaginationParams
 from app.core.security import AuthenticatedUser, check_campus_scope
 from app.features.analytics.models import ListingView, ListingViewDailyRollup
+from app.core.slug import url_segment
 from app.features.campuses.models import Campus
 from app.features.profiles.models import UserProfile
 from app.features.reviews.models import Review
@@ -356,6 +357,14 @@ class ListingService:
             pass
 
     @staticmethod
+    async def county_for_agent(db: AsyncSession, agent) -> Optional[str]:
+        """The market a listing belongs to when the client did not say: the city of the agent's campus ("Nyeri" -> "nyeri")."""
+        if not agent.campus_id:
+            return None
+        city = (await db.execute(select(Campus.city).where(Campus.id == agent.campus_id))).scalar_one_or_none()
+        return url_segment(city) or None
+
+    @staticmethod
     async def create_listing(
         db: AsyncSession,
         user: AuthenticatedUser,
@@ -378,7 +387,7 @@ class ListingService:
             property_type=data.property_type,
             price=data.price,
             location=data.location,
-            county=data.county,
+            county=data.county or await ListingService.county_for_agent(db, agent),
             area=data.area,
             specific_location=data.specific_location,
             landlord_phone=data.landlord_phone,

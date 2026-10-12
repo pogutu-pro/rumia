@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.slug import listing_path
 from app.core.errors import BadRequestException, NotFoundException
 from app.features.catalog.service import days_ago_text
 from app.features.discovery.query_parser import ParsedQuery, parse_query
@@ -191,7 +192,7 @@ async def _run(db: AsyncSession, p: SearchParams, market_id: str) -> Tuple[int, 
             text(
                 f"""
                 SELECT p.id, p.legacy_listing_id, p.slug, p.name, p.kind, p.status, p.lat, p.lng, p.last_confirmed_at, p.published_at, p.quality_score,
-                       pl.name AS place_name,
+                       pl.name AS place_name, pl.slug AS place_slug, (SELECT mk.slug FROM markets mk WHERE mk.id = p.market_id) AS market_slug,
                        u.price_amount AS from_price, u.price_period, u.unit_kind,
                        CASE WHEN u.deposit_amount IS NOT NULL THEN u.price_amount + u.deposit_amount END AS move_in_total,
                        nd.walk_min, coalesce(lm.features->>'short_name', lm.name) AS walk_to,
@@ -252,7 +253,7 @@ async def _run(db: AsyncSession, p: SearchParams, market_id: str) -> Tuple[int, 
         cards.append(
             SearchCard(
                 id=str(r["id"]), listing_id=str(r["legacy_listing_id"]) if r["legacy_listing_id"] else None,
-                slug=r["slug"], name=r["name"], kind=r["kind"], status=r["status"], place_name=r["place_name"],
+                slug=r["slug"], name=r["name"], kind=r["kind"], status=r["status"], place_name=r["place_name"], path=_card_path(r),
                 cover_url=r["cover_url"], cover_blur=r["cover_blur"], from_price=float(r["from_price"]), price_period=r["price_period"],
                 unit_kind=r["unit_kind"], move_in_total=float(r["move_in_total"]) if r["move_in_total"] is not None else None,
                 walk_min=r["walk_min"], walk_to=r["walk_to"], freshness=freshness,
@@ -325,9 +326,19 @@ async def similar(db: AsyncSession, slug: str, limit: int = 6) -> List[SearchCar
     return cards[:limit]
 
 
+_TYPE_OF_KIND = {"hostel": "hostel", "apartment": "apartment", "compound": "apartment", "house": "short_stay", "room": "short_stay"}
+
+
+def _card_path(r) -> Optional[str]:
+    """The place's own page: /{market}/{type}/{place}/{name}. None if it has no market or place yet (the web then uses /p/{slug})."""
+    if not r["market_slug"] or not r["place_slug"]:
+        return None
+    return listing_path(r["market_slug"], r["place_slug"], r["slug"], _TYPE_OF_KIND.get(r["kind"], "hostel"))
+
+
 CARD_SELECT = """
     SELECT p.id, p.legacy_listing_id, p.slug, p.name, p.kind, p.status, p.lat, p.lng, p.last_confirmed_at, p.published_at,
-           pl.name AS place_name,
+           pl.name AS place_name, pl.slug AS place_slug, (SELECT mk.slug FROM markets mk WHERE mk.id = p.market_id) AS market_slug,
            u.price_amount AS from_price, u.price_period, u.unit_kind,
            CASE WHEN u.deposit_amount IS NOT NULL THEN u.price_amount + u.deposit_amount END AS move_in_total,
            (SELECT a.url FROM property_media pm JOIN media_assets a ON a.id = pm.asset_id
@@ -358,7 +369,7 @@ def _plain_card(r) -> SearchCard:
         freshness = f"Confirmed {days_ago_text(r['confirmed_at'])}"
     return SearchCard(
         id=str(r["id"]), listing_id=str(r["legacy_listing_id"]) if r["legacy_listing_id"] else None,
-        slug=r["slug"], name=r["name"], kind=r["kind"], status=r["status"], place_name=r["place_name"],
+        slug=r["slug"], name=r["name"], kind=r["kind"], status=r["status"], place_name=r["place_name"], path=_card_path(r),
         cover_url=r["cover_url"], cover_blur=r["cover_blur"], from_price=float(r["from_price"]), price_period=r["price_period"],
         unit_kind=r["unit_kind"], move_in_total=float(r["move_in_total"]) if r["move_in_total"] is not None else None,
         freshness=freshness, flags=SearchFlags(visited=r["visited"], registry=r["registry"], has_video=r["has_video"]),

@@ -12,7 +12,7 @@ import { UserAvatar } from '@/components/ui/user-avatar';
 import { JsonLd } from '@/components/seo/json-ld';
 import { AgentContactSection } from '@/components/agents/agent-contact-section';
 import { ShareAgentProfile } from '@/components/agents/share-agent-profile';
-import { getCampusBySlug } from '@/lib/data/campuses';
+import { getDefaultCampus } from '@/lib/data/campuses';
 
 export const revalidate = 86400;
 
@@ -61,7 +61,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
   const agent = await getAgent(slug);
   if (!agent) notFound();
 
-  const campus = await getCampusBySlug('dekut');
+  const campus = await getDefaultCampus();
   const campusShortName = campus.short_name ?? 'DeKUT';
 
   const feed = await listingsApi
