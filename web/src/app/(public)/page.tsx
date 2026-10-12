@@ -1,3 +1,4 @@
+import { getLiveMarkets, joinNames } from '@/lib/seo/markets';
 import { listingPath } from '@/lib/utils/listing-path';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -29,9 +30,9 @@ const FEED_LIMIT = 12;
 
 export async function generateMetadata(): Promise<Metadata> {
   // The tab title no longer comes from the campus row: the home page is for every kind of place, not only student housing.
-  const title = 'Rumia: Short Stays, Hostels & Apartments in Nyeri';
-  const description =
-    'Find short stays, student hostels and apartments to rent in Nyeri. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.';
+  const title = 'Rumia: Short Stays, Hostels & Apartments';
+  const places = joinNames((await getLiveMarkets()).map((m) => m.name));
+  const description = `Find short stays, student hostels and apartments to rent${places ? ` in ${places}` : ''}. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.`;
 
   return {
     title: { absolute: title },

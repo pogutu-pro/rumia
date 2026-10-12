@@ -1,3 +1,4 @@
+import { getLiveMarkets } from '@/lib/seo/markets';
 import { ReactNode } from 'react';
 import { AppShell } from '@/components/shell';
 import { HomeVideoDrawer } from '@/components/videos/video-drawer';
@@ -12,13 +13,14 @@ interface LayoutProps {
 
 export default async function PublicLayout({ children }: LayoutProps) {
   const campus = await getCampusBySlug('dekut');
+  const markets = await getLiveMarkets();
 
   return (
     <CampusProvider campus={campus}>
       <AppShell rightPanel={<HomeVideoDrawer />}>
         <div className="flex min-h-[calc(100dvh-var(--shell-header-h))] flex-col">
           <div className="flex-1">{children}</div>
-          <Footer whatsappNumber={campus.whatsapp_number} />
+          <Footer whatsappNumber={campus.whatsapp_number} markets={markets} />
         </div>
         <ContactFollowUp />
       </AppShell>

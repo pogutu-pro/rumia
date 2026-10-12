@@ -16,10 +16,13 @@ import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
 
 interface FooterProps {
   whatsappNumber?: string;
+  /** Live markets, for the crawlable links below. Optional: pages without them simply show no market links. */
+  markets?: Array<{ slug: string; name: string }>;
 }
 
 export const Footer = React.memo(function Footer({
   whatsappNumber,
+  markets = [],
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
@@ -132,15 +135,19 @@ export const Footer = React.memo(function Footer({
           </div>
         </div>
 
-        {/* Browse by type: gives every page a crawlable path into the market pages */}
-        <nav aria-label="Places to rent in Nyeri" className="mb-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-medium text-ink-muted">
-          <Link href="/nyeri" className="hover:text-ink transition-colors">Rentals in Nyeri</Link>
-          {KIND_PAGES.map((k) => (
-            <Link key={k.slug} href={`/nyeri/${k.slug}`} className="hover:text-ink transition-colors">
-              {k.label} in Nyeri
-            </Link>
-          ))}
-        </nav>
+        {/* Browse by market and type: gives every page a crawlable path into the market pages */}
+        {markets.length > 0 && (
+          <nav aria-label="Browse places to rent" className="mb-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-medium text-ink-muted">
+            {markets.slice(0, 8).map((m) => (
+              <Link key={m.slug} href={`/${m.slug}`} className="hover:text-ink transition-colors">Rentals in {m.name}</Link>
+            ))}
+            {KIND_PAGES.map((k) => (
+              <Link key={k.slug} href={`/${markets[0].slug}/${k.slug}`} className="hover:text-ink transition-colors">
+                {k.label} in {markets[0].name}
+              </Link>
+            ))}
+          </nav>
+        )}
 
         {/* Copyright & Legal Links */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-muted font-medium">

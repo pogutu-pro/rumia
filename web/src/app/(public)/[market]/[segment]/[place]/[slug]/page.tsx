@@ -1,5 +1,6 @@
 import { formatAreaName } from '@/lib/utils/area-label';
 import { listingPath, TYPE_SEGMENT } from '@/lib/utils/listing-path';
+import { titleCase } from '@/lib/seo/markets';
 import { BnbDetail, bnbMetadata } from '@/app/(public)/bnb/bnb-detail';
 import { cache } from 'react';
 import { getStartingPrice, pickBestRoomType } from '@/lib/utils/starting-price';
@@ -127,13 +128,14 @@ export async function generateMetadata({
     listing.room_type ??
     'Self Contained';
   const isHostel = (listing.property_type || 'hostel') === 'hostel';
-  const place = listing.area ? formatAreaName(listing.area) : 'Nyeri';
+  const city = titleCase(listing.county || 'nyeri');
+  const place = listing.area ? formatAreaName(listing.area) : city;
   const title = isHostel
     ? `${listing.title} — ${roomType} Near DeKUT`
-    : `${listing.title} — apartment to rent in ${place}, Nyeri`;
+    : `${listing.title} — apartment to rent in ${place}, ${city}`;
   const description = (isHostel
     ? `${listing.title} offers ${roomType.toLowerCase()} rooms from KES ${listing.price.toLocaleString()}/month near Dedan Kimathi University in Nyeri. ${listing.distance_to_campus ? `${listing.distance_to_campus} from campus. ` : ''}Contact agent on WhatsApp today.`
-    : `${listing.title} in ${place}, Nyeri, from KES ${listing.price.toLocaleString()}/month. See the move-in cost and photos, and contact the agent on WhatsApp.`
+    : `${listing.title} in ${place}, ${city}, from KES ${listing.price.toLocaleString()}/month. See the move-in cost and photos, and contact the agent on WhatsApp.`
   ).slice(0, 155);
   const metadataBase = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
   const canonicalUrl = `${metadataBase}${listingPath({ ...listing, slug: listing.slug || slug })}`;
@@ -231,8 +233,8 @@ export default async function ListingSlugPage({ params }: PageProps) {
     address: {
       '@type': 'PostalAddress',
       streetAddress: listing.location,
-      addressLocality: 'Nyeri',
-      addressRegion: 'Nyeri County',
+      addressLocality: titleCase(listing.county || 'nyeri'),
+      addressRegion: `${titleCase(listing.county || 'nyeri')} County`,
       addressCountry: 'KE',
     },
     ...(listing.latitude && listing.longitude
