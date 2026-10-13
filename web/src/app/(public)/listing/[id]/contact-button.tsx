@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ContactModal } from './contact-modal';
+import { ContactModal, consumePendingContact } from './contact-modal';
 
 interface ContactButtonProps {
   listingId: string;
@@ -30,7 +30,15 @@ export function ContactButton({
   className,
   fullWidth = true,
 }: ContactButtonProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  // Resume flow if returning from OAuth redirect — read once at mount. This is
+  // SSR-safe: consumePendingContact swallows sessionStorage errors, so the
+  // server and initial hydration render with no pending contact.
+  const pending = useState(() => consumePendingContact())[0];
+  const resumesFlow = pending?.hostelId === listingId;
+  const [isOpen, setIsOpen] = useState(resumesFlow);
+  const [resumedType, setResumedType] = useState<
+    'hostel_owner' | 'rumia_agent' | null
+  >(resumesFlow ? (pending?.contactType ?? null) : null);
 
   return (
     <>
@@ -46,7 +54,10 @@ export function ContactButton({
 
       <ContactModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false);
+          setResumedType(null);
+        }}
         listingId={listingId}
         listingTitle={listingTitle}
         agentId={agentId}
@@ -55,6 +66,7 @@ export function ContactButton({
         paysCommission={paysCommission}
         consultationFee={consultationFee}
         isFull={isFull}
+        resumedContactType={resumedType}
       />
     </>
   );
