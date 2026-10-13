@@ -259,20 +259,20 @@ def sign_in_code_email(*, code: str, minutes: int) -> RenderedEmail:
         'background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;font-family:Arial,Helvetica,sans-serif;">'
         '<tr><td style="padding:32px 28px;">'
         '<p style="margin:0 0 20px;font-size:20px;font-weight:800;color:#0a7a4c;">Rumia</p>'
-        '<h1 style="margin:0 0 8px;font-size:22px;color:#111827;">Your sign-in code</h1>'
-        '<p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#4b5563;">Enter this code on Rumia to sign in. '
+        '<h1 style="margin:0 0 8px;font-size:22px;color:#111827;">Your verification code</h1>'
+        '<p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#4b5563;">Enter this code on Rumia to confirm your email. '
         f'It works once and expires in {minutes} minutes.</p>'
         f'<p style="margin:0 0 20px;font-size:34px;font-weight:800;letter-spacing:10px;color:#111827;'
         f'background:#f3f4f6;border-radius:12px;padding:16px;text-align:center;">{safe}</p>'
         '<p style="margin:0;font-size:12px;line-height:1.6;color:#6b7280;">If you did not ask for this, you can ignore this email. '
-        'Nobody can sign in without the code.</p>'
+        'Nothing changes on your account unless the code is entered.</p>'
         '</td></tr></table>'
         '<p style="margin:16px 0 0;font-size:12px;color:#9ca3af;font-family:Arial,Helvetica,sans-serif;">'
         f'© {datetime.utcnow().year} Rumia · Nairobi, Kenya</p>'
         '</td></tr></table></body></html>'
     )
     text = (
-        f"Your Rumia sign-in code: {code}\n\nIt works once and expires in {minutes} minutes. "
+        f"Your Rumia verification code: {code}\n\nIt works once and expires in {minutes} minutes. "
         "If you did not ask for this, ignore this email."
     )
-    return RenderedEmail(subject=f"{code} is your Rumia sign-in code", html=html_body, text=text)
+    return RenderedEmail(subject=f"{code} is your Rumia verification code", html=html_body, text=text)

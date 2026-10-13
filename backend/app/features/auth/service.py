@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import hmac
 import json
 import re
@@ -34,6 +36,9 @@ REUSE_GRACE_SECONDS = 10
 EMAIL_CODE_TTL_MINUTES = 10
 EMAIL_CODE_MAX_ATTEMPTS = 5
 EMAIL_CODES_PER_HOUR = 5
+PASSWORD_MIN_LENGTH = 8
+LOGIN_MAX_FAILURES = 5
+LOGIN_LOCK_MINUTES = 15
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -65,6 +70,8 @@ def safe_app_redirect(value: Optional[str]) -> Optional[str]:
 
 
 class AuthService:
+    _DUMMY_HASH = "scrypt$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
     # ---- Google --------------------------------------------------------------------------
     @staticmethod
     def build_google_url(next_path: Optional[str], app_redirect: Optional[str]) -> tuple[str, str]:
@@ -136,6 +143,64 @@ class AuthService:
             tokens.otc = await AuthService._issue_otc(db, user_id)
         return tokens
 
+    # ---- Passwords -----------------------------------------------------------------------
+    @staticmethod
+    def _hash_password(password: str) -> str:
+        salt = secrets.token_bytes(16)
+        digest = hashlib.scrypt(password.encode(), salt=salt, n=2**14, r=8, p=1, dklen=32)
+        return f"scrypt${base64.b64encode(salt).decode()}${base64.b64encode(digest).decode()}"
+
+    @staticmethod
+    def _check_password(password: str, stored: str) -> bool:
+        try:
+            _, salt, digest = stored.split("$")
+            expected = base64.b64decode(digest)
+            actual = hashlib.scrypt(password.encode(), salt=base64.b64decode(salt), n=2**14, r=8, p=1, dklen=len(expected))
+        except Exception:
+            return False
+        return hmac.compare_digest(actual, expected)
+
+    @staticmethod
+    def _validate_password(password: str) -> None:
+        if len(password) < PASSWORD_MIN_LENGTH:
+            raise BadRequestException(f"Use at least {PASSWORD_MIN_LENGTH} characters for your password")
+
+    @staticmethod
+    async def password_login(db: AsyncSession, raw_email: str, password: str, next_path: Optional[str]) -> SessionTokens:
+        email = (raw_email or "").strip().lower()
+        generic = UnauthorizedException("Incorrect email or password")
+        row = (
+            await db.execute(
+                text(
+                    """SELECT u.id, c.password_hash, c.failed_attempts, c.locked_until
+                       FROM auth.users u JOIN public.auth_credentials c ON c.user_id = u.id
+                       WHERE lower(u.email) = :e FOR UPDATE OF c"""
+                ),
+                {"e": email},
+            )
+        ).first()
+        if row is None:
+            AuthService._check_password(password, AuthService._DUMMY_HASH)  # same cost whether or not the account exists
+            raise generic
+        if row.locked_until is not None and row.locked_until > _now():
+            raise APIException(status_code=429, code="LOCKED", message="Too many wrong passwords. Try again in a few minutes, or reset your password.")
+        if not AuthService._check_password(password, row.password_hash):
+            await db.execute(
+                text(
+                    """UPDATE public.auth_credentials
+                       SET failed_attempts = failed_attempts + 1,
+                           locked_until = CASE WHEN failed_attempts + 1 >= :max THEN now() + make_interval(mins => :mins) END
+                       WHERE user_id = :u"""
+                ),
+                {"u": row.id, "max": LOGIN_MAX_FAILURES, "mins": LOGIN_LOCK_MINUTES},
+            )
+            await db.commit()  # keep the count even though we reject the request
+            raise generic
+        await db.execute(text("UPDATE public.auth_credentials SET failed_attempts = 0, locked_until = NULL WHERE user_id = :u"), {"u": row.id})
+        tokens = await AuthService._login(db, str(row.id), email, None, None)
+        tokens.next = safe_next(next_path)
+        return tokens
+
     # ---- Email code ----------------------------------------------------------------------
     @staticmethod
     def _code_hash(email: str, code: str) -> str:
@@ -149,9 +214,13 @@ class AuthService:
         return email
 
     @staticmethod
-    async def email_start(db: AsyncSession, raw_email: str) -> None:
-        """Email a 6-digit code. Same response whether or not the address already has an account."""
+    async def email_start(db: AsyncSession, raw_email: str, password: Optional[str] = None) -> None:
+        """Email a 6-digit code (sign-up when a password is given, otherwise forgot-password).
+
+        The password is only stored, hashed, with the code; it becomes the account's password once the code is confirmed."""
         email = AuthService._clean_email(raw_email)
+        if password is not None:
+            AuthService._validate_password(password)
         recent = (
             await db.execute(
                 text("SELECT count(*) FROM public.auth_email_codes WHERE email = :e AND created_at > now() - interval '1 hour'"),
@@ -163,10 +232,13 @@ class AuthService:
         code = f"{secrets.randbelow(10**6):06d}"
         await db.execute(
             text(
-                """INSERT INTO public.auth_email_codes (email, code_hash, expires_at)
-                   VALUES (:e, :h, :exp)"""
+                """INSERT INTO public.auth_email_codes (email, code_hash, expires_at, pending_password_hash)
+                   VALUES (:e, :h, :exp, :p)"""
             ),
-            {"e": email, "h": AuthService._code_hash(email, code), "exp": _now() + timedelta(minutes=EMAIL_CODE_TTL_MINUTES)},
+            {
+                "e": email, "h": AuthService._code_hash(email, code), "exp": _now() + timedelta(minutes=EMAIL_CODE_TTL_MINUTES),
+                "p": AuthService._hash_password(password) if password is not None else None,
+            },
         )
         # Commit before sending so the code exists by the time the email lands.
         await db.commit()
@@ -182,12 +254,17 @@ class AuthService:
             raise APIException(status_code=503, code="EMAIL_UNAVAILABLE", message="We could not send the email. Please try again.")
 
     @staticmethod
-    async def email_verify(db: AsyncSession, raw_email: str, code: str, next_path: Optional[str]) -> SessionTokens:
+    async def email_verify(
+        db: AsyncSession, raw_email: str, code: str, next_path: Optional[str], new_password: Optional[str] = None
+    ) -> SessionTokens:
+        """Confirm the emailed code and set the account's password (the one given at sign-up, or `new_password`)."""
         email = AuthService._clean_email(raw_email)
+        if new_password is not None:
+            AuthService._validate_password(new_password)
         row = (
             await db.execute(
                 text(
-                    """SELECT id, code_hash, attempts FROM public.auth_email_codes
+                    """SELECT id, code_hash, attempts, pending_password_hash FROM public.auth_email_codes
                        WHERE email = :e AND used_at IS NULL AND expires_at > now()
                        ORDER BY created_at DESC LIMIT 1 FOR UPDATE"""
                 ),
@@ -201,7 +278,18 @@ class AuthService:
             await db.commit()  # keep the count even though we reject the request
             raise UnauthorizedException("That code is not right. Check it and try again.")
         await db.execute(text("UPDATE public.auth_email_codes SET used_at = now() WHERE id = :i"), {"i": row.id})
+        password_hash = AuthService._hash_password(new_password) if new_password is not None else row.pending_password_hash
+        if password_hash is None:
+            raise BadRequestException("Choose a password to finish.")
         user_id = await AuthService._upsert_user(db, email, None, None, None)
+        await db.execute(
+            text(
+                """INSERT INTO public.auth_credentials (user_id, password_hash) VALUES (CAST(:u AS uuid), :h)
+                   ON CONFLICT (user_id) DO UPDATE
+                     SET password_hash = :h, failed_attempts = 0, locked_until = NULL, updated_at = now()"""
+            ),
+            {"u": user_id, "h": password_hash},
+        )
         tokens = await AuthService._login(db, user_id, email, None, None)
         tokens.next = safe_next(next_path)
         return tokens

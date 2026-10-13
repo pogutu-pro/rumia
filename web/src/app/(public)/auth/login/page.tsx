@@ -20,51 +20,91 @@ export default function LoginPage() {
   // Sign-in form state
   const [googleSigningIn, setGoogleSigningIn] = useState(false);
 
-  // Email sign-in: ask for the address, then the 6-digit code we email.
+  // Email + password sign-in. Email codes are only for confirming a new account and for "forgot password".
+  type Mode = 'login' | 'signup' | 'forgot';
+  const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
-  const [emailBusy, setEmailBusy] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  async function sendCode() {
-    if (emailBusy) return;
-    setEmailBusy(true);
-    try {
-      const res = await fetch('/auth/email/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Could not send the code.');
-      setCodeSent(true);
-      setCode('');
-      toast.success('Code sent. Check your email.');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Could not send the code.');
-    } finally {
-      setEmailBusy(false);
-    }
+  function switchMode(next: Mode) {
+    setMode(next);
+    setPassword('');
+    setCode('');
+    setCodeSent(false);
   }
 
-  async function verifyCode() {
-    if (emailBusy) return;
-    setEmailBusy(true);
+  async function postJson(url: string, body: Record<string, unknown>) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+    return data as { next?: string };
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    const next = getNextParam() || '/account';
     try {
-      const res = await fetch('/auth/email/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code, next: getNextParam() || '/account' }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'That code did not work.');
-      posthog.capture('email_sign_in_completed');
+      if (mode === 'login') {
+        const data = await postJson('/auth/password/login', { email, password, next });
+        posthog.capture('password_sign_in_completed');
+        window.location.assign(data.next || '/account');
+        return;
+      }
+      if (!codeSent) {
+        // Sign up sends the chosen password along; forgot password just asks for a code.
+        await postJson('/auth/email/start', mode === 'signup' ? { email, password } : { email });
+        setCodeSent(true);
+        setCode('');
+        if (mode === 'forgot') setPassword('');
+        toast.success('We emailed you a 6-digit code.');
+        setBusy(false);
+        return;
+      }
+      const data = await postJson(
+        '/auth/email/verify',
+        mode === 'forgot' ? { email, code, next, new_password: password } : { email, code, next },
+      );
+      posthog.capture(mode === 'signup' ? 'sign_up_completed' : 'password_reset_completed');
       window.location.assign(data.next || '/account');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'That code did not work.');
-      setEmailBusy(false);
+      toast.error(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setBusy(false);
     }
   }
+
+  const title = mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset your password';
+  const subtitle =
+    mode === 'login'
+      ? 'Enter your credentials to access your account'
+      : mode === 'signup'
+        ? codeSent
+          ? 'Enter the 6-digit code we emailed you to confirm your email'
+          : 'Use your email and a password, then we confirm your email'
+        : codeSent
+          ? 'Enter the code we emailed you and choose a new password'
+          : 'We will email you a code to reset your password';
+  const submitLabel = busy
+    ? 'Please wait…'
+    : mode === 'login'
+      ? 'Login'
+      : codeSent
+        ? mode === 'signup'
+          ? 'Confirm and create account'
+          : 'Reset password and sign in'
+        : mode === 'signup'
+          ? 'Create account'
+          : 'Email me a code';
+  const showPassword = mode !== 'forgot' || codeSent;
+  const passwordLabel = mode === 'forgot' ? 'New password' : 'Password';
 
   function getNextParam(): string | undefined {
     const params = new URLSearchParams(window.location.search);
@@ -158,16 +198,109 @@ export default function LoginPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-slate-100 shadow-xl">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-            Sign in
-          </h1>
-          <p className="text-sm text-slate-500 font-medium">
-            Welcome back, or create an account to get started.
-          </p>
+        <div className="space-y-1.5">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">{title}</h1>
+          <p className="text-sm text-slate-500 font-medium">{subtitle}</p>
         </div>
 
-<InAppBrowserNotice />
+        <InAppBrowserNotice />
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              disabled={codeSent}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-70"
+            />
+          </div>
+
+          {codeSent && (
+            <div className="space-y-1.5">
+              <label htmlFor="code" className="block text-sm font-semibold text-slate-700">
+                6-digit code
+              </label>
+              <input
+                id="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="123456"
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          )}
+
+          {showPassword && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
+                  {passwordLabel}
+                </label>
+                {mode === 'login' && (
+                  <button
+                    type="button"
+                    onClick={() => switchMode('forgot')}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-900"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <input
+                id="password"
+                type="password"
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                required
+                minLength={mode === 'login' ? undefined : 8}
+                value={password}
+                disabled={mode === 'signup' && codeSent}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-70"
+              />
+              {mode !== 'login' && !codeSent && (
+                <p className="text-[11px] text-slate-500">At least 8 characters.</p>
+              )}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={busy || (codeSent && code.length !== 6)}
+            className="w-full h-12 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {submitLabel}
+          </button>
+
+          {codeSent && (
+            <button
+              type="button"
+              onClick={() => {
+                setCodeSent(false);
+                setCode('');
+              }}
+              className="w-full text-xs text-slate-500 hover:text-slate-800"
+            >
+              Use a different email or send a new code
+            </button>
+          )}
+        </form>
+
+        <div className="flex items-center gap-3 text-xs text-slate-400">
+          <span className="h-px flex-1 bg-slate-200" />
+          OR
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
 
 {/* Google Sign-In — prominent */}
         <button
@@ -207,73 +340,24 @@ export default function LoginPage() {
           {googleSigningIn ? 'Redirecting to Google...' : 'Continue with Google'}
         </button>
 
-        <div className="flex items-center gap-3 text-xs text-slate-400">
-          <span className="h-px flex-1 bg-slate-200" />
-          OR
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (codeSent) void verifyCode();
-            else void sendCode();
-          }}
-          className="space-y-3"
-        >
-          <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setCodeSent(false);
-            }}
-            placeholder="you@example.com"
-            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          {codeSent && (
+        <p className="text-center text-sm text-slate-500">
+          {mode === 'login' ? (
             <>
-              <label htmlFor="code" className="block text-sm font-semibold text-slate-700">
-                6-digit code
-              </label>
-              <input
-                id="code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="123456"
-                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+              Don&apos;t have an account?{' '}
+              <button type="button" onClick={() => switchMode('signup')} className="font-bold text-slate-900 hover:underline">
+                Sign up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <button type="button" onClick={() => switchMode('login')} className="font-bold text-slate-900 hover:underline">
+                Login
+              </button>
             </>
           )}
-          <button
-            type="submit"
-            disabled={emailBusy || !email || (codeSent && code.length !== 6)}
-            className="w-full h-12 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {emailBusy ? 'Please wait…' : codeSent ? 'Verify and sign in' : 'Email me a code'}
-          </button>
-          {codeSent && (
-            <button
-              type="button"
-              onClick={() => void sendCode()}
-              disabled={emailBusy}
-              className="w-full text-xs text-slate-500 hover:text-slate-800"
-            >
-              Send a new code
-            </button>
-          )}
-        </form>
+        </p>
+
         {comingCampuses.length > 0 && (
           <div className="mt-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 text-center">

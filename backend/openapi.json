@@ -4979,6 +4979,19 @@
             "maxLength": 254,
             "title": "Email",
             "type": "string"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sign-up: the password to set once the code is confirmed",
+            "title": "Password"
           }
         },
         "required": [
@@ -4999,6 +5012,19 @@
             "maxLength": 254,
             "title": "Email",
             "type": "string"
+          },
+          "new_password": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Forgot password: the new password",
+            "title": "New Password"
           },
           "next": {
             "anyOf": [
@@ -10421,6 +10447,38 @@
           "pages"
         ],
         "title": "PaginatedResponse[StaffTourBookingRead]",
+        "type": "object"
+      },
+      "PasswordLoginRequest": {
+        "properties": {
+          "email": {
+            "maxLength": 254,
+            "title": "Email",
+            "type": "string"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Relative path to land on after login",
+            "title": "Next"
+          },
+          "password": {
+            "maxLength": 128,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "PasswordLoginRequest",
         "type": "object"
       },
       "PlaceRead": {
@@ -18165,6 +18223,47 @@
           }
         },
         "summary": "Begin Google sign-in",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "password_login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTokens"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sign in with email and password",
         "tags": [
           "Auth"
         ]

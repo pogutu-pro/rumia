@@ -12,6 +12,7 @@ from app.features.auth.schemas import (
     GoogleStartRequest,
     GoogleStartResponse,
     LogoutRequest,
+    PasswordLoginRequest,
     SessionTokens,
     TokenRequest,
 )
@@ -46,7 +47,7 @@ async def email_start(
     data: EmailStartRequest,
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
-    await AuthService.email_start(db, data.email)
+    await AuthService.email_start(db, data.email, data.password)
 
 
 @router.post("/email/verify", response_model=SessionTokens, summary="Sign in with the emailed code")
@@ -56,7 +57,17 @@ async def email_verify(
     data: EmailVerifyRequest,
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> SessionTokens:
-    return await AuthService.email_verify(db, data.email, data.code, data.next)
+    return await AuthService.email_verify(db, data.email, data.code, data.next, data.new_password)
+
+
+@router.post("/login", response_model=SessionTokens, summary="Sign in with email and password")
+@limiter.limit("10/minute")
+async def password_login(
+    request: Request,
+    data: PasswordLoginRequest,
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> SessionTokens:
+    return await AuthService.password_login(db, data.email, data.password, data.next)
 
 
 @router.post("/token", response_model=SessionTokens, summary="Refresh a session or redeem a mobile one-time code")

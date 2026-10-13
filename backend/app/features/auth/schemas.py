@@ -47,9 +47,17 @@ class DevLoginRequest(BaseModel):
 
 class EmailStartRequest(BaseModel):
     email: str = Field(max_length=254)
+    password: Optional[str] = Field(None, max_length=128, description="Sign-up: the password to set once the code is confirmed")
 
 
 class EmailVerifyRequest(BaseModel):
     email: str = Field(max_length=254)
     code: str = Field(min_length=6, max_length=6)
+    new_password: Optional[str] = Field(None, max_length=128, description="Forgot password: the new password")
+    next: Optional[str] = Field(None, description="Relative path to land on after login")
+
+
+class PasswordLoginRequest(BaseModel):
+    email: str = Field(max_length=254)
+    password: str = Field(max_length=128)
     next: Optional[str] = Field(None, description="Relative path to land on after login")
