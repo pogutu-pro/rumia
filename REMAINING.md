@@ -1,7 +1,7 @@
 # What is left
 
-Status as of 2026-10-09. The classic UI on the new backend (PR #6) is merged and deployed. Production is on database
-revision `0006` with zero drift, and the server disk is at 26% after clearing 36 GB of Docker build cache.
+Status as of 2026-10-13. The classic UI on the new backend (PR #6) and the open-markets work (PR #11) are merged and deployed.
+Production is on database revision `0007` with zero drift.
 
 Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
 
@@ -12,11 +12,10 @@ Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
    enquiries, "Still available"). Also `/admin/operations` and `/manager/operations`.
 2. **Watch the first few days.** Check Sentry and `docker logs rumia_backend` / `rumia_worker` on the server. The photo
    fingerprint backfill (`hash_legacy_media`) runs on the worker's 6-hourly freshness sweep.
-3. **Supabase leftovers on the server.** Done 2026-10-11: `backend/.env.pre-cutover.bak` and `.env.pre-swap.bak` (old Supabase
-   database credentials) were shredded. Still to decide: `backend/.env` has `SUPABASE_URL` and `web/.env.production` has
-   `NEXT_PUBLIC_SUPABASE_URL` (the project URL only, not a secret). They were left because the backend still has a code path
-   that reads `SUPABASE_URL`; remove them together with that code. Also tighten permissions: both files are `664`
-   (group/other readable); `chmod 600` them (the deploy runs as the file owner).
+3. **Supabase leftovers.** Done 2026-10-13: `backend/.env` and `web/.env.production` on the server are now `600`. Still to do, as its own
+   reviewed PR because it is security-critical: remove the Supabase token path (`SUPABASE_*` settings, `_fetch_jwks` and the
+   Supabase branch of token decoding in `backend/app/core/security.py`, `SupabaseAuthProvider` in `auth_provider.py`, the
+   `AUTH_MODE` switch) and then the two `SUPABASE_URL` lines in the server env files. Production runs `AUTH_MODE=custom`.
 4. **Sitemap.** Done: it revalidates hourly and now lists the area and landmark pages.
 
 ## Parked, with a known fix
@@ -31,17 +30,19 @@ Details of what shipped: `docs/restructure/CLASSIC_UI.md`.
 
 ## Decisions for you
 
-9. **Opening up beyond DeKUT students.** Branch `feat/open-markets` (PR #11). Done there: SEO pages by market, type and place
+9. **Opening up beyond DeKUT students.** Done and live (PR #11, migration `0007`): SEO pages by market, type and place
    (`/nyeri`, `/nyeri/apartments`, `/nyeri/bedsitters/boma`); every listing at `/{market}/{type}/{place}/{name}` with 308 redirects
-   from `/hostels/...`, `/bnb/{id}`, `/areas/...`; search cards carry their exact `path`; no `nyeri`/`dekut` literals left in URL
-   building (a listing without county or area uses `/p/{slug}`); the default campus is the first active campus in the data
-   (`getDefaultCampus`, `default_campus_id`); `DEFAULT_COUNTY` / `DEFAULT_CAMPUS_SLUG` removed; a new listing takes its market
-   from the agent's campus city; managers get the market of the campus they manage; review text rule says "verified students".
-   **Migration `0007` (King'ong'o place match) must be applied to production BEFORE the merge deploys**: it was rehearsed on a restored
-   copy (3 listings get their place, zero drift) and a named backup `~/backups/rumia_pre0007_20261012_1847.dump` exists on the server.
-   Still open: the second test market run, the `/verify` official-records feature (DeKUT-only data, 93 rows; left in place because
-   removing it removes a user-facing feature), commission / consultation-fee / agent-contact rules for non-student rentals (product
-   decision), `/hostels` page and OG image wording.
+   from `/hostels/...`, `/bnb/{id}`, `/areas/...`; search cards carry their exact `path`; no `nyeri`/`dekut` literals in URL
+   building (a listing without county or area uses `/p/{slug}`); the default campus is the first active campus in the data;
+   `DEFAULT_COUNTY` / `DEFAULT_CAMPUS_SLUG` removed; a new listing takes its market from the agent's campus city; managers get the
+   market of the campus they manage; King'ong'o listings now have their place. Still open:
+   1. Run the whole site against a second test market locally (nothing has been run against more than Nyeri).
+   2. Short stays: none exist in production or locally, so `/nyeri/short-stays/...` pages and the `/bnb/{id}` redirect are untested.
+   3. The `/verify` official-records feature is DeKUT-only data (93 rows). Keep or remove: a product decision.
+   4. Commission, consultation-fee and agent-contact rules for non-student rentals: a product decision.
+   5. Wording that still says "students" / "DeKUT": the `/hostels` page title, the OG image, hostel listing titles ("Near DeKUT").
+   6. Google Search Console: submit `https://rumia.co.ke/sitemap.xml`, run the Rich Results Test on `/nyeri` and a listing, and watch for a
+      temporary ranking dip while the old URLs redirect.
 10. **Drift monitoring.** Done: the worker runs the check five minutes after each start and then daily
     (`check_projection_drift` in `backend/app/core/tasks/cron.py`) and logs an ERROR, which Sentry turns into an event, when any
     listing disagrees with its property copy. The query lives in `backend/app/features/catalog/drift_check.sql`;
