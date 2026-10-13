@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import localFont from 'next/font/local';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
 import { BottomNav } from '@/components/pwa/BottomNav';
@@ -12,21 +12,21 @@ import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileMain } from '@/components/pwa/MobileMain';
 import '@/styles/globals.css';
 
-const inter = Inter({
-  subsets: ['latin'],
+// Self-hosted variable fonts (latin subset): the build never depends on fonts.googleapis.com.
+const inter = localFont({
+  src: '../fonts/inter-latin-wght-normal.woff2',
+  weight: '100 900',
   variable: '--font-inter',
   display: 'swap',
   preload: true,
-  adjustFontFallback: true,
 });
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
+const jakarta = localFont({
+  src: '../fonts/plus-jakarta-sans-latin-wght-normal.woff2',
+  weight: '200 800',
   variable: '--font-jakarta',
   display: 'swap',
   preload: true,
-  adjustFontFallback: true,
-  weight: ['400', '500', '600', '700', '800'],
 });
 
 export const viewport: Viewport = {
@@ -75,8 +75,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Rumia" />
         <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png" />
         <link rel="dns-prefetch" href="https://pub-35395ff8fc144313adfa903807f2a359.r2.dev" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body
         className={cn(
