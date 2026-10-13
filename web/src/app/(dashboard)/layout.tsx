@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { AgentHeader } from './agent-header';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
@@ -11,10 +11,10 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
+  const authClient = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authClient.auth.getUser();
 
   if (!user) {
     redirect('/auth/login');

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { TeamSection } from '@/components/dashboard/team-section';
@@ -7,8 +7,8 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function AgentProfilePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
 
   if (!user) redirect('/auth/login');
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { NewListingForm } from './new-listing-form';
@@ -10,11 +10,11 @@ import { campusesServerApi } from '@/lib/api/campuses.server';
 export const revalidate = 0;
 
 export default async function NewListingPage() {
-  const supabase = await createClient();
+  const authClient = await createClient();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authClient.auth.getUser();
   if (!user) {
     redirect('/auth/login');
   }

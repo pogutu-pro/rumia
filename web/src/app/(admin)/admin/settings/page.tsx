@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { toast } from 'sonner';
 import { Loader2, LogOut } from 'lucide-react';
 
@@ -12,8 +12,8 @@ export default function AdminSettingsPage() {
 
   const handleSignOut = async () => {
     setLoggingOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut({ scope: 'local' });
+    const authClient = createClient();
+    await authClient.auth.signOut({ scope: 'local' });
     toast.success('Signed out successfully');
     window.location.href = '/auth/login';
   };

@@ -14,7 +14,7 @@ import {
   User,
   CalendarCheck,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
 
 export interface AgentSidebarProps {
@@ -111,11 +111,11 @@ function SidebarContent({
 export function AgentSidebar({ agentName, userEmail, isAdmin, hasAgent = true }: AgentSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
+  const authClient = createClient();
   const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: 'local' });
+    await authClient.auth.signOut({ scope: 'local' });
     router.push('/auth/login');
     router.refresh();
   };

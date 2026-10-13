@@ -44,7 +44,7 @@ def decode_own_access_token(token: str) -> Dict[str, Any]:
 
 
 def is_own_token(token: str) -> bool:
-    """Cheap routing check: was this token minted by us (vs. Supabase)? Does not verify anything."""
+    """Cheap routing check: was this token minted by us? Does not verify anything."""
     try:
         return jwt.get_unverified_claims(token).get("iss") == ISSUER
     except JWTError:

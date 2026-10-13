@@ -47,11 +47,6 @@ class AuthDisabled(APIException):
         super().__init__(status_code=404, code="AUTH_DISABLED", message="Not found")
 
 
-def ensure_enabled() -> None:
-    if settings.AUTH_MODE != "custom":
-        raise AuthDisabled()
-
-
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 

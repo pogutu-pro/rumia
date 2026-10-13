@@ -16,7 +16,7 @@ rumia/
 │   ├── architecture/         # System architecture documentation
 │   └── internal/             # Internal planning & research notes
 ├── data/             # Seed data & migration CSV files
-├── supabase/         # Supabase migrations & database schema
+├── db/               # legacy SQL migrations (replayed to build test databases) + shim
 ├── .github/          # GitHub Actions CI/CD workflows (push-to-deploy)
 ├── docker-compose.yml
 └── README.md
@@ -70,7 +70,7 @@ Full step-by-step Oracle VPS deployment guide: [`docs/DEPLOYMENT.md`](docs/DEPLO
 | ------------- | ------------------------------------------------------ |
 | Frontend      | Next.js 16, TypeScript, Tailwind CSS, Serwist PWA      |
 | Backend API   | Python 3.12, FastAPI, SQLAlchemy 2 (Async), PostgreSQL |
-| Auth          | Supabase JWT                                           |
+| Auth          | Own Google sign-in, signed access tokens, rotating refresh tokens |
 | Storage       | Cloudflare R2                                          |
 | Hosting       | Oracle Cloud VPS, Johannesburg (`af-johannesburg-1`)   |
 | Reverse Proxy | Nginx + Let's Encrypt SSL                              |

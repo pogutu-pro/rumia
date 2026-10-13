@@ -69,8 +69,6 @@ Desktop.ini
 # Encrypted credentials — never commit
 *.enc
 
-# Supabase CLI local state
-supabase/.temp/
 
 # SSH key passphrase — never commit
 .ssh-key-passphrase.txt

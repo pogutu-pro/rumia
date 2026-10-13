@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
-import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
+import { signInWithGoogle, getSession } from '@/lib/auth/actions';
 import { profilesApi } from '@/lib/api/profiles';
 import { isValidKenyanPhone } from '@/lib/utils/phone';
 import type { TourTimeWindow, TourBooking } from '@/types';

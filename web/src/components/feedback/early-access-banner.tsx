@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { listingsClientApi } from '@/lib/api/listings-client';
-import { getSession } from '@/lib/supabase/auth';
+import { getSession } from '@/lib/auth/actions';
 import { ArrowRight, Lightbulb } from 'lucide-react';
 
 const MAX_HOSTELS = 20;

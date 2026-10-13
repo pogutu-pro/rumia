@@ -40,8 +40,7 @@ python_functions = ["test_*"]
 env = [
     "ENVIRONMENT=test",
     "DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres",
-    "SUPABASE_JWT_SECRET=test_secret_32_bytes_long_string_for_testing!!",
-    "SUPABASE_URL=https://test.supabase.co",
+    "AUTH_JWT_SECRET=test_secret_32_bytes_long_string_for_testing!!",
     "RATE_LIMIT_ENABLED=false",
 ]
 

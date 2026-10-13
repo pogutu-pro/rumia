@@ -4,7 +4,7 @@ import { InAppBrowserNotice } from '@/components/auth/in-app-browser-notice';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { campusesApi } from '@/lib/api/campuses';
-import { signInWithGoogle, hasStoredSessionCookie } from '@/lib/supabase/auth';
+import { signInWithGoogle, hasStoredSessionCookie } from '@/lib/auth/actions';
 import posthog from 'posthog-js';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';

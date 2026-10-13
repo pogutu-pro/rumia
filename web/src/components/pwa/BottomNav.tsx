@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import * as React from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils/cn";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { MOBILE_NAV, isBottomNavHidden, isNavActive } from "@/components/shell/nav-config";
@@ -42,11 +42,11 @@ export function BottomNav() {
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    const supabase = createClient();
+    const authClient = createClient();
     let active = true;
     const sync = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await authClient.auth.getUser();
         if (!active) return;
         if (!user) {
           setAvatarUrl(null);
@@ -65,7 +65,7 @@ export function BottomNav() {
       }
     };
     void sync();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => void sync());
+    const { data: sub } = authClient.auth.onAuthStateChange(() => void sync());
     return () => {
       active = false;
       sub?.subscription?.unsubscribe?.();

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUploadUrl, isConfigured } from '@/lib/r2/client';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { ALLOWED_MIME_TYPES } from '@/lib/image/validate';
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

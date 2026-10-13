@@ -1,5 +1,5 @@
 import { TodayPanel } from '@/components/dashboard/today-panel';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import {
   Building2,
@@ -31,11 +31,11 @@ function getGreeting(): string {
 }
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
+  const authClient = await createClient();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authClient.auth.getUser();
   if (!user) {
     redirect('/auth/login');
   }

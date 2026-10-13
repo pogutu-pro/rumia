@@ -1,13 +1,13 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { getAgentHostelsAction } from '@/app/actions/listings';
 import { OfficialHostelsTableClient } from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
 
 export default async function AgentHostelsPage() {
-  const supabase = await createClient();
+  const authClient = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authClient.auth.getUser();
   if (!user) {
     redirect('/auth/login');
   }

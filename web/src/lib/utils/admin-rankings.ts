@@ -1,7 +1,7 @@
 /**
  * Pure ranking and aggregation helpers for agent performance on
  * the Rumia Admin Panel Overview page.
- * No Supabase dependencies — all functions operate on plain arrays.
+ * No external dependencies — all functions operate on plain arrays.
  */
 
 import { countMonthlyLeads } from './admin-stats';

@@ -1,7 +1,7 @@
 import { getManagerUserContext } from '../src/lib/utils/manager';
 
-// Mock Supabase client for testing getManagerUserContext unit logic
-function createMockSupabase(role: string | null, managedCampusId: string | null = null) {
+// Mock database client for testing getManagerUserContext unit logic
+function createMockClient(role: string | null, managedCampusId: string | null = null) {
   return {
     from: (table: string) => {
       if (table !== 'profiles') throw new Error(`Unexpected table ${table}`);
@@ -23,7 +23,7 @@ async function runNegativeTests() {
   console.log('--- Running Mandatory Negative Authorization Tests (Step 2) ---');
 
   // Test 1: Student role
-  const studentClient = createMockSupabase('student');
+  const studentClient = createMockClient('student');
   const studentResult = await getManagerUserContext(studentClient, 'test-student-id');
   console.log('Test 1 - Student role attempt:', studentResult === null ? 'REJECTED (PASS)' : 'FAILED - Got context');
   if (studentResult !== null) {
@@ -31,7 +31,7 @@ async function runNegativeTests() {
   }
 
   // Test 2: Agent role
-  const agentClient = createMockSupabase('agent');
+  const agentClient = createMockClient('agent');
   const agentResult = await getManagerUserContext(agentClient, 'test-agent-id');
   console.log('Test 2 - Agent role attempt:', agentResult === null ? 'REJECTED (PASS)' : 'FAILED - Got context');
   if (agentResult !== null) {
@@ -39,7 +39,7 @@ async function runNegativeTests() {
   }
 
   // Test 3: Null / non-existent profile
-  const nullClient = createMockSupabase(null);
+  const nullClient = createMockClient(null);
   const nullResult = await getManagerUserContext(nullClient, 'non-existent-id');
   console.log('Test 3 - Non-existent user attempt:', nullResult === null ? 'REJECTED (PASS)' : 'FAILED - Got context');
   if (nullResult !== null) {
@@ -48,12 +48,12 @@ async function runNegativeTests() {
 
   // Positive sanity checks
   // Test 4: Manager role
-  const managerClient = createMockSupabase('manager', 'campus-123');
+  const managerClient = createMockClient('manager', 'campus-123');
   const managerResult = await getManagerUserContext(managerClient, 'test-manager-id');
   console.log('Test 4 - Manager role attempt:', managerResult?.role === 'manager' && managerResult.managedCampusId === 'campus-123' ? 'ALLOWED (PASS)' : 'FAILED');
 
   // Test 5: Admin / SuperAdmin role
-  const adminClient = createMockSupabase('admin');
+  const adminClient = createMockClient('admin');
   const adminResult = await getManagerUserContext(adminClient, 'test-admin-id');
   console.log('Test 5 - Admin role attempt:', adminResult?.isSuperAdmin === true ? 'ALLOWED (PASS)' : 'FAILED');
 

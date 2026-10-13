@@ -26,7 +26,7 @@ LogOut,
   Scale,
   Hotel,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { DashboardSwitcher } from '@/components/dashboard-switcher';
 
 export interface AdminSidebarProps {
@@ -121,11 +121,11 @@ function SidebarContent({
 export function AdminSidebar({ userName, userEmail, isAdmin = true, hasAgent }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
+  const authClient = createClient();
   const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: 'local' });
+    await authClient.auth.signOut({ scope: 'local' });
     router.push('/auth/login');
     router.refresh();
   };

@@ -1224,8 +1224,8 @@ function ComparePageContent() {
   const clearSelection = useCompareStore((s) => s.clearSelection);
   const urlSyncDone = useRef(false);
 
-  // Fetch full listing data from Supabase for the given IDs
-  const fetchListingsFromSupabase = useCallback(
+  // Fetch full listing data from the API for the given IDs
+  const fetchSavedListings = useCallback(
     async (ids: string[]) => {
       if (ids.length === 0) return;
       const { items } = await listingsClientApi
@@ -1275,8 +1275,8 @@ function ComparePageContent() {
     }
 
     enrichedRef.current = true;
-    fetchListingsFromSupabase(state.selectedIds);
-  }, [hydrated, fetchListingsFromSupabase]);
+    fetchSavedListings(state.selectedIds);
+  }, [hydrated, fetchSavedListings]);
 
   // Handle URL-based comparison (?ids=id1,id2,...)
   useEffect(() => {
@@ -1297,8 +1297,8 @@ function ComparePageContent() {
     });
     if (alreadyLoaded) return;
 
-    fetchListingsFromSupabase(urlIds);
-  }, [searchParams, fetchListingsFromSupabase]);
+    fetchSavedListings(urlIds);
+  }, [searchParams, fetchSavedListings]);
 
   // Sync URL params when selections change
   useEffect(() => {

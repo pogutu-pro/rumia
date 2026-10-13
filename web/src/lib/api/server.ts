@@ -1,4 +1,4 @@
-import { createClient } from '../supabase/server';
+import { createClient } from '../auth/server';
 import { getApiUrl, API_BASE_URL } from './config';
 import { ApiError, extractApiErrorMessage } from './client';
 
@@ -10,8 +10,8 @@ export async function apiServer<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const supabase = await createClient();
-  const { data: sessionData } = await supabase.auth.getSession();
+  const authClient = await createClient();
+  const { data: sessionData } = await authClient.auth.getSession();
   const token = sessionData?.session?.access_token;
 
   const headers = new Headers(options.headers || {});

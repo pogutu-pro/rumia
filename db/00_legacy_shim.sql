@@ -1,6 +1,5 @@
--- Minimal stand-ins for the Supabase-provided objects the migrations reference.
--- Lets supabase/migrations/*.sql replay on plain Postgres. Remove the auth
--- parts once custom auth owns the users table (migration step 3).
+-- Minimal stand-ins for the roles and the `auth` schema that the legacy SQL migrations reference
+-- (db/legacy-migrations/*.sql), so they replay on plain Postgres. `auth.users` is also the live users table.
 
 DO $$
 BEGIN

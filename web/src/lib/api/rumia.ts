@@ -2,7 +2,7 @@ import createClient, { type Middleware } from 'openapi-fetch';
 import type { components, paths } from './schema';
 import { API_BASE_URL } from './config';
 import { deviceHeaders } from '@/lib/device';
-import { getBrowserSession } from '../supabase/client';
+import { getBrowserSession } from '../auth/client';
 
 /**
  * Typed client for the Rumia API, generated from the backend's OpenAPI contract

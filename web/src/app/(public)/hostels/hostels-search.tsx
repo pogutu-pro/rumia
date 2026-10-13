@@ -17,7 +17,7 @@ import {
   Check,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';

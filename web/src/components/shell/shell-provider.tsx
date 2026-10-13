@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { profilesApi, type UserProfile } from '@/lib/api/profiles';
-import { createClient, hasStoredSession } from '@/lib/supabase/client';
+import { createClient, hasStoredSession } from '@/lib/auth/client';
 
 export interface ShellUser {
   id: string;

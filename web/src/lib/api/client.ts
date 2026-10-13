@@ -1,4 +1,4 @@
-import { getBrowserSession } from '../supabase/client';
+import { getBrowserSession } from '../auth/client';
 import { getApiUrl } from './config';
 
 /**
