@@ -954,6 +954,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/email/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email me a sign-in code */
+        post: operations["email_start_api_v1_auth_email_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/email/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in with the emailed code */
+        post: operations["email_verify_api_v1_auth_email_verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/google/callback": {
         parameters: {
             query?: never;
@@ -982,6 +1016,23 @@ export interface paths {
         put?: never;
         /** Begin Google sign-in */
         post: operations["google_start_api_v1_auth_google_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in with email and password */
+        post: operations["password_login_api_v1_auth_login_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5304,6 +5355,33 @@ export interface components {
             /** Exists */
             exists: boolean;
         };
+        /** EmailStartRequest */
+        EmailStartRequest: {
+            /** Email */
+            email: string;
+            /**
+             * Password
+             * @description Sign-up: the password to set once the code is confirmed
+             */
+            password?: string | null;
+        };
+        /** EmailVerifyRequest */
+        EmailVerifyRequest: {
+            /** Code */
+            code: string;
+            /** Email */
+            email: string;
+            /**
+             * New Password
+             * @description Forgot password: the new password
+             */
+            new_password?: string | null;
+            /**
+             * Next
+             * @description Relative path to land on after login
+             */
+            next?: string | null;
+        };
         /** EventBatch */
         EventBatch: {
             /** Events */
@@ -7212,6 +7290,18 @@ export interface components {
              * @example 100
              */
             total: number;
+        };
+        /** PasswordLoginRequest */
+        PasswordLoginRequest: {
+            /** Email */
+            email: string;
+            /**
+             * Next
+             * @description Relative path to land on after login
+             */
+            next?: string | null;
+            /** Password */
+            password: string;
         };
         /** PlaceRead */
         PlaceRead: {
@@ -10545,6 +10635,70 @@ export interface operations {
             };
         };
     };
+    email_start_api_v1_auth_email_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailStartRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    email_verify_api_v1_auth_email_verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     google_callback_api_v1_auth_google_callback_post: {
         parameters: {
             query?: never;
@@ -10598,6 +10752,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GoogleStartResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    password_login_api_v1_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTokens"];
                 };
             };
             /** @description Validation Error */
