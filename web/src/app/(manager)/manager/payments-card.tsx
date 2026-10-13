@@ -12,6 +12,8 @@ interface FeeCampus {
   consultation_fee: number | null;
 }
 
+const feeText = (fee: number | null | undefined) => (fee == null ? '' : String(fee));
+
 interface PaymentsCardProps {
   campuses: FeeCampus[];
   isSuperAdmin?: boolean;
@@ -28,12 +30,9 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
   const [selectedId, setSelectedId] = useState(campuses[0]?.id ?? '');
   const selected = campuses.find((c) => c.id === selectedId) ?? campuses[0];
 
-  const [hostelFee, setHostelFee] = useState<number>(
-    selected?.hostel_finding_fee ?? 100,
-  );
-  const [consultationFee, setConsultationFee] = useState<number>(
-    selected?.consultation_fee ?? 0,
-  );
+  // Kept as strings so the field can be cleared while typing; empty is rejected on save.
+  const [hostelFee, setHostelFee] = useState<string>(feeText(selected?.hostel_finding_fee));
+  const [consultationFee, setConsultationFee] = useState<string>(feeText(selected?.consultation_fee));
   const [saving, setSaving] = useState(false);
 
   if (!selected && campuses.length === 0) {
@@ -44,18 +43,24 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
     setSelectedId(id);
     const campus = campuses.find((c) => c.id === id);
     if (campus) {
-      setHostelFee(campus.hostel_finding_fee ?? 100);
-      setConsultationFee(campus.consultation_fee ?? 0);
+      setHostelFee(feeText(campus.hostel_finding_fee));
+      setConsultationFee(feeText(campus.consultation_fee));
     }
   };
 
   const handleSave = async () => {
     if (saving) return;
+    const hostel = Number(hostelFee);
+    const consultation = Number(consultationFee);
+    if (hostelFee.trim() === '' || consultationFee.trim() === '' || !(hostel >= 0) || !(consultation >= 0)) {
+      toast.error('Enter an amount of 0 or more for both fees.');
+      return;
+    }
     setSaving(true);
     try {
       const res = await updateCampusSettingsAction(selectedId, {
-        hostel_finding_fee: hostelFee,
-        consultation_fee: consultationFee,
+        hostel_finding_fee: hostel,
+        consultation_fee: consultation,
       });
       if (!res.success) {
         toast.error(res.error);
@@ -119,7 +124,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
               min={0}
               step={1}
               value={hostelFee}
-              onChange={(e) => setHostelFee(Number(e.target.value))}
+              onChange={(e) => setHostelFee(e.target.value)}
               className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-slate-900"
             />
             <span className="text-sm font-bold text-slate-500 shrink-0">KSh</span>
@@ -142,7 +147,7 @@ export function PaymentsCard({ campuses, isSuperAdmin = false }: PaymentsCardPro
               min={0}
               step={1}
               value={consultationFee}
-              onChange={(e) => setConsultationFee(Number(e.target.value))}
+              onChange={(e) => setConsultationFee(e.target.value)}
               className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-slate-900"
             />
             <span className="text-sm font-bold text-slate-500 shrink-0">KSh</span>

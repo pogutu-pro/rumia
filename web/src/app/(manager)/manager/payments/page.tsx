@@ -31,6 +31,7 @@ export default async function ManagerPaymentsPage() {
       </div>
 
       <PaymentsCard
+        key={(campuses as any[]).map((c) => `${c.id}:${c.hostel_finding_fee}:${c.consultation_fee}`).join('|')}
         campuses={campuses as any[]}
         isSuperAdmin={manager.context.isSuperAdmin}
       />

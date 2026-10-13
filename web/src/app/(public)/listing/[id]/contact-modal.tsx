@@ -676,11 +676,6 @@ function ModalContent({
 
   // ── Fully occupied notice step (or choose step when hostel is full) ──
   if (step === 'full' || (step === 'choose' && isFull)) {
-    const feeDisplay =
-      consultationFee && consultationFee > 0
-        ? `KES ${consultationFee.toLocaleString()}`
-        : 'KES 1,000';
-
     return (
       <div>
         <div className="flex items-center justify-between mb-5">
@@ -703,8 +698,11 @@ function ModalContent({
 
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-5">
           <p className="text-sm text-amber-900 leading-relaxed">
-            This hostel is currently <span className="font-bold">full</span>. A Rumia agent can help you find available alternatives for a consultation fee of{' '}
-            <span className="font-bold">{feeDisplay}</span>.
+            This hostel is currently <span className="font-bold">full</span>. A Rumia agent can help you find available alternatives
+            {consultationFee && consultationFee > 0 ? (
+              <> for a consultation fee of <span className="font-bold">KES {consultationFee.toLocaleString()}</span></>
+            ) : null}
+            .
           </p>
         </div>
 

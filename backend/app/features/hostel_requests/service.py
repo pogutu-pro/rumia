@@ -92,7 +92,7 @@ class HostelRequestService:
         row = result.fetchone()
         if row is None:
             return None, DEFAULT_FEE
-        return row.name, int(row.fee or DEFAULT_FEE)
+        return row.name, int(row.fee) if row.fee is not None else DEFAULT_FEE
 
     @staticmethod
     async def _get_campus_zones(db: AsyncSession, campus_id: str) -> List[HostelRequestZoneOption]:

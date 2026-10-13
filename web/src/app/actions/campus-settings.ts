@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { ApiError } from '@/lib/api/client';
 import { managerApi, type CampusSettingsPayload } from '@/lib/api/manager';
 
@@ -27,9 +27,12 @@ export async function updateCampusSettingsAction(
   try {
     await managerApi.updateCampus(campusId, payload);
     revalidatePath('/manager/settings');
+    revalidatePath('/manager/payments');
+    revalidatePath('/manager');
     revalidatePath('/[campusSlug]', 'layout');
     revalidatePath('/');
-    revalidateTag('campuses', 'max');
+    // updateTag expires the cache immediately; revalidateTag would serve the old fees once more.
+    updateTag('campuses');
     return { success: true };
   } catch (err) {
     return failure(err, 'Failed to update campus settings');
@@ -52,7 +55,7 @@ export async function createCampusAction(data: {
     });
     revalidatePath('/manager/settings');
     revalidatePath('/');
-    revalidateTag('campuses', 'max');
+    updateTag('campuses');
     return { success: true };
   } catch (err) {
     return failure(err, 'Failed to create the campus');
