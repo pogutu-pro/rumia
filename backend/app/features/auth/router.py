@@ -6,6 +6,8 @@ from app.core.errors import BadRequestException
 from app.core.ratelimit import limiter
 from app.features.auth.schemas import (
     DevLoginRequest,
+    EmailStartRequest,
+    EmailVerifyRequest,
     GoogleCallbackRequest,
     GoogleStartRequest,
     GoogleStartResponse,
@@ -35,6 +37,26 @@ async def google_callback(
 ) -> SessionTokens:
     ensure_enabled()
     return await AuthService.google_callback(db, data.code, data.state)
+
+
+@router.post("/email/start", status_code=status.HTTP_204_NO_CONTENT, summary="Email me a sign-in code")
+@limiter.limit("10/minute")
+async def email_start(
+    request: Request,
+    data: EmailStartRequest,
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> None:
+    await AuthService.email_start(db, data.email)
+
+
+@router.post("/email/verify", response_model=SessionTokens, summary="Sign in with the emailed code")
+@limiter.limit("20/minute")
+async def email_verify(
+    request: Request,
+    data: EmailVerifyRequest,
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> SessionTokens:
+    return await AuthService.email_verify(db, data.email, data.code, data.next)
 
 
 @router.post("/token", response_model=SessionTokens, summary="Refresh a session or redeem a mobile one-time code")

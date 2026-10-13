@@ -1,4 +1,6 @@
+import hmac
 import json
+import re
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -29,6 +31,10 @@ GOOGLE_CERTS_URL = "https://www.googleapis.com/oauth2/v3/certs"
 GOOGLE_ISSUERS = ("https://accounts.google.com", "accounts.google.com")
 OTC_TTL_SECONDS = 120
 REUSE_GRACE_SECONDS = 10
+EMAIL_CODE_TTL_MINUTES = 10
+EMAIL_CODE_MAX_ATTEMPTS = 5
+EMAIL_CODES_PER_HOUR = 5
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class AuthDisabled(APIException):
@@ -128,6 +134,76 @@ class AuthService:
         if st.get("app"):
             tokens.app_redirect = st["app"]
             tokens.otc = await AuthService._issue_otc(db, user_id)
+        return tokens
+
+    # ---- Email code ----------------------------------------------------------------------
+    @staticmethod
+    def _code_hash(email: str, code: str) -> str:
+        return hash_token(f"{email}:{code}")
+
+    @staticmethod
+    def _clean_email(raw: str) -> str:
+        email = (raw or "").strip().lower()
+        if not EMAIL_RE.match(email):
+            raise BadRequestException("Enter a valid email address")
+        return email
+
+    @staticmethod
+    async def email_start(db: AsyncSession, raw_email: str) -> None:
+        """Email a 6-digit code. Same response whether or not the address already has an account."""
+        email = AuthService._clean_email(raw_email)
+        recent = (
+            await db.execute(
+                text("SELECT count(*) FROM public.auth_email_codes WHERE email = :e AND created_at > now() - interval '1 hour'"),
+                {"e": email},
+            )
+        ).scalar_one()
+        if recent >= EMAIL_CODES_PER_HOUR:
+            raise APIException(status_code=429, code="RATE_LIMITED", message="Too many codes requested. Try again in a while.")
+        code = f"{secrets.randbelow(10**6):06d}"
+        await db.execute(
+            text(
+                """INSERT INTO public.auth_email_codes (email, code_hash, expires_at)
+                   VALUES (:e, :h, :exp)"""
+            ),
+            {"e": email, "h": AuthService._code_hash(email, code), "exp": _now() + timedelta(minutes=EMAIL_CODE_TTL_MINUTES)},
+        )
+        # Commit before sending so the code exists by the time the email lands.
+        await db.commit()
+
+        from app.core.email import email_service
+        from app.core.email.templates import sign_in_code_email
+
+        mail = sign_in_code_email(code=code, minutes=EMAIL_CODE_TTL_MINUTES)
+        result = await email_service.send(
+            to_email=email, to_name=None, subject=mail.subject, html_content=mail.html, text_content=mail.text, tags=["sign-in-code"],
+        )
+        if not getattr(result, "success", False):
+            raise APIException(status_code=503, code="EMAIL_UNAVAILABLE", message="We could not send the email. Please try again.")
+
+    @staticmethod
+    async def email_verify(db: AsyncSession, raw_email: str, code: str, next_path: Optional[str]) -> SessionTokens:
+        email = AuthService._clean_email(raw_email)
+        row = (
+            await db.execute(
+                text(
+                    """SELECT id, code_hash, attempts FROM public.auth_email_codes
+                       WHERE email = :e AND used_at IS NULL AND expires_at > now()
+                       ORDER BY created_at DESC LIMIT 1 FOR UPDATE"""
+                ),
+                {"e": email},
+            )
+        ).first()
+        if row is None or row.attempts >= EMAIL_CODE_MAX_ATTEMPTS:
+            raise UnauthorizedException("That code has expired. Request a new one.")
+        if not hmac.compare_digest(row.code_hash, AuthService._code_hash(email, code.strip())):
+            await db.execute(text("UPDATE public.auth_email_codes SET attempts = attempts + 1 WHERE id = :i"), {"i": row.id})
+            await db.commit()  # keep the count even though we reject the request
+            raise UnauthorizedException("That code is not right. Check it and try again.")
+        await db.execute(text("UPDATE public.auth_email_codes SET used_at = now() WHERE id = :i"), {"i": row.id})
+        user_id = await AuthService._upsert_user(db, email, None, None, None)
+        tokens = await AuthService._login(db, user_id, email, None, None)
+        tokens.next = safe_next(next_path)
         return tokens
 
     # ---- Users ---------------------------------------------------------------------------

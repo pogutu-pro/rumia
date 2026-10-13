@@ -20,6 +20,52 @@ export default function LoginPage() {
   // Sign-in form state
   const [googleSigningIn, setGoogleSigningIn] = useState(false);
 
+  // Email sign-in: ask for the address, then the 6-digit code we email.
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [emailBusy, setEmailBusy] = useState(false);
+
+  async function sendCode() {
+    if (emailBusy) return;
+    setEmailBusy(true);
+    try {
+      const res = await fetch('/auth/email/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not send the code.');
+      setCodeSent(true);
+      setCode('');
+      toast.success('Code sent. Check your email.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not send the code.');
+    } finally {
+      setEmailBusy(false);
+    }
+  }
+
+  async function verifyCode() {
+    if (emailBusy) return;
+    setEmailBusy(true);
+    try {
+      const res = await fetch('/auth/email/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code, next: getNextParam() || '/account' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'That code did not work.');
+      posthog.capture('email_sign_in_completed');
+      window.location.assign(data.next || '/account');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'That code did not work.');
+      setEmailBusy(false);
+    }
+  }
+
   function getNextParam(): string | undefined {
     const params = new URLSearchParams(window.location.search);
     return params.get('next') || undefined;
@@ -161,9 +207,73 @@ export default function LoginPage() {
           {googleSigningIn ? 'Redirecting to Google...' : 'Continue with Google'}
         </button>
 
-        <p className="text-center text-xs text-slate-500">
-          Everyone — students, agents and administrators — signs in with Google.
-        </p>
+        <div className="flex items-center gap-3 text-xs text-slate-400">
+          <span className="h-px flex-1 bg-slate-200" />
+          OR
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (codeSent) void verifyCode();
+            else void sendCode();
+          }}
+          className="space-y-3"
+        >
+          <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setCodeSent(false);
+            }}
+            placeholder="you@example.com"
+            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          {codeSent && (
+            <>
+              <label htmlFor="code" className="block text-sm font-semibold text-slate-700">
+                6-digit code
+              </label>
+              <input
+                id="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="123456"
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </>
+          )}
+          <button
+            type="submit"
+            disabled={emailBusy || !email || (codeSent && code.length !== 6)}
+            className="w-full h-12 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {emailBusy ? 'Please wait…' : codeSent ? 'Verify and sign in' : 'Email me a code'}
+          </button>
+          {codeSent && (
+            <button
+              type="button"
+              onClick={() => void sendCode()}
+              disabled={emailBusy}
+              className="w-full text-xs text-slate-500 hover:text-slate-800"
+            >
+              Send a new code
+            </button>
+          )}
+        </form>
         {comingCampuses.length > 0 && (
           <div className="mt-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 text-center">

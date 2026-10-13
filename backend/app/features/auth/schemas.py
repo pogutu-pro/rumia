@@ -43,3 +43,13 @@ class LogoutRequest(BaseModel):
 class DevLoginRequest(BaseModel):
     email: str
     full_name: Optional[str] = None
+
+
+class EmailStartRequest(BaseModel):
+    email: str = Field(max_length=254)
+
+
+class EmailVerifyRequest(BaseModel):
+    email: str = Field(max_length=254)
+    code: str = Field(min_length=6, max_length=6)
+    next: Optional[str] = Field(None, description="Relative path to land on after login")

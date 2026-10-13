@@ -19,6 +19,9 @@ export const authBackend = {
     post<{ url: string; state: string }>('/auth/google/start', { next, app_redirect: appRedirect }, clientIp),
   callback: (code: string, state: string, clientIp?: string) =>
     post<BackendSession>('/auth/google/callback', { code, state }, clientIp),
+  emailStart: (email: string, clientIp?: string) => post<{ message?: string } | null>('/auth/email/start', { email }, clientIp),
+  emailVerify: (email: string, code: string, next: string | null, clientIp?: string) =>
+    post<BackendSession>('/auth/email/verify', { email, code, next }, clientIp),
   refresh: (refreshToken: string, clientIp?: string) =>
     post<BackendSession>('/auth/token', { grant_type: 'refresh_token', refresh_token: refreshToken }, clientIp),
   logout: (refreshToken: string, clientIp?: string) => post<null>('/auth/logout', { refresh_token: refreshToken }, clientIp),
