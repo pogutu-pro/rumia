@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BedDouble, Building2, House, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { ExploreListing } from './explore-listing-card';
 import { ListingSection } from './listing-section';
@@ -19,11 +20,11 @@ type CategoryKey = 'hostel' | 'short_stay' | 'apartment';
 const CATEGORIES: {
   key: CategoryKey;
   label: string;
-  Icon: typeof BedDouble;
+  icon: string;
 }[] = [
-  { key: 'hostel', label: 'Hostels', Icon: BedDouble },
-  { key: 'short_stay', label: 'Short stays', Icon: House },
-  { key: 'apartment', label: 'Apartments', Icon: Building2 },
+  { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
+  { key: 'short_stay', label: 'Short stays', icon: '/images/categories/short-stays.png' },
+  { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
 ];
 
 interface ExploreDiscoveryProps {
@@ -125,7 +126,7 @@ export function ExploreDiscovery({
     <section className="w-full">
       <div className="px-4 pt-5 lg:px-8">
         <div role="group" aria-label="Property category" className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {CATEGORIES.map(({ key, label, Icon }) => {
+          {CATEGORIES.map(({ key, label, icon }) => {
             const active = category === key;
             return (
               <button
@@ -148,7 +149,7 @@ export function ExploreDiscovery({
                     : 'border-line bg-raised text-ink hover:bg-subtle',
                 )}
               >
-                <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                <Image src={icon} alt="" width={32} height={32} className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" aria-hidden />
                 {label}
               </button>
             );
