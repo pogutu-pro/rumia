@@ -13,7 +13,7 @@ export PGPASSWORD=pw
 P="psql -h localhost -p 5555 -U postgres -q -v ON_ERROR_STOP=1"
 for _ in $(seq 1 30); do $P -c "select 1" postgres >/dev/null 2>&1 && break; sleep 1; done
 $P -c "create database rumia_restore" postgres
-$P -d rumia_restore -f db/00_supabase_shim.sql
+$P -d rumia_restore -f db/00_legacy_shim.sql
 docker cp "$DUMP" "$NAME":/tmp/rumia.dump
 RESTORE="docker exec -e PGPASSWORD=pw $NAME pg_restore -U postgres -d rumia_restore --no-owner"
 $RESTORE --disable-triggers /tmp/rumia.dump >/dev/null 2>&1 || true   # FK-to-auth.users errors expected here

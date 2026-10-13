@@ -1,6 +1,6 @@
 /**
  * Pure aggregation helpers for the Rumia Admin Panel stat cards.
- * No Supabase dependencies — all functions operate on plain arrays.
+ * No external dependencies — all functions operate on plain arrays.
  */
 
 /**

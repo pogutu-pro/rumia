@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserAvatar } from '@/components/ui/user-avatar';
-import { signOut } from '@/lib/supabase/auth';
+import { signOut } from '@/lib/auth/actions';
 import { useShell } from './shell-provider';
 
 export function ProfileMenu() {

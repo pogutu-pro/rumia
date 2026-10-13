@@ -1,5 +1,5 @@
 /**
- * Shared session primitives for our own auth (replaces Supabase Auth cookies).
+ * Shared session primitives for our own auth (cookies, claims, freshness).
  *
  *   rumia_at  access JWT, readable by JS (short-lived; sent as Bearer to the API)
  *   rumia_rt  refresh token, httpOnly (only ever sent to our own /auth/* routes)

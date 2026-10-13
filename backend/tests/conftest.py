@@ -21,7 +21,7 @@ from httpx import ASGITransport, AsyncClient
 # Ensure a valid JWT secret exists before app.settings is instantiated, so tests
 # never exercise the (removed) hardcoded dev fallback. Prod must always set the
 # real secret via backend/.env or the environment.
-os.environ.setdefault("SUPABASE_JWT_SECRET", "ci-test-only-jwt-secret-9f8a7e6d5c4b")
+os.environ.setdefault("AUTH_JWT_SECRET", "ci-test-only-auth-secret-0123456789abcdef")
 
 from app.core.database import get_db_session
 from app.main import app

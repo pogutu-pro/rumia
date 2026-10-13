@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { signInWithGoogle, getSession } from '@/lib/supabase/auth';
+import { signInWithGoogle, getSession } from '@/lib/auth/actions';
 import { profilesApi } from '@/lib/api/profiles';
 import { rumia } from '@/lib/api/rumia';
 import { rememberFollowUp, withReference } from '@/lib/contact';

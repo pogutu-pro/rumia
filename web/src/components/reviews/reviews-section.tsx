@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Star, AlertTriangle, RefreshCw, ChevronDown, Share2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { profilesApi } from '@/lib/api/profiles';
 import { reviewsApi } from '@/lib/api/reviews';
-import { signInWithGoogle } from '@/lib/supabase/auth';
+import { signInWithGoogle } from '@/lib/auth/actions';
 import { RatingSummary } from './rating-summary';
 import { ReviewComposer } from './review-composer';
 import { ReviewCard } from './review-card';
@@ -52,7 +52,7 @@ export function ReviewsSection({
   listingArea,
   listingImageUrl,
 }: ReviewsSectionProps) {
-  const supabase = createClient();
+  const authClient = createClient();
 
   const [summary, setSummary] = useState<ReviewSummary>(buildEmptySummary());
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -124,7 +124,7 @@ export function ReviewsSection({
       try {
         const {
           data: { session },
-        } = await supabase.auth.getSession();
+        } = await authClient.auth.getSession();
         if (session?.user) {
           setCurrentUserId(session.user.id);
           const profile = await profilesApi.getMe().catch(() => null);

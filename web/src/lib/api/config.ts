@@ -10,7 +10,7 @@ export function getApiUrl(path: string): string {
 
 /**
  * Plain fetch wrapper for Server Components that read PUBLIC data only.
- * Does NOT read cookies / Supabase session, so it keeps pages static or ISR-compatible.
+ * Does NOT read cookies or the session, so it keeps pages static or ISR-compatible.
  * Use this for any public market data (listings feed, listing detail, search, campuses).
  * For authenticated server calls, use serverApi instead.
  */

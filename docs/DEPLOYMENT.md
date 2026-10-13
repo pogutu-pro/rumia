@@ -205,10 +205,8 @@ Required keys:
 ```env
 ENVIRONMENT=production
 DEBUG=false
-DATABASE_URL=postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:6543/<DB_NAME>   # Supabase pooler
-SUPABASE_URL=https://<YOUR_PROJECT_REF>.supabase.co
-SUPABASE_ANON_KEY=<YOUR_ANON_KEY>                # backend reads via anon key + RLS (read-only)
-SUPABASE_JWT_SECRET=<YOUR_SUPABASE_JWT_SECRET>
+DATABASE_URL=postgresql+asyncpg://<USER>:<PASSWORD>@<HOST>:5432/<DB_NAME>
+AUTH_JWT_SECRET=<openssl rand -hex 32>            # signs access tokens and OAuth state
 R2_ACCOUNT_ID=<YOUR_R2_ACCOUNT_ID>
 R2_ACCESS_KEY_ID=<YOUR_R2_KEY>
 R2_SECRET_ACCESS_KEY=<YOUR_R2_SECRET>
@@ -222,9 +220,6 @@ POSTHOG_PROJECT_TOKEN=<...>  POSTHOG_HOST=https://eu.i.posthog.com
 **`web/.env.production`** (injected by compose at build — `NEXT_PUBLIC_*` — and at runtime)
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://rumia.co.ke/api/v1   # used only as dotenv fallback; compose overrides with internal URL
-NEXT_PUBLIC_SUPABASE_URL=https://<YOUR_PROJECT_REF>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
-SUPABASE_SERVICE_ROLE_KEY=<YOUR_SERVICE_ROLE_KEY>
 R2_ACCOUNT_ID=<...>  R2_ACCESS_KEY_ID=<...>  R2_SECRET_ACCESS_KEY=<...>  R2_BUCKET_NAME=<...>
 NEXT_PUBLIC_R2_PUBLIC_URL=https://pub-xxxx.r2.dev
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=<...>  VAPID_PRIVATE_KEY=<...>
@@ -362,7 +357,7 @@ Test public endpoints:
 - **Campuses**: `https://rumia.co.ke/api/v1/campuses`
 - **Search**: `curl 'https://rumia.co.ke/api/v1/search?q=kimathi'`
 - **Top-10 real view counts**: `curl 'https://rumia.co.ke/api/v1/listings?sort=views&limit=10'`
-- **Auth workflow**: register/login on the site (Supabase cookie session)
+- **Auth workflow**: register/login on the site (own session cookies)
 - **Image upload**: submit a listing with a photo >1 MB (validates the nginx `30m` body limit and R2 flow)
 
 ---
@@ -420,6 +415,6 @@ docker compose up -d
   traffic through the proxy (public browser/mobile). SSR traffic uses the internal
   `http://backend:8000` URL and bypasses it. Raise when mobile launches.
 - **DB safety:** the backend reads via anon key + RLS (read-only). Schema changes are
-  additive Supabase CLI migrations only — never destructive; don't hand the backend the
+  additive Alembic migrations only — never destructive; don't hand the backend the
   service-role key for data access.
 

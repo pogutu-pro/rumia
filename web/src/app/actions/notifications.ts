@@ -6,7 +6,7 @@ import type { AppNotification } from '@/types';
 
 /**
  * Returns the signed-in user's notifications (newest first, unread flagged).
- * Single source of truth is the FastAPI backend, not direct Supabase access.
+ * Single source of truth is the FastAPI backend, not direct database access.
  */
 export async function getMyNotificationsAction(
   limit = 20,

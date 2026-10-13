@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { imagesApi } from '@/lib/api/images';
 import { processImage } from '@/lib/image/processor';
 import { LISTING_VARIANTS, AGENT_VARIANTS } from '@/lib/image/variants';
@@ -13,8 +13,8 @@ export const maxDuration = 60;
 const PURPOSES = ['listing', 'agent', 'og'] as const;
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

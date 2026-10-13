@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Local end-to-end dev stack for Rumia — everything runs on this machine:
 #   * a throwaway Postgres container (named rumia_local_pg, port 55436)
-#   * the FastAPI backend on :8000, with AUTH_MODE=custom and blank cloud creds
+#   * the FastAPI backend on :8000, with blank cloud creds
 #   * the Next.js web app on :3000
 #
-# NO Supabase / cloud service is contacted. The `supabase/migrations/*.sql` files
-# are only legacy schema SQL that Alembic 0002+ build on; they are applied to the
-# local Postgres, not to Supabase.
+# No cloud service is contacted. The `db/legacy-migrations/*.sql` files are the legacy
+# schema SQL that Alembic 0002+ build on; they are applied to the local Postgres.
 #
 # Reversible: run scripts/local-dev/down.sh (keeps data) or down.sh --purge (wipes it).
 set -euo pipefail
@@ -33,7 +32,7 @@ until docker exec "$PG" pg_isready -U rumia -d rumia_local >/dev/null 2>&1; do s
 echo "==> Schema"
 if ! docker exec "$PG" psql -U rumia -d rumia_local -tAc \
      "select 1 from information_schema.tables where table_name='listings'" | grep -q 1; then
-  echo "   applying legacy schema SQL (repo files, not Supabase the service)…"
+  echo "   applying legacy schema SQL (repo files)…"
   DATABASE_URL="$DB" bash "$ROOT/scripts/db-replay-migrations.sh"
 fi
 (cd "$ROOT/backend" && DATABASE_URL="$ASYNC_DB" uv run alembic upgrade head)
@@ -48,12 +47,7 @@ if [ ! -f "$ROOT/backend/.env.development.local" ]; then
 ENVIRONMENT=development
 DEBUG=true
 DATABASE_URL=postgresql+asyncpg://rumia:rumia@127.0.0.1:55436/rumia_local
-AUTH_MODE=custom
 AUTH_JWT_SECRET=local-dev-only-auth-secret-0123456789abcdef
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_JWT_SECRET=
-SUPABASE_SERVICE_ROLE_KEY=
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=

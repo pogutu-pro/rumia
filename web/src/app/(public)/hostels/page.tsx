@@ -36,7 +36,7 @@ async function getAllActiveListings(): Promise<Listing[]> {
       is_active: true,
     });
     
-    // Map FastAPI response keys to the legacy Supabase keys expected by HostelsSearch
+    // Map FastAPI response keys to the legacy keys expected by HostelsSearch
     return feed.items.map((item: any) => ({
       ...item,
       listing_images: item.images,

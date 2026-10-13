@@ -15,10 +15,10 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { campusesApi } from '@/lib/api/campuses';
 import { zonesApi } from '@/lib/api/zones';
-import { signInWithGoogle } from '@/lib/supabase/auth';
+import { signInWithGoogle } from '@/lib/auth/actions';
 import {
   createHostelRequestAction,
   getMyHostelRequestsAction,
@@ -83,7 +83,7 @@ export function FindMeAHostel({
   campusFee: campusFeeProp,
 }: FindMeAHostelProps) {
   const isHome = variant === 'home';
-  const [supabase] = useState(() => createClient());
+  const [authClient] = useState(() => createClient());
 
   const [zones, setZones] = useState<Array<{ id: string; name: string }>>([]);
   const [requests, setRequests] = useState<HostelRequest[]>([]);
@@ -193,7 +193,7 @@ export function FindMeAHostel({
     return () => {
       cancelled = true;
     };
-  }, [hasCampus, campusId, supabase, isHome, studentPhone, campusFeeProp]);
+  }, [hasCampus, campusId, authClient, isHome, studentPhone, campusFeeProp]);
 
   // Auto-submit the pending draft once we know the user has a campus. For brand
   // new users the profile-completion modal blocks with empty campus; the moment
@@ -247,10 +247,10 @@ export function FindMeAHostel({
     if (isHome) {
       // Guest (or cold session): save the draft and go to Google OAuth — the
       // payment modal will appear on the account page after login.
-      await supabase.auth.getSession();
+      await authClient.auth.getSession();
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await authClient.auth.getUser();
 
       if (!user) {
         setSubmitting(true);
@@ -282,7 +282,7 @@ export function FindMeAHostel({
     canSubmit,
     submitting,
     isHome,
-    supabase,
+    authClient,
     phone,
     preferredZone,
     budget,

@@ -14,16 +14,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
 
-    # Supabase Auth
-    SUPABASE_URL: str = ""
-    SUPABASE_JWT_SECRET: str = ""
-    SUPABASE_ANON_KEY: str = ""
-    # Needed only to create login identities (admin 'add agent'); removed with Supabase Auth.
-    SUPABASE_SERVICE_ROLE_KEY: str = ""
-
-    # Own authentication (replaces Supabase Auth). Until cutover AUTH_MODE stays "supabase" and the
-    # /auth endpoints refuse to run; tokens signed by us are accepted by the verifier either way.
-    AUTH_MODE: str = "supabase"  # "supabase" | "custom"
+    # Authentication: our own Google sign-in, access tokens and rotating refresh tokens (app/features/auth).
     AUTH_JWT_SECRET: str = ""    # >= 32 random bytes; signs our access tokens and OAuth state
     AUTH_ACCESS_TTL_SECONDS: int = 1800
     AUTH_REFRESH_TTL_DAYS: int = 30
@@ -108,7 +99,6 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
-        # Allow reading NEXT_PUBLIC_SUPABASE_URL → SUPABASE_URL via env aliases
     )
 
     @field_validator("DATABASE_URL", mode="before")

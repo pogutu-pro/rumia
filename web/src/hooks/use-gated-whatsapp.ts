@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { getSession, signInWithGoogle } from '@/lib/supabase/auth';
+import { getSession, signInWithGoogle } from '@/lib/auth/actions';
 
 interface GatedWhatsAppOptions {
   /** sessionStorage key used to persist the pending contact across OAuth redirect. */

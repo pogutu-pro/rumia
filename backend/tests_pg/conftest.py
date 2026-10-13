@@ -16,7 +16,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 # Own-auth signing key for tests that issue tokens (never a real secret).
 os.environ.setdefault("AUTH_JWT_SECRET", "ci-test-only-auth-secret-0123456789abcdef")
-os.environ.setdefault("AUTH_MODE", "custom")
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
 

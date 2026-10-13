@@ -2,8 +2,8 @@ import { createClient, getBrowserSession, hasStoredSession } from './client';
 
 /** Start the Google sign-in (full-page redirect through our /auth/google/start route). */
 export async function signInWithGoogle(next?: string) {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const authClient = createClient();
+  const { data, error } = await authClient.auth.signInWithOAuth({
     options: { redirectTo: next ? `${window.location.origin}/?next=${encodeURIComponent(next)}` : undefined },
   });
   return { data, error };

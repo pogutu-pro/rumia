@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
-import { getSession } from '@/lib/supabase/auth';
+import { getSession } from '@/lib/auth/actions';
 import { rumia, type SearchCard } from '@/lib/api/rumia';
 import { DiscoveryCard } from '@/components/discovery/search-card';
 import { AlertsList } from '@/components/discovery/alerts-list';

@@ -1,7 +1,7 @@
 import { approveAgentApplicationAction, rejectAgentApplicationAction } from '../src/app/actions/manager';
 
-// Mock Supabase client to test cross-campus scoping logic unit-style
-function createMockSupabaseWithContext(managerCampusId: string | null, isSuperAdmin: boolean = false) {
+// Mock database client to test cross-campus scoping logic unit-style
+function createMockClientWithContext(managerCampusId: string | null, isSuperAdmin: boolean = false) {
   const currentUserId = isSuperAdmin ? 'admin-user-id' : 'manager-user-id';
   const role = isSuperAdmin ? 'admin' : 'manager';
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { listingsApi } from '@/lib/api/listings';
 import { toLegacyListingShape } from '@/lib/api/legacy-listing';
@@ -17,11 +17,11 @@ export default async function EditListingPage({
   params,
 }: EditListingPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
+  const authClient = await createClient();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authClient.auth.getUser();
 
   if (!user) {
     redirect('/auth/login');

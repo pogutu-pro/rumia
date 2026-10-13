@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { campusesApi } from '@/lib/api/campuses';
 import { listingsClientApi } from '@/lib/api/listings-client';
 import { profilesApi, type UserProfile } from '@/lib/api/profiles';
 import { toursApi } from '@/lib/api/tours';
-import { signInWithGoogle } from '@/lib/supabase/auth';
+import { signInWithGoogle } from '@/lib/auth/actions';
 import { apiClient } from '@/lib/api/client';
 import posthog from 'posthog-js';
 import type { AccountTab } from './account-tabs';
@@ -135,15 +135,15 @@ export default function AccountPage() {
     // loadDeferred() so the header/tabs render before the heavier queries
     // resolve, making the page feel near-instant.
     async function loadCritical() {
-      const supabase = createClient();
+      const authClient = createClient();
       // Hydrate the client's in-memory session from cookies before calling
       // getUser(). The singleton browser client may have been instantiated
       // before the OAuth callback set the session cookies, so its in-memory
       // state is empty and getUser() would return null without this call.
-      await supabase.auth.getSession();
+      await authClient.auth.getSession();
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await authClient.auth.getUser();
 
       if (!user || cancelled) {
         setLoading(false);
@@ -160,7 +160,7 @@ export default function AccountPage() {
         // the API creates the profile on first read, but degrade gracefully anyway.
         loadProfileWithRetry(),
         getMyAgentApplicationsAction().catch(() => [] as unknown[]),
-        // A 401 here (backend failing to validate the Supabase session token)
+        // A 401 here (backend failing to validate the session token)
         // must never reject the whole Promise.all — otherwise setLoading(false)
         // is skipped and the page hangs on the loading skeleton forever.
         apiClient<{

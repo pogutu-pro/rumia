@@ -1,6 +1,6 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
@@ -9,13 +9,13 @@ import posthog from 'posthog-js';
 
 export function LogoutButton() {
   const router = useRouter();
-  const supabase = createClient();
+  const authClient = createClient();
 
   const handleSignOut = async () => {
     try {
       posthog.capture('user_signed_out');
       posthog.reset();
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      const { error } = await authClient.auth.signOut({ scope: 'local' });
       if (error) throw error;
       toast.success('Logged out successfully');
       router.push('/auth/login');

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/auth/client";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
@@ -88,10 +88,10 @@ export function usePushSubscription() {
       const sub = subscription.toJSON();
       if (!sub.endpoint || !sub.keys) return false;
 
-      const supabase = createClient();
+      const authClient = createClient();
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await authClient.auth.getUser();
 
       if (!user) return false;
 

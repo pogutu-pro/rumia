@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -10,8 +10,8 @@ export const revalidate = 0;
 
 export default async function EditBnbListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) redirect('/auth/login');
 
   const agent = await agentDashboardApi.getSelf().catch(() => null);

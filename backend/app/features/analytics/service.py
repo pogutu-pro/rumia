@@ -19,7 +19,7 @@ class AnalyticsService:
         user_id: Optional[str] = None,
         ip_hash: Optional[str] = None,
     ) -> TrackViewResponse:
-        """Delegate to the Supabase RPC `track_listing_view` stored procedure."""
+        """Delegate to the `track_listing_view` stored procedure."""
         result = await db.execute(
             text("SELECT public.track_listing_view(CAST(:listing_id AS uuid), CAST(:user_id AS uuid), :ip_hash)"),
             {

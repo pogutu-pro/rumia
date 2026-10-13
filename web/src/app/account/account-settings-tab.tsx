@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { WishlistNotificationPreferences } from '@/components/settings/WishlistNotificationPreferences';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/auth/client';
 import { saveProfile } from '@/lib/api/profile-save';
 import { User, Phone, Mail, GraduationCap, Loader2, Check, LogOut, AlertTriangle, X, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -91,8 +91,8 @@ export function AccountSettingsTab({
 
   const handleConfirmLogout = async () => {
     setLoggingOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut({ scope: 'local' });
+    const authClient = createClient();
+    await authClient.auth.signOut({ scope: 'local' });
     toast.success('Signed out successfully');
     router.push('/');
     router.refresh();

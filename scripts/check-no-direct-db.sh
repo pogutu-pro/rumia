@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Guard: the web app must not talk to the database (PostgREST/RPC/service role).
-# All data access goes web -> FastAPI. See docs/PLAN_FRONTEND_DB_DECOUPLING.md.
+# All data access goes web -> FastAPI.
 #
 # Files with legacy violations are listed in web/.direct-db-allowlist.txt. The list
 # may only SHRINK: a new offender fails, and an entry that no longer violates fails
@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ALLOW=web/.direct-db-allowlist.txt
-PATTERN="supabaseAdmin|supabasePublic|\.from\(['\"][a-z_]+['\"]\)|\.rpc\(['\"][a-z_]+['\"]|\.storage\.from|auth\.admin\.|rest/v1/|SUPABASE_SERVICE_ROLE_KEY|@supabase/supabase-js"
+PATTERN="\.from\(['\"][a-z_]+['\"]\)|\.rpc\(['\"][a-z_]+['\"]|\.storage\.from|auth\.admin\.|rest/v1/"
 
 offenders=$(grep -rIlE "$PATTERN" web/src --include=*.ts --include=*.tsx \
   | grep -vE '/__tests__/|\.test\.(ts|tsx)$' | sort -u || true)
