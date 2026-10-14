@@ -4886,6 +4886,11 @@ export interface components {
              * @default true
              */
             is_active: boolean;
+            /**
+             * Is Youtube Shorts
+             * @default false
+             */
+            is_youtube_shorts: boolean;
             /** Latitude */
             latitude?: number | null;
             /** Location */
@@ -4901,6 +4906,8 @@ export interface components {
             specific_location?: string | null;
             /** Title */
             title: string;
+            /** Youtube Id */
+            youtube_id?: string | null;
         };
         /**
          * BnbListingRead
@@ -4945,6 +4952,11 @@ export interface components {
              * @default false
              */
             is_saved: boolean;
+            /**
+             * Is Youtube Shorts
+             * @default false
+             */
+            is_youtube_shorts: boolean;
             /** Latitude */
             latitude?: number | null;
             /** Location */
@@ -4975,6 +4987,8 @@ export interface components {
              * @default 0
              */
             views: number;
+            /** Youtube Id */
+            youtube_id?: string | null;
         };
         /**
          * BnbListingUpdate
@@ -4998,6 +5012,8 @@ export interface components {
             }[] | null;
             /** Is Active */
             is_active?: boolean | null;
+            /** Is Youtube Shorts */
+            is_youtube_shorts?: boolean | null;
             /** Latitude */
             latitude?: number | null;
             /** Location */
@@ -5010,6 +5026,8 @@ export interface components {
             specific_location?: string | null;
             /** Title */
             title?: string | null;
+            /** Youtube Id */
+            youtube_id?: string | null;
         };
         /** CampusCreate */
         CampusCreate: {

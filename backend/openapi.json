@@ -3335,6 +3335,11 @@
             "title": "Is Active",
             "type": "boolean"
           },
+          "is_youtube_shorts": {
+            "default": false,
+            "title": "Is Youtube Shorts",
+            "type": "boolean"
+          },
           "latitude": {
             "anyOf": [
               {
@@ -3384,6 +3389,18 @@
             "minLength": 3,
             "title": "Title",
             "type": "string"
+          },
+          "youtube_id": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youtube Id"
           }
         },
         "required": [
@@ -3502,6 +3519,11 @@
             "title": "Is Saved",
             "type": "boolean"
           },
+          "is_youtube_shorts": {
+            "default": false,
+            "title": "Is Youtube Shorts",
+            "type": "boolean"
+          },
           "latitude": {
             "anyOf": [
               {
@@ -3594,6 +3616,17 @@
             "default": 0,
             "title": "Views",
             "type": "integer"
+          },
+          "youtube_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youtube Id"
           }
         },
         "required": [
@@ -3708,6 +3741,17 @@
             ],
             "title": "Is Active"
           },
+          "is_youtube_shorts": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Youtube Shorts"
+          },
           "latitude": {
             "anyOf": [
               {
@@ -3776,6 +3820,18 @@
               }
             ],
             "title": "Title"
+          },
+          "youtube_id": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youtube Id"
           }
         },
         "title": "BnbListingUpdate",
