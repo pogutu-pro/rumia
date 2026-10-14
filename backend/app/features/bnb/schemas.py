@@ -91,6 +91,8 @@ class BnbListingCreate(BaseModel):
     is_active: bool = True
     images: List[Dict[str, Any]] = []
     agent_whatsapp: Optional[str] = None
+    youtube_id: Optional[str] = Field(None, max_length=20)
+    is_youtube_shorts: bool = False
 
     # BnB-specific fields
     bnb: _BnbDetailsBase = Field(default_factory=_BnbDetailsBase)
@@ -150,6 +152,8 @@ class BnbListingUpdate(BaseModel):
     is_active: Optional[bool] = None
     images: Optional[List[Dict[str, Any]]] = None
     agent_whatsapp: Optional[str] = None
+    youtube_id: Optional[str] = Field(None, max_length=20)
+    is_youtube_shorts: Optional[bool] = None
     bnb: Optional[BnbDetailsUpdate] = None
 
 
@@ -169,6 +173,8 @@ class BnbListingRead(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     amenities: Optional[List[str]] = None
+    youtube_id: Optional[str] = None
+    is_youtube_shorts: bool = False
     is_active: bool
     is_saved: bool = False
     verified: Optional[bool] = None

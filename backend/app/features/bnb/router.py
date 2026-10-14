@@ -31,6 +31,8 @@ def _to_read(listing, bnb) -> BnbListingRead:
         latitude=listing_read.latitude,
         longitude=listing_read.longitude,
         amenities=listing_read.amenities,
+        youtube_id=listing_read.youtube_id,
+        is_youtube_shorts=listing_read.is_youtube_shorts,
         is_active=listing_read.is_active,
         verified=listing.verified,
         rating=listing_read.rating,

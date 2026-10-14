@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, UploadCloud, GripVertical,
-  Star, ChevronUp, ChevronDown, AlertCircle, ChevronRight,
+  Youtube, Star, ChevronUp, ChevronDown, AlertCircle, ChevronRight,
 } from 'lucide-react';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor,
@@ -27,6 +27,7 @@ import { createBnbListingAction, updateBnbListingAction } from '@/app/actions/bn
 import { cn } from '@/lib/utils/cn';
 import { processAndUploadImage } from '@/lib/r2/upload';
 import { getAmenityMeta } from '@/lib/utils/amenity-icons';
+import { parseYoutube } from '@/lib/utils/youtube';
 
 const GoogleLocationInput = dynamic(
   () => import('@/components/ui/google-location-input').then((m) => m.GoogleLocationInput),
@@ -47,6 +48,8 @@ export interface BnbInitialData {
   latitude?: number | null;
   longitude?: number | null;
   amenities?: string[];
+  youtube_id?: string | null;
+  is_youtube_shorts?: boolean;
   is_active?: boolean;
   images?: Array<{
     id?: string; r2_url: string; category?: string | null;
@@ -129,6 +132,7 @@ const GUEST_SUITABILITY_OPTIONS = [
 const STEPS = [
   { id: 'property', label: 'Property' },
   { id: 'photos', label: 'Photos' },
+  { id: 'video', label: 'Video' },
   { id: 'capacity', label: 'Capacity' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'availability', label: 'Availability' },
@@ -316,6 +320,12 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
   const [checkInTime, setCheckInTime] = useState(bnb?.check_in_time ?? '');
   const [checkOutTime, setCheckOutTime] = useState(bnb?.check_out_time ?? '');
   const [advanceNotice, setAdvanceNotice] = useState(String(bnb?.advance_notice_hours ?? ''));
+  const [videoInput, setVideoInput] = useState(
+    initialData?.youtube_id
+      ? `https://www.youtube.com/${initialData.is_youtube_shorts ? 'shorts/' : 'watch?v='}${initialData.youtube_id}`
+      : '',
+  );
+  const video = parseYoutube(videoInput);
   const [amenities, setAmenities] = useState<string[]>(initialData?.amenities ?? []);
   const rules = bnb?.house_rules as Record<string, unknown> | undefined;
   const [smoking, setSmoking] = useState(Boolean(rules?.smoking));
@@ -372,7 +382,8 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
   const handleSubmit = async (isActive: boolean) => {
     if (isSaving || isUploading) return;
     if (!title.trim()) { toast.error('Listing title is required'); setStep(0); return; }
-    if (!price || Number(price) <= 0) { toast.error('Base price is required'); setStep(3); return; }
+    if (videoInput.trim() && !video.id) { toast.error('That does not look like a YouTube link'); setStep(2); return; }
+    if (!price || Number(price) <= 0) { toast.error('Base price is required'); setStep(4); return; }
     setIsSaving(true);
     try {
       const payload = {
@@ -394,6 +405,8 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
           width: img.width ?? null, height: img.height ?? null, format: img.format ?? null,
         })),
         agent_whatsapp: whatsapp || undefined,
+        youtube_id: video.id || null,
+        is_youtube_shorts: video.isShort,
         bnb: {
           listing_type: listingType,
           max_guests: toNum(maxGuests),
@@ -535,6 +548,32 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
       )}
 
       {step === 2 && (
+        <Section title="Video tour" subtitle="Optional. A walkthrough helps guests trust the place before they book.">
+          <div className="space-y-2">
+            <Label htmlFor="bnbVideo" className="flex items-center gap-1">
+              <Youtube className="h-4 w-4 text-red-600" /> YouTube link
+            </Label>
+            <Input id="bnbVideo" value={videoInput}
+              onChange={(e) => setVideoInput(e.target.value)}
+              placeholder="Paste a YouTube or YouTube Shorts link"
+              className="h-11 bg-slate-50 border-slate-200/80 text-sm font-medium" />
+            {videoInput.trim() && !video.id && (
+              <p className="text-xs font-semibold text-rose-600">That does not look like a YouTube link.</p>
+            )}
+            <p className="text-xs text-slate-500">Upload the video to YouTube (unlisted is fine), then paste its link here.</p>
+          </div>
+          {video.id && (
+            <div className={cn('overflow-hidden rounded-xl border border-slate-200',
+              video.isShort ? 'aspect-[9/16] max-w-[220px]' : 'aspect-video max-w-md')}>
+              <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${video.id}`}
+                title="Video tour preview" allowFullScreen
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
+            </div>
+          )}
+        </Section>
+      )}
+
+      {step === 3 && (
         <Section title="Capacity" subtitle="How many guests can stay, and what beds are available?">
           <div className="grid grid-cols-3 gap-4">
             {([['Max guests', maxGuests, setMaxGuests], ['Bedrooms', bedrooms, setBedrooms], ['Bathrooms', bathrooms, setBathrooms]] as const).map(([label, value, set]) => (
@@ -584,7 +623,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
         </Section>
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <Section title="Pricing" subtitle="Set your base price and any additional fees.">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-2">
@@ -628,7 +667,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
         </Section>
       )}
 
-      {step === 4 && (
+      {step === 5 && (
         <Section title="Availability" subtitle="When is your place available and what are the check-in rules?">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-2">
@@ -661,7 +700,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
         </Section>
       )}
 
-      {step === 5 && (
+      {step === 6 && (
         <Section title="Amenities" subtitle="What does your place offer?">
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {AMENITIES_BNB.map((amenity) => {
@@ -692,7 +731,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
         </Section>
       )}
 
-      {step === 6 && (
+      {step === 7 && (
         <Section title="House rules & guest suitability" subtitle="Set expectations for your guests.">
           <div className="space-y-4">
             <p className="text-sm font-semibold text-slate-700">House rules</p>

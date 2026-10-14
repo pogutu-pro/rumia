@@ -38,6 +38,8 @@ export interface BnbListingPayload {
   is_active?: boolean;
   images?: Record<string, unknown>[];
   agent_whatsapp?: string | null;
+  youtube_id?: string | null;
+  is_youtube_shorts?: boolean;
   bnb: BnbDetailsPayload;
 }
 

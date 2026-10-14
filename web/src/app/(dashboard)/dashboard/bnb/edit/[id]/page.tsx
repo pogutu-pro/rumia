@@ -40,6 +40,8 @@ export default async function EditBnbListingPage({ params }: { params: Promise<{
     latitude: listing.latitude,
     longitude: listing.longitude,
     amenities: listing.amenities ?? [],
+    youtube_id: listing.youtube_id,
+    is_youtube_shorts: listing.is_youtube_shorts,
     is_active: listing.is_active,
     images: listing.images ?? [],
     bnb: listing.bnb ?? undefined,

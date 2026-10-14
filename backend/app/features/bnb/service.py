@@ -52,6 +52,8 @@ class BnbService:
                 for idx, img in enumerate(data.images)
             ],
             agent_whatsapp=data.agent_whatsapp,
+            youtube_id=data.youtube_id or None,
+            is_youtube_shorts=bool(data.youtube_id) and data.is_youtube_shorts,
         )
         listing = await ListingService.create_listing(db=db, user=user, data=listing_create)
 
@@ -97,6 +99,13 @@ class BnbService:
                 )
                 for idx, img in enumerate(data.images)
             ]
+
+        # An explicit null/empty youtube_id removes the video, so it bypasses the None filter above.
+        if "youtube_id" in data.model_fields_set:
+            listing_update_data["youtube_id"] = data.youtube_id or None
+            listing_update_data["is_youtube_shorts"] = (
+                bool(data.youtube_id) and bool(data.is_youtube_shorts)
+            )
 
         if data.agent_whatsapp:
             listing_update_data["agent_whatsapp"] = data.agent_whatsapp
