@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
+import { BNB_SEPARATE } from '@/lib/site/separation';
 import { RouteProgress } from '@/components/pwa/RouteProgress';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { ChunkErrorRecovery } from '@/components/pwa/ChunkErrorRecovery';
@@ -37,11 +38,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke'
   ),
   title: {
-    default: 'Rumia: Short Stays, Hostels & Apartments',
+    default: BNB_SEPARATE ? 'Rumia: Hostels, Bedsitters & Apartments' : 'Rumia: Short Stays, Hostels & Apartments',
     template: '%s | Rumia',
   },
   description:
-    'Find short stays, student hostels and apartments to rent. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.',
+    `Find ${BNB_SEPARATE ? 'student hostels, bedsitters and apartments' : 'short stays, student hostels and apartments'} to rent. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.`,
   authors: [{ name: 'Rumia', url: 'https://rumia.co.ke' }],
   creator: 'Rumia',
   publisher: 'Rumia',

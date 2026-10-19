@@ -5,6 +5,9 @@ import { KIND_BY_SLUG, KIND_PAGES, MIN_INDEXABLE, type KindPage } from '@/lib/se
 import { DiscoveryLanding } from '@/components/discovery/landing';
 import { cardHref } from '@/components/discovery/card-href';
 import { JsonLd } from '@/components/seo/json-ld';
+import { BNB_SEPARATE } from '@/lib/site/separation';
+
+const KINDS_PHRASE = BNB_SEPARATE ? 'student hostels, bedsitters and apartments' : 'student hostels, bedsitters, apartments and short stays';
 
 export const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
 export const PAGE_REVALIDATE = 3600;
@@ -76,7 +79,7 @@ export function buildMetadata(d: PageData): Metadata {
   const where = `${d.place ? `${d.place.name}, ` : ''}${d.market.name}`;
   const lead = d.kind
     ? `${count > 0 ? `${count} ` : ''}${d.kind.phrase} in ${where}`
-    : `${count > 0 ? `${count} places` : 'Places'} to rent in ${where}: student hostels, bedsitters, apartments and short stays`;
+    : `${count > 0 ? `${count} places` : 'Places'} to rent in ${where}: ${KINDS_PHRASE}`;
   const description = `${lead}${range ? `, from ${kes(range.min)} a ${range.period}` : ''}, with move-in costs and when each place was last confirmed.`;
   const indexable = count >= MIN_INDEXABLE;
   const url = `${BASE}${pathFor(d)}`;
@@ -94,7 +97,7 @@ function intro(d: PageData): string {
   const range = priceRange(d.cards);
   const base = d.kind
     ? `${d.kind.blurb} Showing ${d.kind.phrase} in ${where}.`
-    : `Student hostels, bedsitters, apartments and short stays in ${where}.`;
+    : `${KINDS_PHRASE.charAt(0).toUpperCase()}${KINDS_PHRASE.slice(1)} in ${where}.`;
   const tail = range
     ? ` Prices here run from ${kes(range.min)} to ${kes(range.max)} a ${range.period}; each place shows when its owner last confirmed it.`
     : ' Each place shows when its owner last confirmed it.';

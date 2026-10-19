@@ -5,6 +5,7 @@ import HostelsSearch, { type Listing } from './hostels-search';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
 import { getDefaultCampus, isFallbackCampus } from '@/lib/data/campuses';
 import { getActiveAnnouncements } from '@/lib/data/announcements';
+import { BNB_SEPARATE } from '@/lib/site/separation';
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rumia.co.ke';
 
@@ -37,7 +38,9 @@ async function getAllActiveListings(): Promise<Listing[]> {
     });
     
     // Map FastAPI response keys to the legacy keys expected by HostelsSearch
-    return feed.items.map((item: any) => ({
+    // Once RumiaBnB is its own site, short stays are not part of Rumia's listings.
+    const items = BNB_SEPARATE ? feed.items.filter((item: any) => item.property_type !== 'short_stay') : feed.items;
+    return items.map((item: any) => ({
       ...item,
       listing_images: item.images,
       agents: item.agent,

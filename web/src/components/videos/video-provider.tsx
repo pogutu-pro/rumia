@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { listingsClientApi } from '@/lib/api/listings-client';
 import type { Listing } from '@/types';
+import { BNB_SEPARATE } from '@/lib/site/separation';
 
 const OPEN_KEY = 'rumia:videos:open';
 const PAGE_SIZE = 10;
@@ -34,6 +35,8 @@ function withVideo(items: Listing[], existing: Listing[] = []): Listing[] {
   return items.filter((l) => {
     const id = String(l.id);
     if (!l.youtube_id || seen.has(id)) return false;
+    // Short-stay tours belong to RumiaBnB once the products are separated.
+    if (BNB_SEPARATE && l.property_type === 'short_stay') return false;
     seen.add(id);
     return true;
   });

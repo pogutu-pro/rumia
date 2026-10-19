@@ -7,6 +7,7 @@ import { getApiUrl } from '@/lib/api/config';
 import { authBackend } from '@/lib/auth/backend';
 import { AT_COOKIE, HINT_COOKIE, RT_COOKIE, isFresh, isRefreshRejected, sessionCookies, sessionFromToken } from '@/lib/auth/session';
 import { BNB_ORIGIN, BNB_SITE_PREFIX, bnbRewritePath, isBnbHost, isBnbSitePath } from '@/lib/site/hosts';
+import { BNB_REDIRECT_STATUS, BNB_SEPARATE, bnbRedirectFor } from '@/lib/site/separation';
 
 const SECURITY_HEADERS: [string, string][] = [
   ['X-DNS-Prefetch-Control', 'on'],
@@ -66,6 +67,12 @@ export default async function proxy(request: NextRequest) {
 
   // Rumia-only legacy redirects.
   if (!onBnb) {
+    // ── Short stays live on RumiaBnB (once separated): old Rumia short-stay URLs follow them ─────────────
+    if (BNB_SEPARATE) {
+      const dest = bnbRedirectFor(pathname, request.nextUrl.search);
+      if (dest) return NextResponse.redirect(dest, { status: BNB_REDIRECT_STATUS });
+    }
+
     // ── 301 redirect /browse → /hostels ──────────────────────────────────────────
     if (pathname === '/browse') {
       const dest = new URL('/hostels', request.url);

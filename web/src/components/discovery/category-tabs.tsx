@@ -3,15 +3,25 @@
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
+import { BNB_SEPARATE } from '@/lib/site/separation';
+import { BNB_ORIGIN } from '@/lib/site/hosts';
 
 type Key = 'all' | 'hostel' | 'short_stay' | 'apartment';
 
-const TABS: Array<{ key: Key; label: string }> = [
-  { key: 'all', label: 'All' },
-  { key: 'hostel', label: 'Hostels' },
-  { key: 'short_stay', label: 'Short stays' },
-  { key: 'apartment', label: 'Apartments' },
-];
+const TABS: Array<{ key: Key; label: string }> = BNB_SEPARATE
+  ? [
+      { key: 'all', label: 'All' },
+      { key: 'hostel', label: 'Hostels' },
+      { key: 'apartment', label: 'Apartments' },
+      // Last once separated: it leaves Rumia for RumiaBnB.
+      { key: 'short_stay', label: 'Short stays · RumiaBnB' },
+    ]
+  : [
+      { key: 'all', label: 'All' },
+      { key: 'hostel', label: 'Hostels' },
+      { key: 'short_stay', label: 'Short stays' },
+      { key: 'apartment', label: 'Apartments' },
+    ];
 
 /**
  * Category switch for Explore. Short stays live at /bnb; everything else is /hostels with ?type=.
@@ -24,7 +34,7 @@ export function CategoryTabs() {
   const current: Key = onBnb ? 'short_stay' : ((params.get('type') as Key | null) ?? 'all');
 
   const hrefFor = (key: Key) => {
-    if (key === 'short_stay') return '/bnb';
+    if (key === 'short_stay') return BNB_SEPARATE ? `${BNB_ORIGIN}/` : '/bnb';
     const next = new URLSearchParams(onBnb ? '' : params.toString());
     if (key === 'all') next.delete('type');
     else next.set('type', key);
