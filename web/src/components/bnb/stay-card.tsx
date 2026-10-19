@@ -66,7 +66,7 @@ export function StayCard({ stay, search, priority = false }: { stay: BnbStay; se
           </span>
         )}
         <div className="absolute right-2.5 top-2.5 z-10">
-          <SaveButton listingId={String(stay.id)} variant="icon" className="h-9 w-9 border-white/70 bg-white/90 shadow-sm" />
+          <SaveButton listingId={String(stay.id)} variant="icon" className="h-11 w-11 border-white/70 bg-white/90 shadow-sm" />
         </div>
 
         {slides.length > 1 && (

@@ -146,7 +146,7 @@ export function RequestStatus({ token }: { token: string }) {
             onClick={() => {
               if (window.confirm('Cancel this request?')) void act(() => staysApi.cancel(token));
             }}
-            className="text-sm font-semibold text-red-700 underline-offset-4 hover:underline disabled:opacity-60"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-red-700 underline-offset-4 hover:underline disabled:opacity-60"
           >
             Cancel request
           </button>

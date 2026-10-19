@@ -93,7 +93,7 @@ export function BookRequest({ stay, ident }: { stay: BnbStay; ident: string }) {
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[1fr_26rem] lg:gap-20">
-        <form onSubmit={submit} className="order-2 min-w-0 lg:order-1">
+        <form id="book-form" onSubmit={submit} className="order-2 min-w-0 pb-24 lg:order-1 lg:pb-0">
           <section className="border-b border-bnb-line pb-8">
             <h2 className="font-bnb-display text-xl font-bold text-bnb-ink">Your trip</h2>
             <dl className="mt-5 space-y-5">
@@ -102,7 +102,7 @@ export function BookRequest({ stay, ident }: { stay: BnbStay; ident: string }) {
                   <dt className="font-semibold text-bnb-ink">Dates</dt>
                   <dd className="text-bnb-stone">{shortRange(s.checkIn, s.checkOut)}</dd>
                 </div>
-                <Link href={back} className="font-semibold text-bnb-ink underline underline-offset-4">
+                <Link href={back} className="-my-2 inline-flex min-h-11 items-center px-1 font-semibold text-bnb-ink underline underline-offset-4">
                   Edit
                 </Link>
               </div>
@@ -113,7 +113,7 @@ export function BookRequest({ stay, ident }: { stay: BnbStay; ident: string }) {
                     {guests} guest{guests === 1 ? '' : 's'}
                   </dd>
                 </div>
-                <Link href={back} className="font-semibold text-bnb-ink underline underline-offset-4">
+                <Link href={back} className="-my-2 inline-flex min-h-11 items-center px-1 font-semibold text-bnb-ink underline underline-offset-4">
                   Edit
                 </Link>
               </div>
@@ -167,7 +167,7 @@ export function BookRequest({ stay, ident }: { stay: BnbStay; ident: string }) {
             <button
               type="submit"
               disabled={sending || !q}
-              className="mt-6 min-h-14 w-full rounded-xl bg-bnb-forest px-8 text-lg font-semibold text-white transition-colors hover:bg-bnb-pine disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              className="mt-6 hidden min-h-14 rounded-xl bg-bnb-forest px-8 text-lg font-semibold text-white transition-colors hover:bg-bnb-pine disabled:cursor-not-allowed disabled:opacity-60 lg:inline-block"
             >
               {sending ? 'Sending request…' : 'Request to book'}
             </button>
@@ -212,6 +212,21 @@ export function BookRequest({ stay, ident }: { stay: BnbStay; ident: string }) {
             )}
           </div>
         </aside>
+      </div>
+
+      {/* Phones: the total and the button stay in reach while filling the form. */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-bnb-line bg-white px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 lg:hidden">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
+          <p className="text-bnb-ink">
+            <span className="block font-semibold">{q ? kes(q.total) : '…'}</span>
+            <span className="block text-sm text-bnb-stone">
+              {shortRange(s.checkIn, s.checkOut)}, {guests} guest{guests === 1 ? '' : 's'}
+            </span>
+          </p>
+          <button type="submit" form="book-form" disabled={sending || !q} className="min-h-12 rounded-xl bg-bnb-forest px-6 font-semibold text-white hover:bg-bnb-pine disabled:opacity-60">
+            {sending ? 'Sending…' : 'Request to book'}
+          </button>
+        </div>
       </div>
     </>
   );

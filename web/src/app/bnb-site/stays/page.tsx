@@ -36,7 +36,7 @@ export default async function StaysPage({ searchParams }: { searchParams: Promis
           {parts.length > 0 && <span className="font-normal text-bnb-stone"> {parts.join(', ')}</span>}
         </h1>
         {parts.length > 0 && (
-          <Link href="/stays" className="text-sm font-semibold text-bnb-ink underline underline-offset-4">
+          <Link href="/stays" className="inline-flex min-h-11 items-center text-sm font-semibold text-bnb-ink underline underline-offset-4">
             Clear search
           </Link>
         )}

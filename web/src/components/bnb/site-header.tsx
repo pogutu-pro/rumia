@@ -24,7 +24,7 @@ export async function BnbSiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-bnb-line/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-6 md:px-6 md:py-4">
-        <Link href="/" aria-label="RumiaBnB home" className="shrink-0 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-bnb-forest">
+        <Link href="/" aria-label="RumiaBnB home" className="-m-1.5 flex min-h-11 shrink-0 items-center rounded-lg p-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-bnb-forest">
           <BnbLogo compact />
         </Link>
         <div className="min-w-0 flex-1 md:w-[min(40rem,52vw)]">

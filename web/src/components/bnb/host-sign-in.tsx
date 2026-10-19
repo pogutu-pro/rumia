@@ -127,17 +127,17 @@ export function HostSignIn() {
       </form>
       <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
         {mode !== 'login' && (
-          <button type="button" onClick={() => switchMode('login')} className="font-semibold text-bnb-forest underline-offset-4 hover:underline">
+          <button type="button" onClick={() => switchMode('login')} className="inline-flex min-h-11 items-center font-semibold text-bnb-forest underline-offset-4 hover:underline">
             I have an account
           </button>
         )}
         {mode !== 'signup' && (
-          <button type="button" onClick={() => switchMode('signup')} className="font-semibold text-bnb-forest underline-offset-4 hover:underline">
+          <button type="button" onClick={() => switchMode('signup')} className="inline-flex min-h-11 items-center font-semibold text-bnb-forest underline-offset-4 hover:underline">
             Create an account
           </button>
         )}
         {mode !== 'forgot' && (
-          <button type="button" onClick={() => switchMode('forgot')} className="font-semibold text-bnb-forest underline-offset-4 hover:underline">
+          <button type="button" onClick={() => switchMode('forgot')} className="inline-flex min-h-11 items-center font-semibold text-bnb-forest underline-offset-4 hover:underline">
             Forgot password
           </button>
         )}
