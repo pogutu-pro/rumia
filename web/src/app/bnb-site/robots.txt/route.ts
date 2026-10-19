@@ -11,5 +11,6 @@ export function GET() {
   const body = open
     ? `User-agent: *\nAllow: /\nDisallow: /host\nDisallow: /r/\n\nSitemap: ${BNB_ORIGIN}/sitemap.xml\n`
     : 'User-agent: *\nDisallow: /\n';
-  return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+  // Short cache: opening or closing crawling (BNB_INDEXABLE) must reach Cloudflare and crawlers within minutes.
+  return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=300, s-maxage=300' } });
 }
