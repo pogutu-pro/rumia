@@ -87,6 +87,17 @@ def decide_outcome(guest_report: Optional[str], host_report: Optional[str]) -> O
     return "completed" if "stayed" in reports else "no_show"
 
 
+def concierge_message(title: Optional[str], check_in: Optional[date], check_out: Optional[date], guests: Optional[int], ref_code: str) -> str:
+    """The WhatsApp text a guest sends the RumiaBnB team: the place, the dates and guests when known, the reference."""
+    about = f"*{title}*" if title else "a place to stay"
+    who = f" for {guests} guest{'s' if guests != 1 else ''}" if guests else ""
+    if check_in and check_out and check_out > check_in:
+        same_year = check_in.year == check_out.year
+        dates = f"{check_in:%-d %b}{'' if same_year else f' {check_in.year}'} to {check_out:%-d %b %Y}"
+        return f"Hi RumiaBnB, is {about} available from {dates}{who}? Ref {ref_code}"
+    return f"Hi RumiaBnB, I'd like to check availability for {about}{who}. My dates are: … Ref {ref_code}"
+
+
 class StayService:
     # ── Listings and prices ──────────────────────────────────────────────────────────────────────────────────
 
@@ -219,7 +230,8 @@ class StayService:
     @staticmethod
     async def concierge_contact(
         db: AsyncSession, listing_ident: Optional[str], attribution: Attribution, device_id: Optional[str],
-        user_id: Optional[str], session_id: Optional[str],
+        user_id: Optional[str], session_id: Optional[str], check_in: Optional[date] = None,
+        check_out: Optional[date] = None, guests: Optional[int] = None,
     ) -> Tuple[str, str, str]:
         """A chat with the RumiaBnB concierge. Returns (ref code, WhatsApp URL, message)."""
         # Any format the operator types (0757…, +254 757…, 254757…) becomes what wa.me expects: 254757….
@@ -233,8 +245,7 @@ class StayService:
             db, listing=listing, channel="whatsapp", handled_by="concierge", attribution=attribution,
             device_id=device_id, user_id=user_id, session_id=session_id, source="concierge",
         )
-        about = f"*{listing.title}*" if listing else "a place to stay"
-        message = f"Hi RumiaBnB, I'm asking about {about}. My dates are: … Ref {ref_code}"
+        message = concierge_message(listing.title if listing else None, check_in, check_out, guests, ref_code)
         return ref_code, f"https://wa.me/{number}?text={urlquote(message)}", message
 
     # ── Requests ─────────────────────────────────────────────────────────────────────────────────────────────

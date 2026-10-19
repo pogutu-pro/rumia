@@ -120,13 +120,18 @@ export function BookingCard({ stay, ident }: { stay: BnbStay; ident: string }) {
     </p>
   );
 
+  // "Check availability" goes to the RumiaBnB WhatsApp with the place, dates and guests already written;
+  // "Request to book" (once dates are chosen) sends a request the host confirms.
   const notes = (
     <>
       {tooShort && <p className="text-sm text-red-700">The minimum stay here is {b?.min_stay_nights} nights.</p>}
-      <button type="button" onClick={book} className="min-h-12 w-full rounded-xl bg-bnb-forest px-6 text-base font-semibold text-white transition-colors hover:bg-bnb-pine">
-        {ready ? 'Request to book' : 'Check availability'}
-      </button>
-      <p className="text-center text-sm text-bnb-stone">You won&rsquo;t be charged. The host confirms first.</p>
+      <ConciergeButton listing={ident} label="Check availability" checkIn={checkIn} checkOut={checkOut} guests={guests} className="w-full [&>button]:w-full" />
+      {ready && (
+        <button type="button" onClick={book} className="min-h-12 w-full rounded-xl border border-bnb-ink bg-white px-6 text-base font-semibold text-bnb-ink transition-colors hover:bg-bnb-mist">
+          Request to book
+        </button>
+      )}
+      <p className="text-center text-sm text-bnb-stone">We reply on WhatsApp. You won&rsquo;t be charged.</p>
     </>
   );
 
@@ -167,9 +172,6 @@ export function BookingCard({ stay, ident }: { stay: BnbStay; ident: string }) {
           {notes}
           {ready && breakdown}
         </div>
-        <div className="mt-5 border-t border-bnb-line pt-4 text-center">
-          <ConciergeButton listing={ident} label="Ask us about this place" variant="link" />
-        </div>
       </div>
 
       {/* Phones */}
@@ -185,9 +187,7 @@ export function BookingCard({ stay, ident }: { stay: BnbStay; ident: string }) {
             )}
             <span className="block text-sm text-bnb-ink underline underline-offset-2">{checkIn && checkOut ? shortRange(checkIn, checkOut) : 'Add dates'}</span>
           </button>
-          <button type="button" onClick={() => (ready ? book() : setSheet(true))} className="min-h-12 rounded-xl bg-bnb-forest px-7 font-semibold text-white hover:bg-bnb-pine">
-            {ready ? 'Reserve' : 'Check dates'}
-          </button>
+          <ConciergeButton listing={ident} label="Check availability" checkIn={checkIn} checkOut={checkOut} guests={guests} className="shrink-0" />
         </div>
       </div>
       <Drawer open={sheet} onOpenChange={setSheet}>

@@ -69,6 +69,9 @@ class GuestReport(BaseModel):
 
 class ConciergeContactCreate(BaseModel):
     listing: Optional[str] = Field(None, description="Listing id or slug, when the guest asks about one place")
+    check_in: Optional[date] = None
+    check_out: Optional[date] = None
+    guests: Optional[int] = Field(None, ge=1, le=50)
     session_id: Optional[str] = Field(None, max_length=64)
     attribution: Attribution = Attribution()
 

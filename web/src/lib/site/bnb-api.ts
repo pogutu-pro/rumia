@@ -69,9 +69,14 @@ export const staysApi = {
   cancel: (token: string) => call<GuestStayView>(`/stays/requests/${encodeURIComponent(token)}/cancel`, { method: 'POST' }),
   report: (token: string, stayed: boolean) =>
     call<GuestStayView>(`/stays/requests/${encodeURIComponent(token)}/report`, { method: 'POST', body: JSON.stringify({ stayed }) }),
-  concierge: (listing: string | null, attribution: Attribution, sessionId?: string) =>
+  concierge: (
+    listing: string | null,
+    attribution: Attribution,
+    sessionId?: string,
+    trip?: { check_in?: string | null; check_out?: string | null; guests?: number | null },
+  ) =>
     call<ConciergeContact>('/stays/concierge', {
       method: 'POST',
-      body: JSON.stringify({ listing, attribution, session_id: sessionId }),
+      body: JSON.stringify({ listing, attribution, session_id: sessionId, ...(trip ?? {}) }),
     }),
 };
