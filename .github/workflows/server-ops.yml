@@ -1,0 +1,147 @@
+name: Server operations (manual)
+
+# Run by hand from the Actions tab (or `gh workflow run server-ops.yml -f task=...`). Uses the same SSH secrets as CD,
+# so nobody needs the server's address. Every task prints what it did; none prints secret values.
+#
+#   status       code version, schema revision, containers, which RumiaBnB settings are set (names only), certificate
+#   migrate      back up the database, rehearse the migrations of `ref` on a restored copy (up, down, up), then apply
+#                them to production. Needs confirm=yes.
+#   set-env      set RumiaBnB settings (allow-listed keys only) in the server env files, then redeploy. Needs confirm=yes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: What to do
+        type: choice
+        options: [status, migrate, set-env]
+        default: status
+      ref:
+        description: "migrate: git ref whose migrations to apply (branch, tag or sha)"
+        default: main
+      settings:
+        description: "set-env: KEY=VALUE pairs separated by ';' (allowed: BNB_HOST, BNB_INDEXABLE, NEXT_PUBLIC_BNB_ORIGIN, NEXT_PUBLIC_BNB_CONCIERGE_WHATSAPP, NEXT_PUBLIC_BNB_SEPARATE, BNB_CONCIERGE_WHATSAPP, BNB_PUBLIC_URL)"
+        default: ""
+      confirm:
+        description: "Type yes for migrate and set-env"
+        default: ""
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check inputs
+        env:
+          TASK: ${{ inputs.task }}
+          REF: ${{ inputs.ref }}
+          SETTINGS: ${{ inputs.settings }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$TASK" != status ] && [ "$CONFIRM" != yes ]; then echo "confirm=yes is required for $TASK"; exit 1; fi
+          echo "$REF" | grep -Eq '^[A-Za-z0-9._/-]{1,100}$' || { echo "bad ref"; exit 1; }
+          if [ "$TASK" = set-env ]; then
+            echo "$SETTINGS" | grep -Eq '^([A-Z_]+=[A-Za-z0-9.:/+_-]*)(;[A-Z_]+=[A-Za-z0-9.:/+_-]*)*$' || { echo "settings must be KEY=VALUE;KEY=VALUE with plain values"; exit 1; }
+          fi
+
+      - name: Run on the server
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          TASK: ${{ inputs.task }}
+          REF: ${{ inputs.ref }}
+          SETTINGS: ${{ inputs.settings }}
+        with:
+          host: ${{ secrets.ORACLE_VPS_HOST }}
+          username: ${{ secrets.ORACLE_VPS_USER }}
+          key: ${{ secrets.ORACLE_VPS_SSH_KEY }}
+          port: 22
+          command_timeout: 45m
+          envs: TASK,REF,SETTINGS
+          script: |
+            set -euo pipefail
+            cd "$HOME/rumia"
+            NET=$(docker inspect rumia_postgres -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}')
+            # The backend's own environment, passed through without being printed.
+            backend_env() { docker exec rumia_backend env | grep -Ev '^(PATH|HOME|HOSTNAME|PYTHONUNBUFFERED|PORT|GPG_KEY|LANG|PYTHON_[A-Z_]*)='; }
+            alembic_in() { # image, database url (empty = production), alembic args...
+              local image="$1" url="$2"; shift 2
+              if [ -n "$url" ]; then
+                # The production URL is removed, not just overridden: a rehearsal can never touch production.
+                docker run --rm --network "$NET" --env-file <(backend_env | grep -v '^DATABASE_URL=') -e DATABASE_URL="$url" "$image" alembic "$@"
+              else
+                docker run --rm --network "$NET" --env-file <(backend_env) "$image" alembic "$@"
+              fi
+            }
+
+            status() {
+              echo "--- code: $(git log --oneline -1)"
+              echo "--- schema: $(docker compose exec -T backend alembic current 2>/dev/null | tail -1)"
+              docker compose ps --format '{{.Name}} {{.Status}}'
+              echo "--- RumiaBnB settings present (names only):"
+              for f in web/.env.production backend/.env; do
+                echo "  $f: $(grep -Eo '^(BNB_[A-Z_]+|NEXT_PUBLIC_BNB_[A-Z_]+|CORS_ORIGINS)=' "$f" | tr -d '=' | tr '\n' ' ')"
+              done
+              echo "--- certificate names: $(docker compose exec -T nginx sh -c 'openssl x509 -in /etc/letsencrypt/live/rumia.co.ke/fullchain.pem -noout -ext subjectAltName 2>/dev/null' | tr -d '\n' || true)"
+              echo "--- disk free: $(df -h --output=avail / | tail -1)"
+            }
+
+            case "$TASK" in
+              status) status ;;
+
+              migrate)
+                TS=$(date -u +%Y%m%dT%H%M%SZ)
+                mkdir -p "$HOME/backups"
+                DUMP="$HOME/backups/rumia_premigrate_$TS.dump"
+                echo "=== 1. Backup -> $DUMP"
+                docker exec rumia_postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc --no-owner' > "$DUMP"
+                test -s "$DUMP"; ls -lh "$DUMP"
+
+                echo "=== 2. Build the migration image from $REF"
+                rm -rf /tmp/rumia-migrate; git worktree prune
+                git fetch -q origin "$REF"
+                git worktree add -q --detach /tmp/rumia-migrate FETCH_HEAD
+                echo "    $(git -C /tmp/rumia-migrate log --oneline -1)"
+                docker build -q -t rumia-migrate:latest /tmp/rumia-migrate/backend
+
+                echo "=== 3. Rehearse on a restored copy"
+                docker rm -f rumia-rehearsal >/dev/null 2>&1 || true
+                docker run -d --name rumia-rehearsal --network "$NET" -e POSTGRES_PASSWORD=rehearsal postgres:17-alpine >/dev/null
+                for i in $(seq 1 30); do docker exec rumia-rehearsal pg_isready -U postgres >/dev/null 2>&1 && break; sleep 2; done
+                docker exec rumia-rehearsal createdb -U postgres rehearsal
+                docker cp "$DUMP" rumia-rehearsal:/tmp/rumia.dump
+                docker exec rumia-rehearsal pg_restore -U postgres -d rehearsal --no-owner --no-privileges /tmp/rumia.dump 2>&1 | tail -5 || true
+                R="postgresql+asyncpg://postgres:rehearsal@rumia-rehearsal:5432/rehearsal"
+                START=$(alembic_in rumia-migrate:latest "$R" current 2>/dev/null | grep -Eo '^[0-9]+' | tail -1)
+                echo "    rehearsal starts at $START"
+                alembic_in rumia-migrate:latest "$R" upgrade head
+                alembic_in rumia-migrate:latest "$R" downgrade "$START"
+                alembic_in rumia-migrate:latest "$R" upgrade head
+                echo "    rehearsal now at: $(alembic_in rumia-migrate:latest "$R" current 2>/dev/null | tail -1)"
+                docker rm -f rumia-rehearsal >/dev/null
+
+                echo "=== 4. Apply to production"
+                alembic_in rumia-migrate:latest "" upgrade head
+                echo "    production now at: $(alembic_in rumia-migrate:latest "" current 2>/dev/null | tail -1)"
+                git worktree remove --force /tmp/rumia-migrate; docker image rm rumia-migrate:latest >/dev/null 2>&1 || true
+                echo "Backup kept at $DUMP" ;;
+
+              set-env)
+                IFS=';' read -ra PAIRS <<< "$SETTINGS"
+                for pair in "${PAIRS[@]}"; do
+                  key="${pair%%=*}"; value="${pair#*=}"
+                  case "$key" in
+                    BNB_HOST|BNB_INDEXABLE|NEXT_PUBLIC_BNB_ORIGIN|NEXT_PUBLIC_BNB_CONCIERGE_WHATSAPP|NEXT_PUBLIC_BNB_SEPARATE) file=web/.env.production ;;
+                    BNB_CONCIERGE_WHATSAPP|BNB_PUBLIC_URL) file=backend/.env ;;
+                    *) echo "not allowed: $key"; exit 1 ;;
+                  esac
+                  cp "$file" "$file.bak-$(date -u +%Y%m%dT%H%M%SZ)"
+                  if grep -q "^$key=" "$file"; then sed -i "s|^$key=.*|$key=$value|" "$file"; else printf '\n%s=%s\n' "$key" "$value" >> "$file"; fi
+                  echo "set $key in $file"
+                done
+                chmod 600 web/.env.production backend/.env
+                ./scripts/deploy.sh
+                status ;;
+            esac
