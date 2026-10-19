@@ -14,7 +14,7 @@ const TABS: Array<{ key: Key; label: string }> = BNB_SEPARATE
       { key: 'hostel', label: 'Hostels' },
       { key: 'apartment', label: 'Apartments' },
       // Last once separated: it leaves Rumia for RumiaBnB.
-      { key: 'short_stay', label: 'Short stays · RumiaBnB' },
+      { key: 'short_stay', label: 'RumiaBnB | Short stays' },
     ]
   : [
       { key: 'all', label: 'All' },
@@ -47,6 +47,22 @@ export function CategoryTabs() {
       <ul className="flex gap-2">
         {TABS.map(({ key, label }) => {
           const active = current === key;
+          const href = hrefFor(key);
+          const cls = cn(
+            'inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+            active ? 'border-primary bg-primary text-primary-foreground' : 'border-line bg-raised text-ink active:bg-subtle',
+          );
+          // RumiaBnB is another site: a plain link, so the browser always leaves Rumia.
+          if (href.startsWith('http')) {
+            return (
+              <li key={key} className="shrink-0">
+                <a href={href} className={cls}>
+                  {label}
+                </a>
+              </li>
+            );
+          }
           return (
             <li key={key} className="shrink-0">
               <Link

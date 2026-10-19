@@ -3,7 +3,7 @@ import { BNB_ORIGIN } from './hosts';
 /**
  * Rumia and RumiaBnB as two products. With NEXT_PUBLIC_BNB_SEPARATE=true (build-time; set at RumiaBnB go-live):
  * short stays leave Rumia's discovery (home, /hostels, kind pages, videos, sitemap) and every Rumia short-stay URL
- * redirects to RumiaBnB. Rumia keeps one way in ("Short stays · RumiaBnB", /bnb). Unset: Rumia is exactly as before.
+ * redirects to RumiaBnB. Rumia keeps one way in ("RumiaBnB | Short stays", /bnb). Unset: Rumia is exactly as before.
  * The listing records are not touched either way.
  */
 export const BNB_SEPARATE = process.env.NEXT_PUBLIC_BNB_SEPARATE === 'true';

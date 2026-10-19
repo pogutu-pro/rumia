@@ -28,7 +28,7 @@ const CATEGORIES: {
       { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
       { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
       // Rumia's way in to RumiaBnB: it leaves the site, so it comes last.
-      { key: 'short_stay', label: 'Short stays · RumiaBnB', icon: '/images/categories/short-stays.png' },
+      { key: 'short_stay', label: 'RumiaBnB | Short stays', icon: '/images/categories/short-stays.png' },
     ]
   : [
       { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
@@ -137,14 +137,26 @@ export function ExploreDiscovery({
         <div role="group" aria-label="Property category" className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {CATEGORIES.map(({ key, label, icon }) => {
             const active = category === key;
+            // Once separated, short stays are a plain link to RumiaBnB: it always leaves Rumia, with or without JS.
+            if (key === 'short_stay' && BNB_SEPARATE) {
+              return (
+                <a
+                  key={key}
+                  href={`${BNB_ORIGIN}/`}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-line bg-raised px-4 text-sm font-semibold text-ink transition-colors hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <Image src={icon} alt="" width={32} height={32} className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" aria-hidden />
+                  {label}
+                </a>
+              );
+            }
             return (
               <button
                 key={key}
                 type="button"
                 onClick={() => {
                   if (key === 'short_stay') {
-                    if (BNB_SEPARATE) window.location.assign(`${BNB_ORIGIN}/`);
-                    else router.push('/bnb');
+                    router.push('/bnb');
                     return;
                   }
                   setCategory(key);
