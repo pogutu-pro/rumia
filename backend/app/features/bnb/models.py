@@ -29,6 +29,9 @@ class BnbDetails(Base):
     cleaning_fee: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
     security_deposit: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
     extra_guest_fee: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
+    # The owner's rates for longer stays (weekly from 7 nights, monthly from 30); none means nightly only.
+    weekly_price: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
+    monthly_price: Mapped[Optional[float]] = mapped_column(Numeric, nullable=True)
 
     available_from: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     available_until: Mapped[Optional[date]] = mapped_column(Date, nullable=True)

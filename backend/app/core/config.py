@@ -86,6 +86,16 @@ class Settings(BaseSettings):
     # Fee recorded when a move-in is confirmed (KES). 0 = nothing is recorded; set once the revenue model is decided.
     LEDGER_MOVE_IN_FEE_KES: float = 0
 
+    # RumiaBnB. The staffed concierge WhatsApp number (any format); empty disables concierge chats.
+    BNB_CONCIERGE_WHATSAPP: str = ""
+    # Public origin of the RumiaBnB site, for links in notifications.
+    BNB_PUBLIC_URL: str = "https://rumiabnb.rumia.co.ke"
+    # Default fee for a completed stay when a host has no agreement of their own: a percentage of the room charges
+    # (cleaning fee and deposit excluded), at least the minimum, counted on the first BNB_FEE_NIGHT_CAP nights only.
+    BNB_FEE_PERCENT: float = 10
+    BNB_FEE_MIN_KES: float = 500
+    BNB_FEE_NIGHT_CAP: int = 30
+
     # Scheduled jobs (delivery retries, announcement cleanup). In production the API sets this to
     # false and a single `worker` container runs them, so they never run once per web worker.
     RUN_SCHEDULER: bool = True
