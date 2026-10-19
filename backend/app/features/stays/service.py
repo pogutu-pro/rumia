@@ -24,7 +24,7 @@ from app.core.device import touch_device
 from app.core.errors import BadRequestException, ConflictException, NotFoundException
 from app.features.bnb.models import BnbDetails
 from app.features.hostel_requests.service import clean_kenyan_phone
-from app.features.inquiries.service import new_ref_code
+from app.features.inquiries.service import _digits_for_wa, new_ref_code
 from app.features.listings.models import Listing
 from app.features.stays.pricing import FeeTerms, Quote, quote_stay, stay_fee
 from app.features.stays.schemas import Attribution
@@ -222,7 +222,8 @@ class StayService:
         user_id: Optional[str], session_id: Optional[str],
     ) -> Tuple[str, str, str]:
         """A chat with the RumiaBnB concierge. Returns (ref code, WhatsApp URL, message)."""
-        number = re.sub(r"\D", "", settings.BNB_CONCIERGE_WHATSAPP or "")
+        # Any format the operator types (0757…, +254 757…, 254757…) becomes what wa.me expects: 254757….
+        number = _digits_for_wa(settings.BNB_CONCIERGE_WHATSAPP) if (settings.BNB_CONCIERGE_WHATSAPP or "").strip() else ""
         if not number:
             raise ConflictException(code="NO_CONCIERGE", message="Chat is not available right now. Send a booking request instead.")
         listing = None
