@@ -147,7 +147,8 @@ async def concierge_contact(
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ConciergeContactResult:
     ref, url, message = await StayService.concierge_contact(
-        db, data.listing, data.attribution, device_id, user.id if user else None, data.session_id
+        db, data.listing, data.attribution, device_id, user.id if user else None, data.session_id,
+        data.check_in, data.check_out, data.guests,
     )
     return ConciergeContactResult(ref_code=ref, whatsapp_url=url, message=message)
 

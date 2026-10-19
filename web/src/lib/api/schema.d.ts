@@ -5858,6 +5858,12 @@ export interface components {
         ConciergeContactCreate: {
             /** @default {} */
             attribution: components["schemas"]["Attribution"];
+            /** Check In */
+            check_in?: string | null;
+            /** Check Out */
+            check_out?: string | null;
+            /** Guests */
+            guests?: number | null;
             /**
              * Listing
              * @description Listing id or slug, when the guest asks about one place

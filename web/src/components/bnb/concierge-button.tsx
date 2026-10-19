@@ -17,11 +17,18 @@ export function ConciergeButton({
   label = 'Chat with us on WhatsApp',
   variant = 'solid',
   className,
+  checkIn = null,
+  checkOut = null,
+  guests = null,
 }: {
   listing?: string | null;
   label?: string;
   variant?: 'solid' | 'amber' | 'outline' | 'link';
   className?: string;
+  /** The guest's trip so far: written into the WhatsApp message. */
+  checkIn?: string | null;
+  checkOut?: string | null;
+  guests?: number | null;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +40,11 @@ export function ConciergeButton({
     // Open the tab synchronously so pop-up blockers allow it, then point it at WhatsApp.
     const tab = window.open('', '_blank');
     try {
-      const res = await staysApi.concierge(listing, attributionFor(), sessionId());
+      const res = await staysApi.concierge(listing, attributionFor(), sessionId(), {
+        check_in: checkIn && checkOut ? checkIn : null,
+        check_out: checkIn && checkOut ? checkOut : null,
+        guests: checkIn && checkOut && guests ? guests : null, // the count defaults to 1; only say it once dates are chosen
+      });
       if (tab) tab.location.href = res.whatsapp_url;
       else window.location.href = res.whatsapp_url;
     } catch (e) {

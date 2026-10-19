@@ -44,3 +44,17 @@ def test_every_member_role_can_handle_their_own_requests():
         ctx = AccessContext(user_id="u", orgs={"o1": role})
         assert ctx.can("property.confirm", org_id="o1")
         assert not ctx.can("property.confirm", org_id="o2")
+
+
+def test_concierge_message_carries_dates_and_guests():
+    from datetime import date
+
+    from app.features.stays.service import concierge_message
+
+    assert concierge_message("Regal Residence", date(2026, 12, 1), date(2026, 12, 4), 2, "AB2CD") == (
+        "Hi RumiaBnB, is *Regal Residence* available from 1 Dec to 4 Dec 2026 for 2 guests? Ref AB2CD"
+    )
+    assert concierge_message("Regal", date(2026, 12, 30), date(2027, 1, 2), 1, "X") == (
+        "Hi RumiaBnB, is *Regal* available from 30 Dec 2026 to 2 Jan 2027 for 1 guest? Ref X"
+    )
+    assert concierge_message(None, None, None, None, "X") == "Hi RumiaBnB, I'd like to check availability for a place to stay. My dates are: … Ref X"
