@@ -1,20 +1,43 @@
 /*
- * RumiaBnB tokens: highland forest and sunrise amber (Mt Kenya, the Aberdares), cool mist rather than cream.
- * Used only by the RumiaBnB site (app/bnb-site, components/bnb) as bnb-* utilities, e.g. bg-bnb-forest.
- * --font-bricolage is set by app/bnb-site/layout.tsx (self-hosted Bricolage Grotesque).
+ * RumiaBnB tokens: Rumia's own palette (themes.css), so the two products read as one family. The bnb-* names are
+ * kept so RumiaBnB components can be restyled here in one place.
  */
 @theme {
-  --color-bnb-forest: #0f3b2e;
-  --color-bnb-pine: #1c5442;
-  --color-bnb-ink: #10201a;
-  --color-bnb-stone: #5b6560;
-  --color-bnb-line: #dce3dd;
-  --color-bnb-mist: #f4f6f3;
-  --color-bnb-amber: #f2a93b;
-  --color-bnb-amber-deep: #c97f12;
+  --color-bnb-forest: hsl(154 85% 26%); /* Rumia green: primary actions */
+  --color-bnb-pine: hsl(154 85% 20%); /* pressed / hover */
+  --color-bnb-ink: hsl(222 30% 14%); /* Rumia ink */
+  --color-bnb-stone: hsl(220 9% 40%); /* Rumia ink-muted */
+  --color-bnb-line: hsl(220 13% 90%); /* Rumia line */
+  --color-bnb-mist: hsl(40 25% 98.5%); /* Rumia porcelain page */
+  --color-bnb-amber: hsl(39 95% 52%); /* Rumia accent: small highlights only */
+  --color-bnb-amber-deep: hsl(32 90% 40%);
 }
 
-/* inline: the utility must read --font-bricolage on the element (set by the RumiaBnB layout), not at :root. */
+/* inline: the utility reads the font variables on the element (set by the root layout). */
 @theme inline {
-  --font-bnb-display: var(--font-bricolage), 'Inter', system-ui, sans-serif;
+  --font-bnb-display: var(--font-jakarta), 'Inter', system-ui, sans-serif;
+}
+
+/* Calendar (react-day-picker v9) in RumiaBnB: range selection like a booking site. */
+.bnb-calendar .rdp-root {
+  --rdp-accent-color: hsl(154 85% 26%);
+  --rdp-accent-background-color: hsl(154 60% 94%);
+  --rdp-day-height: 44px;
+  --rdp-day-width: 44px;
+  --rdp-day_button-height: 42px;
+  --rdp-day_button-width: 42px;
+  --rdp-day_button-border-radius: 9999px;
+  --rdp-range_middle-background-color: hsl(154 60% 94%);
+  --rdp-range_start-date-background-color: hsl(222 30% 14%);
+  --rdp-range_end-date-background-color: hsl(222 30% 14%);
+  --rdp-today-color: hsl(154 85% 26%);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+.bnb-calendar .rdp-month_caption {
+  font-weight: 600;
+  justify-content: center;
+}
+.bnb-calendar .rdp-disabled {
+  text-decoration: line-through;
+  opacity: 0.35;
 }

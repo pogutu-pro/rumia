@@ -20,7 +20,7 @@ export function ConciergeButton({
 }: {
   listing?: string | null;
   label?: string;
-  variant?: 'solid' | 'amber' | 'outline';
+  variant?: 'solid' | 'amber' | 'outline' | 'link';
   className?: string;
 }) {
   const [busy, setBusy] = useState(false);
@@ -45,9 +45,10 @@ export function ConciergeButton({
   }
 
   const styles = {
-    solid: 'bg-bnb-forest text-bnb-mist hover:bg-bnb-pine',
-    amber: 'bg-bnb-amber text-bnb-ink hover:bg-bnb-amber-deep hover:text-white',
-    outline: 'border border-bnb-forest/30 bg-white text-bnb-forest hover:border-bnb-forest',
+    solid: 'bg-bnb-forest text-white hover:bg-bnb-pine',
+    amber: 'bg-bnb-ink text-white hover:bg-black',
+    outline: 'border border-bnb-ink bg-white text-bnb-ink hover:bg-bnb-mist',
+    link: 'min-h-0 px-0 text-sm text-bnb-ink underline underline-offset-4 hover:text-bnb-forest',
   }[variant];
 
   return (
@@ -57,7 +58,9 @@ export function ConciergeButton({
         onClick={open}
         disabled={busy}
         className={cn(
-          'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-6 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bnb-amber disabled:opacity-60 sm:w-auto',
+          variant === 'link'
+            ? 'inline-flex items-center justify-center gap-2 font-semibold transition-colors disabled:opacity-60'
+            : 'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bnb-forest disabled:opacity-60 sm:w-auto',
           styles,
         )}
       >

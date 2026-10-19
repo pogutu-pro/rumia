@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { Clock, MapPin } from 'lucide-react';
+import { CalendarRange, Clock, KeyRound, MapPin, Play, ReceiptText } from 'lucide-react';
 import { getStay, getStays } from '@/lib/site/bnb-api';
 import { BNB_ORIGIN } from '@/lib/site/hosts';
 import { kes, stayCover, stayFacts, stayHost, stayImages, stayKind, stayPath, stayPlace } from '@/lib/site/stay-format';
-import { StayMedia } from '@/components/bnb/stay-media';
-import { RequestForm } from '@/components/bnb/request-form';
+import { StayGallery } from '@/components/bnb/stay-gallery';
+import { BookingCard } from '@/components/bnb/booking-card';
+import { Amenities, Description } from '@/components/bnb/stay-sections';
 import { ConciergeButton } from '@/components/bnb/concierge-button';
 import { StayViewTracker } from '@/components/bnb/stay-view-tracker';
+import { StayVideo } from '@/components/bnb/stay-video';
 import { JsonLd } from '@/components/seo/json-ld';
+import { SaveButton } from '@/components/ui/save-button';
+import { ShareListingButton } from '@/components/ui/share-listing-button';
 
 export const revalidate = 300;
 
@@ -33,13 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const RULES: Record<string, string> = {
-  smoking: 'Smoking',
-  pets: 'Pets',
-  parties: 'Parties or events',
-  children: 'Children',
-  visitors: 'Visitors',
-};
+const RULES: Record<string, string> = { smoking: 'Smoking', pets: 'Pets', parties: 'Parties or events', children: 'Children', visitors: 'Visitors' };
 
 export default async function StayPage({ params }: Props) {
   const { slug } = await params;
@@ -47,22 +46,39 @@ export default async function StayPage({ params }: Props) {
   if (!stay) notFound();
 
   const b = stay.bnb;
-  const facts = stayFacts(stay);
   const host = stayHost(stay);
   const where = stayPlace(stay);
   const ident = stay.slug ?? stay.id;
-  const longStay = [
-    b?.weekly_price ? `${kes(b.weekly_price)} a week` : null,
-    b?.monthly_price ? `${kes(b.monthly_price)} a month` : null,
-  ].filter(Boolean);
+  const images = stayImages(stay);
+  const url = `${BNB_ORIGIN}${stayPath(stay)}`;
   const rules = Object.entries((b?.house_rules ?? {}) as Record<string, unknown>)
     .filter(([k, v]) => RULES[k] && typeof v === 'boolean')
     .map(([k, v]) => `${RULES[k]} ${v ? 'allowed' : 'not allowed'}`);
-  const quietHours = typeof b?.house_rules?.quiet_hours === 'string' ? (b.house_rules.quiet_hours as string) : null;
-  if (quietHours) rules.push(`Quiet hours ${quietHours}`);
+  const quiet = typeof b?.house_rules?.quiet_hours === 'string' ? `Quiet hours ${b.house_rules.quiet_hours as string}` : null;
+
+  // Only what is true of this place.
+  const highlights = [
+    stay.youtube_id && { icon: Play, title: 'Video tour', body: 'Walk through the place before you book.' },
+    (b?.check_in_time || b?.check_out_time) && {
+      icon: KeyRound,
+      title: b?.check_in_time ? `Check in from ${b.check_in_time}` : 'Check-out time set',
+      body: b?.check_out_time ? `Check out by ${b.check_out_time}.` : 'The host shares arrival details when they confirm.',
+    },
+    (b?.weekly_price || b?.monthly_price) && { icon: CalendarRange, title: 'Cheaper for longer stays', body: [b?.weekly_price && `${kes(b.weekly_price)} a week`, b?.monthly_price && `${kes(b.monthly_price)} a month`].filter(Boolean).join(', ') + '.' },
+    { icon: ReceiptText, title: 'Full price before you ask', body: 'Pick dates and see the total, cleaning fee included. Nothing is charged to request.' },
+  ].filter(Boolean) as Array<{ icon: typeof Play; title: string; body: string }>;
+
+  const actions = (
+    <>
+      <ShareListingButton listing={{ name: stay.title, area: where, url, imageUrl: images[0]?.url }} variant="icon" className="h-9 w-9 rounded-full bg-white shadow-sm" />
+      <SaveButton listingId={String(stay.id)} variant="icon" className="h-9 w-9 bg-white shadow-sm" />
+    </>
+  );
+  const section = 'border-t border-bnb-line py-10';
+  const h2 = 'font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink';
 
   return (
-    <article className="mx-auto max-w-6xl px-4 pb-32 pt-6 lg:pb-16">
+    <article className="mx-auto max-w-6xl px-4 pb-32 pt-4 md:px-6 md:pt-8 lg:pb-16">
       <StayViewTracker listingId={stay.id} />
       <JsonLd
         data={{
@@ -70,129 +86,152 @@ export default async function StayPage({ params }: Props) {
           '@type': 'VacationRental',
           name: stay.title,
           description: stay.description,
-          url: `${BNB_ORIGIN}${stayPath(stay)}`,
-          image: stayImages(stay).slice(0, 6).map((i) => i.url),
+          url,
+          image: images.slice(0, 6).map((i) => i.url),
           address: { '@type': 'PostalAddress', addressLocality: where, addressCountry: 'KE' },
           ...(b?.max_guests ? { occupancy: { '@type': 'QuantitativeValue', maxValue: b.max_guests } } : {}),
           amenityFeature: (stay.amenities ?? []).map((a) => ({ '@type': 'LocationFeatureSpecification', name: a, value: true })),
         }}
       />
 
-      <StayMedia title={stay.title} listingId={stay.id} images={stayImages(stay)} youtubeId={stay.youtube_id} isShort={stay.is_youtube_shorts} />
+      <div className="mb-6 hidden items-end justify-between gap-4 md:flex">
+        <h1 className="font-bnb-display text-3xl font-bold tracking-tight text-bnb-ink">{stay.title}</h1>
+        <div className="flex gap-2">{actions}</div>
+      </div>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_24rem]">
+      <StayGallery title={stay.title} images={images} actions={actions} />
+
+      <div className="mt-6 grid gap-x-20 md:mt-10 lg:grid-cols-[1fr_24rem]">
         <div className="min-w-0">
-          <header>
-            <h1 className="font-bnb-display text-3xl font-bold leading-tight tracking-tight text-bnb-ink sm:text-4xl">{stay.title}</h1>
-            <p className="mt-2 flex items-center gap-1.5 text-bnb-stone">
-              <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-              {where}
-              {b?.nearby_landmark ? `, near ${b.nearby_landmark}` : ''}
+          <header className="pb-8">
+            <h1 className="font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink md:hidden">{stay.title}</h1>
+            <p className="mt-1 text-lg font-semibold text-bnb-ink md:mt-0 md:text-xl">
+              {stayKind(stay) ?? 'Stay'} in {where}
             </p>
-            {(stayKind(stay) || facts.length > 0) && (
-              <ul className="mt-4 flex flex-wrap gap-2" aria-label="At a glance">
-                {[stayKind(stay), ...facts].filter(Boolean).map((f) => (
-                  <li key={f} className="rounded-full border border-bnb-line bg-white px-3 py-1 text-sm text-bnb-ink">
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <p className="mt-1 text-bnb-stone">{stayFacts(stay).join(' · ')}</p>
           </header>
 
-          <section className="mt-8" aria-labelledby="price">
-            <h2 id="price" className="sr-only">
-              Price
-            </h2>
-            <p className="font-bnb-display text-2xl font-bold text-bnb-ink">
-              {kes(stay.price)} <span className="text-base font-normal text-bnb-stone">a night</span>
-            </p>
-            {longStay.length > 0 && <p className="mt-1 text-bnb-stone">Longer stays: {longStay.join(', ')}.</p>}
-            {(b?.cleaning_fee || b?.security_deposit) && (
-              <p className="mt-1 text-sm text-bnb-stone">
-                {[b?.cleaning_fee ? `Cleaning fee ${kes(b.cleaning_fee)}` : null, b?.security_deposit ? `refundable deposit ${kes(b.security_deposit)}` : null]
-                  .filter(Boolean)
-                  .join(', ')}
-                .
-              </p>
-            )}
-          </section>
+          {host && (
+            <div className="flex items-center gap-4 border-t border-bnb-line py-6">
+              <span className="grid h-12 w-12 place-items-center rounded-full bg-bnb-ink font-bnb-display text-lg font-bold text-white" aria-hidden>
+                {host.charAt(0).toUpperCase()}
+              </span>
+              <div>
+                <p className="font-semibold text-bnb-ink">Hosted by {host}</p>
+                <p className="text-sm text-bnb-stone">Hosting with RumiaBnB</p>
+              </div>
+            </div>
+          )}
+
+          <ul className="space-y-6 border-t border-bnb-line py-8">
+            {highlights.map(({ icon: Icon, title, body }) => (
+              <li key={title} className="flex gap-5">
+                <Icon className="mt-0.5 h-6 w-6 shrink-0 text-bnb-ink" strokeWidth={1.5} aria-hidden />
+                <div>
+                  <p className="font-semibold text-bnb-ink">{title}</p>
+                  <p className="text-bnb-stone">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
 
           {stay.description && (
-            <section className="mt-8" aria-labelledby="about">
-              <h2 id="about" className="font-bnb-display text-xl font-bold text-bnb-ink">
+            <section className={section} aria-labelledby="about">
+              <h2 id="about" className={`${h2} mb-4`}>
                 About this place
               </h2>
-              <p className="mt-3 max-w-prose whitespace-pre-line leading-relaxed text-bnb-ink/90">{stay.description}</p>
+              <Description text={stay.description} />
+            </section>
+          )}
+
+          {stay.youtube_id && (
+            <section className={section} aria-labelledby="tour">
+              <h2 id="tour" className={`${h2} mb-4`}>
+                Video tour
+              </h2>
+              <StayVideo videoId={stay.youtube_id} isShort={stay.is_youtube_shorts} title={stay.title} listingId={stay.id} />
             </section>
           )}
 
           {(stay.amenities?.length ?? 0) > 0 && (
-            <section className="mt-8" aria-labelledby="amenities">
-              <h2 id="amenities" className="font-bnb-display text-xl font-bold text-bnb-ink">
-                What is here
+            <section className={section} aria-labelledby="amenities">
+              <h2 id="amenities" className={`${h2} mb-4`}>
+                What this place offers
               </h2>
-              <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
-                {stay.amenities!.map((a) => (
-                  <li key={a} className="border-b border-bnb-line pb-2 text-bnb-ink/90">
-                    {a}
-                  </li>
-                ))}
-              </ul>
+              <Amenities items={stay.amenities!} />
             </section>
           )}
 
-          {(b?.check_in_time || b?.check_out_time || rules.length > 0 || b?.custom_rules) && (
-            <section className="mt-8" aria-labelledby="rules">
-              <h2 id="rules" className="font-bnb-display text-xl font-bold text-bnb-ink">
-                Arrival and house rules
-              </h2>
-              {(b?.check_in_time || b?.check_out_time) && (
-                <p className="mt-3 flex items-center gap-2 text-bnb-ink/90">
-                  <Clock className="h-4 w-4 text-bnb-stone" aria-hidden />
-                  {[b?.check_in_time && `Check-in from ${b.check_in_time}`, b?.check_out_time && `check-out by ${b.check_out_time}`].filter(Boolean).join(', ')}
-                </p>
-              )}
-              {rules.length > 0 && <p className="mt-2 text-bnb-ink/90">{rules.join('. ')}.</p>}
-              {b?.custom_rules && <p className="mt-2 whitespace-pre-line text-bnb-ink/90">{b.custom_rules}</p>}
-            </section>
-          )}
-
-          {host && (
-            <section className="mt-8 border-t border-bnb-line pt-6" aria-labelledby="host">
-              <h2 id="host" className="font-bnb-display text-xl font-bold text-bnb-ink">
-                Hosted by {host}
-              </h2>
-              <p className="mt-2 max-w-prose text-bnb-stone">
-                Requests go to the host to confirm. Questions first? Our team answers on WhatsApp and checks with the host for you.
-              </p>
-              <ConciergeButton className="mt-4" listing={ident} label="Ask us about this place" variant="outline" />
-            </section>
-          )}
-        </div>
-
-        <aside id="request" className="scroll-mt-20 lg:sticky lg:top-24 lg:self-start" aria-labelledby="request-heading">
-          <div className="rounded-[1.5rem] bg-white p-5 ring-1 ring-bnb-line sm:p-6">
-            <h2 id="request-heading" className="font-bnb-display text-xl font-bold text-bnb-ink">
-              Request your dates
+          <section className={section} aria-labelledby="where">
+            <h2 id="where" className={`${h2} mb-4`}>
+              Where you&rsquo;ll be
             </h2>
-            <div className="mt-4">
-              <RequestForm listing={ident} title={stay.title} nightly={stay.price} maxGuests={b?.max_guests} minNights={b?.min_stay_nights} />
-            </div>
-          </div>
-        </aside>
-      </div>
+            <p className="flex items-start gap-3 text-bnb-ink">
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+              <span>
+                {where}
+                {b?.nearby_landmark ? `, near ${b.nearby_landmark}` : ''}
+                <span className="block text-sm text-bnb-stone">The exact address is shared once the host confirms.</span>
+              </span>
+            </p>
+          </section>
 
-      {/* Phones: the price and a way to the form stay in reach. */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-bnb-line bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur lg:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <p className="font-bnb-display text-lg font-bold text-bnb-ink">
-            {kes(stay.price)} <span className="text-sm font-normal text-bnb-stone">a night</span>
-          </p>
-          <a href="#request" className="inline-flex min-h-11 items-center rounded-full bg-bnb-amber px-5 font-semibold text-bnb-ink hover:bg-bnb-amber-deep hover:text-white">
-            Request dates
-          </a>
+          <section className={section} aria-labelledby="know">
+            <h2 id="know" className={`${h2} mb-6`}>
+              Things to know
+            </h2>
+            <div className="grid gap-8 sm:grid-cols-3">
+              <div>
+                <h3 className="font-semibold text-bnb-ink">House rules</h3>
+                <ul className="mt-2 space-y-1.5 text-bnb-ink/90">
+                  {b?.check_in_time && <li>Check-in after {b.check_in_time}</li>}
+                  {b?.check_out_time && <li>Checkout before {b.check_out_time}</li>}
+                  {b?.max_guests && <li>{b.max_guests} guests maximum</li>}
+                  {rules.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                  {quiet && <li>{quiet}</li>}
+                </ul>
+                {b?.custom_rules && <p className="mt-2 whitespace-pre-line text-sm text-bnb-stone">{b.custom_rules}</p>}
+              </div>
+              <div>
+                <h3 className="font-semibold text-bnb-ink">Prices and fees</h3>
+                <ul className="mt-2 space-y-1.5 text-bnb-ink/90">
+                  <li>{kes(stay.price)} a night</li>
+                  {b?.weekly_price && <li>{kes(b.weekly_price)} a week (7+ nights)</li>}
+                  {b?.monthly_price && <li>{kes(b.monthly_price)} a month (30+ nights)</li>}
+                  {b?.cleaning_fee ? <li>Cleaning fee {kes(b.cleaning_fee)}</li> : null}
+                  {b?.security_deposit ? <li>Refundable deposit {kes(b.security_deposit)}</li> : null}
+                  {b?.min_stay_nights && b.min_stay_nights > 1 ? <li>Minimum {b.min_stay_nights} nights</li> : null}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-bnb-ink">Booking</h3>
+                <ul className="mt-2 space-y-1.5 text-bnb-ink/90">
+                  <li>Send a request; the host confirms</li>
+                  <li>Pay the host as agreed</li>
+                  <li>No fee to guests</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section className={`${section} flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between`}>
+            <div className="flex items-center gap-3">
+              <Clock className="h-6 w-6 text-bnb-forest" aria-hidden />
+              <p className="text-bnb-ink">
+                <span className="font-semibold">Questions first?</span> Our team answers on WhatsApp and checks with the host.
+              </p>
+            </div>
+            <ConciergeButton listing={ident} label="Message RumiaBnB" variant="outline" className="shrink-0 whitespace-nowrap" />
+          </section>
         </div>
+
+        <aside className="lg:sticky lg:top-28 lg:self-start" aria-label="Book this stay">
+          <Suspense fallback={null}>
+            <BookingCard stay={stay} ident={ident} />
+          </Suspense>
+        </aside>
       </div>
     </article>
   );
