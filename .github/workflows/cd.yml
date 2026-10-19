@@ -1,17 +1,28 @@
 name: CD (Automated Oracle VPS Deployment)
 
+# Deploy only after CI has passed on a push to main. CI runs on every push and PR; this
+# workflow waits for it and skips failed, cancelled or pull-request runs.
 on:
-  push:
-    branches: [ main, master ]
+  workflow_run:
+    workflows: [ "CI (Automated Testing & Build Verification)" ]
+    types: [ completed ]
+    branches: [ main ]
 
-# Ensure CD only runs if CI passes
+# Two quick pushes must not deploy out of order: the later deploy waits for the earlier one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Auto-Deploy to Oracle VPS (Johannesburg)
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Deploy to Oracle VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -24,7 +35,8 @@ jobs:
             cd /home/${{ secrets.ORACLE_VPS_USER }}/rumia
             # Recover from any leftover conflicted working tree BEFORE running
             # the deploy script (env files are gitignored, certbot/ untracked).
-            git fetch origin main 2>/dev/null || git fetch origin master 2>/dev/null
-            git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
+            # Deploy exactly the commit CI tested, not whatever main points to by now.
+            git fetch origin main
+            git reset --hard ${{ github.event.workflow_run.head_sha }}
             chmod +x scripts/deploy.sh
             ./scripts/deploy.sh
