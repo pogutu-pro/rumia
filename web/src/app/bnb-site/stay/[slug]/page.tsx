@@ -70,8 +70,8 @@ export default async function StayPage({ params }: Props) {
 
   const actions = (
     <>
-      <ShareListingButton listing={{ name: stay.title, area: where, url, imageUrl: images[0]?.url }} variant="icon" className="h-9 w-9 rounded-full bg-white shadow-sm" />
-      <SaveButton listingId={String(stay.id)} variant="icon" className="h-9 w-9 bg-white shadow-sm" />
+      <ShareListingButton listing={{ name: stay.title, area: where, url, imageUrl: images[0]?.url }} variant="icon" className="h-11 w-11 rounded-full bg-white shadow-sm" />
+      <SaveButton listingId={String(stay.id)} variant="icon" className="h-11 w-11 bg-white shadow-sm" />
     </>
   );
   const section = 'border-t border-bnb-line py-10';
