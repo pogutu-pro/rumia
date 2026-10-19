@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { BnbSiteHeader } from '@/components/bnb/site-header';
 import { BnbSiteFooter } from '@/components/bnb/site-footer';
+import { AttributionCapture } from '@/components/bnb/attribution-capture';
 import { BNB_ORIGIN } from '@/lib/site/hosts';
 import { BNB_NAME } from '@/lib/site/bnb';
 
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
 export default function BnbSiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`${bricolage.variable} flex min-h-dvh flex-col bg-bnb-mist text-bnb-ink`}>
+      <AttributionCapture />
       <BnbSiteHeader />
       <main className="flex-1">{children}</main>
       <BnbSiteFooter />
