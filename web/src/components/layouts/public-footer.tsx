@@ -13,6 +13,8 @@ import {
   FaLinkedinIn,
 } from 'react-icons/fa6';
 import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
+import { BNB_SEPARATE } from '@/lib/site/separation';
+import { BNB_ORIGIN } from '@/lib/site/hosts';
 
 interface FooterProps {
   whatsappNumber?: string;
@@ -146,6 +148,11 @@ export const Footer = React.memo(function Footer({
                 {k.label} in {markets[0].name}
               </Link>
             ))}
+            {BNB_SEPARATE && (
+              <a href={`${BNB_ORIGIN}/`} className="hover:text-ink transition-colors">
+                Short stays on RumiaBnB
+              </a>
+            )}
           </nav>
         )}
 

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useShell } from '@/components/shell';
+import { BNB_SEPARATE } from '@/lib/site/separation';
 
 interface HomeHeadingProps {
   /** Campus the listings are near; kept as screen-reader text for search engines and assistive tech. */
@@ -47,7 +48,7 @@ export function HomeHeading({ campusName }: HomeHeadingProps) {
         <span className="sr-only"> — student accommodation, hostels, bedsitters and apartments near {campusName}</span>
       </h1>
       <p className="mt-2 hidden max-w-2xl text-sm leading-relaxed text-ink-muted sm:block sm:text-base">
-        Student hostels, apartments and short stays near you. Real places, real people, better living.
+        {BNB_SEPARATE ? 'Student hostels, bedsitters and apartments near you.' : 'Student hostels, apartments and short stays near you.'} Real places, real people, better living.
       </p>
     </div>
   );

@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils/cn';
 import type { ExploreListing } from './explore-listing-card';
 import { ListingSection } from './listing-section';
 import { formatAreaName, normaliseArea } from '@/lib/utils/area-label';
+import { BNB_SEPARATE } from '@/lib/site/separation';
+import { BNB_ORIGIN } from '@/lib/site/hosts';
 
 export interface ExploreZone {
   name: string;
@@ -21,11 +23,18 @@ const CATEGORIES: {
   key: CategoryKey;
   label: string;
   icon: string;
-}[] = [
-  { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
-  { key: 'short_stay', label: 'Short stays', icon: '/images/categories/short-stays.png' },
-  { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
-];
+}[] = BNB_SEPARATE
+  ? [
+      { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
+      { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
+      // Rumia's way in to RumiaBnB: it leaves the site, so it comes last.
+      { key: 'short_stay', label: 'Short stays · RumiaBnB', icon: '/images/categories/short-stays.png' },
+    ]
+  : [
+      { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
+      { key: 'short_stay', label: 'Short stays', icon: '/images/categories/short-stays.png' },
+      { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
+    ];
 
 interface ExploreDiscoveryProps {
   items: ExploreListing[];
@@ -134,7 +143,8 @@ export function ExploreDiscovery({
                 type="button"
                 onClick={() => {
                   if (key === 'short_stay') {
-                    router.push('/bnb');
+                    if (BNB_SEPARATE) window.location.assign(`${BNB_ORIGIN}/`);
+                    else router.push('/bnb');
                     return;
                   }
                   setCategory(key);

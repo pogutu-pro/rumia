@@ -1,3 +1,5 @@
+import { BNB_SEPARATE } from '@/lib/site/separation';
+
 /**
  * The kinds of place that get their own search-friendly page under /{market} and /{market}/{place}.
  * `query` is what the discovery API is asked for; the wording follows how people in Kenya search.
@@ -13,7 +15,7 @@ export interface KindPage {
   blurb: string;
 }
 
-export const KIND_PAGES: KindPage[] = [
+const ALL_KIND_PAGES: KindPage[] = [
   { slug: 'student-hostels', label: 'Student hostels', phrase: 'student hostels', query: { kind: 'hostel' },
     blurb: 'Hostels near campus with monthly rent, move-in costs and walking time.' },
   { slug: 'bedsitters', label: 'Bedsitters', phrase: 'bedsitters', query: { unit_kind: 'bedsitter' },
@@ -27,6 +29,9 @@ export const KIND_PAGES: KindPage[] = [
   { slug: 'short-stays', label: 'Airbnb and short stays', phrase: 'Airbnb and short stays', query: { mode: 'nightly' },
     blurb: 'Furnished places to book by the night, priced per night.' },
 ];
+
+/** Short stays are RumiaBnB's once the products are separated (their old pages redirect there). */
+export const KIND_PAGES: KindPage[] = BNB_SEPARATE ? ALL_KIND_PAGES.filter((k) => k.slug !== 'short-stays') : ALL_KIND_PAGES;
 
 export const KIND_BY_SLUG: Record<string, KindPage> = Object.fromEntries(KIND_PAGES.map((k) => [k.slug, k]));
 

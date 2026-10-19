@@ -21,6 +21,7 @@ import { getActiveAnnouncements } from '@/lib/data/announcements';
 import type { Campus, Listing } from '@/types';
 import { getStartingPrice } from '@/lib/utils/starting-price';
 import { formatAreaName, normaliseArea } from '@/lib/utils/area-label';
+import { BNB_SEPARATE } from '@/lib/site/separation';
 
 export const revalidate = 300;
 
@@ -30,9 +31,10 @@ const FEED_LIMIT = 12;
 
 export async function generateMetadata(): Promise<Metadata> {
   // The tab title no longer comes from the campus row: the home page is for every kind of place, not only student housing.
-  const title = 'Rumia: Short Stays, Hostels & Apartments';
+  const title = BNB_SEPARATE ? 'Rumia: Hostels, Bedsitters & Apartments' : 'Rumia: Short Stays, Hostels & Apartments';
   const places = joinNames((await getLiveMarkets()).map((m) => m.name));
-  const description = `Find short stays, student hostels and apartments to rent${places ? ` in ${places}` : ''}. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.`;
+  const kinds = BNB_SEPARATE ? 'student hostels, bedsitters and apartments' : 'short stays, student hostels and apartments';
+  const description = `Find ${kinds} to rent${places ? ` in ${places}` : ''}. Real prices, move-in costs and places confirmed by their owners, with direct contact on WhatsApp.`;
 
   return {
     title: { absolute: title },
@@ -133,6 +135,8 @@ async function fetchFeed(params: {
   property_type?: string;
   campus_slug?: string;
 }): Promise<ExploreListing[]> {
+  // Short stays have their own product (RumiaBnB) once separated: none on Rumia's home page.
+  if (BNB_SEPARATE && params.property_type === 'short_stay') return [];
   try {
     const feed = await listingsApi.getFeedServer({
       limit: params.limit ?? FEED_LIMIT,
@@ -141,7 +145,8 @@ async function fetchFeed(params: {
       property_type: params.property_type,
       campus_slug: params.campus_slug,
     });
-    return feed.items.map(toExploreListing);
+    const items = feed.items.map(toExploreListing);
+    return BNB_SEPARATE ? items.filter((i) => (i.property_type ?? 'hostel') !== 'short_stay') : items;
   } catch (err) {
     console.error('Failed to fetch explore listings from backend:', err);
     return [];
@@ -270,8 +275,8 @@ export default async function HomePage() {
         items={affordableUnique}
       />
       <ListingSection
-        title="Apartments & short stays"
-        subtitle="Other ways to stay"
+        title={BNB_SEPARATE ? 'Apartments' : 'Apartments & short stays'}
+        subtitle={BNB_SEPARATE ? 'Whole homes to rent by the month' : 'Other ways to stay'}
         seeAllHref="/hostels?type=apartment"
         items={stayItems}
       />

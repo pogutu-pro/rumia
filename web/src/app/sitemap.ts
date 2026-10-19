@@ -1,4 +1,5 @@
 import { listingPath } from '@/lib/utils/listing-path';
+import { BNB_SEPARATE } from '@/lib/site/separation';
 import { MetadataRoute } from 'next';
 import { publicApi } from '@/lib/api/public';
 import { getAllCampuses } from '@/lib/data/campuses';
@@ -62,7 +63,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.95,
     }));
 
-  const listingEntries: MetadataRoute.Sitemap = listings.map((l) => ({
+  // Short stays are in RumiaBnB's sitemap once the products are separated.
+  const listingEntries: MetadataRoute.Sitemap = listings
+    .filter((l) => !(BNB_SEPARATE && l.property_type === 'short_stay'))
+    .map((l) => ({
     url: `${BASE}${listingPath(l)}`,
     lastModified: l.updated_at ? new Date(l.updated_at) : new Date(),
     changeFrequency: 'weekly',

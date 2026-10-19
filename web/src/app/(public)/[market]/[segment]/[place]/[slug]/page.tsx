@@ -41,6 +41,7 @@ import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { resolveCampusFromSegments } from '@/lib/data/campus-route';
 import { getCampusById, isFallbackCampus } from '@/lib/data/campuses';
 import type { Campus } from '@/types';
+import { BNB_SEPARATE, bnbStayUrl } from '@/lib/site/separation';
 
 export const revalidate = 300;
 
@@ -167,6 +168,9 @@ export default async function ListingSlugPage({ params }: PageProps) {
   const { market: county, segment, place: area, slug } = await params;
   const listing = await getListing(slug);
   if (!listing) notFound();
+
+  // Short stays live on RumiaBnB once the products are separated, whatever Rumia URL led here.
+  if (BNB_SEPARATE && listing.property_type === 'short_stay') redirect(bnbStayUrl(listing.slug || slug));
 
   // Old links used raw area names ("Near Gate A"). Send them to the clean, lowercase URL permanently.
   const canonicalPath = listingPath({ ...listing, slug: listing.slug || slug });
