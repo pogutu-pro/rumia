@@ -78,7 +78,7 @@ export default async function StayPage({ params }: Props) {
   const h2 = 'font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink';
 
   return (
-    <article className="mx-auto max-w-6xl px-4 pb-32 pt-4 md:px-6 md:pt-8 lg:pb-16">
+    <article className="mx-auto max-w-6xl px-4 pb-32 pt-0 md:px-6 md:pt-8 lg:pb-16">
       <StayViewTracker listingId={stay.id} />
       <JsonLd
         data={{

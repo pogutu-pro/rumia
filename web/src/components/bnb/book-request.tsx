@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { Photo } from './photo';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ShieldCheck } from 'lucide-react';
@@ -178,7 +178,7 @@ export function BookRequest({ stay, ident }: { stay: BnbStay; ident: string }) {
           <div className="rounded-2xl border border-bnb-line bg-white p-6 lg:sticky lg:top-28">
             <div className="flex gap-4 border-b border-bnb-line pb-6">
               <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-xl bg-bnb-line">
-                {cover && <Image src={cover} alt="" fill sizes="112px" className="object-cover" />}
+                {cover && <Photo src={cover} size="thumb" alt="" sizes="112px" className="object-cover" />}
               </div>
               <div className="min-w-0">
                 <p className="text-sm text-bnb-stone">{stayKind(stay) ?? 'Stay'}</p>
