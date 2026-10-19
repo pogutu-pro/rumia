@@ -32,6 +32,7 @@ from app.features.regions import regions_router
 from app.features.reviews import reviews_router
 from app.features.saves import saves_router
 from app.features.search import search_router
+from app.features.stays import stays_router
 from app.features.tours import tours_router
 from app.features.zones import zones_router
 
@@ -73,6 +74,7 @@ api_router.include_router(media_router)
 api_router.include_router(events_router)
 api_router.include_router(inquiries_router)
 api_router.include_router(saves_router)
+api_router.include_router(stays_router)
 
 
 

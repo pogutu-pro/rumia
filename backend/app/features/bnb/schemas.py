@@ -30,6 +30,8 @@ class BnbDetailsRead(BaseModel):
     cleaning_fee: Optional[float] = None
     security_deposit: Optional[float] = None
     extra_guest_fee: Optional[float] = None
+    weekly_price: Optional[float] = None
+    monthly_price: Optional[float] = None
     available_from: Optional[date] = None
     available_until: Optional[date] = None
     check_in_time: Optional[str] = None
@@ -64,6 +66,8 @@ class _BnbDetailsBase(BaseModel):
     cleaning_fee: Optional[float] = Field(None, ge=0)
     security_deposit: Optional[float] = Field(None, ge=0)
     extra_guest_fee: Optional[float] = Field(None, ge=0)
+    weekly_price: Optional[float] = Field(None, gt=0, description="Price for 7 nights; used from 7 nights")
+    monthly_price: Optional[float] = Field(None, gt=0, description="Price for 30 nights; used from 30 nights")
     available_from: Optional[date] = None
     available_until: Optional[date] = None
     check_in_time: Optional[str] = None
@@ -111,6 +115,8 @@ class BnbDetailsUpdate(BaseModel):
     cleaning_fee: Optional[float] = Field(None, ge=0)
     security_deposit: Optional[float] = Field(None, ge=0)
     extra_guest_fee: Optional[float] = Field(None, ge=0)
+    weekly_price: Optional[float] = Field(None, gt=0, description="Price for 7 nights; used from 7 nights")
+    monthly_price: Optional[float] = Field(None, gt=0, description="Price for 30 nights; used from 30 nights")
     available_from: Optional[date] = None
     available_until: Optional[date] = None
     check_in_time: Optional[str] = None
