@@ -6,6 +6,7 @@ import type { NextRequest } from 'next/server';
 import { getApiUrl } from '@/lib/api/config';
 import { authBackend } from '@/lib/auth/backend';
 import { AT_COOKIE, HINT_COOKIE, RT_COOKIE, isFresh, isRefreshRejected, sessionCookies, sessionFromToken } from '@/lib/auth/session';
+import { BNB_ORIGIN, BNB_SITE_PREFIX, bnbRewritePath, isBnbHost, isBnbSitePath } from '@/lib/site/hosts';
 
 const SECURITY_HEADERS: [string, string][] = [
   ['X-DNS-Prefetch-Control', 'on'],
@@ -21,7 +22,7 @@ const SECURITY_HEADERS: [string, string][] = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http:",
-       "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://rumia.co.ke https://www.rumia.co.ke https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com https://*.i.posthog.com https://*.posthog.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://www.youtube.com https://*.youtube.com https://*.ytimg.com",
+       `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://rumia.co.ke https://www.rumia.co.ke ${BNB_ORIGIN} https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com https://places.googleapis.com https://vitals.vercel-insights.com https://*.i.posthog.com https://*.posthog.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://www.youtube.com https://*.youtube.com https://*.ytimg.com`,
       "frame-src 'self' https://www.youtube.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -42,46 +43,66 @@ function applySecurityHeaders(headers: Headers) {
  * - Keeps the session fresh (refresh-token exchange)
  * - 301 redirects /listing/[id] and /agent/[id] UUID paths to slug-based canonical URLs
  * - Protects /dashboard, /admin, /manager and /account routes
+ * - Serves RumiaBnB on its own host by rewriting to the internal /bnb-site segment (see lib/site/hosts.ts)
  */
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const requestHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const onBnb = isBnbHost(requestHost);
 
-  // ── 301 redirect /browse → /hostels ──────────────────────────────────────────
-  if (pathname === '/browse') {
-    const dest = new URL('/hostels', request.url);
-    request.nextUrl.searchParams.forEach((v, k) => dest.searchParams.set(k, v));
-    return NextResponse.redirect(dest, { status: 301 });
+  // The internal RumiaBnB segment is only reachable through the RumiaBnB host.
+  if (!onBnb && isBnbSitePath(pathname)) {
+    const res = new NextResponse('Not found', { status: 404 });
+    applySecurityHeaders(res.headers);
+    return res;
+  }
+  // On the RumiaBnB host the internal prefix is never part of a public URL: one address per page.
+  if (onBnb && isBnbSitePath(pathname)) {
+    // Built from the Host header: nextUrl can carry the server's own hostname behind the proxy.
+    const proto = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol.replace(':', '');
+    const dest = new URL(`${pathname.slice(BNB_SITE_PREFIX.length) || '/'}${request.nextUrl.search}`, `${proto}://${requestHost}`);
+    return NextResponse.redirect(dest, { status: 308 });
   }
 
-  // ── 301 permanent redirects for old UUID-based listing URLs ──────────────────
-  const listingMatch = pathname.match(/^\/listing\/([0-9a-f-]{36})$/);
-  if (listingMatch) {
-    const id = listingMatch[1];
-    try {
-      const res = await fetch(getApiUrl(`/listings/${id}`));
-      if (res.ok) {
-        const row = await res.json();
-        if (row?.slug) {
-          const dest = `${listingPath(row)}`;
-          return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
-        }
-      }
-    } catch {}
-  }
+  // Rumia-only legacy redirects.
+  if (!onBnb) {
+    // ── 301 redirect /browse → /hostels ──────────────────────────────────────────
+    if (pathname === '/browse') {
+      const dest = new URL('/hostels', request.url);
+      request.nextUrl.searchParams.forEach((v, k) => dest.searchParams.set(k, v));
+      return NextResponse.redirect(dest, { status: 301 });
+    }
 
-  // ── 301 permanent redirects for old UUID-based agent URLs ────────────────────
-  const agentMatch = pathname.match(/^\/agent\/([0-9a-f-]{36})$/);
-  if (agentMatch) {
-    const id = agentMatch[1];
-    try {
-      const res = await fetch(getApiUrl(`/public/agents/${id}`));
-      if (res.ok) {
-        const row = await res.json();
-        if (row?.slug) {
-          return NextResponse.redirect(new URL(`/agents/${row.slug}`, request.url), { status: 301 });
+    // ── 301 permanent redirects for old UUID-based listing URLs ──────────────────
+    const listingMatch = pathname.match(/^\/listing\/([0-9a-f-]{36})$/);
+    if (listingMatch) {
+      const id = listingMatch[1];
+      try {
+        const res = await fetch(getApiUrl(`/listings/${id}`));
+        if (res.ok) {
+          const row = await res.json();
+          if (row?.slug) {
+            const dest = `${listingPath(row)}`;
+            return NextResponse.redirect(new URL(dest, request.url), { status: 301 });
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }
+
+    // ── 301 permanent redirects for old UUID-based agent URLs ────────────────────
+    const agentMatch = pathname.match(/^\/agent\/([0-9a-f-]{36})$/);
+    if (agentMatch) {
+      const id = agentMatch[1];
+      try {
+        const res = await fetch(getApiUrl(`/public/agents/${id}`));
+        if (res.ok) {
+          const row = await res.json();
+          if (row?.slug) {
+            return NextResponse.redirect(new URL(`/agents/${row.slug}`, request.url), { status: 301 });
+          }
+        }
+      } catch {}
+    }
   }
 
   // ── Auth protection ───────────────────────────────────────────────────────────
@@ -125,6 +146,15 @@ export default async function proxy(request: NextRequest) {
     return response;
   };
 
+  // RumiaBnB host: serve its own pages; the shared sign-in handlers pass through untouched.
+  if (onBnb) {
+    const target = bnbRewritePath(pathname);
+    if (!target) return finish(NextResponse.next({ request: { headers: request.headers } }));
+    const url = request.nextUrl.clone();
+    url.pathname = target;
+    return finish(NextResponse.rewrite(url, { request: { headers: request.headers } }));
+  }
+
   if (!isProtectedRoute && !pathname.startsWith('/auth/login')) {
     return finish(NextResponse.next({ request: { headers: request.headers } }));
   }
@@ -159,5 +189,9 @@ export default async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.png|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|css|json|txt|xml|html|ico|mp3|webmanifest|woff2?)$).*)',
+    // Per-host metadata files: RumiaBnB serves its own (the pattern above skips these extensions).
+    '/sitemap.xml',
+    '/robots.txt',
+    '/manifest.webmanifest',
   ],
 };

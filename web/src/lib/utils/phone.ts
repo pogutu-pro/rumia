@@ -18,7 +18,10 @@
  */
 export function cleanPhone(phone: string): string {
   const clean = phone.replace(/[^\d+]/g, '');
-  return clean.startsWith('+') ? clean : clean.replace(/^0?/, '+254');
+  if (clean.startsWith('+')) return clean;
+  // Already carries the country code without the plus (2547…): adding +254 again would double it.
+  if (/^254\d{9}$/.test(clean)) return `+${clean}`;
+  return clean.replace(/^0?/, '+254');
 }
 
 /**

@@ -1,15 +1,10 @@
-import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils/cn';
-import { BottomNav } from '@/components/pwa/BottomNav';
 import { RouteProgress } from '@/components/pwa/RouteProgress';
-import { CompareTray } from '@/components/compare/compare-tray';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { ChunkErrorRecovery } from '@/components/pwa/ChunkErrorRecovery';
-import { InstallBanner } from '@/components/pwa/InstallBanner';
-import { MobileMain } from '@/components/pwa/MobileMain';
 import '@/styles/globals.css';
 
 // Self-hosted variable fonts (latin subset): the build never depends on fonts.googleapis.com.
@@ -83,17 +78,11 @@ export default function RootLayout({
       >
         <Providers>
           <RouteProgress />
-          <MobileMain>
-            {children}
-          </MobileMain>
-          <CompareTray />
-          <Suspense fallback={null}>
-            <BottomNav />
-          </Suspense>
+          {/* Rumia's bottom bar, compare tray and install banner live in the Rumia layouts (RumiaChrome). */}
+          {children}
         </Providers>
         <ServiceWorkerRegister />
         <ChunkErrorRecovery />
-        <InstallBanner />
         {/* Production only: on localhost the beacon is rejected by CORS and fills the console with errors. */}
         {process.env.NODE_ENV === 'production' && (
         <script
