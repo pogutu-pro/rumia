@@ -14,6 +14,7 @@ export function BnbSiteFooter() {
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-bnb-mist/80">
+          <Link href="/host" className="hover:text-bnb-amber">Host sign-in</Link>
           <Link href={`${RUMIA_ORIGIN}/terms`} className="hover:text-bnb-amber">Terms</Link>
           <Link href={`${RUMIA_ORIGIN}/policy`} className="hover:text-bnb-amber">Privacy</Link>
           <Link href={RUMIA_ORIGIN} className="hover:text-bnb-amber">Hostels and rentals on Rumia</Link>

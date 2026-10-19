@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 NAIROBI = ZoneInfo("Africa/Nairobi")
 MAX_NIGHTS = 365
 OPEN = ("requested", "confirmed")
+UUID_RE = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 
 # Who may move a request from one status to another by hand. Reports (stayed / did not stay) are separate.
 GUEST_MOVES = {("requested", "cancelled"), ("confirmed", "cancelled")}
@@ -44,6 +45,12 @@ STAFF_MOVES = HOST_MOVES | GUEST_MOVES | {
     ("completed", "no_show"), ("no_show", "completed"),
     ("declined", "requested"), ("cancelled", "requested"),
 }
+
+
+def require_uuid(value: Optional[str], message: str = "Not found.") -> None:
+    """Ids from URLs are checked before they reach a uuid cast (a malformed one is a 404, not a database error)."""
+    if value is not None and not UUID_RE.fullmatch(value):
+        raise NotFoundException(message)
 
 
 def today() -> date:
@@ -87,7 +94,7 @@ class StayService:
     async def resolve_listing(db: AsyncSession, ident: str) -> Tuple[Listing, Optional[BnbDetails]]:
         """An active short stay by id or slug."""
         ident = (ident or "").strip()
-        is_uuid = bool(re.fullmatch(r"[0-9a-fA-F-]{36}", ident))
+        is_uuid = bool(UUID_RE.fullmatch(ident))
         stmt = select(Listing).where(Listing.id == ident) if is_uuid else select(Listing).where(Listing.slug == ident)
         listing = (await db.execute(stmt)).scalar_one_or_none()
         if not listing or not listing.is_active or listing.property_type != "short_stay":
@@ -350,7 +357,14 @@ class StayService:
                 "org_id": org_id, "duplicate": False}
 
     @staticmethod
+    def _check_id(value: Optional[str]) -> None:
+        if value is not None and not UUID_RE.fullmatch(value):
+            raise NotFoundException("Booking request not found.")
+
+    @staticmethod
     async def _load(db: AsyncSession, where: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        StayService._check_id(params.get("id"))
+        StayService._check_id(params.get("o"))
         row = (
             await db.execute(
                 text(f"SELECT r.*, i.ref_code FROM stay_requests r LEFT JOIN inquiries i ON i.id = r.inquiry_id WHERE {where} FOR UPDATE OF r"),
@@ -514,6 +528,8 @@ class StayService:
     async def list_requests(db: AsyncSession, *, org_ids: Optional[List[str]] = None, status: Optional[str] = None, limit: int = 200) -> List[Dict[str, Any]]:
         where, params = ["true"], {"lim": limit}
         if org_ids is not None:
+            for o in org_ids:
+                require_uuid(o, "Host not found.")
             where.append("r.org_id = ANY(CAST(:o AS uuid[]))")
             params["o"] = org_ids
         if status:
@@ -529,6 +545,8 @@ class StayService:
 
     @staticmethod
     async def detail(db: AsyncSession, req_id: str, org_id: Optional[str] = None) -> Dict[str, Any]:
+        StayService._check_id(req_id)
+        StayService._check_id(org_id)
         where = "r.id = CAST(:id AS uuid)" + (" AND r.org_id = CAST(:o AS uuid)" if org_id else "")
         row = (await db.execute(text(StayService.ROW_SELECT + f" WHERE {where}"), {"id": req_id, "o": org_id})).mappings().first()
         if not row:
@@ -562,6 +580,7 @@ class StayService:
     @staticmethod
     async def summary(db: AsyncSession, org_id: str, since: date) -> Dict[str, Any]:
         """Views, contacts, requests, stays and fees for one organisation's RumiaBnB places since a date."""
+        require_uuid(org_id, "Host not found.")
         params = {"o": org_id, "since": since}
         listings_cte = """
             WITH ls AS (
@@ -635,6 +654,7 @@ class StayService:
     async def add_agreement(db: AsyncSession, org_id: str, fee_percent: float, fee_min: float, fee_night_cap: Optional[int],
                             effective_from: Optional[date], note: Optional[str], created_by: str) -> Dict[str, Any]:
         """New terms for a host. The previous open agreement ends the day before the new one starts."""
+        require_uuid(org_id, "Host organisation not found.")
         start = effective_from or today()
         if not (await db.execute(text("SELECT 1 FROM lister_orgs WHERE id = CAST(:o AS uuid)"), {"o": org_id})).first():
             raise NotFoundException("Host organisation not found.")

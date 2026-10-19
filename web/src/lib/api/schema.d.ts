@@ -1404,6 +1404,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/host/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept A Host Invite */
+        post: operations["claim_host_api_v1_host_claim_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hostel-requests": {
         parameters: {
             query?: never;
@@ -2403,6 +2420,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/host-orgs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My RumiaBnB Hosts
+         * @description The organisations the signed-in person manages on RumiaBnB, with their places.
+         */
+        get: operations["my_host_orgs_api_v1_me_host_orgs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/workspace": {
         parameters: {
             query?: never;
@@ -2973,6 +3010,46 @@ export interface paths {
         get: operations["ops_contacts_api_v1_ops_stays_contacts_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stays/hosts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * RumiaBnB Hosts
+         * @description Every host with short stays: places, whether the owner has a login, fee terms, open requests.
+         */
+        get: operations["ops_hosts_api_v1_ops_stays_hosts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stays/hosts/{org_id}/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invite A Host To Their Dashboard
+         * @description A one-time link (14 days). Whoever opens it signed in becomes an owner of this host. Send it only to the owner.
+         */
+        post: operations["ops_invite_api_v1_ops_stays_hosts__org_id__invite_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5724,6 +5801,18 @@ export interface components {
             /** Slug */
             slug: string;
         };
+        /** ClaimBody */
+        ClaimBody: {
+            /** Token */
+            token: string;
+        };
+        /** ClaimResult */
+        ClaimResult: {
+            /** Org Id */
+            org_id: string;
+            /** Org Name */
+            org_name: string;
+        };
         /** CommissionCreate */
         CommissionCreate: {
             /** Agent Id */
@@ -6054,6 +6143,30 @@ export interface components {
              */
             version: string;
         };
+        /** HostAdminRow */
+        HostAdminRow: {
+            /** Agreement */
+            agreement?: {
+                [key: string]: unknown;
+            } | null;
+            /** Claimed At */
+            claimed_at: string | null;
+            /**
+             * Has Login
+             * @description Someone other than a staff-made placeholder can sign in for this host
+             */
+            has_login: boolean;
+            /** Id */
+            id: string;
+            /** Listings */
+            listings: components["schemas"]["HostListing"][];
+            /** Name */
+            name: string;
+            /** Open Requests */
+            open_requests: number;
+            /** Slug */
+            slug: string;
+        };
         /** HostConfirm */
         HostConfirm: {
             /**
@@ -6068,6 +6181,26 @@ export interface components {
         HostDecline: {
             /** Reason */
             reason?: string | null;
+        };
+        /** HostListing */
+        HostListing: {
+            /** Id */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Slug */
+            slug: string | null;
+            /** Title */
+            title: string;
+        };
+        /** HostOrg */
+        HostOrg: {
+            /** Id */
+            id: string;
+            /** Listings */
+            listings: components["schemas"]["HostListing"][];
+            /** Name */
+            name: string;
         };
         /** HostReport */
         HostReport: {
@@ -6391,6 +6524,16 @@ export interface components {
             tel_url?: string | null;
             /** Whatsapp Url */
             whatsapp_url?: string | null;
+        };
+        /** InviteRead */
+        InviteRead: {
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Url */
+            url: string;
         };
         /** LandmarkDistance */
         LandmarkDistance: {
@@ -12414,6 +12557,41 @@ export interface operations {
             };
         };
     };
+    claim_host_api_v1_host_claim_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_hostel_request_api_v1_hostel_requests_post: {
         parameters: {
             query?: never;
@@ -14266,6 +14444,37 @@ export interface operations {
             };
         };
     };
+    my_host_orgs_api_v1_me_host_orgs_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostOrg"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     my_workspace_api_v1_me_workspace_get: {
         parameters: {
             query?: never;
@@ -15399,6 +15608,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ContactRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_hosts_api_v1_ops_stays_hosts_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostAdminRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_invite_api_v1_ops_stays_hosts__org_id__invite_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteRead"];
                 };
             };
             /** @description Validation Error */

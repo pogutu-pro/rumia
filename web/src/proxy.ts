@@ -148,6 +148,15 @@ export default async function proxy(request: NextRequest) {
 
   // RumiaBnB host: serve its own pages; the shared sign-in handlers pass through untouched.
   if (onBnb) {
+    // The host dashboard needs a session on this host (cookies are per host); sign-in and invites stay open.
+    const hostArea = pathname === '/host' || pathname.startsWith('/host/');
+    const openHostPath = pathname === '/host/sign-in' || pathname === '/host/claim';
+    if (hostArea && !openHostPath && !user && !refreshUnavailable) {
+      const proto = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol.replace(':', '');
+      const login = new URL('/host/sign-in', `${proto}://${requestHost}`);
+      login.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+      return finish(NextResponse.redirect(login));
+    }
     const target = bnbRewritePath(pathname);
     if (!target) return finish(NextResponse.next({ request: { headers: request.headers } }));
     const url = request.nextUrl.clone();
