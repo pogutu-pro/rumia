@@ -3,6 +3,7 @@ import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { AdminHeader } from './admin-header';
 import { profilesServerApi } from '@/lib/api/profiles.server';
+import { RumiaChrome } from '@/components/shell/rumia-chrome';
 
 export default async function AdminLayout({
   children,
@@ -36,16 +37,18 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <AdminHeader
-        userName={userName}
-        userEmail={user.email ?? ''}
-        isAdmin={isAdmin}
-        hasAgent={hasAgent}
-      />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
-        {children}
-      </main>
-    </div>
+    <RumiaChrome>
+      <div className="min-h-screen bg-white">
+        <AdminHeader
+          userName={userName}
+          userEmail={user.email ?? ''}
+          isAdmin={isAdmin}
+          hasAgent={hasAgent}
+        />
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
+          {children}
+        </main>
+      </div>
+    </RumiaChrome>
   );
 }

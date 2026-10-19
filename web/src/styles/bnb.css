@@ -1,0 +1,20 @@
+/*
+ * RumiaBnB tokens: highland forest and sunrise amber (Mt Kenya, the Aberdares), cool mist rather than cream.
+ * Used only by the RumiaBnB site (app/bnb-site, components/bnb) as bnb-* utilities, e.g. bg-bnb-forest.
+ * --font-bricolage is set by app/bnb-site/layout.tsx (self-hosted Bricolage Grotesque).
+ */
+@theme {
+  --color-bnb-forest: #0f3b2e;
+  --color-bnb-pine: #1c5442;
+  --color-bnb-ink: #10201a;
+  --color-bnb-stone: #5b6560;
+  --color-bnb-line: #dce3dd;
+  --color-bnb-mist: #f4f6f3;
+  --color-bnb-amber: #f2a93b;
+  --color-bnb-amber-deep: #c97f12;
+}
+
+/* inline: the utility must read --font-bricolage on the element (set by the RumiaBnB layout), not at :root. */
+@theme inline {
+  --font-bnb-display: var(--font-bricolage), 'Inter', system-ui, sans-serif;
+}

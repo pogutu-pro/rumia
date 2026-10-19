@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     # CORS Configuration
     # Web app (Next.js on :3000), mobile (Expo web dev on :8081 / legacy :19006),
-    # and the public rumia.co.ke domain.
+    # the public rumia.co.ke domain, and RumiaBnB on its subdomain (same web app, other host).
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -37,6 +37,7 @@ class Settings(BaseSettings):
         "http://127.0.0.1:19006",
         "https://rumia.co.ke",
         "https://www.rumia.co.ke",
+        "https://rumiabnb.rumia.co.ke",
     ]
 
     # Cloudflare R2
