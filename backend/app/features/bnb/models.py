@@ -44,6 +44,8 @@ class BnbDetails(Base):
     guest_suitability: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False, server_default="{}")
 
     nearby_landmark: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # The name guests see as the host; the listing's agent may be a broker. Empty: the site default.
+    host_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

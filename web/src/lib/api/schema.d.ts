@@ -5270,6 +5270,8 @@ export interface components {
              * @default []
              */
             guest_suitability: string[];
+            /** Host Name */
+            host_name?: string | null;
             /**
              * House Rules
              * @default {}
@@ -5329,6 +5331,11 @@ export interface components {
             extra_guest_fee?: number | null;
             /** Guest Suitability */
             guest_suitability?: string[] | null;
+            /**
+             * Host Name
+             * @description Name shown to guests as the host; empty uses the site default
+             */
+            host_name?: string | null;
             house_rules?: components["schemas"]["HouseRules"] | null;
             /** Listing Type */
             listing_type?: string | null;
@@ -9593,6 +9600,11 @@ export interface components {
              * @default []
              */
             guest_suitability: string[];
+            /**
+             * Host Name
+             * @description Name shown to guests as the host; empty uses the site default
+             */
+            host_name?: string | null;
             house_rules?: components["schemas"]["HouseRules"];
             /**
              * Listing Type

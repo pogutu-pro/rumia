@@ -1,4 +1,5 @@
 import type { BnbStay } from './bnb-api';
+import { BNB_DEFAULT_HOST_NAME } from './bnb';
 
 /** Small helpers that turn a stay from the API into what a guest reads. */
 
@@ -37,9 +38,9 @@ export function stayPlace(stay: BnbStay): string {
   return nice(area || county || stay.location);
 }
 
-export function stayHost(stay: BnbStay): string | null {
-  const name = (stay.agent as Record<string, unknown> | null | undefined)?.name;
-  return typeof name === 'string' && name.trim() ? name.trim() : null;
+/** The name guests see as the host: the listing's own host name, else the site default (never the lister's account). */
+export function stayHost(stay: BnbStay): string {
+  return stay.bnb?.host_name?.trim() || BNB_DEFAULT_HOST_NAME;
 }
 
 const KINDS: Record<string, string> = {

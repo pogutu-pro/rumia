@@ -3161,6 +3161,17 @@
             "title": "Guest Suitability",
             "type": "array"
           },
+          "host_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Name"
+          },
           "house_rules": {
             "additionalProperties": true,
             "default": {},
@@ -3422,6 +3433,19 @@
               }
             ],
             "title": "Guest Suitability"
+          },
+          "host_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name shown to guests as the host; empty uses the site default",
+            "title": "Host Name"
           },
           "house_rules": {
             "anyOf": [
@@ -16291,6 +16315,19 @@
             },
             "title": "Guest Suitability",
             "type": "array"
+          },
+          "host_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name shown to guests as the host; empty uses the site default",
+            "title": "Host Name"
           },
           "house_rules": {
             "$ref": "#/components/schemas/HouseRules"
