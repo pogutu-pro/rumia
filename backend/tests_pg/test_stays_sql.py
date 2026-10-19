@@ -183,6 +183,9 @@ async def test_concierge_chat_then_booking_keeps_its_source(db, monkeypatch):
     monkeypatch.setattr(stays_service.settings, "BNB_CONCIERGE_WHATSAPP", "+254 700 000 999")
     ref, url, message = await StayService.concierge_contact(db, None, Attribution(utm_source="instagram"), None, None, "s1")
     assert url.startswith("https://wa.me/254700000999?text=") and ref in message
+    monkeypatch.setattr(stays_service.settings, "BNB_CONCIERGE_WHATSAPP", "0757901596")
+    _, url, _ = await StayService.concierge_contact(db, None, Attribution(), None, None, None)
+    assert url.startswith("https://wa.me/254757901596?text=")
     staff = await make_user(db)
     created = await _request(db, listing, origin="concierge", ref_code=ref.lower(), staff_user_id=staff)
     assert created["ref_code"] == ref
