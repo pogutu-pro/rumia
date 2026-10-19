@@ -150,7 +150,7 @@ export const Footer = React.memo(function Footer({
             ))}
             {BNB_SEPARATE && (
               <a href={`${BNB_ORIGIN}/`} className="hover:text-ink transition-colors">
-                Short stays on RumiaBnB
+                RumiaBnB | Short stays
               </a>
             )}
           </nav>

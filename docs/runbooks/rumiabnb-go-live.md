@@ -33,7 +33,7 @@ RumiaBnB is the same Next.js app as Rumia. `web/src/proxy.ts` serves it when the
 
 5. **Separate the products.** Set `NEXT_PUBLIC_BNB_SEPARATE=true` and redeploy. Check:
    - `rumia.co.ke` home and `/hostels` show no short stays; the title reads "Hostels, Bedsitters & Apartments"; the
-     "Short stays · RumiaBnB" tile and the footer link go to RumiaBnB.
+     "RumiaBnB | Short stays" tile and the footer link go to RumiaBnB.
    - `/bnb`, `/nyeri/short-stays`, `/nyeri/short-stays/{place}/{name}` and `/p/{short-stay}` answer 307 to the matching
      RumiaBnB page, keeping `utm_*`.
    - Rumia's sitemap no longer lists short stays; RumiaBnB's does.
