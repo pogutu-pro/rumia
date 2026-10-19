@@ -2920,6 +2920,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ops/stays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All Booking Requests */
+        get: operations["ops_stays_api_v1_ops_stays_get"];
+        put?: never;
+        /**
+         * Record A Concierge Booking
+         * @description A stay arranged on WhatsApp, recorded for the guest. Pass the chat's reference code to keep its source.
+         */
+        post: operations["ops_create_api_v1_ops_stays_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stays/agreements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Host Fee Agreements */
+        get: operations["ops_agreements_api_v1_ops_stays_agreements_get"];
+        put?: never;
+        /** Record A Host's Fee Terms */
+        post: operations["ops_add_agreement_api_v1_ops_stays_agreements_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stays/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * RumiaBnB Contacts
+         * @description Recent contacts with their reference code and source, newest first.
+         */
+        get: operations["ops_contacts_api_v1_ops_stays_contacts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stays/{req_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One Booking Request (Staff) */
+        get: operations["ops_stay_api_v1_ops_stays__req_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/stays/{req_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change A Request's Status
+         * @description Staff may make any reasonable change (including resolving disputes); the reason is kept in the history.
+         */
+        post: operations["ops_status_api_v1_ops_stays__req_id__status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{org_id}/inquiries": {
         parameters: {
             query?: never;
@@ -2974,6 +3070,131 @@ export interface paths {
          * @description Add an existing Rumia user (by email) to the organisation. Owners only.
          */
         post: operations["add_member_api_v1_orgs__org_id__members_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Booking Requests For My Places */
+        get: operations["org_stays_api_v1_orgs__org_id__stays_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What RumiaBnB Brought Me
+         * @description Views, contacts by source, requests, completed stays and fees since a date (default: 90 days).
+         */
+        get: operations["org_stays_summary_api_v1_orgs__org_id__stays_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays/{req_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One Booking Request */
+        get: operations["org_stay_api_v1_orgs__org_id__stays__req_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays/{req_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel A Confirmed Stay */
+        post: operations["org_cancel_api_v1_orgs__org_id__stays__req_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays/{req_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm A Booking Request */
+        post: operations["org_confirm_api_v1_orgs__org_id__stays__req_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays/{req_id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline A Booking Request */
+        post: operations["org_decline_api_v1_orgs__org_id__stays__req_id__decline_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{org_id}/stays/{req_id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Did The Guest Stay?
+         * @description The host says whether the stay happened. A completed stay records the RumiaBnB fee.
+         */
+        post: operations["org_report_api_v1_orgs__org_id__stays__req_id__report_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3622,6 +3843,123 @@ export interface paths {
         get: operations["search_listings_api_v1_search_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stays/concierge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Chat With RumiaBnB
+         * @description Records the contact with a reference code and returns a WhatsApp link to the RumiaBnB team. Public.
+         */
+        post: operations["concierge_contact_api_v1_stays_concierge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stays/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Price For Dates
+         * @description The price of a stay for these dates (nightly, or the owner's weekly/monthly rate), before any request.
+         */
+        get: operations["stay_quote_api_v1_stays_quote_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stays/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request A Stay
+         * @description A guest asks to book dates. No account needed. The host confirms or declines; the guest follows the request at /r/{token}. Rate limited. Public.
+         */
+        post: operations["request_stay_api_v1_stays_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stays/requests/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Booking Request
+         * @description The guest's view of their request, by the secret token from the confirmation.
+         */
+        get: operations["my_stay_api_v1_stays_requests__token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stays/requests/{token}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel My Request */
+        post: operations["cancel_my_stay_api_v1_stays_requests__token__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stays/requests/{token}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Did You Stay?
+         * @description The guest says whether the stay happened. From the check-in day.
+         */
+        post: operations["report_my_stay_api_v1_stays_requests__token__report_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4589,6 +4927,56 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /** AgreementCreate */
+        AgreementCreate: {
+            /** Effective From */
+            effective_from?: string | null;
+            /**
+             * Fee Min
+             * @default 0
+             */
+            fee_min: number;
+            /**
+             * Fee Night Cap
+             * @default 30
+             */
+            fee_night_cap: number | null;
+            /** Fee Percent */
+            fee_percent: number;
+            /** Note */
+            note?: string | null;
+            /** Org Id */
+            org_id: string;
+        };
+        /** AgreementRead */
+        AgreementRead: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /** Effective To */
+            effective_to: string | null;
+            /** Fee Min */
+            fee_min: number;
+            /** Fee Night Cap */
+            fee_night_cap: number | null;
+            /** Fee Percent */
+            fee_percent: number;
+            /** Id */
+            id: string;
+            /** Note */
+            note: string | null;
+            /** Org Id */
+            org_id: string;
+            /** Org Name */
+            org_name?: string | null;
+        };
         /** AlertCreate */
         AlertCreate: {
             /**
@@ -4735,6 +5123,27 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /**
+         * Attribution
+         * @description Where the guest came from. Captured on the first page they landed on and sent with every contact.
+         */
+        Attribution: {
+            /**
+             * Heard From
+             * @description The guest's answer to 'How did you hear about us?'
+             */
+            heard_from?: string | null;
+            /** Landing Path */
+            landing_path?: string | null;
+            /** Utm Campaign */
+            utm_campaign?: string | null;
+            /** Utm Content */
+            utm_content?: string | null;
+            /** Utm Medium */
+            utm_medium?: string | null;
+            /** Utm Source */
+            utm_source?: string | null;
+        };
         /** BedConfig */
         BedConfig: {
             /** Qty */
@@ -4801,6 +5210,8 @@ export interface components {
             max_stay_nights?: number | null;
             /** Min Stay Nights */
             min_stay_nights: number;
+            /** Monthly Price */
+            monthly_price?: number | null;
             /** Nearby Landmark */
             nearby_landmark?: string | null;
             /** Price Unit */
@@ -4809,6 +5220,8 @@ export interface components {
             security_deposit?: number | null;
             /** Updated At */
             updated_at?: string | null;
+            /** Weekly Price */
+            weekly_price?: number | null;
         };
         /**
          * BnbDetailsUpdate
@@ -4848,12 +5261,22 @@ export interface components {
             max_stay_nights?: number | null;
             /** Min Stay Nights */
             min_stay_nights?: number | null;
+            /**
+             * Monthly Price
+             * @description Price for 30 nights; used from 30 nights
+             */
+            monthly_price?: number | null;
             /** Nearby Landmark */
             nearby_landmark?: string | null;
             /** Price Unit */
             price_unit?: string | null;
             /** Security Deposit */
             security_deposit?: number | null;
+            /**
+             * Weekly Price
+             * @description Price for 7 nights; used from 7 nights
+             */
+            weekly_price?: number | null;
         };
         /**
          * BnbListingCreate
@@ -5335,6 +5758,51 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** ConciergeContactCreate */
+        ConciergeContactCreate: {
+            /** @default {} */
+            attribution: components["schemas"]["Attribution"];
+            /**
+             * Listing
+             * @description Listing id or slug, when the guest asks about one place
+             */
+            listing?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+        };
+        /** ConciergeContactResult */
+        ConciergeContactResult: {
+            /** Message */
+            message: string;
+            /** Ref Code */
+            ref_code: string;
+            /** Whatsapp Url */
+            whatsapp_url: string;
+        };
+        /** ContactRow */
+        ContactRow: {
+            /** Channel */
+            channel: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Handled By */
+            handled_by: string;
+            /** Has Request */
+            has_request: boolean;
+            /** Landing Path */
+            landing_path: string | null;
+            /** Listing Title */
+            listing_title: string | null;
+            /** Ref Code */
+            ref_code: string;
+            /** Source */
+            source: string | null;
+            /** Utm Campaign */
+            utm_campaign: string | null;
+        };
         /** Decision */
         Decision: {
             /** Decision */
@@ -5514,6 +5982,51 @@ export interface components {
             /** Url */
             url: string;
         };
+        /** GuestReport */
+        GuestReport: {
+            /** Stayed */
+            stayed: boolean;
+        };
+        /** GuestStayView */
+        GuestStayView: {
+            /** Agreed Total */
+            agreed_total: number | null;
+            /** Can Cancel */
+            can_cancel: boolean;
+            /** Can Report */
+            can_report: boolean;
+            /**
+             * Check In
+             * Format: date
+             */
+            check_in: string;
+            /**
+             * Check Out
+             * Format: date
+             */
+            check_out: string;
+            /** Guest Report */
+            guest_report: string | null;
+            /** Guests */
+            guests: number;
+            /** Host Note */
+            host_note: string | null;
+            /** Listing Slug */
+            listing_slug: string | null;
+            /** Listing Title */
+            listing_title: string;
+            /** Nights */
+            nights: number;
+            /** Quoted Total */
+            quoted_total: number;
+            /** Ref Code */
+            ref_code: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed";
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -5540,6 +6053,55 @@ export interface components {
              * @example 1.0.0
              */
             version: string;
+        };
+        /** HostConfirm */
+        HostConfirm: {
+            /**
+             * Agreed Total
+             * @description Room charges agreed with the guest, if different from the quote
+             */
+            agreed_total?: number | null;
+            /** Host Note */
+            host_note?: string | null;
+        };
+        /** HostDecline */
+        HostDecline: {
+            /** Reason */
+            reason?: string | null;
+        };
+        /** HostReport */
+        HostReport: {
+            /** Stayed */
+            stayed: boolean;
+        };
+        /**
+         * HostSummary
+         * @description What RumiaBnB brought a host over a period.
+         */
+        HostSummary: {
+            /** By Source */
+            by_source: components["schemas"]["SourceCount"][];
+            /** Completed */
+            completed: number;
+            /** Confirmed */
+            confirmed: number;
+            /** Contacts */
+            contacts: number;
+            /** Fees Paid */
+            fees_paid: number;
+            /** Fees Pending */
+            fees_pending: number;
+            /** Requests */
+            requests: number;
+            /** Room Value Completed */
+            room_value_completed: number;
+            /**
+             * Since
+             * Format: date
+             */
+            since: string;
+            /** Views */
+            views: number;
         };
         /** HostelRequestCampus */
         HostelRequestCampus: {
@@ -7060,6 +7622,52 @@ export interface components {
             /** Official Hostels */
             official_hostels: components["schemas"]["OfficialHostelRead"][];
         };
+        /** OpsStatusChange */
+        OpsStatusChange: {
+            /** Agreed Total */
+            agreed_total?: number | null;
+            /**
+             * Note
+             * @description Why (kept in the history)
+             */
+            note: string;
+            /**
+             * To Status
+             * @enum {string}
+             */
+            to_status: "requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed";
+        };
+        /**
+         * OpsStayCreate
+         * @description A booking the concierge arranged on WhatsApp, recorded on the guest's behalf.
+         */
+        OpsStayCreate: {
+            /**
+             * Check In
+             * Format: date
+             */
+            check_in: string;
+            /**
+             * Check Out
+             * Format: date
+             */
+            check_out: string;
+            /** Guest Name */
+            guest_name: string;
+            /** Guest Phone */
+            guest_phone: string;
+            /** Guests */
+            guests: number;
+            /** Listing */
+            listing: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Ref Code
+             * @description The concierge chat's reference code, to keep its attribution
+             */
+            ref_code?: string | null;
+        };
         /** OrderUpdate */
         OrderUpdate: {
             /** Id */
@@ -7599,6 +8207,22 @@ export interface components {
             /** Endpoint */
             endpoint: string;
         };
+        /** QuoteRead */
+        QuoteRead: {
+            /** Cleaning Fee */
+            cleaning_fee?: number | null;
+            /** Nights */
+            nights: number;
+            /**
+             * Rate Basis
+             * @enum {string}
+             */
+            rate_basis: "night" | "week" | "month";
+            /** Room Total */
+            room_total: number;
+            /** Total */
+            total: number;
+        };
         /** RegionRead */
         RegionRead: {
             /**
@@ -8022,6 +8646,17 @@ export interface components {
             /** Listings */
             listings: components["schemas"]["SitemapListing"][];
         };
+        /** SourceCount */
+        SourceCount: {
+            /** Completed */
+            completed: number;
+            /** Contacts */
+            contacts: number;
+            /** Requests */
+            requests: number;
+            /** Source */
+            source: string;
+        };
         /** StaffAssignment */
         StaffAssignment: {
             /** Market Slug */
@@ -8100,6 +8735,230 @@ export interface components {
         StatusChange: {
             /** Reason */
             reason?: string | null;
+        };
+        /** StayDetail */
+        StayDetail: {
+            /** Agreed Total */
+            agreed_total: number | null;
+            /**
+             * Check In
+             * Format: date
+             */
+            check_in: string;
+            /**
+             * Check Out
+             * Format: date
+             */
+            check_out: string;
+            /** Cleaning Fee */
+            cleaning_fee: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Events
+             * @default []
+             */
+            events: components["schemas"]["StayEvent"][];
+            /** Fee Amount */
+            fee_amount: number | null;
+            /** Fee Status */
+            fee_status: string | null;
+            /** Guest Email */
+            guest_email: string | null;
+            /** Guest Name */
+            guest_name: string;
+            /** Guest Note */
+            guest_note: string | null;
+            /** Guest Phone */
+            guest_phone: string;
+            /** Guest Report */
+            guest_report: string | null;
+            /** Guests */
+            guests: number;
+            /** Host Note */
+            host_note: string | null;
+            /** Host Report */
+            host_report: string | null;
+            /** Id */
+            id: string;
+            /** Listing Id */
+            listing_id: string | null;
+            /** Listing Slug */
+            listing_slug: string | null;
+            /** Listing Title */
+            listing_title: string;
+            /** Nights */
+            nights: number;
+            /** Org Id */
+            org_id: string | null;
+            /** Origin */
+            origin: string;
+            /** Quoted Total */
+            quoted_total: number;
+            /** Rate Basis */
+            rate_basis: string;
+            /** Ref Code */
+            ref_code: string | null;
+            /**
+             * Source
+             * @description utm_source, or what the guest said when asked
+             */
+            source?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed";
+            /** Utm Campaign */
+            utm_campaign: string | null;
+        };
+        /** StayEvent */
+        StayEvent: {
+            /** Action */
+            action: string;
+            /** Actor */
+            actor: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** From Status */
+            from_status: string | null;
+            /** Note */
+            note: string | null;
+            /** To Status */
+            to_status: string | null;
+        };
+        /** StayRequestCreate */
+        StayRequestCreate: {
+            /** @default {} */
+            attribution: components["schemas"]["Attribution"];
+            /**
+             * Check In
+             * Format: date
+             */
+            check_in: string;
+            /**
+             * Check Out
+             * Format: date
+             */
+            check_out: string;
+            /** Guest Email */
+            guest_email?: string | null;
+            /** Guest Name */
+            guest_name: string;
+            /** Guest Phone */
+            guest_phone: string;
+            /** Guests */
+            guests: number;
+            /**
+             * Listing
+             * @description Listing id or slug
+             */
+            listing: string;
+            /** Note */
+            note?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+        };
+        /** StayRequestCreated */
+        StayRequestCreated: {
+            /** Listing Title */
+            listing_title: string;
+            quote: components["schemas"]["QuoteRead"];
+            /** Ref Code */
+            ref_code: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed";
+            /**
+             * Token
+             * @description Secret for the guest's status page (/r/{token}). Shown once.
+             */
+            token: string;
+        };
+        /**
+         * StayRow
+         * @description A stay request as hosts and staff see it.
+         */
+        StayRow: {
+            /** Agreed Total */
+            agreed_total: number | null;
+            /**
+             * Check In
+             * Format: date
+             */
+            check_in: string;
+            /**
+             * Check Out
+             * Format: date
+             */
+            check_out: string;
+            /** Cleaning Fee */
+            cleaning_fee: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Fee Amount */
+            fee_amount: number | null;
+            /** Fee Status */
+            fee_status: string | null;
+            /** Guest Email */
+            guest_email: string | null;
+            /** Guest Name */
+            guest_name: string;
+            /** Guest Note */
+            guest_note: string | null;
+            /** Guest Phone */
+            guest_phone: string;
+            /** Guest Report */
+            guest_report: string | null;
+            /** Guests */
+            guests: number;
+            /** Host Note */
+            host_note: string | null;
+            /** Host Report */
+            host_report: string | null;
+            /** Id */
+            id: string;
+            /** Listing Id */
+            listing_id: string | null;
+            /** Listing Slug */
+            listing_slug: string | null;
+            /** Listing Title */
+            listing_title: string;
+            /** Nights */
+            nights: number;
+            /** Org Id */
+            org_id: string | null;
+            /** Origin */
+            origin: string;
+            /** Quoted Total */
+            quoted_total: number;
+            /** Rate Basis */
+            rate_basis: string;
+            /** Ref Code */
+            ref_code: string | null;
+            /**
+             * Source
+             * @description utm_source, or what the guest said when asked
+             */
+            source?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed";
+            /** Utm Campaign */
+            utm_campaign: string | null;
         };
         /** SupportAgentRow */
         SupportAgentRow: {
@@ -8606,6 +9465,11 @@ export interface components {
              * @default 1
              */
             min_stay_nights: number;
+            /**
+             * Monthly Price
+             * @description Price for 30 nights; used from 30 nights
+             */
+            monthly_price?: number | null;
             /** Nearby Landmark */
             nearby_landmark?: string | null;
             /**
@@ -8615,6 +9479,11 @@ export interface components {
             price_unit: string;
             /** Security Deposit */
             security_deposit?: number | null;
+            /**
+             * Weekly Price
+             * @description Price for 7 nights; used from 7 nights
+             */
+            weekly_price?: number | null;
         };
         /** AgentRead */
         app__features__agents__schemas__AgentRead: {
@@ -14378,6 +15247,241 @@ export interface operations {
             };
         };
     };
+    ops_stays_api_v1_ops_stays_get: {
+        parameters: {
+            query?: {
+                status?: ("requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed") | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_create_api_v1_ops_stays_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpsStayCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_agreements_api_v1_ops_stays_agreements_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgreementRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_add_agreement_api_v1_ops_stays_agreements_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgreementCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgreementRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_contacts_api_v1_ops_stays_contacts_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_stay_api_v1_ops_stays__req_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ops_status_api_v1_ops_stays__req_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpsStatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     org_inquiries_api_v1_orgs__org_id__inquiries_get: {
         parameters: {
             query?: never;
@@ -14472,6 +15576,262 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_stays_api_v1_orgs__org_id__stays_get: {
+        parameters: {
+            query?: {
+                status?: ("requested" | "confirmed" | "declined" | "cancelled" | "completed" | "no_show" | "disputed") | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_stays_summary_api_v1_orgs__org_id__stays_summary_get: {
+        parameters: {
+            query?: {
+                since?: string | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_stay_api_v1_orgs__org_id__stays__req_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_cancel_api_v1_orgs__org_id__stays__req_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostDecline"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_confirm_api_v1_orgs__org_id__stays__req_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostConfirm"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_decline_api_v1_orgs__org_id__stays__req_id__decline_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostDecline"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    org_report_api_v1_orgs__org_id__stays__req_id__report_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                org_id: string;
+                req_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostReport"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayDetail"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -15797,6 +17157,209 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_ListingRead_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    concierge_contact_api_v1_stays_concierge_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConciergeContactCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConciergeContactResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stay_quote_api_v1_stays_quote_get: {
+        parameters: {
+            query: {
+                listing: string;
+                check_in: string;
+                check_out: string;
+                guests?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuoteRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_stay_api_v1_stays_requests_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Device-Id"?: string | null;
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StayRequestCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StayRequestCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_stay_api_v1_stays_requests__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestStayView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_my_stay_api_v1_stays_requests__token__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestStayView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_my_stay_api_v1_stays_requests__token__report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuestReport"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestStayView"];
                 };
             };
             /** @description Validation Error */

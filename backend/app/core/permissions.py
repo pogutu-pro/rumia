@@ -22,11 +22,12 @@ STAFF_PERMISSIONS: Dict[str, FrozenSet[str]] = {
     "admin": frozenset({
         "property.create", "property.edit", "property.confirm", "property.pause", "property.remove",
         "property.review", "property.verify", "report.resolve", "org.suspend", "org.manage_members",
-        "queue.view", "market.manage", "staff.manage", "ledger.view",
+        "queue.view", "market.manage", "staff.manage", "ledger.view", "bnb.concierge",
     }),
     "market_lead": frozenset({
         "property.create", "property.edit", "property.confirm", "property.pause", "property.remove",
         "property.review", "property.verify", "report.resolve", "org.suspend", "queue.view", "ledger.view",
+        "bnb.concierge",
     }),
     "reviewer": frozenset({"property.review", "property.verify", "report.resolve", "queue.view"}),
     "scout": frozenset({"property.create", "property.edit"}),

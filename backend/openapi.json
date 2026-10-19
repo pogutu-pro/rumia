@@ -2415,6 +2415,157 @@
         "title": "AgentVerificationResult",
         "type": "object"
       },
+      "AgreementCreate": {
+        "properties": {
+          "effective_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "fee_min": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Fee Min",
+            "type": "number"
+          },
+          "fee_night_cap": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 30,
+            "title": "Fee Night Cap"
+          },
+          "fee_percent": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Fee Percent",
+            "type": "number"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "org_id": {
+            "title": "Org Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "org_id",
+          "fee_percent"
+        ],
+        "title": "AgreementCreate",
+        "type": "object"
+      },
+      "AgreementRead": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "effective_from": {
+            "format": "date",
+            "title": "Effective From",
+            "type": "string"
+          },
+          "effective_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective To"
+          },
+          "fee_min": {
+            "title": "Fee Min",
+            "type": "number"
+          },
+          "fee_night_cap": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee Night Cap"
+          },
+          "fee_percent": {
+            "title": "Fee Percent",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "org_id": {
+            "title": "Org Id",
+            "type": "string"
+          },
+          "org_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Org Name"
+          }
+        },
+        "required": [
+          "id",
+          "org_id",
+          "fee_percent",
+          "fee_min",
+          "fee_night_cap",
+          "effective_from",
+          "effective_to",
+          "note",
+          "created_at"
+        ],
+        "title": "AgreementRead",
+        "type": "object"
+      },
       "AlertCreate": {
         "properties": {
           "channel": {
@@ -2774,6 +2925,86 @@
         "title": "ApplicationRejection",
         "type": "object"
       },
+      "Attribution": {
+        "description": "Where the guest came from. Captured on the first page they landed on and sent with every contact.",
+        "properties": {
+          "heard_from": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The guest's answer to 'How did you hear about us?'",
+            "title": "Heard From"
+          },
+          "landing_path": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landing Path"
+          },
+          "utm_campaign": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Campaign"
+          },
+          "utm_content": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Content"
+          },
+          "utm_medium": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Medium"
+          },
+          "utm_source": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Source"
+          }
+        },
+        "title": "Attribution",
+        "type": "object"
+      },
       "BedConfig": {
         "properties": {
           "qty": {
@@ -2970,6 +3201,17 @@
             "title": "Min Stay Nights",
             "type": "integer"
           },
+          "monthly_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Price"
+          },
           "nearby_landmark": {
             "anyOf": [
               {
@@ -3007,6 +3249,17 @@
               }
             ],
             "title": "Updated At"
+          },
+          "weekly_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Price"
           }
         },
         "required": [
@@ -3229,6 +3482,19 @@
             ],
             "title": "Min Stay Nights"
           },
+          "monthly_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price for 30 nights; used from 30 nights",
+            "title": "Monthly Price"
+          },
           "nearby_landmark": {
             "anyOf": [
               {
@@ -3264,6 +3530,19 @@
               }
             ],
             "title": "Security Deposit"
+          },
+          "weekly_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price for 7 nights; used from 7 nights",
+            "title": "Weekly Price"
           }
         },
         "title": "BnbDetailsUpdate",
@@ -4927,6 +5206,145 @@
         "title": "CommissionRead",
         "type": "object"
       },
+      "ConciergeContactCreate": {
+        "properties": {
+          "attribution": {
+            "$ref": "#/components/schemas/Attribution",
+            "default": {}
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Listing id or slug, when the guest asks about one place",
+            "title": "Listing"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "title": "ConciergeContactCreate",
+        "type": "object"
+      },
+      "ConciergeContactResult": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ref_code": {
+            "title": "Ref Code",
+            "type": "string"
+          },
+          "whatsapp_url": {
+            "title": "Whatsapp Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_code",
+          "whatsapp_url",
+          "message"
+        ],
+        "title": "ConciergeContactResult",
+        "type": "object"
+      },
+      "ContactRow": {
+        "properties": {
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "handled_by": {
+            "title": "Handled By",
+            "type": "string"
+          },
+          "has_request": {
+            "title": "Has Request",
+            "type": "boolean"
+          },
+          "landing_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landing Path"
+          },
+          "listing_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Title"
+          },
+          "ref_code": {
+            "title": "Ref Code",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "utm_campaign": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Campaign"
+          }
+        },
+        "required": [
+          "ref_code",
+          "channel",
+          "handled_by",
+          "listing_title",
+          "source",
+          "utm_campaign",
+          "landing_path",
+          "created_at",
+          "has_request"
+        ],
+        "title": "ContactRow",
+        "type": "object"
+      },
       "Decision": {
         "properties": {
           "decision": {
@@ -5473,6 +5891,143 @@
         "title": "GoogleStartResponse",
         "type": "object"
       },
+      "GuestReport": {
+        "properties": {
+          "stayed": {
+            "title": "Stayed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "stayed"
+        ],
+        "title": "GuestReport",
+        "type": "object"
+      },
+      "GuestStayView": {
+        "properties": {
+          "agreed_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Total"
+          },
+          "can_cancel": {
+            "title": "Can Cancel",
+            "type": "boolean"
+          },
+          "can_report": {
+            "title": "Can Report",
+            "type": "boolean"
+          },
+          "check_in": {
+            "format": "date",
+            "title": "Check In",
+            "type": "string"
+          },
+          "check_out": {
+            "format": "date",
+            "title": "Check Out",
+            "type": "string"
+          },
+          "guest_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Report"
+          },
+          "guests": {
+            "title": "Guests",
+            "type": "integer"
+          },
+          "host_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Note"
+          },
+          "listing_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Slug"
+          },
+          "listing_title": {
+            "title": "Listing Title",
+            "type": "string"
+          },
+          "nights": {
+            "title": "Nights",
+            "type": "integer"
+          },
+          "quoted_total": {
+            "title": "Quoted Total",
+            "type": "number"
+          },
+          "ref_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Code"
+          },
+          "status": {
+            "enum": [
+              "requested",
+              "confirmed",
+              "declined",
+              "cancelled",
+              "completed",
+              "no_show",
+              "disputed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_code",
+          "status",
+          "listing_title",
+          "listing_slug",
+          "check_in",
+          "check_out",
+          "nights",
+          "guests",
+          "quoted_total",
+          "agreed_total",
+          "host_note",
+          "guest_report",
+          "can_cancel",
+          "can_report"
+        ],
+        "title": "GuestStayView",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -5516,6 +6071,131 @@
           "services"
         ],
         "title": "HealthCheckResponse",
+        "type": "object"
+      },
+      "HostConfirm": {
+        "properties": {
+          "agreed_total": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Room charges agreed with the guest, if different from the quote",
+            "title": "Agreed Total"
+          },
+          "host_note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Note"
+          }
+        },
+        "title": "HostConfirm",
+        "type": "object"
+      },
+      "HostDecline": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "HostDecline",
+        "type": "object"
+      },
+      "HostReport": {
+        "properties": {
+          "stayed": {
+            "title": "Stayed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "stayed"
+        ],
+        "title": "HostReport",
+        "type": "object"
+      },
+      "HostSummary": {
+        "description": "What RumiaBnB brought a host over a period.",
+        "properties": {
+          "by_source": {
+            "items": {
+              "$ref": "#/components/schemas/SourceCount"
+            },
+            "title": "By Source",
+            "type": "array"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "integer"
+          },
+          "contacts": {
+            "title": "Contacts",
+            "type": "integer"
+          },
+          "fees_paid": {
+            "title": "Fees Paid",
+            "type": "number"
+          },
+          "fees_pending": {
+            "title": "Fees Pending",
+            "type": "number"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "room_value_completed": {
+            "title": "Room Value Completed",
+            "type": "number"
+          },
+          "since": {
+            "format": "date",
+            "title": "Since",
+            "type": "string"
+          },
+          "views": {
+            "title": "Views",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "since",
+          "views",
+          "contacts",
+          "requests",
+          "confirmed",
+          "completed",
+          "room_value_completed",
+          "fees_pending",
+          "fees_paid",
+          "by_source"
+        ],
+        "title": "HostSummary",
         "type": "object"
       },
       "HostelRequestCampus": {
@@ -10072,6 +10752,120 @@
         "title": "OfficialHostelsOverview",
         "type": "object"
       },
+      "OpsStatusChange": {
+        "properties": {
+          "agreed_total": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Total"
+          },
+          "note": {
+            "description": "Why (kept in the history)",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Note",
+            "type": "string"
+          },
+          "to_status": {
+            "enum": [
+              "requested",
+              "confirmed",
+              "declined",
+              "cancelled",
+              "completed",
+              "no_show",
+              "disputed"
+            ],
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to_status",
+          "note"
+        ],
+        "title": "OpsStatusChange",
+        "type": "object"
+      },
+      "OpsStayCreate": {
+        "description": "A booking the concierge arranged on WhatsApp, recorded on the guest's behalf.",
+        "properties": {
+          "check_in": {
+            "format": "date",
+            "title": "Check In",
+            "type": "string"
+          },
+          "check_out": {
+            "format": "date",
+            "title": "Check Out",
+            "type": "string"
+          },
+          "guest_name": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Guest Name",
+            "type": "string"
+          },
+          "guest_phone": {
+            "maxLength": 20,
+            "minLength": 7,
+            "title": "Guest Phone",
+            "type": "string"
+          },
+          "guests": {
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Guests",
+            "type": "integer"
+          },
+          "listing": {
+            "title": "Listing",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "ref_code": {
+            "anyOf": [
+              {
+                "maxLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The concierge chat's reference code, to keep its attribution",
+            "title": "Ref Code"
+          }
+        },
+        "required": [
+          "listing",
+          "check_in",
+          "check_out",
+          "guests",
+          "guest_name",
+          "guest_phone"
+        ],
+        "title": "OpsStayCreate",
+        "type": "object"
+      },
       "OrderUpdate": {
         "properties": {
           "id": {
@@ -11476,6 +12270,50 @@
         "title": "PushUnsubscribeRequest",
         "type": "object"
       },
+      "QuoteRead": {
+        "properties": {
+          "cleaning_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cleaning Fee"
+          },
+          "nights": {
+            "title": "Nights",
+            "type": "integer"
+          },
+          "rate_basis": {
+            "enum": [
+              "night",
+              "week",
+              "month"
+            ],
+            "title": "Rate Basis",
+            "type": "string"
+          },
+          "room_total": {
+            "title": "Room Total",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "number"
+          }
+        },
+        "required": [
+          "nights",
+          "rate_basis",
+          "room_total",
+          "total"
+        ],
+        "title": "QuoteRead",
+        "type": "object"
+      },
       "RegionRead": {
         "properties": {
           "created_at": {
@@ -12834,6 +13672,34 @@
         "title": "SitemapResponse",
         "type": "object"
       },
+      "SourceCount": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "contacts": {
+            "title": "Contacts",
+            "type": "integer"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "contacts",
+          "requests",
+          "completed"
+        ],
+        "title": "SourceCount",
+        "type": "object"
+      },
       "StaffAssignment": {
         "properties": {
           "market_slug": {
@@ -13065,6 +13931,734 @@
           }
         },
         "title": "StatusChange",
+        "type": "object"
+      },
+      "StayDetail": {
+        "properties": {
+          "agreed_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Total"
+          },
+          "check_in": {
+            "format": "date",
+            "title": "Check In",
+            "type": "string"
+          },
+          "check_out": {
+            "format": "date",
+            "title": "Check Out",
+            "type": "string"
+          },
+          "cleaning_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cleaning Fee"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "events": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/StayEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee Amount"
+          },
+          "fee_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee Status"
+          },
+          "guest_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Email"
+          },
+          "guest_name": {
+            "title": "Guest Name",
+            "type": "string"
+          },
+          "guest_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Note"
+          },
+          "guest_phone": {
+            "title": "Guest Phone",
+            "type": "string"
+          },
+          "guest_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Report"
+          },
+          "guests": {
+            "title": "Guests",
+            "type": "integer"
+          },
+          "host_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Note"
+          },
+          "host_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Report"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
+          "listing_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Slug"
+          },
+          "listing_title": {
+            "title": "Listing Title",
+            "type": "string"
+          },
+          "nights": {
+            "title": "Nights",
+            "type": "integer"
+          },
+          "org_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Org Id"
+          },
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "quoted_total": {
+            "title": "Quoted Total",
+            "type": "number"
+          },
+          "rate_basis": {
+            "title": "Rate Basis",
+            "type": "string"
+          },
+          "ref_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Code"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "utm_source, or what the guest said when asked",
+            "title": "Source"
+          },
+          "status": {
+            "enum": [
+              "requested",
+              "confirmed",
+              "declined",
+              "cancelled",
+              "completed",
+              "no_show",
+              "disputed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "utm_campaign": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Campaign"
+          }
+        },
+        "required": [
+          "id",
+          "ref_code",
+          "status",
+          "origin",
+          "listing_id",
+          "listing_title",
+          "listing_slug",
+          "org_id",
+          "guest_name",
+          "guest_phone",
+          "guest_email",
+          "guests",
+          "check_in",
+          "check_out",
+          "nights",
+          "rate_basis",
+          "quoted_total",
+          "agreed_total",
+          "cleaning_fee",
+          "guest_note",
+          "host_note",
+          "guest_report",
+          "host_report",
+          "utm_campaign",
+          "fee_amount",
+          "fee_status",
+          "created_at"
+        ],
+        "title": "StayDetail",
+        "type": "object"
+      },
+      "StayEvent": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          }
+        },
+        "required": [
+          "at",
+          "actor",
+          "action",
+          "from_status",
+          "to_status",
+          "note"
+        ],
+        "title": "StayEvent",
+        "type": "object"
+      },
+      "StayRequestCreate": {
+        "properties": {
+          "attribution": {
+            "$ref": "#/components/schemas/Attribution",
+            "default": {}
+          },
+          "check_in": {
+            "format": "date",
+            "title": "Check In",
+            "type": "string"
+          },
+          "check_out": {
+            "format": "date",
+            "title": "Check Out",
+            "type": "string"
+          },
+          "guest_email": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Email"
+          },
+          "guest_name": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Guest Name",
+            "type": "string"
+          },
+          "guest_phone": {
+            "maxLength": 20,
+            "minLength": 7,
+            "title": "Guest Phone",
+            "type": "string"
+          },
+          "guests": {
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Guests",
+            "type": "integer"
+          },
+          "listing": {
+            "description": "Listing id or slug",
+            "title": "Listing",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "required": [
+          "listing",
+          "check_in",
+          "check_out",
+          "guests",
+          "guest_name",
+          "guest_phone"
+        ],
+        "title": "StayRequestCreate",
+        "type": "object"
+      },
+      "StayRequestCreated": {
+        "properties": {
+          "listing_title": {
+            "title": "Listing Title",
+            "type": "string"
+          },
+          "quote": {
+            "$ref": "#/components/schemas/QuoteRead"
+          },
+          "ref_code": {
+            "title": "Ref Code",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "requested",
+              "confirmed",
+              "declined",
+              "cancelled",
+              "completed",
+              "no_show",
+              "disputed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "token": {
+            "description": "Secret for the guest's status page (/r/{token}). Shown once.",
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_code",
+          "token",
+          "status",
+          "listing_title",
+          "quote"
+        ],
+        "title": "StayRequestCreated",
+        "type": "object"
+      },
+      "StayRow": {
+        "description": "A stay request as hosts and staff see it.",
+        "properties": {
+          "agreed_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Total"
+          },
+          "check_in": {
+            "format": "date",
+            "title": "Check In",
+            "type": "string"
+          },
+          "check_out": {
+            "format": "date",
+            "title": "Check Out",
+            "type": "string"
+          },
+          "cleaning_fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cleaning Fee"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee Amount"
+          },
+          "fee_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee Status"
+          },
+          "guest_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Email"
+          },
+          "guest_name": {
+            "title": "Guest Name",
+            "type": "string"
+          },
+          "guest_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Note"
+          },
+          "guest_phone": {
+            "title": "Guest Phone",
+            "type": "string"
+          },
+          "guest_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guest Report"
+          },
+          "guests": {
+            "title": "Guests",
+            "type": "integer"
+          },
+          "host_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Note"
+          },
+          "host_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Report"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listing_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Id"
+          },
+          "listing_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Slug"
+          },
+          "listing_title": {
+            "title": "Listing Title",
+            "type": "string"
+          },
+          "nights": {
+            "title": "Nights",
+            "type": "integer"
+          },
+          "org_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Org Id"
+          },
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "quoted_total": {
+            "title": "Quoted Total",
+            "type": "number"
+          },
+          "rate_basis": {
+            "title": "Rate Basis",
+            "type": "string"
+          },
+          "ref_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Code"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "utm_source, or what the guest said when asked",
+            "title": "Source"
+          },
+          "status": {
+            "enum": [
+              "requested",
+              "confirmed",
+              "declined",
+              "cancelled",
+              "completed",
+              "no_show",
+              "disputed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "utm_campaign": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utm Campaign"
+          }
+        },
+        "required": [
+          "id",
+          "ref_code",
+          "status",
+          "origin",
+          "listing_id",
+          "listing_title",
+          "listing_slug",
+          "org_id",
+          "guest_name",
+          "guest_phone",
+          "guest_email",
+          "guests",
+          "check_in",
+          "check_out",
+          "nights",
+          "rate_basis",
+          "quoted_total",
+          "agreed_total",
+          "cleaning_fee",
+          "guest_note",
+          "host_note",
+          "guest_report",
+          "host_report",
+          "utm_campaign",
+          "fee_amount",
+          "fee_status",
+          "created_at"
+        ],
+        "title": "StayRow",
         "type": "object"
       },
       "SupportAgentRow": {
@@ -14558,6 +16152,19 @@
             "title": "Min Stay Nights",
             "type": "integer"
           },
+          "monthly_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price for 30 nights; used from 30 nights",
+            "title": "Monthly Price"
+          },
           "nearby_landmark": {
             "anyOf": [
               {
@@ -14587,6 +16194,19 @@
               }
             ],
             "title": "Security Deposit"
+          },
+          "weekly_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Price for 7 nights; used from 7 nights",
+            "title": "Weekly Price"
           }
         },
         "title": "_BnbDetailsBase",
@@ -24884,6 +26504,433 @@
         ]
       }
     },
+    "/api/v1/ops/stays": {
+      "get": {
+        "operationId": "ops_stays_api_v1_ops_stays_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "requested",
+                    "confirmed",
+                    "declined",
+                    "cancelled",
+                    "completed",
+                    "no_show",
+                    "disputed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StayRow"
+                  },
+                  "title": "Response Ops Stays Api V1 Ops Stays Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "All Booking Requests",
+        "tags": [
+          "Stays"
+        ]
+      },
+      "post": {
+        "description": "A stay arranged on WhatsApp, recorded for the guest. Pass the chat's reference code to keep its source.",
+        "operationId": "ops_create_api_v1_ops_stays_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpsStayCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record A Concierge Booking",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/ops/stays/agreements": {
+      "get": {
+        "operationId": "ops_agreements_api_v1_ops_stays_agreements_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgreementRead"
+                  },
+                  "title": "Response Ops Agreements Api V1 Ops Stays Agreements Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Host Fee Agreements",
+        "tags": [
+          "Stays"
+        ]
+      },
+      "post": {
+        "operationId": "ops_add_agreement_api_v1_ops_stays_agreements_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgreementCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record A Host's Fee Terms",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/ops/stays/contacts": {
+      "get": {
+        "description": "Recent contacts with their reference code and source, newest first.",
+        "operationId": "ops_contacts_api_v1_ops_stays_contacts_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContactRow"
+                  },
+                  "title": "Response Ops Contacts Api V1 Ops Stays Contacts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "RumiaBnB Contacts",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/ops/stays/{req_id}": {
+      "get": {
+        "operationId": "ops_stay_api_v1_ops_stays__req_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "One Booking Request (Staff)",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/ops/stays/{req_id}/status": {
+      "post": {
+        "description": "Staff may make any reasonable change (including resolving disputes); the reason is kept in the history.",
+        "operationId": "ops_status_api_v1_ops_stays__req_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpsStatusChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Change A Request's Status",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
     "/api/v1/orgs/{org_id}/inquiries": {
       "get": {
         "description": "Reference code, place, channel and whether the seeker said they got a reply. No personal details.",
@@ -25078,6 +27125,545 @@
         "summary": "Add A Team Member",
         "tags": [
           "Workspace"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays": {
+      "get": {
+        "operationId": "org_stays_api_v1_orgs__org_id__stays_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "requested",
+                    "confirmed",
+                    "declined",
+                    "cancelled",
+                    "completed",
+                    "no_show",
+                    "disputed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StayRow"
+                  },
+                  "title": "Response Org Stays Api V1 Orgs  Org Id  Stays Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Booking Requests For My Places",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays/summary": {
+      "get": {
+        "description": "Views, contacts by source, requests, completed stays and fees since a date (default: 90 days).",
+        "operationId": "org_stays_summary_api_v1_orgs__org_id__stays_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "What RumiaBnB Brought Me",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays/{req_id}": {
+      "get": {
+        "operationId": "org_stay_api_v1_orgs__org_id__stays__req_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "One Booking Request",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays/{req_id}/cancel": {
+      "post": {
+        "operationId": "org_cancel_api_v1_orgs__org_id__stays__req_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostDecline"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel A Confirmed Stay",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays/{req_id}/confirm": {
+      "post": {
+        "operationId": "org_confirm_api_v1_orgs__org_id__stays__req_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm A Booking Request",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays/{req_id}/decline": {
+      "post": {
+        "operationId": "org_decline_api_v1_orgs__org_id__stays__req_id__decline_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostDecline"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decline A Booking Request",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/stays/{req_id}/report": {
+      "post": {
+        "description": "The host says whether the stay happened. A completed stay records the RumiaBnB fee.",
+        "operationId": "org_report_api_v1_orgs__org_id__stays__req_id__report_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "req_id",
+            "required": true,
+            "schema": {
+              "title": "Req Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostReport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Did The Guest Stay?",
+        "tags": [
+          "Stays"
         ]
       }
     },
@@ -27536,6 +30122,371 @@
         "summary": "Search Listings",
         "tags": [
           "Search"
+        ]
+      }
+    },
+    "/api/v1/stays/concierge": {
+      "post": {
+        "description": "Records the contact with a reference code and returns a WhatsApp link to the RumiaBnB team. Public.",
+        "operationId": "concierge_contact_api_v1_stays_concierge_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConciergeContactCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConciergeContactResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Chat With RumiaBnB",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/stays/quote": {
+      "get": {
+        "description": "The price of a stay for these dates (nightly, or the owner's weekly/monthly rate), before any request.",
+        "operationId": "stay_quote_api_v1_stays_quote_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "listing",
+            "required": true,
+            "schema": {
+              "title": "Listing",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "check_in",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "Check In",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "check_out",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "Check Out",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "guests",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Guests",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Price For Dates",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/stays/requests": {
+      "post": {
+        "description": "A guest asks to book dates. No account needed. The host confirms or declines; the guest follows the request at /r/{token}. Rate limited. Public.",
+        "operationId": "request_stay_api_v1_stays_requests_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Device-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StayRequestCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StayRequestCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request A Stay",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/stays/requests/{token}": {
+      "get": {
+        "description": "The guest's view of their request, by the secret token from the confirmation.",
+        "operationId": "my_stay_api_v1_stays_requests__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestStayView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Booking Request",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/stays/requests/{token}/cancel": {
+      "post": {
+        "operationId": "cancel_my_stay_api_v1_stays_requests__token__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestStayView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel My Request",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/stays/requests/{token}/report": {
+      "post": {
+        "description": "The guest says whether the stay happened. From the check-in day.",
+        "operationId": "report_my_stay_api_v1_stays_requests__token__report_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestReport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestStayView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Did You Stay?",
+        "tags": [
+          "Stays"
         ]
       }
     },
