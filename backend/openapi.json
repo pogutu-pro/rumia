@@ -5118,6 +5118,39 @@
         "title": "CampusZoneRead",
         "type": "object"
       },
+      "ClaimBody": {
+        "properties": {
+          "token": {
+            "maxLength": 100,
+            "minLength": 10,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "ClaimBody",
+        "type": "object"
+      },
+      "ClaimResult": {
+        "properties": {
+          "org_id": {
+            "title": "Org Id",
+            "type": "string"
+          },
+          "org_name": {
+            "title": "Org Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "org_id",
+          "org_name"
+        ],
+        "title": "ClaimResult",
+        "type": "object"
+      },
       "CommissionCreate": {
         "properties": {
           "agent_id": {
@@ -6073,6 +6106,73 @@
         "title": "HealthCheckResponse",
         "type": "object"
       },
+      "HostAdminRow": {
+        "properties": {
+          "agreement": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement"
+          },
+          "claimed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claimed At"
+          },
+          "has_login": {
+            "description": "Someone other than a staff-made placeholder can sign in for this host",
+            "title": "Has Login",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/HostListing"
+            },
+            "title": "Listings",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "open_requests": {
+            "title": "Open Requests",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "listings",
+          "slug",
+          "claimed_at",
+          "has_login",
+          "open_requests"
+        ],
+        "title": "HostAdminRow",
+        "type": "object"
+      },
       "HostConfirm": {
         "properties": {
           "agreed_total": {
@@ -6120,6 +6220,67 @@
           }
         },
         "title": "HostDecline",
+        "type": "object"
+      },
+      "HostListing": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "is_active"
+        ],
+        "title": "HostListing",
+        "type": "object"
+      },
+      "HostOrg": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/HostListing"
+            },
+            "title": "Listings",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "listings"
+        ],
+        "title": "HostOrg",
         "type": "object"
       },
       "HostReport": {
@@ -6945,6 +7106,25 @@
           "message"
         ],
         "title": "InquiryResult",
+        "type": "object"
+      },
+      "InviteRead": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "expires_at"
+        ],
+        "title": "InviteRead",
         "type": "object"
       },
       "LandmarkDistance": {
@@ -21408,6 +21588,65 @@
         ]
       }
     },
+    "/api/v1/host/claim": {
+      "post": {
+        "operationId": "claim_host_api_v1_host_claim_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept A Host Invite",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
     "/api/v1/hostel-requests": {
       "post": {
         "description": "Submit a 'Find Me a Hostel' request. Authenticated.",
@@ -24848,6 +25087,60 @@
         ]
       }
     },
+    "/api/v1/me/host-orgs": {
+      "get": {
+        "description": "The organisations the signed-in person manages on RumiaBnB, with their places.",
+        "operationId": "my_host_orgs_api_v1_me_host_orgs_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HostOrg"
+                  },
+                  "title": "Response My Host Orgs Api V1 Me Host Orgs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My RumiaBnB Hosts",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
     "/api/v1/me/workspace": {
       "get": {
         "description": "The caller's organisations and places, each with what needs attention (unconfirmed, paused, drafts) and the last week's contacts. One call powers the lister home screen.",
@@ -26799,6 +27092,119 @@
           }
         },
         "summary": "RumiaBnB Contacts",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/ops/stays/hosts": {
+      "get": {
+        "description": "Every host with short stays: places, whether the owner has a login, fee terms, open requests.",
+        "operationId": "ops_hosts_api_v1_ops_stays_hosts_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HostAdminRow"
+                  },
+                  "title": "Response Ops Hosts Api V1 Ops Stays Hosts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "RumiaBnB Hosts",
+        "tags": [
+          "Stays"
+        ]
+      }
+    },
+    "/api/v1/ops/stays/hosts/{org_id}/invite": {
+      "post": {
+        "description": "A one-time link (14 days). Whoever opens it signed in becomes an owner of this host. Send it only to the owner.",
+        "operationId": "ops_invite_api_v1_ops_stays_hosts__org_id__invite_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Invite A Host To Their Dashboard",
         "tags": [
           "Stays"
         ]

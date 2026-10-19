@@ -11,13 +11,14 @@ from app.core.device import get_device_id
 from app.core.errors import BadRequestException, ForbiddenException
 from app.core.permissions import AccessContext, get_access
 from app.core.ratelimit import limiter
-from app.core.security import AuthenticatedUser, get_optional_current_user
+from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user
 from app.core.tasks.worker import send_push_to_user
 from app.features.stays.schemas import (
-    AgreementCreate, AgreementRead, ConciergeContactCreate, ConciergeContactResult, ContactRow, GuestReport,
+    AgreementCreate, AgreementRead, ClaimBody, ClaimResult, HostAdminRow, HostOrg, InviteRead, ConciergeContactCreate, ConciergeContactResult, ContactRow, GuestReport,
     GuestStayView, HostConfirm, HostDecline, HostReport, HostSummary, OpsStatusChange, OpsStayCreate, QuoteRead,
     StayDetail, StayRequestCreate, StayRequestCreated, StayRow, StayStatus,
 )
+from app.features.stays import hosts as host_service
 from app.features.stays.service import StayService, today
 
 router = APIRouter(tags=["Stays"])
@@ -200,7 +201,7 @@ async def org_cancel(org_id: str, req_id: str, body: HostDecline, access: Access
                      db: AsyncSession = Depends(get_db_session, scope="function")) -> StayDetail:
     access.require("property.confirm", org_id=org_id)
     req = await StayService.for_org(db, org_id, req_id)
-    await StayService.move(db, req, "cancelled", actor="host", actor_user_id=access.user_id, note=body.reason)
+    await StayService.move(db, req, "cancelled", actor="host", actor_user_id=access.user_id, note=body.reason, host_note=body.reason)
     return StayDetail(**await StayService.detail(db, req_id, org_id))
 
 
@@ -246,6 +247,21 @@ async def ops_add_agreement(body: AgreementCreate, access: AccessContext = Depen
     ))
 
 
+@router.get("/ops/stays/hosts", response_model=List[HostAdminRow], summary="RumiaBnB Hosts",
+            description="Every host with short stays: places, whether the owner has a login, fee terms, open requests.")
+async def ops_hosts(access: AccessContext = Depends(get_access), db: AsyncSession = Depends(get_db_session, scope="function")) -> List[HostAdminRow]:
+    _need_staff(access)
+    return [HostAdminRow(**h) for h in await host_service.list_hosts(db)]
+
+
+@router.post("/ops/stays/hosts/{org_id}/invite", response_model=InviteRead, status_code=status.HTTP_201_CREATED,
+             summary="Invite A Host To Their Dashboard",
+             description="A one-time link (14 days). Whoever opens it signed in becomes an owner of this host. Send it only to the owner.")
+async def ops_invite(org_id: str, access: AccessContext = Depends(get_access), db: AsyncSession = Depends(get_db_session, scope="function")) -> InviteRead:
+    _need_staff(access)
+    return InviteRead(**await host_service.create_invite(db, org_id, access.user_id))
+
+
 @router.post("/ops/stays", response_model=StayDetail, status_code=status.HTTP_201_CREATED, summary="Record A Concierge Booking",
              description="A stay arranged on WhatsApp, recorded for the guest. Pass the chat's reference code to keep its source.")
 async def ops_create(body: OpsStayCreate, background_tasks: BackgroundTasks, access: AccessContext = Depends(get_access),
@@ -278,3 +294,19 @@ async def ops_status(req_id: str, body: OpsStatusChange, access: AccessContext =
     await StayService.move(db, req, body.to_status, actor="staff", actor_user_id=access.user_id, note=body.note,
                            agreed_total=body.agreed_total)
     return StayDetail(**await StayService.detail(db, req_id))
+
+
+# ── Host accounts ───────────────────────────────────────────────────────────────────────────────────────────
+
+
+@router.get("/me/host-orgs", response_model=List[HostOrg], summary="My RumiaBnB Hosts",
+            description="The organisations the signed-in person manages on RumiaBnB, with their places.")
+async def my_host_orgs(user: AuthenticatedUser = Depends(get_current_user), db: AsyncSession = Depends(get_db_session, scope="function")) -> List[HostOrg]:
+    return [HostOrg(**o) for o in await host_service.my_host_orgs(db, user.id)]
+
+
+@router.post("/host/claim", response_model=ClaimResult, summary="Accept A Host Invite")
+@limiter.limit("10/minute")
+async def claim_host(request: Request, body: ClaimBody, user: AuthenticatedUser = Depends(get_current_user),
+                     db: AsyncSession = Depends(get_db_session, scope="function")) -> ClaimResult:
+    return ClaimResult(**await host_service.claim(db, body.token, user.id))

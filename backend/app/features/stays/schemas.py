@@ -211,3 +211,38 @@ class HostSummary(BaseModel):
     fees_pending: float
     fees_paid: float
     by_source: List[SourceCount]
+
+
+class HostListing(BaseModel):
+    id: str
+    title: str
+    slug: Optional[str]
+    is_active: bool
+
+
+class HostOrg(BaseModel):
+    id: str
+    name: str
+    listings: List[HostListing]
+
+
+class HostAdminRow(HostOrg):
+    slug: str
+    claimed_at: Optional[datetime]
+    has_login: bool = Field(..., description="Someone other than a staff-made placeholder can sign in for this host")
+    open_requests: int
+    agreement: Optional[dict] = None
+
+
+class InviteRead(BaseModel):
+    url: str
+    expires_at: datetime
+
+
+class ClaimBody(BaseModel):
+    token: str = Field(..., min_length=10, max_length=100)
+
+
+class ClaimResult(BaseModel):
+    org_id: str
+    org_name: str
