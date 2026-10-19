@@ -1,89 +1,105 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import Link from 'next/link';
+import { BadgeCheck, MessageCircle, ReceiptText } from 'lucide-react';
 import { getStays } from '@/lib/site/bnb-api';
 import { ReelStrip } from '@/components/bnb/reel-strip';
 import { StayCard } from '@/components/bnb/stay-card';
+import { CategoryBar } from '@/components/bnb/category-bar';
 import { ConciergeButton } from '@/components/bnb/concierge-button';
 
 export const revalidate = 300;
 
 export const metadata: Metadata = { alternates: { canonical: '/' } };
 
-const STEPS = [
-  { title: 'Pick a place and your dates', body: 'Send a booking request here, or tell us what you need on WhatsApp.' },
-  { title: 'The host confirms', body: 'You get a link to follow your request. Nothing is paid to us.' },
-  { title: 'Stay', body: 'Pay the host as agreed. Afterwards, tell us how it went.' },
+const PROMISES = [
+  { icon: BadgeCheck, title: 'Visited and filmed by us', body: 'Every place is seen by our team before it goes up, so the photos and the tour are the real thing.' },
+  { icon: ReceiptText, title: 'The full price up front', body: 'Pick your dates and you see the total, cleaning fee included. No surprise at checkout.' },
+  { icon: MessageCircle, title: 'People, not a call centre', body: 'Ask us anything on WhatsApp. We check with the host and come back to you.' },
 ];
 
 export default async function BnbHome() {
   const stays = await getStays();
   const withVideo = stays.filter((s) => s.youtube_id);
-  const reel = withVideo.length >= 2 ? withVideo : stays;
+  const towns = [...new Set(stays.map((s) => (s.county ?? '').trim()).filter(Boolean))];
+  const where = towns.length === 1 ? towns[0].replace(/^\w/, (c) => c.toUpperCase()) : 'Mt Kenya';
 
   return (
     <>
-      <section className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:pt-16">
-        <h1 className="max-w-3xl font-bnb-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.02em] text-bnb-ink sm:text-6xl">
-          Stays we have walked through, filmed and vouched for.
-        </h1>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-bnb-stone">
-          Homes, apartments and cottages around Nyeri and Mt Kenya. Watch the tour, then request your dates or ask us
-          on WhatsApp.
-        </p>
-      </section>
+      <div className="mx-auto max-w-7xl px-4 pt-5 md:px-6">
+        <Suspense fallback={<div className="h-16" />}>
+          <CategoryBar base="/" />
+        </Suspense>
+      </div>
 
-      {reel.length > 0 && (
-        <section aria-label="Video tours" className="mx-auto max-w-6xl px-4 pb-12">
-          <ReelStrip stays={reel.slice(0, 10)} />
+      {withVideo.length > 0 && (
+        <section aria-labelledby="tours" className="mx-auto max-w-7xl px-4 pb-4 pt-8 md:px-6">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 id="tours" className="font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink">
+                Walk through before you book
+              </h2>
+              <p className="mt-1 text-bnb-stone">Short video tours, filmed on our visits.</p>
+            </div>
+            <Link href="/stays?type=video" className="hidden text-sm font-semibold text-bnb-ink underline underline-offset-4 sm:block">
+              All video tours
+            </Link>
+          </div>
+          <ReelStrip stays={withVideo.slice(0, 10)} />
         </section>
       )}
 
-      <section className="mx-auto max-w-6xl px-4 pb-16" aria-labelledby="all-stays">
-        <div className="flex items-end justify-between gap-4">
-          <h2 id="all-stays" className="font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink sm:text-3xl">
-            {stays.length > 0 ? 'All stays' : 'New stays are on the way'}
-          </h2>
-          {stays.length > 6 && (
-            <Link href="/stays" className="text-sm font-semibold text-bnb-forest underline-offset-4 hover:underline">
-              Search by guests and price
-            </Link>
-          )}
-        </div>
+      <section aria-labelledby="stays" className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-6">
+        <h2 id="stays" className="font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink">
+          {stays.length > 0 ? `Stays around ${where}` : 'New stays are on the way'}
+        </h2>
         {stays.length > 0 ? (
-          <ul className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {stays.slice(0, 9).map((stay, i) => (
+          <ul className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {stays.map((stay, i) => (
               <li key={stay.id}>
-                <StayCard stay={stay} priority={i < 2} />
+                <StayCard stay={stay} priority={i < 4} />
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 max-w-lg text-bnb-stone">
-            We are visiting and filming the first places now. Tell us your dates and we will find you somewhere.
-          </p>
+          <div className="mt-3 max-w-lg">
+            <p className="text-bnb-stone">We are visiting and filming the first places now. Tell us your dates and we will find you somewhere.</p>
+            <ConciergeButton className="mt-5" label="Ask us on WhatsApp" />
+          </div>
         )}
       </section>
 
-      <section className="bg-bnb-line/50" aria-labelledby="how">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 lg:grid-cols-[1fr_2fr]">
-          <div>
-            <h2 id="how" className="font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink sm:text-3xl">
-              How booking works
-            </h2>
-            <p className="mt-3 text-bnb-stone">No account and no booking fee for guests.</p>
-            <ConciergeButton className="mt-6" label="Ask about your dates" variant="amber" />
-          </div>
-          <ol className="grid gap-6 sm:grid-cols-3">
-            {STEPS.map((step, i) => (
-              <li key={step.title} className="border-t-2 border-bnb-forest pt-4">
-                <span className="font-bnb-display text-3xl font-extrabold text-bnb-forest/30" aria-hidden>
-                  {i + 1}
+      <section aria-labelledby="why" className="border-t border-bnb-line bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+          <h2 id="why" className="font-bnb-display text-2xl font-bold tracking-tight text-bnb-ink">
+            Why book with RumiaBnB
+          </h2>
+          <ul className="mt-8 grid gap-8 md:grid-cols-3">
+            {PROMISES.map(({ icon: Icon, title, body }) => (
+              <li key={title}>
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-bnb-forest/10 text-bnb-forest">
+                  <Icon className="h-6 w-6" aria-hidden />
                 </span>
-                <h3 className="mt-1 font-semibold text-bnb-ink">{step.title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-bnb-stone">{step.body}</p>
+                <h3 className="mt-4 text-lg font-semibold text-bnb-ink">{title}</h3>
+                <p className="mt-1.5 max-w-sm leading-relaxed text-bnb-stone">{body}</p>
               </li>
             ))}
-          </ol>
+          </ul>
+          <ConciergeButton className="mt-10" label="Ask about your dates" variant="outline" />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+        <div className="grid items-center gap-6 overflow-hidden rounded-[2rem] bg-bnb-ink p-8 text-white md:grid-cols-[1.4fr_1fr] md:p-12">
+          <div>
+            <h2 className="font-bnb-display text-3xl font-bold tracking-tight">Have a place guests would love?</h2>
+            <p className="mt-3 max-w-lg text-white/75">We film it, put it in front of travellers on TikTok, Instagram and YouTube, and send you booking requests. You pay only for stays that happen.</p>
+          </div>
+          <div className="md:text-right">
+            <Link href="/hosts" className="inline-flex min-h-12 items-center rounded-full bg-white px-6 font-semibold text-bnb-ink hover:bg-bnb-mist">
+              List your place
+            </Link>
+          </div>
         </div>
       </section>
     </>

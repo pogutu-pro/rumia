@@ -10,9 +10,9 @@ export function GET() {
       start_url: '/',
       scope: '/',
       display: 'standalone',
-      background_color: '#F4F6F3',
-      theme_color: '#0F3B2E',
-      icons: [{ src: '/images/bnb/mark.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+      background_color: '#FCFBF9',
+      theme_color: '#ffffff',
+      icons: [{ src: '/images/logo/logo-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
     },
     { headers: { 'Content-Type': 'application/manifest+json', 'Cache-Control': 'public, max-age=0, must-revalidate' } },
   );
