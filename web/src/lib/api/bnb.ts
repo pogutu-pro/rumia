@@ -22,6 +22,9 @@ export interface BnbDetailsPayload {
   custom_rules?: string | null;
   guest_suitability?: string[];
   nearby_landmark?: string | null;
+  host_name?: string | null;
+  weekly_price?: number | null;
+  monthly_price?: number | null;
 }
 
 export interface BnbListingPayload {

@@ -220,7 +220,7 @@ class BnbService:
             "price_unit", "min_stay_nights", "max_stay_nights", "cleaning_fee",
             "security_deposit", "extra_guest_fee", "weekly_price", "monthly_price", "available_from", "available_until",
             "check_in_time", "check_out_time", "advance_notice_hours",
-            "house_rules", "custom_rules", "guest_suitability", "nearby_landmark",
+            "house_rules", "custom_rules", "guest_suitability", "nearby_landmark", "host_name",
         }
 
         if bnb is None:

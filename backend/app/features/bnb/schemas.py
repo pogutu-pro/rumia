@@ -41,6 +41,7 @@ class BnbDetailsRead(BaseModel):
     custom_rules: Optional[str] = None
     guest_suitability: List[str] = []
     nearby_landmark: Optional[str] = None
+    host_name: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -77,6 +78,7 @@ class _BnbDetailsBase(BaseModel):
     custom_rules: Optional[str] = Field(None, max_length=1000)
     guest_suitability: List[str] = []
     nearby_landmark: Optional[str] = Field(None, max_length=200)
+    host_name: Optional[str] = Field(None, max_length=80, description="Name shown to guests as the host; empty uses the site default")
 
 
 class BnbListingCreate(BaseModel):
@@ -126,6 +128,7 @@ class BnbDetailsUpdate(BaseModel):
     custom_rules: Optional[str] = Field(None, max_length=1000)
     guest_suitability: Optional[List[str]] = None
     nearby_landmark: Optional[str] = Field(None, max_length=200)
+    host_name: Optional[str] = Field(None, max_length=80, description="Name shown to guests as the host; empty uses the site default")
 
     @model_validator(mode="after")
     def reject_null_for_required_columns(self):

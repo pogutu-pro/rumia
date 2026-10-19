@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils/cn';
 import { processAndUploadImage } from '@/lib/r2/upload';
 import { getAmenityMeta } from '@/lib/utils/amenity-icons';
 import { parseYoutube } from '@/lib/utils/youtube';
+import { BNB_DEFAULT_HOST_NAME } from '@/lib/site/bnb';
 
 const GoogleLocationInput = dynamic(
   () => import('@/components/ui/google-location-input').then((m) => m.GoogleLocationInput),
@@ -78,6 +79,9 @@ export interface BnbInitialData {
     custom_rules?: string | null;
     guest_suitability?: string[];
     nearby_landmark?: string | null;
+    host_name?: string | null;
+    weekly_price?: number | null;
+    monthly_price?: number | null;
   };
 }
 
@@ -300,6 +304,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
   const [area, setArea] = useState(initialData?.area ?? '');
   const [specificLocation, setSpecificLocation] = useState(initialData?.specific_location ?? '');
   const [nearbyLandmark, setNearbyLandmark] = useState(bnb?.nearby_landmark ?? '');
+  const [hostName, setHostName] = useState(bnb?.host_name ?? '');
   const [whatsapp, setWhatsapp] = useState(agentWhatsapp ?? '');
   const [images, setImages] = useState<UploadedImage[]>(() => initImages(initialData));
   const [maxGuests, setMaxGuests] = useState(String(bnb?.max_guests ?? ''));
@@ -313,6 +318,8 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
   const [minStay, setMinStay] = useState(String(bnb?.min_stay_nights ?? '1'));
   const [maxStay, setMaxStay] = useState(String(bnb?.max_stay_nights ?? ''));
   const [cleaningFee, setCleaningFee] = useState(String(bnb?.cleaning_fee ?? ''));
+  const [weeklyPrice, setWeeklyPrice] = useState(String(bnb?.weekly_price ?? ''));
+  const [monthlyPrice, setMonthlyPrice] = useState(String(bnb?.monthly_price ?? ''));
   const [securityDeposit, setSecurityDeposit] = useState(String(bnb?.security_deposit ?? ''));
   const [extraGuestFee, setExtraGuestFee] = useState(String(bnb?.extra_guest_fee ?? ''));
   const [availableFrom, setAvailableFrom] = useState(bnb?.available_from ?? '');
@@ -428,6 +435,9 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
           custom_rules: customRules || null,
           guest_suitability: guestSuitability,
           nearby_landmark: nearbyLandmark || null,
+          host_name: hostName.trim() || null,
+          weekly_price: toNum(weeklyPrice),
+          monthly_price: toNum(monthlyPrice),
         },
       };
       const result = isEditing
@@ -497,6 +507,13 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                   placeholder="e.g. Opposite Equity Bank"
                   className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bnb-host-name">Host&rsquo;s name shown to guests <span className="text-slate-500 font-normal">optional</span></Label>
+              <Input id="bnb-host-name" value={hostName} maxLength={80} onChange={(e) => setHostName(e.target.value)}
+                placeholder="e.g. Mary Wanjiru"
+                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-xs text-slate-500">Appears as &ldquo;Hosted by …&rdquo; on RumiaBnB. Leave empty to show {BNB_DEFAULT_HOST_NAME}.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bnb-specific">Specific location detail</Label>
@@ -657,6 +674,18 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
               <Label htmlFor="bnb-deposit">Security deposit (KES) <span className="text-slate-500 font-normal">optional</span></Label>
               <Input id="bnb-deposit" type="number" min={0} value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)}
                 placeholder="e.g. 2000" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bnb-weekly">Weekly price (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Input id="bnb-weekly" type="number" min={0} value={weeklyPrice} onChange={(e) => setWeeklyPrice(e.target.value)}
+                placeholder="For 7 nights, e.g. 21000" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-xs text-slate-500">Used for stays of 7 nights or more, if cheaper than nightly.</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bnb-monthly">Monthly price (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Input id="bnb-monthly" type="number" min={0} value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)}
+                placeholder="For 30 nights, e.g. 60000" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-xs text-slate-500">Used for stays of 30 nights or more, if cheaper.</p>
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="bnb-extra-guest">Extra guest fee / person (KES) <span className="text-slate-500 font-normal">optional</span></Label>
