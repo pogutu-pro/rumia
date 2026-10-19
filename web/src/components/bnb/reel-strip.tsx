@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { Photo } from './photo';
 import { Play } from 'lucide-react';
 import type { BnbStay } from '@/lib/site/bnb-api';
 import { kes, stayCover, stayPath, stayPlace } from '@/lib/site/stay-format';
@@ -21,7 +21,7 @@ export function ReelStrip({ stays }: { stays: BnbStay[] }) {
               className="group relative block aspect-[9/16] overflow-hidden rounded-[1.5rem] bg-bnb-pine focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-bnb-forest"
             >
               {cover && (
-                <Image src={cover} alt="" fill sizes="240px" className="object-cover" priority={i < 2} />
+                <Photo src={cover} size="gallery" alt="" sizes="240px" className="object-cover" priority={i < 2} />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-bnb-ink/85 via-bnb-ink/10 to-transparent" aria-hidden />
               {stay.youtube_id && (

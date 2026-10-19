@@ -2,12 +2,12 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import type { BnbStay } from '@/lib/site/bnb-api';
 import { kes, stayFacts, stayImages, stayKind, stayPath, stayPlace } from '@/lib/site/stay-format';
 import { estimateTotal, nightsBetween, searchQuery, type StaySearch } from '@/lib/site/stay-search';
 import { SaveButton } from '@/components/ui/save-button';
+import { Photo } from './photo';
 import { cn } from '@/lib/utils/cn';
 
 const MAX_PHOTOS = 6;
@@ -47,15 +47,14 @@ export function StayCard({ stay, search, priority = false }: { stay: BnbStay; se
         >
           {slides.map((img, i) => (
             <div key={img.url} className="relative h-full w-full shrink-0 snap-center">
-              <Image
+              <Photo
                 src={img.url}
+                size="gallery"
                 alt={i === 0 ? stay.title : ''}
-                fill
                 sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, (min-width: 560px) 50vw, 100vw"
                 className="object-cover"
                 priority={priority && i === 0}
-                placeholder={img.blur ? 'blur' : 'empty'}
-                blurDataURL={img.blur ?? undefined}
+                blur={img.blur}
               />
             </div>
           ))}
