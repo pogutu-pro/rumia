@@ -11,6 +11,8 @@ interface VideoPlayerProps {
   title: string;
   /** The agent's link was a YouTube Shorts link: show a 9:16 frame. Otherwise the video is a normal 16:9 upload. */
   portrait: boolean;
+  /** Rounded card corners (default). The full-screen videos page sets false to run edge to edge. */
+  rounded?: boolean;
 }
 
 /** `embed` is the fallback: YouTube's own player in a plain iframe, used when the API cannot be reached in time. */
@@ -41,7 +43,7 @@ function formatTime(seconds: number): string {
  *   so only one video can ever be playing.
  * - The iframe ignores pointer events; every control here is ours and keyboard accessible.
  */
-export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
+export function VideoPlayer({ youtubeId, title, portrait, rounded = true }: VideoPlayerProps) {
   const [phase, setPhase] = React.useState<Phase>('poster');
   const [playing, setPlaying] = React.useState(false);
   const [muted, setMuted] = React.useState(false);
@@ -264,7 +266,7 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
       ref={frameRef}
       className={cn(
         'group relative overflow-hidden bg-black',
-        fullscreen ? 'h-full w-full' : cn(portrait ? 'aspect-[9/16]' : 'aspect-video', 'w-full rounded-2xl'),
+        fullscreen ? 'h-full w-full' : cn(portrait ? 'aspect-[9/16]' : 'aspect-video', 'w-full', rounded && 'rounded-2xl'),
       )}
     >
       {/* YouTube mounts here; pointer events off so its own chrome can never intercept input. */}
