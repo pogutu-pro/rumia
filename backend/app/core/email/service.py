@@ -19,6 +19,10 @@ class EmailService:
         self._provider = provider
 
     @property
+    def is_configured(self) -> bool:
+        return bool(getattr(self._provider, "is_configured", True))
+
+    @property
     def provider_name(self) -> str:
         return self._provider.name
 

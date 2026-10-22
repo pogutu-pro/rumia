@@ -22,7 +22,7 @@ function readInfo(): InAppBrowserInfo | null {
 
 const subscribeNever = () => () => {};
 
-export function InAppBrowserNotice() {
+export function InAppBrowserNotice({ emailAvailable = false }: { emailAvailable?: boolean }) {
   // Server renders nothing; the browser reads its own user agent once after hydration.
   const info = useSyncExternalStore(subscribeNever, readInfo, () => null);
   const [copied, setCopied] = useState(false);
@@ -51,7 +51,9 @@ export function InAppBrowserNotice() {
     <div role="note" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
       <p className="font-semibold">Google sign-in doesn&apos;t work inside {where}.</p>
       <p className="mt-1">
-        Open Rumia in {info.platform === 'ios' ? 'Safari' : 'Chrome'} to continue.
+        {emailAvailable
+          ? `Continue with your email below, or open Rumia in ${info.platform === 'ios' ? 'Safari' : 'Chrome'} to use Google.`
+          : `Open Rumia in ${info.platform === 'ios' ? 'Safari' : 'Chrome'} to continue.`}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {info.platform === 'android' && (

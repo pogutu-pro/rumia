@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { pushSupported } from "@/lib/pwa/push-support";
 
 const DISMISSED_AT_KEY = "rumia_push_prompt_dismissed_at";
 const COOLDOWN_HOURS = 72;
@@ -25,7 +26,8 @@ export function useNotificationPrompt() {
   const [shouldShow, setShouldShow] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    // No Notification API here (e.g. iPhone outside the home-screen app): nothing to ask for.
+    if (!pushSupported()) return;
 
     // Already granted or denied — never show
     if (Notification.permission !== "default") return;

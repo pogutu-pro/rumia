@@ -65,6 +65,16 @@ def safe_app_redirect(value: Optional[str]) -> Optional[str]:
 
 
 class AuthService:
+    @staticmethod
+    def sign_in_methods() -> dict:
+        """Which sign-in options this server can actually complete, so the sign-in page never offers a dead end."""
+        from app.core.email import email_service
+
+        return {
+            "google": bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET and settings.GOOGLE_REDIRECT_URI),
+            "email": email_service.is_configured,
+        }
+
     _DUMMY_HASH = "scrypt$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
     # ---- Google --------------------------------------------------------------------------
@@ -210,9 +220,10 @@ class AuthService:
 
     @staticmethod
     async def email_start(db: AsyncSession, raw_email: str, password: Optional[str] = None) -> None:
-        """Email a 6-digit code (sign-up when a password is given, otherwise forgot-password).
+        """Email a 6-digit sign-in code. With a password (RumiaBnB host sign-up) it becomes the account's password once
+        the code is confirmed.
 
-        The password is only stored, hashed, with the code; it becomes the account's password once the code is confirmed."""
+        The password is only stored, hashed, with the code."""
         email = AuthService._clean_email(raw_email)
         if password is not None:
             AuthService._validate_password(password)
@@ -252,7 +263,7 @@ class AuthService:
     async def email_verify(
         db: AsyncSession, raw_email: str, code: str, next_path: Optional[str], new_password: Optional[str] = None
     ) -> SessionTokens:
-        """Confirm the emailed code and set the account's password (the one given at sign-up, or `new_password`)."""
+        """Confirm the emailed code and sign in, setting the password chosen at sign-up or `new_password` if any."""
         email = AuthService._clean_email(raw_email)
         if new_password is not None:
             AuthService._validate_password(new_password)
@@ -274,17 +285,18 @@ class AuthService:
             raise UnauthorizedException("That code is not right. Check it and try again.")
         await db.execute(text("UPDATE public.auth_email_codes SET used_at = now() WHERE id = :i"), {"i": row.id})
         password_hash = AuthService._hash_password(new_password) if new_password is not None else row.pending_password_hash
-        if password_hash is None:
-            raise BadRequestException("Choose a password to finish.")
         user_id = await AuthService._upsert_user(db, email, None, None, None)
-        await db.execute(
-            text(
-                """INSERT INTO public.auth_credentials (user_id, password_hash) VALUES (CAST(:u AS uuid), :h)
-                   ON CONFLICT (user_id) DO UPDATE
-                     SET password_hash = :h, failed_attempts = 0, locked_until = NULL, updated_at = now()"""
-            ),
-            {"u": user_id, "h": password_hash},
-        )
+        # The code proves the email, so it signs in (and creates the account) on its own. A password is only set
+        # when one was chosen at sign-up or for a reset; an existing password is left as it is otherwise.
+        if password_hash is not None:
+            await db.execute(
+                text(
+                    """INSERT INTO public.auth_credentials (user_id, password_hash) VALUES (CAST(:u AS uuid), :h)
+                       ON CONFLICT (user_id) DO UPDATE
+                         SET password_hash = :h, failed_attempts = 0, locked_until = NULL, updated_at = now()"""
+                ),
+                {"u": user_id, "h": password_hash},
+            )
         tokens = await AuthService._login(db, user_id, email, None, None)
         tokens.next = safe_next(next_path)
         return tokens

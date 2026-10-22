@@ -13790,6 +13790,25 @@
         "title": "SetHomeCampusRequest",
         "type": "object"
       },
+      "SignInMethods": {
+        "properties": {
+          "email": {
+            "description": "False when the server cannot send email, so codes would never arrive",
+            "title": "Email",
+            "type": "boolean"
+          },
+          "google": {
+            "title": "Google",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "google",
+          "email"
+        ],
+        "title": "SignInMethods",
+        "type": "object"
+      },
       "SimilarResponse": {
         "properties": {
           "items": {
@@ -20228,6 +20247,27 @@
           }
         },
         "summary": "Revoke a session",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/methods": {
+      "get": {
+        "operationId": "sign_in_methods_api_v1_auth_methods_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInMethods"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Sign-in options this server can complete",
         "tags": [
           "Auth"
         ]

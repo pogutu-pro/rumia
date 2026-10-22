@@ -4,7 +4,7 @@ import { Bell, BellOff, Loader2 } from "lucide-react";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 export function NotificationSettings() {
-  const { isSubscribed, permission, loading, subscribe, unsubscribe } =
+  const { isSubscribed, permission, loading, supported, subscribe, unsubscribe } =
     usePushSubscription();
 
   if (loading) {
@@ -12,6 +12,23 @@ export function NotificationSettings() {
       <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
         <Loader2 className="h-5 w-5 text-slate-300 animate-spin" />
         <span className="text-sm text-slate-500">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!supported) {
+    return (
+      <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100">
+        <div className="shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
+          <BellOff className="h-5 w-5 text-slate-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-900">Push notifications</p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Not available in this browser. On iPhone, tap Share, then &quot;Add to Home Screen&quot;, and open Rumia
+            from there to turn them on.
+          </p>
+        </div>
       </div>
     );
   }

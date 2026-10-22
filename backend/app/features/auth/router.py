@@ -14,11 +14,17 @@ from app.features.auth.schemas import (
     LogoutRequest,
     PasswordLoginRequest,
     SessionTokens,
+    SignInMethods,
     TokenRequest,
 )
 from app.features.auth.service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+@router.get("/methods", response_model=SignInMethods, summary="Sign-in options this server can complete")
+async def sign_in_methods() -> SignInMethods:
+    return SignInMethods(**AuthService.sign_in_methods())
 
 
 @router.post("/google/start", response_model=GoogleStartResponse, summary="Begin Google sign-in")

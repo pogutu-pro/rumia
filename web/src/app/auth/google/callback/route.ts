@@ -1,11 +1,10 @@
-import { getApiUrl } from '@/lib/api/config';
-import { clientIpFrom, clientIpHeaders } from '@/lib/net/client-ip';
+import { clientIpFrom } from '@/lib/net/client-ip';
 import { reportAuthFailure, errorCodeForStatus } from '@/lib/auth/report';
 import { NextRequest, NextResponse } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
-import { STATE_COOKIE, sessionCookies } from '@/lib/auth/session';
-import { getCanonicalOrigin, safeNext } from '@/lib/auth/origin';
-import { profilesApi } from '@/lib/api/profiles';
+import { STATE_COOKIE } from '@/lib/auth/session';
+import { getCanonicalOrigin } from '@/lib/auth/origin';
+import { prepareSignIn, setSessionCookies } from '@/lib/auth/finish-sign-in';
 import { getPostHogClient } from '@/lib/posthog-server';
 
 function fail(origin: string, error: string, next?: string) {
@@ -70,27 +69,8 @@ export async function GET(request: NextRequest) {
     return res;
   }
 
-  let dest = safeNext(session.next);
-  try {
-    const sync = await profilesApi.syncLoginWithToken(session.access_token, {});
-    if (sync.needs_profile_completion) dest = '/account';
-  } catch (syncError) {
-    console.error('[auth/google/callback] post-login sync failed', syncError);
-    reportAuthFailure({ stage: 'post_login_sync', cause: 'sync_failed' });
-  }
-
-  // Saves made before signing in belong to the account now.
-  const deviceId = request.cookies.get('rumia_did')?.value;
-  if (deviceId) {
-    await fetch(getApiUrl('/saves/merge'), {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.access_token}`, 'X-Device-Id': deviceId, ...clientIpHeaders(clientIpFrom(request.headers)) },
-      cache: 'no-store',
-    }).catch(() => null);
-  }
-
-  const response = NextResponse.redirect(new URL(dest, origin));
-  for (const c of sessionCookies(session)) response.cookies.set(c.name, c.value, c.options);
+  const dest = await prepareSignIn(request, session);
+  const response = setSessionCookies(NextResponse.redirect(new URL(dest, origin)), session);
   response.cookies.delete({ name: STATE_COOKIE, path: '/auth/google' });
   return response;
 }

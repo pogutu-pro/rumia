@@ -43,7 +43,7 @@ function applySecurityHeaders(headers: Headers) {
  * Runs on the Node.js runtime before every matched request.
  * - Keeps the session fresh (refresh-token exchange)
  * - 301 redirects /listing/[id] and /agent/[id] UUID paths to slug-based canonical URLs
- * - Protects /dashboard, /admin, /manager and /account routes
+ * - Protects /dashboard, /admin, /manager, /account and /welcome
  * - Serves RumiaBnB on its own host by rewriting to the internal /bnb-site segment (see lib/site/hosts.ts)
  */
 export default async function proxy(request: NextRequest) {
@@ -117,7 +117,8 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/manager') ||
-    pathname.startsWith('/account');
+    pathname.startsWith('/account') ||
+    pathname === '/welcome';
 
   // ── Session refresh ───────────────────────────────────────────────────────────
   // The access token lives 30 min. When it is missing/near expiry but a refresh token exists,
@@ -184,7 +185,7 @@ export default async function proxy(request: NextRequest) {
     const loginUrl = new URL('/auth/login', request.url);
     const safePath =
       pathname.startsWith('/') && !pathname.startsWith('//')
-        ? pathname
+        ? `${pathname}${request.nextUrl.search}`
         : '/dashboard';
     loginUrl.searchParams.set('next', safePath);
     const redirect = NextResponse.redirect(loginUrl);
