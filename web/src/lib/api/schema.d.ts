@@ -5965,6 +5965,11 @@ export interface components {
             /** Email */
             email: string;
             /**
+             * Link Next
+             * @description Rumia sign-in: also email a one-tap sign-in link that lands on this relative path
+             */
+            link_next?: string | null;
+            /**
              * Password
              * @description Sign-up: the password to set once the code is confirmed
              */

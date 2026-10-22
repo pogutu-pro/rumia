@@ -5548,6 +5548,18 @@
             "title": "Email",
             "type": "string"
           },
+          "link_next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rumia sign-in: also email a one-tap sign-in link that lands on this relative path",
+            "title": "Link Next"
+          },
           "password": {
             "anyOf": [
               {

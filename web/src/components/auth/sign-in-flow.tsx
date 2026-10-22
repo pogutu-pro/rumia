@@ -36,7 +36,7 @@ async function postJson(url: string, body: Record<string, unknown>) {
 }
 
 /**
- * Sign in and sign up are one flow: Google, or a 6-digit code sent to your email. The server signs an existing
+ * Sign in and sign up are one flow: Google, or a link and 6-digit code sent to your email. The server signs an existing
  * address in and creates the account for a new one, so nobody has to know which screen they belong on.
  */
 export function SignInFlow({ next, methods, initialError }: { next: string; methods: SignInMethods; initialError: string | null }) {
@@ -69,7 +69,7 @@ export function SignInFlow({ next, methods, initialError }: { next: string; meth
     }
     setError(null);
     setBusy(true);
-    const res = await postJson('/auth/email/start', { email: clean });
+    const res = await postJson('/auth/email/start', { email: clean, next, link: true });
     setBusy(false);
     // 429: a code already went out recently, so the code step is still the right place to be.
     if (res.ok || res.status === 429) {
@@ -196,7 +196,7 @@ export function SignInFlow({ next, methods, initialError }: { next: string; meth
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               Continue with email
             </button>
-            <p className="text-center text-xs text-ink-muted">We will email you a 6-digit code. No password needed.</p>
+            <p className="text-center text-xs text-ink-muted">We will email you a sign-in link and a code. No password needed.</p>
           </form>
         )}
 
@@ -242,7 +242,8 @@ function CodeStep({
       </div>
       <h1 className="mt-5 text-[28px] font-semibold tracking-tight text-ink">Check your email</h1>
       <p className="mt-1.5 text-[15px] leading-relaxed text-ink-muted">
-        We sent a 6-digit code to <span className="font-medium text-ink">{email}</span>. Enter it here.
+        We sent a sign-in link and a 6-digit code to <span className="font-medium text-ink">{email}</span>. Tap
+        the link in the email, or enter the code here.
       </p>
 
       <form
@@ -305,7 +306,7 @@ function CodeStep({
           {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend code'}
         </button>
       </div>
-      <p className="mt-4 text-xs text-ink-muted">Not there? Check spam or promotions. The code works for 10 minutes.</p>
+      <p className="mt-4 text-xs text-ink-muted">Not there? Check spam or promotions. The link and code work once, for 10 minutes.</p>
     </div>
   );
 }

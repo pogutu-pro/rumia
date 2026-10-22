@@ -131,3 +131,16 @@ async def test_short_password_invalid_email_hourly_limit_and_send_failure(db, ma
     monkeypatch.setattr(email_pkg, "_email_service", FakeEmail(success=False))
     with pytest.raises(APIException):
         await AuthService.email_start(db, "fail@example.com")
+
+
+@pytest.mark.asyncio
+async def test_magic_link_code_signs_in_once(db, mail):
+    from urllib.parse import parse_qs, urlsplit
+
+    await AuthService.email_start(db, "linky@example.com", None, "/saved")
+    link = re.search(r"https://rumia\.co\.ke/auth/magic#\S+", mail.sent[-1]["text_content"]).group(0)
+    fields = parse_qs(urlsplit(link).fragment)
+    tokens = await AuthService.email_verify(db, fields["e"][0], fields["c"][0], fields["n"][0])
+    assert tokens.access_token and tokens.next == "/saved"
+    with pytest.raises(UnauthorizedException):
+        await AuthService.email_verify(db, fields["e"][0], fields["c"][0], fields["n"][0])
