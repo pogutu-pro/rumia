@@ -39,7 +39,19 @@ EMAIL_CODES_PER_HOUR = 5
 PASSWORD_MIN_LENGTH = 8
 LOGIN_MAX_FAILURES = 5
 LOGIN_LOCK_MINUTES = 15
+MAGIC_LINK_PAGE = "https://rumia.co.ke/auth/magic"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def magic_link(email: str, code: str, next_path: Optional[str]) -> Optional[str]:
+    """One-tap sign-in link for the code email, or None when the request did not ask for one (RumiaBnB hosts).
+
+    The email and code ride in the URL fragment, which browsers never send to a server: they stay out of logs and
+    Referer headers, and a mail scanner that opens the link cannot spend the code (the page posts it with script)."""
+    if next_path is None:
+        return None
+    fragment = urlencode({"e": email, "c": code, "n": safe_next(next_path) or "/account"})
+    return f"{MAGIC_LINK_PAGE}#{fragment}"
 
 
 class AuthDisabled(APIException):
@@ -219,7 +231,9 @@ class AuthService:
         return email
 
     @staticmethod
-    async def email_start(db: AsyncSession, raw_email: str, password: Optional[str] = None) -> None:
+    async def email_start(
+        db: AsyncSession, raw_email: str, password: Optional[str] = None, link_next: Optional[str] = None
+    ) -> None:
         """Email a 6-digit sign-in code. With a password (RumiaBnB host sign-up) it becomes the account's password once
         the code is confirmed.
 
@@ -252,7 +266,7 @@ class AuthService:
         from app.core.email import email_service
         from app.core.email.templates import sign_in_code_email
 
-        mail = sign_in_code_email(code=code, minutes=EMAIL_CODE_TTL_MINUTES)
+        mail = sign_in_code_email(code=code, minutes=EMAIL_CODE_TTL_MINUTES, link=magic_link(email, code, link_next))
         result = await email_service.send(
             to_email=email, to_name=None, subject=mail.subject, html_content=mail.html, text_content=mail.text, tags=["sign-in-code"],
         )

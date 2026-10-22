@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { AlertCircle, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { AlertCircle, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { loadYouTubeAPI, preloadYouTubeAPI } from '@/lib/youtube-api-loader';
 import { cn } from '@/lib/utils/cn';
 
@@ -298,14 +298,23 @@ export function VideoPlayer({ youtubeId, title, portrait }: VideoPlayerProps) {
             aria-label={phase === 'loading' ? `Loading ${title}` : `Play ${title}`}
             className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors hover:bg-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
           >
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-ink shadow-lg">
-              {phase === 'loading' ? (
-                <Loader2 className="h-7 w-7 animate-spin" aria-hidden />
-              ) : (
-                <Play className="ml-1 h-7 w-7 fill-current" aria-hidden />
+            {/* While YouTube loads, the poster stays and the Play button breathes instead of a spinner. */}
+            <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-ink shadow-lg">
+              {phase === 'loading' && (
+                <span className="absolute inset-0 rounded-full bg-white/70 motion-safe:animate-ping" aria-hidden />
               )}
+              <Play className="relative ml-1 h-7 w-7 fill-current" aria-hidden />
             </span>
           </button>
+        </div>
+      )}
+
+      {phase === 'loading' && !slow && (
+        <div role="status" className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
+          <p className="bg-gradient-to-t from-black/60 to-transparent px-3 pb-2 pt-6 text-xs font-medium text-white">Loading video…</p>
+          <div className="h-1 w-full overflow-hidden bg-white/25">
+            <div className="h-full w-2/5 bg-white motion-safe:animate-indeterminate" />
+          </div>
         </div>
       )}
 

@@ -51,7 +51,7 @@ async def email_start(
     data: EmailStartRequest,
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> None:
-    await AuthService.email_start(db, data.email, data.password)
+    await AuthService.email_start(db, data.email, data.password, data.link_next)
 
 
 @router.post("/email/verify", response_model=SessionTokens, summary="Sign in with the emailed code")

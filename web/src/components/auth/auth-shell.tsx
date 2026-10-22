@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BadgeCheck, Check, MapPin } from 'lucide-react';
+import { Check, MapPin } from 'lucide-react';
 
 const POINTS = [
   'Verified hostels near your campus, with real photos.',
@@ -61,25 +61,29 @@ export function AuthShell({ children }: { children: ReactNode }) {
             </ul>
           </div>
 
-          {/* A listing card as it appears on Rumia, so the panel shows the product rather than describing it. */}
+          {/* What students actually get: a listing card and a booked viewing, so the panel shows the product. */}
           <div className="relative mt-auto flex flex-col items-center gap-4 pb-12 pt-12">
             <div className="w-[300px] -rotate-1 self-center rounded-xl bg-white p-3 text-ink shadow-xl">
               <p className="text-xs font-medium text-ink-muted">Viewing · Saturday 10:00</p>
               <p className="mt-1 text-sm font-semibold">Booked. The caretaker will meet you.</p>
             </div>
             <div className="w-[300px] rounded-2xl bg-white p-4 text-ink shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]">
-              <div className="h-36 rounded-xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-slate-100" />
+              {/* A real Rumia listing (Kimathi Student Centre, near DeKUT Gate A), shown as its card appears. */}
+              <Image
+                src="/images/auth/hostel-card.webp"
+                alt=""
+                width={600}
+                height={450}
+                sizes="268px"
+                unoptimized
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
               <div className="mt-3 flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold">Sunrise Hostel</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
-                  <BadgeCheck className="h-3 w-3" /> Verified
-                </span>
+                <p className="text-sm font-semibold">Kimathi Student Centre</p>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">Near DeKUT</span>
               </div>
               <p className="mt-1 flex items-center gap-1 text-xs text-ink-muted">
-                <MapPin className="h-3 w-3" /> 6 min walk to campus
-              </p>
-              <p className="mt-2 text-sm font-semibold">
-                KES 6,500 <span className="font-normal text-ink-muted">/ month</span>
+                <MapPin className="h-3 w-3" /> Near Gate A · 5 min walk to campus
               </p>
             </div>
           </div>

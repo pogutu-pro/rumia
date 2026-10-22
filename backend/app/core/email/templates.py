@@ -249,9 +249,25 @@ def profile_completion_reminder_email(
     )
 
 
-def sign_in_code_email(*, code: str, minutes: int) -> RenderedEmail:
-    """Standalone sign-in code email (the shared layout's footer is wishlist-specific)."""
+def sign_in_code_email(*, code: str, minutes: int, link: Optional[str] = None) -> RenderedEmail:
+    """Standalone sign-in code email (the shared layout's footer is wishlist-specific).
+
+    With `link` (a sign-in from Rumia's own page) it also carries a one-tap "Sign in" button; the code stays for
+    signing in on the device the request came from."""
     safe = _esc(code)
+    button = (
+        f'<a href="{_esc(link)}" style="display:block;margin:0 0 20px;padding:14px 20px;border-radius:12px;'
+        'background:#0a7a4c;color:#ffffff;font-size:16px;font-weight:700;text-align:center;text-decoration:none;">'
+        "Sign in to Rumia</a>"
+        '<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#4b5563;">Or enter this code:</p>'
+        if link
+        else ""
+    )
+    intro = (
+        f"Tap the button to sign in. It works once and expires in {minutes} minutes."
+        if link
+        else f"Enter this code on Rumia to confirm your email. It works once and expires in {minutes} minutes."
+    )
     html_body = (
         '<!doctype html><html><body style="margin:0;background:#f9fafb;padding:24px 12px;">'
         '<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center">'
@@ -259,9 +275,9 @@ def sign_in_code_email(*, code: str, minutes: int) -> RenderedEmail:
         'background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;font-family:Arial,Helvetica,sans-serif;">'
         '<tr><td style="padding:32px 28px;">'
         '<p style="margin:0 0 20px;font-size:20px;font-weight:800;color:#0a7a4c;">Rumia</p>'
-        '<h1 style="margin:0 0 8px;font-size:22px;color:#111827;">Your verification code</h1>'
-        '<p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#4b5563;">Enter this code on Rumia to confirm your email. '
-        f'It works once and expires in {minutes} minutes.</p>'
+        f'<h1 style="margin:0 0 8px;font-size:22px;color:#111827;">{"Sign in to Rumia" if link else "Your verification code"}</h1>'
+        f'<p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#4b5563;">{intro}</p>'
+        f"{button}"
         f'<p style="margin:0 0 20px;font-size:34px;font-weight:800;letter-spacing:10px;color:#111827;'
         f'background:#f3f4f6;border-radius:12px;padding:16px;text-align:center;">{safe}</p>'
         '<p style="margin:0;font-size:12px;line-height:1.6;color:#6b7280;">If you did not ask for this, you can ignore this email. '
@@ -272,7 +288,7 @@ def sign_in_code_email(*, code: str, minutes: int) -> RenderedEmail:
         '</td></tr></table></body></html>'
     )
     text = (
-        f"Your Rumia verification code: {code}\n\nIt works once and expires in {minutes} minutes. "
-        "If you did not ask for this, ignore this email."
+        (f"Sign in to Rumia: {link}\n\nOr enter this code: {code}\n\n" if link else f"Your Rumia verification code: {code}\n\n")
+        + f"It works once and expires in {minutes} minutes. If you did not ask for this, ignore this email."
     )
     return RenderedEmail(subject=f"{code} is your Rumia verification code", html=html_body, text=text)

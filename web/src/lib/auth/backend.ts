@@ -32,8 +32,9 @@ export const authBackend = {
     post<{ url: string; state: string }>('/auth/google/start', { next, app_redirect: appRedirect }, clientIp),
   callback: (code: string, state: string, clientIp?: string) =>
     post<BackendSession>('/auth/google/callback', { code, state }, clientIp),
-  emailStart: (email: string, password: string | null, clientIp?: string) =>
-    post<{ message?: string } | null>('/auth/email/start', { email, password }, clientIp),
+  /** `linkNext` (Rumia's sign-in page only) adds a one-tap sign-in link that lands on that path. */
+  emailStart: (email: string, password: string | null, clientIp?: string, linkNext: string | null = null) =>
+    post<{ message?: string } | null>('/auth/email/start', { email, password, link_next: linkNext }, clientIp),
   emailVerify: (email: string, code: string, next: string | null, newPassword: string | null, clientIp?: string) =>
     post<BackendSession>('/auth/email/verify', { email, code, next, new_password: newPassword }, clientIp),
   passwordLogin: (email: string, password: string, next: string | null, clientIp?: string) =>

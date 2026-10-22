@@ -48,6 +48,9 @@ class DevLoginRequest(BaseModel):
 class EmailStartRequest(BaseModel):
     email: str = Field(max_length=254)
     password: Optional[str] = Field(None, max_length=128, description="Sign-up: the password to set once the code is confirmed")
+    link_next: Optional[str] = Field(
+        None, description="Rumia sign-in: also email a one-tap sign-in link that lands on this relative path"
+    )
 
 
 class EmailVerifyRequest(BaseModel):
