@@ -72,10 +72,24 @@ async def test_forgot_password_sets_a_new_one_and_unlocks(db, mail):
 
 
 @pytest.mark.asyncio
-async def test_a_code_alone_cannot_sign_in(db, mail):
+async def test_a_code_alone_signs_in_without_a_password(db, mail):
     await AuthService.email_start(db, "lonely@example.com")
-    with pytest.raises(BadRequestException):
-        await AuthService.email_verify(db, "lonely@example.com", code_from(mail), None)
+    tokens = await AuthService.email_verify(db, "lonely@example.com", code_from(mail), "/saved")
+    assert tokens.access_token and tokens.next == "/saved"
+    creds = (await db.execute(text("SELECT count(*) FROM public.auth_credentials WHERE user_id = CAST(:u AS uuid)"), {"u": tokens.user_id})).scalar_one()
+    assert creds == 0
+    # The next code signs the same account in again.
+    await AuthService.email_start(db, "lonely@example.com")
+    again = await AuthService.email_verify(db, "lonely@example.com", code_from(mail), None)
+    assert again.user_id == tokens.user_id
+
+
+@pytest.mark.asyncio
+async def test_a_code_alone_keeps_an_existing_password(db, mail):
+    await sign_up(db, mail)
+    await AuthService.email_start(db, "new.person@example.com")
+    await AuthService.email_verify(db, "new.person@example.com", code_from(mail), None)
+    assert (await AuthService.password_login(db, "new.person@example.com", "correct horse", None)).access_token
 
 
 @pytest.mark.asyncio

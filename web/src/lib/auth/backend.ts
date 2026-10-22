@@ -14,7 +14,20 @@ async function post<T>(path: string, body: unknown, clientIp?: string): Promise<
   return { ok: res.ok, status: res.status, data };
 }
 
+export interface SignInMethods {
+  google: boolean;
+  email: boolean;
+}
+
 export const authBackend = {
+  /** Which options the API can complete. Google-only when the API cannot be asked: it is the path that always worked. */
+  methods: async (): Promise<SignInMethods> => {
+    try {
+      const res = await fetch(getApiUrl('/auth/methods'), { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+      if (res.ok) return (await res.json()) as SignInMethods;
+    } catch {}
+    return { google: true, email: false };
+  },
   start: (next: string | null, appRedirect: string | null, clientIp?: string) =>
     post<{ url: string; state: string }>('/auth/google/start', { next, app_redirect: appRedirect }, clientIp),
   callback: (code: string, state: string, clientIp?: string) =>

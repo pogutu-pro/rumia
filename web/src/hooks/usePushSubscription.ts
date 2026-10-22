@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/auth/client";
+import { pushSupported } from "@/lib/pwa/push-support";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
@@ -17,11 +18,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 function canInitializeSync(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    "serviceWorker" in navigator &&
-    !!VAPID_PUBLIC_KEY
-  );
+  return pushSupported() && !!VAPID_PUBLIC_KEY;
 }
 
 export function usePushSubscription() {
@@ -30,11 +27,15 @@ export function usePushSubscription() {
   // Always starts as "checking" so the server render and the first client render are identical (reading
   // `window` here made them differ and caused a hydration error). The effect below settles it after mount.
   const [loading, setLoading] = useState(true);
+  // Starts true for the same reason; false once we know this browser cannot do web push (e.g. iPhone outside the
+  // home-screen app), so callers can explain that instead of offering a button that does nothing.
+  const [supported, setSupported] = useState(true);
 
   useEffect(() => {
     if (!canInitializeSync()) {
       // Push is not available here (no service worker or no VAPID key): nothing to check.
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSupported(false);
       setLoading(false);
       return;
     }
@@ -166,5 +167,5 @@ export function usePushSubscription() {
     return () => { cancelled = true; };
   }, [loading, permission, isSubscribed, subscribe]);
 
-  return { isSubscribed, permission, loading, subscribe, unsubscribe };
+  return { isSubscribed, permission, loading, supported, subscribe, unsubscribe };
 }

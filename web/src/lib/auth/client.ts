@@ -5,6 +5,7 @@ import {
   sessionFromToken,
   type AuthSession,
 } from '@/lib/auth/session';
+import { detectInAppBrowser } from '@/lib/auth/in-app-browser';
 
 /**
  * Browser auth client. Keeps the small surface the app was written against
@@ -78,7 +79,10 @@ export function createClient() {
       },
       signInWithOAuth: async (opts: { options?: { redirectTo?: string } } = {}) => {
         const next = opts.options?.redirectTo ? new URL(opts.options.redirectTo, window.location.origin).searchParams.get('next') : null;
-        const url = `/auth/google/start${next ? `?next=${encodeURIComponent(next)}` : ''}`;
+        const query = next ? `?next=${encodeURIComponent(next)}` : '';
+        // Google refuses sign-in inside WhatsApp/Instagram/TikTok browsers; the sign-in page explains that and
+        // offers the email code instead of letting them hit Google's error page.
+        const url = detectInAppBrowser(navigator.userAgent).isInApp ? `/auth/login${query}` : `/auth/google/start${query}`;
         window.location.assign(url);
         return { data: { url }, error: null as Error | null };
       },

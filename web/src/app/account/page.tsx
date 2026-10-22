@@ -7,7 +7,9 @@ import { campusesApi } from '@/lib/api/campuses';
 import { listingsClientApi } from '@/lib/api/listings-client';
 import { profilesApi, type UserProfile } from '@/lib/api/profiles';
 import { toursApi } from '@/lib/api/tours';
-import { signInWithGoogle } from '@/lib/auth/actions';
+import Link from 'next/link';
+import { ArrowRight, UserRoundCheck } from 'lucide-react';
+import { missingSetup, WELCOME_PATH } from '@/lib/auth/onboarding';
 import { apiClient } from '@/lib/api/client';
 import posthog from 'posthog-js';
 import type { AccountTab } from './account-tabs';
@@ -22,7 +24,6 @@ import { AccountSavedTab } from './account-saved-tab';
 import { AccountFeedbackTab } from './account-feedback-tab';
 import { AccountSettingsTab } from './account-settings-tab';
 import { AccountAgentApplicationTab } from './account-agent-application-tab';
-import { ProfileCompletionModal } from './profile-completion-modal';
 import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
 import {
   getRecentlyViewedHostels,
@@ -116,16 +117,8 @@ export default function AccountPage() {
   >(undefined);
   const [campuses, setCampuses] = useState<Campus[]>([]);
   // True when /profiles/me could not be read. We must not guess "profile incomplete" from an
-  // empty fallback: that showed the blocking completion modal to users who had already finished.
+  // empty fallback: that asked users who had already finished to set up again.
   const [profileLoadFailed, setProfileLoadFailed] = useState(false);
-  // Session-scoped fallback: if profile completion keeps failing the user can
-  // dismiss the modal for this session instead of being stranded on it. The
-  // draft is preserved and settings still lets them finish any time.
-  const [profileCompletionDismissed, setProfileCompletionDismissed] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      sessionStorage.getItem('rumia:pc:dismissed') === '1',
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -287,13 +280,6 @@ export default function AccountPage() {
     [router],
   );
 
-  const dismissProfileCompletion = useCallback(() => {
-    setProfileCompletionDismissed(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('rumia:pc:dismissed', '1');
-    }
-  }, []);
-
   useEffect(() => {
     if (hasAgent && activeTab === 'agent-application') {
       router.replace('/account?tab=overview', { scroll: false });
@@ -317,77 +303,35 @@ export default function AccountPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => signInWithGoogle('/account')}
-            className="w-full flex items-center justify-center gap-3 h-11 border border-slate-300 rounded-lg font-medium text-ink hover:bg-subtle transition-colors text-sm cursor-pointer"
+          <Link
+            href="/auth/login?next=/account"
+            className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-base font-semibold text-white transition-colors hover:bg-primary/90"
           >
-            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            Continue with Google
-          </button>
+            Sign in
+          </Link>
         </div>
       </div>
     );
   }
 
-  const missingPhone = !profile.phone?.trim();
-  const missingCampus = !profile.home_campus_confirmed_at;
-  const needsProfileCompletion =
-    !profileLoadFailed && !profileCompletionDismissed && (missingPhone || missingCampus);
+  const setupDue = !profileLoadFailed && missingSetup(profile).required;
 
   return (
     <div className="min-h-[calc(100dvh-var(--shell-header-h))]">
-      {needsProfileCompletion && (
-        <ProfileCompletionModal
-          isOpen={true}
-          currentPhone={profile.phone}
-          currentCampusId={profile.home_campus_id ?? profile.campus_id ?? null}
-          currentCampusName={profile.home_campus_name}
-          campuses={campuses}
-          requirePhone={missingPhone}
-          requireCampus={missingCampus}
-          onSuccess={(data) => {
-            setProfile((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    ...(data.phone !== undefined
-                      ? { phone: data.phone }
-                      : {}),
-                    home_campus_id:
-                      data.home_campus_id !== undefined
-                        ? data.home_campus_id
-                        : prev.home_campus_id,
-                    home_campus_name:
-                      data.home_campus_name !== undefined
-                        ? data.home_campus_name
-                        : prev.home_campus_name,
-                    home_campus_confirmed_at:
-                      data.home_campus_confirmed_at !== undefined
-                        ? data.home_campus_confirmed_at
-                        : prev.home_campus_confirmed_at,
-                  }
-                : prev,
-            );
-          }}
-          onDismiss={dismissProfileCompletion}
-        />
+      {setupDue && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <Link
+            href={`${WELCOME_PATH}?next=${encodeURIComponent('/account')}`}
+            className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 transition-colors hover:bg-emerald-100"
+          >
+            <UserRoundCheck className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+            <span className="flex-1">
+              <span className="font-semibold">Finish setting up your account.</span>{' '}
+              Add your campus and phone so we can show hostels near you and arrange viewings.
+            </span>
+            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+          </Link>
+        </div>
       )}
 
       {profileLoadFailed && (
