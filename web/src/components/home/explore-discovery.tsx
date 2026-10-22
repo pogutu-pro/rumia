@@ -17,7 +17,9 @@ export interface ExploreZone {
   count?: number;
 }
 
-type CategoryKey = 'hostel' | 'short_stay' | 'apartment';
+// Apartments are monthly rentals like hostels: they show under Hostels (and as a filter on Explore), not as their
+// own category. Short stays are the only other product.
+type CategoryKey = 'hostel' | 'short_stay';
 
 const CATEGORIES: {
   key: CategoryKey;
@@ -26,14 +28,12 @@ const CATEGORIES: {
 }[] = BNB_SEPARATE
   ? [
       { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
-      { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
       // Rumia's way in to RumiaBnB: it leaves the site, so it comes last.
       { key: 'short_stay', label: 'RumiaBnB | Short stays', icon: '/images/categories/short-stays.png' },
     ]
   : [
       { key: 'hostel', label: 'Hostels', icon: '/images/categories/hostels.png' },
       { key: 'short_stay', label: 'Short stays', icon: '/images/categories/short-stays.png' },
-      { key: 'apartment', label: 'Apartments', icon: '/images/categories/apartments.png' },
     ];
 
 interface ExploreDiscoveryProps {
@@ -78,9 +78,10 @@ export function ExploreDiscovery({
   const router = useRouter();
 
   const filtered = useMemo(() => {
-    let result = items.filter(
-      (item) => (item.property_type ?? 'hostel') === category,
-    );
+    let result = items.filter((item) => {
+      const kind = item.property_type ?? 'hostel';
+      return category === 'hostel' ? kind === 'hostel' || kind === 'apartment' : kind === category;
+    });
     if (selectedZone) {
       const target = normaliseArea(selectedZone);
       result = result.filter((item) => {
@@ -93,7 +94,6 @@ export function ExploreDiscovery({
   }, [items, category, selectedZone]);
 
   const categoryLabel = useMemo(() => {
-    if (category === 'apartment') return 'Apartments';
     if (category === 'short_stay') return 'Short stays';
     return 'Hostels';
   }, [category]);
@@ -113,7 +113,6 @@ export function ExploreDiscovery({
   const sectionSubtitle = useMemo(() => {
     if (selectedZone) return `Listings in ${formatAreaName(selectedZone)}`;
     if (category === 'hostel') return 'Student rooms near campus';
-    if (category === 'apartment') return `Monthly rentals in ${city}`;
     return `Short stays in ${city}`;
   }, [selectedZone, category, city]);
 
@@ -126,7 +125,6 @@ export function ExploreDiscovery({
     }
     const params = new URLSearchParams();
     if (selectedZone) params.set('zone', selectedZone);
-    if (category) params.set('type', category);
     const qs = params.toString();
     return qs ? `/hostels?${qs}` : '/hostels';
   }, [selectedZone, category]);

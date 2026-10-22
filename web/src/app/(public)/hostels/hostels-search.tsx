@@ -1,30 +1,20 @@
 'use client';
 
-import { formatAreaName } from '@/lib/utils/area-label';
-import { CategoryTabs } from '@/components/discovery/category-tabs';
-import { listingPath } from '@/lib/utils/listing-path';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { getStartingPrice } from '@/lib/utils/starting-price';
-import { NoPhotoTile } from '@/components/ui/no-photo-tile';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import {
-  MapPin,
-  Eye,
-  X,
-  GitCompareArrows,
-  Check,
-} from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
-import { createClient } from '@/lib/auth/client';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
-import { useFilterStore, type FilterState } from '@/stores/filter-store';
+import { FilterPanel, type ExploreFilters } from '@/components/explore/filter-panel';
+import { ResultCard } from '@/components/explore/result-card';
+import { useCampus } from '@/lib/campus-context';
+import { BNB_SEPARATE } from '@/lib/site/separation';
+import { BNB_ORIGIN } from '@/lib/site/hosts';
+import { cn } from '@/lib/utils/cn';
+import { useFilterStore, type ExploreSort } from '@/stores/filter-store';
 import { useCompareStore } from '@/stores/compare-store';
-import { ActiveFilterChips } from '@/components/ui/filter/active-filter-chips';
 import { clientSearch } from '@/lib/search/client-search';
+import { matchesRefinements, offersRoomType, sortListings, SORT_LABELS } from '@/lib/search/explore';
 import type {
   SearchListing,
   CombinedFilters,
@@ -32,25 +22,18 @@ import type {
 
 export type Listing = SearchListing;
 
-const FALLBACK_BLUR =
-  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDUwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQ1MCIgZmlsbD0iI2UyZThmMCIvPjwvc3ZnPg==';
-
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
-function ListingSkeleton() {
+export function ListingSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="bg-white border border-slate-100 rounded-2xl overflow-hidden animate-pulse"
-        >
-          <div className="aspect-4/3 bg-slate-200" />
-          <div className="p-4 space-y-2">
-            <div className="h-3 bg-slate-200 rounded w-1/2" />
-            <div className="h-4 bg-slate-200 rounded w-3/4" />
-            <div className="h-3 bg-slate-200 rounded w-full" />
-            <div className="h-3 bg-slate-200 rounded w-2/3" />
+        <div key={i} className="animate-pulse">
+          <div className="aspect-[4/3] rounded-2xl bg-slate-200" />
+          <div className="mt-3 space-y-2">
+            <div className="h-4 w-2/3 rounded bg-slate-200" />
+            <div className="h-3 w-1/2 rounded bg-slate-200" />
+            <div className="h-4 w-1/3 rounded bg-slate-200" />
           </div>
         </div>
       ))}
@@ -71,17 +54,13 @@ export default function HostelsSearch({
   hideHeader = false,
   basePath = '/hostels',
 }: HostelsSearchProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const campus = useCampus();
   const hydrationDone = useRef(false);
 
   // The search query is now driven entirely by the navbar — we read it from the
   // URL param and use it directly for client-side filtering.
   const qParamFromUrl = searchParams.get('q') ?? '';
-
-  // Optional category pre-filter from Home Explore "See all" links (?type=).
-  const propertyType = searchParams.get('type');
 
   const {
     genders,
@@ -90,15 +69,20 @@ export default function HostelsSearch({
     minPrice,
     maxPrice,
     zones,
-    setGenders,
+    maxDistance,
+    sortByNearest,
+    propertyType,
+    bathroom,
+    distance,
+    sort,
     setAmenities,
     setRoomTypes,
     setPriceRange,
-    setZones,
-    maxDistance,
-    sortByNearest,
-    setMaxDistance,
-    setSortByNearest,
+    setPropertyType,
+    setBathroom,
+    setDistance,
+    setSort,
+    applyAll,
     reset,
     hydrateFromParams,
     toParams,
@@ -121,22 +105,6 @@ export default function HostelsSearch({
   const addCompareSelection = useCompareStore((s) => s.addSelection);
   const removeCompareSelection = useCompareStore((s) => s.removeSelection);
   const isCompareSelected = useCompareStore((s) => s.isSelected);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    async function checkAuth() {
-      const {
-        data: { user },
-      } = await createClient().auth.getUser();
-      if (active && user) setIsLoggedIn(true);
-    }
-    void checkAuth();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const handleCompareToggle = useCallback(
     (item: Listing) => {
@@ -209,387 +177,283 @@ export default function HostelsSearch({
     ],
   );
 
-  // ── Client-side search ─────────────────────────────────────────────────────
-  // searchText is now driven by the URL param (navbar updates it via router.replace)
+  // ── Results ────────────────────────────────────────────────────────────────
+  // One pipeline decides what Explore shows, so the count, the panel's "Show N places" and the grid always agree:
+  // text search and structured filters (clientSearch), then kind / bathroom / distance, then the chosen order.
+  const resultsFor = useCallback(
+    (f: ExploreFilters, q: string) => {
+      const combined: CombinedFilters = {
+        searchText: q,
+        genders: f.genders,
+        amenities: f.amenities,
+        roomTypes: f.roomTypes,
+        minPrice: f.minPrice,
+        maxPrice: f.maxPrice,
+        zones: f.zones,
+      };
+      const matched = clientSearch(allListings, combined, allListings.length, 0).listings.filter((l) =>
+        matchesRefinements(l, f),
+      );
+      return sortListings(matched, f.sort);
+    },
+    [allListings],
+  );
 
-  const combinedFilters = useMemo<CombinedFilters>(
+  const applied: ExploreFilters = useMemo(
     () => ({
-      searchText: qParamFromUrl,
-      genders,
-      amenities,
-      roomTypes,
-      minPrice,
-      maxPrice,
-      zones,
+      genders, amenities, roomTypes, minPrice, maxPrice, zones, maxDistance, sortByNearest,
+      propertyType, bathroom, distance, sort,
     }),
-    [qParamFromUrl, genders, amenities, roomTypes, minPrice, maxPrice, zones],
+    [genders, amenities, roomTypes, minPrice, maxPrice, zones, maxDistance, sortByNearest, propertyType, bathroom, distance, sort],
+  );
+  const emptyFilters: ExploreFilters = useMemo(
+    () => ({
+      genders: [], amenities: [], roomTypes: [], minPrice: null, maxPrice: null, zones: [], maxDistance: null,
+      sortByNearest: false, propertyType: null, bathroom: null, distance: null, sort,
+    }),
+    [sort],
   );
 
-  const allFiltered = useMemo(
-    () =>
-      clientSearch(allListings, combinedFilters, allListings.length, 0)
-        .listings,
-    [allListings, combinedFilters],
-  );
-
-  const typedListings = useMemo(() => {
-    if (!propertyType) return allFiltered;
-    return allFiltered.filter(
-      (l) => (l.property_type ?? 'hostel') === propertyType,
-    );
-  }, [allFiltered, propertyType]);
-
-  const totalCountState = typedListings.length;
+  const results = useMemo(() => resultsFor(applied, qParamFromUrl), [resultsFor, applied, qParamFromUrl]);
+  const countFor = useCallback((draft: ExploreFilters) => resultsFor(draft, qParamFromUrl).length, [resultsFor, qParamFromUrl]);
+  const total = results.length;
 
   // ── Progressive rendering for mobile performance ──────────────────────────
   const INITIAL_DISPLAY_COUNT = 12;
   const BATCH_SIZE = 12;
-  const displayFilterKey = JSON.stringify([
-    qParamFromUrl,
-    genders,
-    amenities,
-    roomTypes,
-    minPrice,
-    maxPrice,
-    zones,
-    propertyType,
-  ]);
-  const [displayState, setDisplayState] = useState({
-    key: '',
-    limit: INITIAL_DISPLAY_COUNT,
-  });
-  const displayLimit =
-    displayState.key === displayFilterKey
-      ? displayState.limit
-      : INITIAL_DISPLAY_COUNT;
+  const displayFilterKey = JSON.stringify([qParamFromUrl, applied]);
+  const [displayState, setDisplayState] = useState({ key: '', limit: INITIAL_DISPLAY_COUNT });
+  const displayLimit = displayState.key === displayFilterKey ? displayState.limit : INITIAL_DISPLAY_COUNT;
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const showMore = useCallback(
+    () =>
+      setDisplayState((prev) => ({
+        key: displayFilterKey,
+        limit: Math.min((prev.key === displayFilterKey ? prev.limit : INITIAL_DISPLAY_COUNT) + BATCH_SIZE, total),
+      })),
+    [displayFilterKey, total],
+  );
 
   useEffect(() => {
-    if (displayLimit >= typedListings.length) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setDisplayState((prev) => {
-            const currentLimit =
-              prev.key === displayFilterKey
-                ? prev.limit
-                : INITIAL_DISPLAY_COUNT;
-            return {
-              key: displayFilterKey,
-              limit: Math.min(currentLimit + BATCH_SIZE, typedListings.length),
-            };
-          });
-        }
-      },
-      { rootMargin: '600px 0px' },
-    );
+    if (displayLimit >= total) return;
+    const observer = new IntersectionObserver((entries) => entries[0]?.isIntersecting && showMore(), {
+      rootMargin: '600px 0px',
+    });
     const target = loadMoreRef.current;
     if (target) observer.observe(target);
-    return () => {
-      if (target) observer.unobserve(target);
-    };
-  }, [displayFilterKey, displayLimit, typedListings.length]);
+    return () => observer.disconnect();
+  }, [displayLimit, total, showMore]);
 
-  const visibleListings = useMemo(() => {
-    return typedListings.slice(0, displayLimit);
-  }, [typedListings, displayLimit]);
+  const visibleListings = useMemo(() => results.slice(0, displayLimit), [results, displayLimit]);
 
-  // ── URL sync (filter changes only — query sync is now owned by the navbar) ──
+  // ── URL sync (filter changes only — query sync is owned by the navbar) ────
+  // The browser's own history API, which Next keeps in step with useSearchParams: router.replace() made every
+  // filter tap a server round trip, so on a slow connection the address bar lagged behind the results.
   useEffect(() => {
-    const filterParams = toParams();
-    const qParam = qParamFromUrl
-      ? `q=${encodeURIComponent(qParamFromUrl)}`
-      : '';
-    const filterStr = filterParams.toString();
-    const url =
-      qParam || filterStr
-        ? `${basePath}?${[qParam, filterStr].filter(Boolean).join('&')}`
-        : basePath;
-    router.replace(url, { scroll: false });
-  }, [
-    qParamFromUrl,
-    genders,
-    amenities,
-    roomTypes,
-    minPrice,
-    maxPrice,
-    zones,
-    basePath,
-    router,
-    toParams,
-  ]);
+    const filterStr = toParams().toString();
+    const qParam = qParamFromUrl ? `q=${encodeURIComponent(qParamFromUrl)}` : '';
+    const url = qParam || filterStr ? `${basePath}?${[qParam, filterStr].filter(Boolean).join('&')}` : basePath;
+    if (url !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(null, '', url);
+  }, [qParamFromUrl, applied, basePath, toParams]);
 
   const handleClearAll = useCallback(() => {
     reset();
-    if (propertyType) {
-      const rest = new URLSearchParams(searchParams.toString());
-      rest.delete('type');
-      rest.delete('q');
-      router.replace(
-        `${basePath}${rest.toString() ? `?${rest.toString()}` : ''}`,
-        { scroll: false },
-      );
-    }
-  }, [reset, propertyType, searchParams, basePath, router]);
+    setSort(sort); // clearing filters keeps the chosen order
+  }, [reset, setSort, sort]);
 
   const activeFilterCount =
     genders.length +
     amenities.length +
     roomTypes.length +
     (minPrice || maxPrice ? 1 : 0) +
-    zones.length;
+    zones.length +
+    (propertyType ? 1 : 0) +
+    (bathroom ? 1 : 0) +
+    (distance ? 1 : 0);
 
-  const hasAnyFilters = activeFilterCount > 0 || qParamFromUrl.length > 0;
+  const [panelOpen, setPanelOpen] = useState(false);
+
+  // ── Quick filters: one tap, applied at once (the panel holds the rest) ────
+  const toggleIn = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  const quickFilters = useMemo(() => {
+    const chips: { key: string; label: string; active: boolean; onToggle: () => void }[] = [
+      { key: 'walk', label: 'Walking distance', active: distance === 'walk', onToggle: () => setDistance(distance === 'walk' ? null : 'walk') },
+    ];
+    for (const [value, label] of [['bedsitter', 'Bedsitter'], ['single', 'Single room'], ['self_contained_bedsitter', 'Self-contained']] as const) {
+      if (allListings.some((l) => offersRoomType(l, value))) {
+        chips.push({ key: value, label, active: roomTypes.includes(value), onToggle: () => setRoomTypes(toggleIn(roomTypes, value)) });
+      }
+    }
+    if (allListings.some((l) => l.property_type === 'apartment')) {
+      chips.push({
+        key: 'apartment',
+        label: 'Apartments',
+        active: propertyType === 'apartment',
+        onToggle: () => setPropertyType(propertyType === 'apartment' ? null : 'apartment'),
+      });
+    }
+    chips.push(
+      { key: 'under6k', label: 'Under KES 6,000', active: maxPrice === 6000 && !minPrice, onToggle: () => (maxPrice === 6000 && !minPrice ? setPriceRange(null, null) : setPriceRange(null, 6000)) },
+      { key: 'wifi', label: 'WiFi included', active: amenities.includes('WiFi'), onToggle: () => setAmenities(toggleIn(amenities, 'WiFi')) },
+      { key: 'private', label: 'Private bathroom', active: bathroom === 'private', onToggle: () => setBathroom(bathroom === 'private' ? null : 'private') },
+    );
+    return chips;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allListings, distance, roomTypes, propertyType, maxPrice, minPrice, amenities, bathroom]);
+
+  const campusShort =
+    campus?.short_name ?? (campus?.name === 'Dedan Kimathi University of Technology' ? 'DeKUT' : campus?.name) ?? 'campus';
+  const shortStaysHref = BNB_SEPARATE ? `${BNB_ORIGIN}/` : '/bnb';
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-0 pb-8 lg:pb-10">
-      <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        <CategoryTabs />
-
-        {/* Active filter chips — rendered directly, no search card wrapper */}
-        <ActiveFilterChips
-          filters={{
-            genders,
-            amenities,
-            roomTypes,
-            minPrice,
-            maxPrice,
-            zones,
-            maxDistance,
-            sortByNearest,
-          }}
-          onRemoveGender={(v) => setGenders(genders.filter((g) => g !== v))}
-          onRemoveAmenity={(v) =>
-            setAmenities(amenities.filter((a) => a !== v))
-          }
-          onRemoveRoomType={(v) =>
-            setRoomTypes(roomTypes.filter((r) => r !== v))
-          }
-          onRemovePrice={() => setPriceRange(null, null)}
-          onRemoveZone={(v) => setZones(zones.filter((z) => z !== v))}
-          onRemoveMaxDistance={() => setMaxDistance(null)}
-          onRemoveSortByNearest={() => setSortByNearest(false)}
-          onClearAll={handleClearAll}
-        />
-
-        {/* Results count */}
-        <div className="mb-5 mt-3 px-1">
-          <h1 className="text-sm text-ink-muted font-semibold">
-            {totalCountState}{' '}
-            {propertyType === 'apartment'
-              ? totalCountState === 1
-                ? 'apartment'
-                : 'apartments'
-              : totalCountState === 1
-                ? 'hostel'
-                : 'hostels'}{' '}
-            found
-            {hasAnyFilters && (
-              <span className="text-ink-muted">
-                {' '}
-                ·{' '}
-                <button
-                  type="button"
-                  onClick={handleClearAll}
-                  className="text-rose-400 hover:text-rose-500 cursor-pointer"
-                >
-                  Clear all
-                </button>
+    <div className="min-h-screen bg-page pb-10">
+      {/* Sticky filter bar under the app header, Airbnb/Zillow style: Filters with its count, then one-tap chips. */}
+      <div className="sticky top-[var(--shell-header-h)] z-30 border-b border-line bg-page/95 backdrop-blur supports-[backdrop-filter]:bg-page/80">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto px-4 py-3 scrollbar-none lg:flex-wrap lg:overflow-visible lg:px-8">
+          <button
+            type="button"
+            onClick={() => setPanelOpen(true)}
+            className={cn(
+              'inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              activeFilterCount > 0 ? 'border-ink bg-ink text-white' : 'border-slate-300 bg-white text-ink hover:border-ink',
+            )}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-xs font-bold text-ink">
+                {activeFilterCount}
               </span>
             )}
-          </h1>
+          </button>
+          <span className="h-6 w-px shrink-0 bg-line" aria-hidden />
+          {quickFilters.map((c) => (
+            <button
+              key={c.key}
+              type="button"
+              aria-pressed={c.active}
+              onClick={c.onToggle}
+              className={cn(
+                'inline-flex min-h-10 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                c.active ? 'border-ink bg-ink text-white' : 'border-slate-300 bg-white text-ink hover:border-ink',
+              )}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 lg:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 pb-5 pt-5">
+          <div>
+            {/* Area pages bring their own heading (hideHeader): one h1 per page. */}
+            {!hideHeader && (
+              <h1 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
+                {qParamFromUrl ? `Results for “${qParamFromUrl}”` : `Places to rent near ${campusShort}`}
+              </h1>
+            )}
+            <p className={cn('text-sm text-ink-muted', !hideHeader && 'mt-0.5')}>
+              {total} {total === 1 ? 'place' : 'places'}
+              {propertyType === 'apartment' ? ' · apartments' : propertyType === 'hostel' ? ' · hostels' : ' · hostels and apartments'}
+              {(activeFilterCount > 0 || qParamFromUrl) && (
+                <>
+                  {' · '}
+                  <button type="button" onClick={handleClearAll} className="font-semibold text-ink underline underline-offset-4">
+                    Clear filters
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
+          <label className="inline-flex items-center gap-2 text-sm text-ink-muted">
+            Sort
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as ExploreSort)}
+              className="min-h-10 rounded-full border border-slate-300 bg-white px-3 pr-8 text-sm font-semibold text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
+            >
+              {(Object.keys(SORT_LABELS) as ExploreSort[]).map((k) => (
+                <option key={k} value={k}>
+                  {SORT_LABELS[k]}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
-        {/* Listing Grid */}
-        {typedListings.length > 0 ? (
+        {total > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleListings.map((item) => {
-                const sorted = [...(item.listing_images || [])].sort(
-                  (a, b) => a.display_order - b.display_order,
-                );
-                const imageUrl = sorted[0]?.r2_url;
-                const blurDataUrl = sorted[0]?.blur_data_url;
-                const href = item.slug
-                  ? `${listingPath(item)}`
-                  : `/listing/${item.id}`;
-
-                const distanceBadge = getDistanceBadgeText(
-                  item.distance_category,
-                );
-                const isSelected = isCompareSelected(item.id);
-
-                const priceDisplay = `From KES ${getStartingPrice(item, item.listing_room_types).toLocaleString()}/mo`;
-
-                let areaDisplay = item.area ? formatAreaName(item.area) : 'Hostel Area';
-                if (item.specific_location) {
-                  areaDisplay = `${areaDisplay} · ${item.specific_location}`;
-                }
-
-                return (
-                  <div key={item.id} className="relative group/card">
-                    <Link
-                      href={href}
-                      className={`group flex flex-col bg-white rounded-2xl overflow-hidden md:hover:shadow-lg md:transition-shadow md:duration-200 h-full cursor-pointer ${
-                        isSelected
-                          ? 'border-2 border-emerald-500 shadow-md shadow-emerald-100'
-                          : 'border border-slate-100'
-                      }`}
-                    >
-                      <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
-                        {imageUrl ? (
-                          <Image
-                            src={imageUrl}
-                            alt={`${item.title} — student hostel near DeKUT`}
-                            fill
-                            className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-105"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            placeholder="blur"
-                            blurDataURL={blurDataUrl || FALLBACK_BLUR}
-                          />
-                        ) : (
-                          <NoPhotoTile />
-                        )}
-
-                        {distanceBadge && (
-                          <div className="absolute top-3 left-3 bg-slate-900/85 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white">
-                            {distanceBadge}
-                          </div>
-                        )}
-
-                        {item.gender && item.gender !== 'mixed' && (
-                          <div
-                            className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs text-white ${
-                              item.gender === 'female'
-                                ? 'bg-pink-600'
-                                : 'bg-blue-600'
-                            }`}
-                          >
-                            {item.gender === 'female'
-                              ? 'Ladies Only'
-                              : 'Gents Only'}
-                          </div>
-                        )}
-
-                        {!item.area && (
-                          <div className="absolute top-3 right-3 bg-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-xs text-slate-900 border border-slate-100">
-                            {priceDisplay.split('/')[0]}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-4 flex-1 flex flex-col">
-                        <h2 className="font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
-                          {item.title}
-                        </h2>
-
-                        <div className="flex items-center gap-1 text-slate-500 text-xs font-semibold mt-1 mb-2 truncate">
-                          <MapPin className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{areaDisplay}</span>
-                        </div>
-
-                        <p className="text-slate-500 text-xs line-clamp-2 mb-4 flex-1">
-                          {item.description}
-                        </p>
-
-                        <div className="mb-3 pt-2 border-t border-slate-100">
-                          <p className="text-sm font-bold text-primary">
-                            {priceDisplay}
-                          </p>
-                        </div>
-
-                        <div className="border-t border-slate-100 pt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-xs text-slate-500">
-                          <span className="min-w-0 truncate">
-                            Agent: {item.agents?.name ?? 'Rumia Agent'}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleCompareToggle(item);
-                              }}
-                              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors cursor-pointer border-2 touch-manipulation ${
-                                isSelected
-                                  ? 'bg-primary text-white border-primary shadow-sm'
-                                  : 'bg-white text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white shadow-xs'
-                              }`}
-                            >
-                              {isSelected ? (
-                                <>
-                                  <Check className="h-3.5 w-3.5" />
-                                  Added
-                                </>
-                              ) : (
-                                <>
-                                  <GitCompareArrows className="h-3.5 w-3.5" />
-                                  Compare
-                                </>
-                              )}
-                            </button>
-                            <span className="font-semibold text-primary group-hover:underline flex items-center gap-0.5 cursor-pointer">
-                              <Eye className="h-3.5 w-3.5" /> View Details
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
+              {visibleListings.map((item, i) => (
+                <ResultCard
+                  key={item.id}
+                  item={item}
+                  priority={i < 3}
+                  comparing={isCompareSelected(item.id)}
+                  onToggleCompare={() => handleCompareToggle(item)}
+                />
+              ))}
             </div>
 
-            {/* Infinite scroll sentinel & manual fallback for progressive loading */}
-            {displayLimit < typedListings.length && (
-              <div
-                ref={loadMoreRef}
-                className="py-8 flex flex-col items-center justify-center gap-2"
-              >
+            {displayLimit < total && (
+              <div ref={loadMoreRef} className="flex justify-center py-10">
                 <button
                   type="button"
-                  onClick={() =>
-                    setDisplayState((prev) => {
-                      const currentLimit =
-                        prev.key === displayFilterKey
-                          ? prev.limit
-                          : INITIAL_DISPLAY_COUNT;
-                      return {
-                        key: displayFilterKey,
-                        limit: Math.min(
-                          currentLimit + BATCH_SIZE,
-                          typedListings.length,
-                        ),
-                      };
-                    })
-                  }
-                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs touch-manipulation cursor-pointer"
+                  onClick={showMore}
+                  className="inline-flex min-h-11 items-center rounded-full border border-ink px-6 text-sm font-semibold text-ink hover:bg-ink hover:text-white"
                 >
-                  Show more ({typedListings.length - displayLimit} remaining)
+                  Show more places ({total - displayLimit})
                 </button>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-24 bg-white border border-slate-100 rounded-2xl">
-            <p className="text-slate-500 font-semibold text-sm max-w-sm mx-auto">
-              No hostels match your search. Try different terms or clear your
-              filters.
+          <div className="rounded-3xl border border-line bg-raised px-6 py-16 text-center">
+            <p className="text-lg font-semibold text-ink">No exact matches</p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">
+              Try removing a filter, widening your price range or searching a nearby area.
             </p>
             <button
               type="button"
               onClick={handleClearAll}
-              className="mt-5 inline-flex items-center px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
+              className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-ink px-5 text-sm font-semibold text-white hover:bg-ink/90"
             >
               Clear all filters
             </button>
           </div>
         )}
 
+        {/* Short stays are a different product (RumiaBnB); apartments above are monthly rentals like the hostels. */}
+        <a
+          href={shortStaysHref}
+          className="mt-12 flex items-center justify-between gap-4 rounded-2xl border border-line bg-raised px-5 py-4 transition-colors hover:border-ink"
+        >
+          <span>
+            <span className="block text-[15px] font-semibold text-ink">Staying just a few nights?</span>
+            <span className="block text-sm text-ink-muted">Furnished short stays are on RumiaBnB.</span>
+          </span>
+          <ArrowRight className="h-5 w-5 shrink-0 text-ink" aria-hidden />
+        </a>
+
         <div className="mt-8">
           <EarlyAccessBanner hostelCount={allListings.length} />
         </div>
       </div>
+
+      <FilterPanel
+        open={panelOpen}
+        onOpenChange={setPanelOpen}
+        current={applied}
+        listings={allListings}
+        countFor={countFor}
+        emptyFilters={emptyFilters}
+        onApply={(draft) => {
+          applyAll(draft);
+          setPanelOpen(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }

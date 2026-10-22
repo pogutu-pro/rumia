@@ -6,13 +6,13 @@ import { cn } from '@/lib/utils/cn';
 import { BNB_SEPARATE } from '@/lib/site/separation';
 import { BNB_ORIGIN } from '@/lib/site/hosts';
 
-type Key = 'all' | 'hostel' | 'short_stay' | 'apartment';
+// Apartments are a filter on Explore (kind of place), not a category beside RumiaBnB.
+type Key = 'all' | 'hostel' | 'short_stay';
 
 const TABS: Array<{ key: Key; label: string }> = BNB_SEPARATE
   ? [
       { key: 'all', label: 'All' },
       { key: 'hostel', label: 'Hostels' },
-      { key: 'apartment', label: 'Apartments' },
       // Last once separated: it leaves Rumia for RumiaBnB.
       { key: 'short_stay', label: 'RumiaBnB | Short stays' },
     ]
@@ -20,7 +20,6 @@ const TABS: Array<{ key: Key; label: string }> = BNB_SEPARATE
       { key: 'all', label: 'All' },
       { key: 'hostel', label: 'Hostels' },
       { key: 'short_stay', label: 'Short stays' },
-      { key: 'apartment', label: 'Apartments' },
     ];
 
 /**
