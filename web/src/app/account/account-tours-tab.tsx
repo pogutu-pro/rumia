@@ -24,6 +24,7 @@ import { TourCountdown } from '@/components/tour-countdown';
 import { formatTourPrice } from '@/lib/constants/tour-pricing';
 import { cancelStudentTourBookingAction } from '@/app/actions/student-tour-bookings';
 import { EditTourModal } from './edit-tour-modal';
+import { AccountPageHeader } from './account-ui';
 import type { TourBooking, TourTimeWindow } from '@/types';
 
 interface TourBookingWithListing extends TourBooking {
@@ -153,45 +154,24 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
         />
       )}
 
-      {/* Top Header & Back Button */}
-      <div className="flex items-center justify-between">
-        {onBackToOverview ? (
-          <button
-            onClick={onBackToOverview}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </button>
-        ) : (
-          <Link
-            href="/account?tab=overview"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </Link>
-        )}
-
-        <Link
-          href="/account/book-tour"
-          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors shadow-sm shrink-0"
-        >
-          <CalendarPlus className="h-3.5 w-3.5" />
-          Book Another Tour
-        </Link>
-      </div>
-
-      {/* Banner */}
-      <div className="bg-subtle border border-line rounded-2xl p-4 sm:px-6">
-        <h2 className="text-base font-bold text-ink">Your Tour Bookings</h2>
-        <p className="text-xs text-ink-muted">
-          {upcomingCount} upcoming · {completedCount} completed · {cancelledCount} cancelled
-        </p>
-      </div>
+      <AccountPageHeader
+        title="Tours & viewings"
+        description={`${upcomingCount} upcoming · ${completedCount} completed · ${cancelledCount} cancelled`}
+        onBack={onBackToOverview}
+        action={
+            <Link
+              href="/account/book-tour"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-ink px-4 text-sm font-semibold text-page transition-opacity hover:opacity-90"
+            >
+              <CalendarPlus className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">Book a tour</span>
+              <span className="sm:hidden">Book</span>
+            </Link>
+        }
+      />
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-line pb-2">
+      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" role="tablist" aria-label="Filter tours">
         {(
           [
             { id: 'all', label: 'All Tours', count: bookings.length },
@@ -203,15 +183,17 @@ export function AccountToursTab({ onBackToOverview }: AccountToursTabProps) {
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+            role="tab"
+            aria-selected={activeFilter === filter.id}
+            className={`inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-colors ${
               activeFilter === filter.id
-                ? 'bg-ink text-white'
-                : 'text-ink-muted hover:bg-slate-100'
+                ? 'border-ink bg-ink text-page'
+                : 'border-line bg-raised text-ink hover:border-ink/40'
             }`}
           >
             <span>{filter.label}</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-              activeFilter === filter.id ? 'bg-slate-800 text-white' : 'bg-slate-200 text-ink-muted'
+            <span className={`text-xs tabular-nums ${
+              activeFilter === filter.id ? 'text-page/70' : 'text-ink-muted'
             }`}>
               {filter.count}
             </span>

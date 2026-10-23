@@ -639,19 +639,8 @@
   }
 }
 
-/* ========================================
-   APPLICATION SHELL UTILITIES
-   Token-backed helpers so shell and page components share one palette.
-   ======================================== */
-@layer components {
-  .bg-page { background-color: hsl(var(--page)); }
-  .bg-raised { background-color: hsl(var(--page-raised)); }
-  .bg-subtle { background-color: hsl(var(--page-subtle)); }
-  .bg-ink { background-color: hsl(var(--ink)); }
-  .text-ink { color: hsl(var(--ink)); }
-  .text-ink-muted { color: hsl(var(--ink-muted)); }
-  .border-line { border-color: hsl(var(--line)); }
-}
+/* Application shell colours (bg-page, bg-raised, bg-subtle, text-ink, text-ink-muted, border-line) are
+   registered in themes.css @theme, so they work with variants and opacity like any Tailwind colour. */
 
 /* Mobile shell: header height and the fixed bottom bar. The bar sets data-bottom-nav on <html> while it is shown. */
 @media (min-width: 1024px) {

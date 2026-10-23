@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api/client';
+import { AccountPageHeader } from './account-ui';
 import {
   Heart,
   MapPin,
@@ -301,34 +302,20 @@ export function AccountSavedTab({ onBackToOverview }: AccountSavedTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Back Button & Header */}
-      <div className="flex items-center justify-between">
-        {onBackToOverview ? (
-          <button
-            onClick={onBackToOverview}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </button>
-        ) : (
+      <AccountPageHeader
+        title="Wishlist"
+        description="Places you've saved. Select two or more to compare them side by side."
+        onBack={onBackToOverview}
+        action={
           <Link
-            href="/account?tab=overview"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
+            href="/hostels"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-raised px-4 text-sm font-semibold text-ink transition-colors hover:bg-subtle"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
+            Explore
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-        )}
-
-        <Link
-          href="/hostels"
-          className="inline-flex items-center gap-1 h-9 px-3.5 rounded-xl bg-raised border border-line text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors"
-        >
-          Continue Browsing
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
+        }
+      />
 
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-subtle border border-line rounded-2xl p-4 sm:px-6">
