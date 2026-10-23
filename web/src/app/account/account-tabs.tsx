@@ -3,7 +3,14 @@
 import { LayoutDashboard, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-export type AccountTab = 'overview' | 'tours' | 'saved' | 'feedback' | 'settings' | 'agent-application';
+export type AccountTab =
+  | 'overview'
+  | 'tours'
+  | 'saved'
+  | 'feedback'
+  | 'settings'
+  | 'agent-application'
+  | 'find-a-hostel';
 
 const TABS: Array<{ id: 'overview' | 'settings'; label: string; icon: typeof LayoutDashboard }> = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },

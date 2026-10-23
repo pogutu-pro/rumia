@@ -1,14 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { WishlistNotificationPreferences } from '@/components/settings/WishlistNotificationPreferences';
-import { createClient } from '@/lib/auth/client';
-import { saveProfile } from '@/lib/api/profile-save';
-import { User, Phone, Mail, GraduationCap, Loader2, Check, LogOut, AlertTriangle, X, ArrowLeft } from 'lucide-react';
+import { saveProfile, type ProfileSaveInput } from '@/lib/api/profile-save';
+import { Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { AccountPageHeader, SettingsGroup, SignOutRow } from './account-ui';
 
 interface AccountSettingsTabProps {
   profile: {
@@ -30,267 +28,245 @@ interface AccountSettingsTabProps {
   onBackToOverview?: () => void;
 }
 
+type FieldId = 'full_name' | 'phone' | 'campus';
+
+interface FieldConfig {
+  id: FieldId;
+  label: string;
+  hint: string;
+  placeholder: string;
+  type: 'text' | 'tel';
+  autoComplete: string;
+}
+
+const FIELDS: FieldConfig[] = [
+  {
+    id: 'full_name',
+    label: 'Full name',
+    hint: 'The name agents see when you book a viewing.',
+    placeholder: 'Your full name',
+    type: 'text',
+    autoComplete: 'name',
+  },
+  {
+    id: 'phone',
+    label: 'Phone number',
+    hint: 'Agents and Rumia managers use this to reach you on WhatsApp.',
+    placeholder: '0712 345 678',
+    type: 'tel',
+    autoComplete: 'tel',
+  },
+  {
+    id: 'campus',
+    label: 'University or campus',
+    hint: 'We use it to show hostels near you first.',
+    placeholder: 'Start typing or choose from the list',
+    type: 'text',
+    autoComplete: 'off',
+  },
+];
+
+/**
+ * One field shown as a read-only row with its own Edit. Editing opens the input in place with
+ * Save / Cancel, and only one row is open at a time, so the page never turns into a long form.
+ */
+function EditableRow({
+  field,
+  value,
+  editing,
+  locked,
+  onEdit,
+  onCancel,
+  onSave,
+  campusListId,
+}: {
+  field: FieldConfig;
+  value: string;
+  editing: boolean;
+  locked: boolean;
+  onEdit: () => void;
+  onCancel: () => void;
+  onSave: (next: string) => Promise<boolean>;
+  campusListId?: string;
+}) {
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = `settings-${field.id}`;
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const startEdit = () => {
+    setDraft(value);
+    onEdit();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const ok = await onSave(draft.trim());
+    setSaving(false);
+    if (!ok) inputRef.current?.focus();
+  };
+
+  return (
+    <div className={editing ? 'px-4 py-4 sm:px-5' : 'px-4 py-3.5 sm:px-5'}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <label htmlFor={editing ? inputId : undefined} className="block text-[15px] font-semibold text-ink">
+            {field.label}
+          </label>
+          {editing ? (
+            <p className="mt-0.5 text-[13px] text-ink-muted">{field.hint}</p>
+          ) : (
+            <p className={`mt-0.5 truncate text-sm ${value ? 'text-ink-muted' : 'italic text-ink-muted/80'}`}>
+              {value || 'Not provided'}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={editing ? onCancel : startEdit}
+          disabled={locked || saving}
+          className="inline-flex min-h-11 shrink-0 items-center px-1 text-sm font-semibold text-ink underline underline-offset-4 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          {editing ? 'Cancel' : value ? 'Edit' : 'Add'}
+        </button>
+      </div>
+
+      {editing && (
+        <form onSubmit={handleSubmit} className="mt-3 space-y-3">
+          <input
+            ref={inputRef}
+            id={inputId}
+            type={field.type}
+            inputMode={field.type === 'tel' ? 'tel' : undefined}
+            autoComplete={field.autoComplete}
+            list={campusListId}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={field.placeholder}
+            className="h-12 w-full rounded-xl border border-line bg-raised px-3.5 text-base text-ink placeholder:text-ink-muted/70 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="submit"
+            disabled={saving || !draft.trim() || draft.trim() === value}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-ink px-5 text-sm font-semibold text-page transition-opacity hover:opacity-90 disabled:opacity-40"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+            {saving ? 'Saving' : 'Save'}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 export function AccountSettingsTab({
   profile,
   campuses = [],
   onProfileUpdate,
   onBackToOverview,
 }: AccountSettingsTabProps) {
-  const router = useRouter();
-  const [fullName, setFullName] = useState(profile.full_name || '');
-  const [phone, setPhone] = useState(profile.phone || '');
-  const [campusInput, setCampusInput] = useState<string>(() => {
-    if (profile.home_campus_name) return profile.home_campus_name;
-    if (profile.home_campus_id) {
-      const matched = campuses.find((c) => c.id === profile.home_campus_id);
-      if (matched) return matched.name;
-    }
-    return '';
-  });
-  const [saving, setSaving] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [editing, setEditing] = useState<FieldId | null>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
-  // Sign out confirmation modal state
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
+  const campusName =
+    profile.home_campus_name ??
+    (profile.home_campus_id ? campuses.find((c) => c.id === profile.home_campus_id)?.name : null) ??
+    '';
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName.trim() || !phone.trim()) return;
-
-    const campusValue = campusInput.trim();
-    setSaving(true);
-    const result = await saveProfile({
-      full_name: fullName.trim(),
-      phone: phone.trim(),
-      campus_input: campusValue || undefined,
-    });
-
-    setSaving(false);
-    if (result.success) {
-      setSavedSuccess(true);
-      onProfileUpdate({
-        full_name: result.updated.full_name ?? fullName.trim(),
-        phone: result.updated.phone ?? phone.trim(),
-        ...(result.updated.home_campus_id !== undefined
-          ? { home_campus_id: result.updated.home_campus_id }
-          : {}),
-        ...(result.updated.home_campus_name !== undefined
-          ? { home_campus_name: result.updated.home_campus_name }
-          : {}),
-        ...(result.updated.home_campus_confirmed_at !== undefined
-          ? { home_campus_confirmed_at: result.updated.home_campus_confirmed_at }
-          : {}),
-      });
-      toast.success('Account profile updated');
-      setTimeout(() => setSavedSuccess(false), 3000);
-    } else {
-      toast.error(result.error || 'Failed to update profile');
-    }
+  const values: Record<FieldId, string> = {
+    full_name: profile.full_name ?? '',
+    phone: profile.phone ?? '',
+    campus: campusName,
   };
 
-  const handleConfirmLogout = async () => {
-    setLoggingOut(true);
-    const authClient = createClient();
-    await authClient.auth.signOut({ scope: 'local' });
-    toast.success('Signed out successfully');
-    router.push('/');
-    router.refresh();
+  // "Notifications" on the hub deep-links here.
+  useEffect(() => {
+    if (window.location.hash === '#notifications') {
+      notificationsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+  const saveField = async (id: FieldId, next: string): Promise<boolean> => {
+    const input: ProfileSaveInput =
+      id === 'full_name' ? { full_name: next } : id === 'phone' ? { phone: next } : { campus_input: next };
+    const result = await saveProfile(input);
+    if (!result.success) {
+      toast.error(result.error || 'Could not save. Please try again.');
+      return false;
+    }
+    onProfileUpdate({
+      full_name: result.updated.full_name ?? values.full_name,
+      phone: result.updated.phone ?? values.phone,
+      ...(result.updated.home_campus_id !== undefined ? { home_campus_id: result.updated.home_campus_id } : {}),
+      ...(result.updated.home_campus_name !== undefined ? { home_campus_name: result.updated.home_campus_name } : {}),
+      ...(result.updated.home_campus_confirmed_at !== undefined
+        ? { home_campus_confirmed_at: result.updated.home_campus_confirmed_at }
+        : {}),
+    });
+    toast.success('Saved');
+    setEditing(null);
+    return true;
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
-      {/* Back to Overview Header */}
-      <div className="flex items-center justify-between">
-        {onBackToOverview ? (
-          <button
-            onClick={onBackToOverview}
-            className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </button>
-        ) : (
-          <Link
-            href="/account?tab=overview"
-            className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </Link>
-        )}
-      </div>
+    <div className="mx-auto max-w-2xl space-y-8">
+      <AccountPageHeader
+        title="Personal info"
+        description="Your contact details and campus, used for tour bookings and hostel requests."
+        onBack={onBackToOverview}
+      />
 
-      {/* 1. Account Profile Details */}
-      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-5">
-        <div>
-          <h3 className="text-sm font-bold text-ink">Personal Information</h3>
-          <p className="text-xs text-ink-muted mt-0.5">
-            Update your contact details and home university for hostel tour bookings.
-          </p>
+      <SettingsGroup title="Profile">
+        {FIELDS.map((field) => (
+          <EditableRow
+            key={field.id}
+            field={field}
+            value={values[field.id]}
+            editing={editing === field.id}
+            locked={editing !== null && editing !== field.id}
+            onEdit={() => setEditing(field.id)}
+            onCancel={() => setEditing(null)}
+            onSave={(next) => saveField(field.id, next)}
+            campusListId={field.id === 'campus' ? 'settings-campus-list' : undefined}
+          />
+        ))}
+        <div className="flex items-start justify-between gap-4 px-4 py-3.5 sm:px-5">
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold text-ink">Email address</p>
+            <p className="mt-0.5 truncate text-sm text-ink-muted">{profile.email}</p>
+          </div>
+          <span className="inline-flex min-h-11 items-center gap-1.5 text-xs font-medium text-ink-muted" title="Your sign-in email">
+            <Lock className="h-3.5 w-3.5" aria-hidden />
+            Sign-in email
+          </span>
         </div>
+      </SettingsGroup>
+      <datalist id="settings-campus-list">
+        {campuses.map((c) => (
+          <option key={c.id} value={c.name} />
+        ))}
+      </datalist>
 
-        <form onSubmit={handleSaveProfile} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0712 345 678"
-                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">University / Campus</label>
-            <div className="relative">
-              <GraduationCap className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-              <input
-                type="text"
-                list="settings-campus-list"
-                value={campusInput}
-                onChange={(e) => setCampusInput(e.target.value)}
-                placeholder="Start typing or choose from the list"
-                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <datalist id="settings-campus-list">
-                {campuses.map((c) => (
-                  <option key={c.id} value={c.name} />
-                ))}
-              </datalist>
-            </div>
-            <p className="text-[11px] text-ink-muted mt-1">
-              Your home university, used to tailor listings and tours.
+      <div id="notifications" ref={notificationsRef} className="scroll-mt-[calc(var(--shell-header-h)+1rem)]">
+        <SettingsGroup title="Notifications">
+          <div className="space-y-3 p-3 sm:p-4">
+            <p className="px-1 text-[13px] text-ink-muted">
+              Alerts for tour updates and price drops on places in your wishlist.
             </p>
+            <NotificationSettings />
+            <WishlistNotificationPreferences email={profile.email} />
           </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-              <input
-                type="email"
-                value={profile.email}
-                disabled
-                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-line bg-subtle text-ink-muted cursor-not-allowed"
-              />
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex min-h-11 items-center gap-1.5 px-4 py-2 rounded-xl bg-ink hover:opacity-90 text-white text-xs font-semibold transition-colors disabled:opacity-50"
-            >
-              {saving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : savedSuccess ? (
-                <Check className="h-3.5 w-3.5 text-emerald-400" />
-              ) : null}
-              {saving ? 'Saving...' : savedSuccess ? 'Saved' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
+        </SettingsGroup>
       </div>
 
-      {/* 2. Notifications Preferences */}
-      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-4">
-        <div>
-          <h3 className="text-sm font-bold text-ink">Notifications & Alerts</h3>
-          <p className="text-xs text-ink-muted mt-0.5">
-            Manage alerts for tour updates and price drops on hostels in your wishlist.
-          </p>
-        </div>
-
-        <NotificationSettings />
-
-        <WishlistNotificationPreferences email={profile.email} />
-      </div>
-
-      {/* 3. Log Out Section */}
-      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-3">
-        <div>
-          <h3 className="text-sm font-bold text-ink">Account Session</h3>
-          <p className="text-xs text-ink-muted mt-0.5">
-            Sign out of your account on this device.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setShowLogoutModal(true)}
-          className="inline-flex min-h-11 items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100/80 text-red-700 text-xs font-semibold transition-colors cursor-pointer"
-        >
-          <LogOut className="h-4 w-4" />
-          Log Out of Rumia
-        </button>
-      </div>
-
-      {/* Logout Confirmation Modal */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between">
-              <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                <AlertTriangle className="h-5 w-5" />
-              </div>
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                disabled={loggingOut}
-                className="p-1 rounded-full text-slate-600 hover:text-ink-muted hover:bg-slate-100"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-1">
-              <h4 className="text-base font-bold text-ink">Leave Rumia?</h4>
-              <p className="text-xs text-ink-muted leading-relaxed">
-                Are you sure you want to log out of your account? You will need to sign in again to access your wishlist and tour bookings.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                disabled={loggingOut}
-                className="flex-1 h-11 rounded-xl border border-line text-xs font-semibold text-slate-700 hover:bg-subtle transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmLogout}
-                disabled={loggingOut}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-semibold text-white transition-colors disabled:opacity-50"
-              >
-                {loggingOut ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                {loggingOut ? 'Logging out...' : 'Log Out'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SettingsGroup title="Session">
+        <SignOutRow />
+      </SettingsGroup>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { submitAgentApplicationAction, getMyAgentApplicationsAction } from '@/ap
 import { BrandedLoader } from '@/components/ui/branded-loader';
 import Link from 'next/link';
 import type { Campus } from '@/types';
+import { AccountPageHeader } from './account-ui';
 
 interface AccountAgentApplicationTabProps {
   onBackToOverview: () => void;
@@ -102,26 +103,16 @@ export function AccountAgentApplicationTab({
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onBackToOverview}
-          className="p-2 text-slate-600 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
-          title="Back to Overview"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <h1 className="text-xl font-bold text-ink tracking-tight">
-            {hasAgent ? 'Agent Status' : 'Apply to become an Agent'}
-          </h1>
-          <p className="text-xs sm:text-sm text-ink-muted">
-            {hasAgent
-              ? 'You are already a registered Rumia agent.'
-              : 'Submit your application to manage hostels and receive student leads.'}
-          </p>
-        </div>
-      </div>
+    <div className="space-y-8 max-w-3xl mx-auto">
+      <AccountPageHeader
+        title={hasAgent ? 'Agent status' : 'Become a Rumia agent'}
+        description={
+          hasAgent
+            ? 'You are already a registered Rumia agent.'
+            : 'Apply to list hostels and receive enquiries from students.'
+        }
+        onBack={onBackToOverview}
+      />
 
       {/* Already an agent */}
       {hasAgent && (
