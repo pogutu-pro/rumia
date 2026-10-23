@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
@@ -182,17 +183,20 @@ export default function HostelsSearch({
   // text search and structured filters (clientSearch), then kind / bathroom / distance, then the chosen order.
   const resultsFor = useCallback(
     (f: ExploreFilters, q: string) => {
+      // Room types and price are judged on the listing's rooms and its "from" rent (matchesRefinements), the
+      // numbers the card shows; the text engine handles the search words and the other structured filters.
       const combined: CombinedFilters = {
         searchText: q,
         genders: f.genders,
         amenities: f.amenities,
-        roomTypes: f.roomTypes,
-        minPrice: f.minPrice,
-        maxPrice: f.maxPrice,
+        roomTypes: [],
+        minPrice: null,
+        maxPrice: null,
         zones: f.zones,
       };
+      const kind = f.propertyType === 'apartment' ? 'apartment' : 'hostel';
       const matched = clientSearch(allListings, combined, allListings.length, 0).listings.filter((l) =>
-        matchesRefinements(l, f),
+        matchesRefinements(l, { ...f, propertyType: kind }),
       );
       return sortListings(matched, f.sort);
     },
@@ -206,12 +210,18 @@ export default function HostelsSearch({
     }),
     [genders, amenities, roomTypes, minPrice, maxPrice, zones, maxDistance, sortByNearest, propertyType, bathroom, distance, sort],
   );
+  // Apartments are their own category on Explore (Hostels | Apartments); everything below is scoped to it.
+  const category: 'hostel' | 'apartment' = propertyType === 'apartment' ? 'apartment' : 'hostel';
+  const categoryListings = useMemo(
+    () => allListings.filter((l) => (l.property_type ?? 'hostel') === category),
+    [allListings, category],
+  );
   const emptyFilters: ExploreFilters = useMemo(
     () => ({
       genders: [], amenities: [], roomTypes: [], minPrice: null, maxPrice: null, zones: [], maxDistance: null,
-      sortByNearest: false, propertyType: null, bathroom: null, distance: null, sort,
+      sortByNearest: false, propertyType: category === 'apartment' ? 'apartment' : null, bathroom: null, distance: null, sort,
     }),
-    [sort],
+    [sort, category],
   );
 
   const results = useMemo(() => resultsFor(applied, qParamFromUrl), [resultsFor, applied, qParamFromUrl]);
@@ -258,8 +268,9 @@ export default function HostelsSearch({
 
   const handleClearAll = useCallback(() => {
     reset();
-    setSort(sort); // clearing filters keeps the chosen order
-  }, [reset, setSort, sort]);
+    setSort(sort); // clearing filters keeps the chosen order…
+    if (category === 'apartment') setPropertyType('apartment'); // …and the category
+  }, [reset, setSort, sort, category, setPropertyType]);
 
   const activeFilterCount =
     genders.length +
@@ -267,7 +278,6 @@ export default function HostelsSearch({
     roomTypes.length +
     (minPrice || maxPrice ? 1 : 0) +
     zones.length +
-    (propertyType ? 1 : 0) +
     (bathroom ? 1 : 0) +
     (distance ? 1 : 0);
 
@@ -280,17 +290,9 @@ export default function HostelsSearch({
       { key: 'walk', label: 'Walking distance', active: distance === 'walk', onToggle: () => setDistance(distance === 'walk' ? null : 'walk') },
     ];
     for (const [value, label] of [['bedsitter', 'Bedsitter'], ['single', 'Single room'], ['self_contained_bedsitter', 'Self-contained']] as const) {
-      if (allListings.some((l) => offersRoomType(l, value))) {
+      if (categoryListings.some((l) => offersRoomType(l, value))) {
         chips.push({ key: value, label, active: roomTypes.includes(value), onToggle: () => setRoomTypes(toggleIn(roomTypes, value)) });
       }
-    }
-    if (allListings.some((l) => l.property_type === 'apartment')) {
-      chips.push({
-        key: 'apartment',
-        label: 'Apartments',
-        active: propertyType === 'apartment',
-        onToggle: () => setPropertyType(propertyType === 'apartment' ? null : 'apartment'),
-      });
     }
     chips.push(
       { key: 'under6k', label: 'Under KES 6,000', active: maxPrice === 6000 && !minPrice, onToggle: () => (maxPrice === 6000 && !minPrice ? setPriceRange(null, null) : setPriceRange(null, 6000)) },
@@ -299,14 +301,58 @@ export default function HostelsSearch({
     );
     return chips;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allListings, distance, roomTypes, propertyType, maxPrice, minPrice, amenities, bathroom]);
+  }, [categoryListings, distance, roomTypes, maxPrice, minPrice, amenities, bathroom]);
 
   const campusShort =
     campus?.short_name ?? (campus?.name === 'Dedan Kimathi University of Technology' ? 'DeKUT' : campus?.name) ?? 'campus';
   const shortStaysHref = BNB_SEPARATE ? `${BNB_ORIGIN}/` : '/bnb';
 
+  const switchCategory = (next: 'hostel' | 'apartment') => {
+    if (next === category) return;
+    setRoomTypes([]); // room kinds differ between hostels and apartments
+    setPropertyType(next === 'apartment' ? 'apartment' : null);
+    window.scrollTo({ top: 0 });
+  };
+  const nouns = category === 'apartment' ? ['apartment', 'apartments'] : ['hostel', 'hostels'];
+
   return (
     <div className="min-h-screen bg-page pb-10">
+      {/* Categories, Airbnb style: icon and label, the current one underlined. Short stays are another product. */}
+      <nav aria-label="Category" className="border-b border-line bg-page">
+        <div className="mx-auto flex max-w-6xl items-end gap-7 overflow-x-auto px-4 pt-3 scrollbar-none lg:px-8">
+          {(
+            [
+              ['hostel', 'Hostels', '/images/categories/hostels.png'],
+              ['apartment', 'Apartments', '/images/categories/apartments.png'],
+            ] as const
+          ).map(([key, label, icon]) => {
+            const active = category === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-current={active ? 'page' : undefined}
+                onClick={() => switchCategory(key)}
+                className={cn(
+                  'flex shrink-0 flex-col items-center gap-1 border-b-2 pb-2.5 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                  active ? 'border-ink text-ink' : 'border-transparent text-ink-muted opacity-80 hover:border-slate-300 hover:text-ink hover:opacity-100',
+                )}
+              >
+                <Image src={icon} alt="" width={28} height={28} className="h-7 w-7" aria-hidden />
+                {label}
+              </button>
+            );
+          })}
+          <a
+            href={shortStaysHref}
+            className="flex shrink-0 flex-col items-center gap-1 border-b-2 border-transparent pb-2.5 text-[13px] font-semibold text-ink-muted opacity-80 hover:border-slate-300 hover:text-ink hover:opacity-100"
+          >
+            <Image src="/images/categories/short-stays.png" alt="" width={28} height={28} className="h-7 w-7" aria-hidden />
+            {BNB_SEPARATE ? 'RumiaBnB | Short stays' : 'Short stays'}
+          </a>
+        </div>
+      </nav>
+
       {/* Sticky filter bar under the app header, Airbnb/Zillow style: Filters with its count, then one-tap chips. */}
       <div className="sticky top-[var(--shell-header-h)] z-30 border-b border-line bg-page/95 backdrop-blur supports-[backdrop-filter]:bg-page/80">
         <div className="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto px-4 py-3 scrollbar-none lg:flex-wrap lg:overflow-visible lg:px-8">
@@ -350,12 +396,12 @@ export default function HostelsSearch({
             {/* Area pages bring their own heading (hideHeader): one h1 per page. */}
             {!hideHeader && (
               <h1 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
-                {qParamFromUrl ? `Results for “${qParamFromUrl}”` : `Places to rent near ${campusShort}`}
+                {qParamFromUrl ? `Results for “${qParamFromUrl}”` : `${category === 'apartment' ? 'Apartments' : 'Hostels'} near ${campusShort}`}
               </h1>
             )}
             <p className={cn('text-sm text-ink-muted', !hideHeader && 'mt-0.5')}>
-              {total} {total === 1 ? 'place' : 'places'}
-              {propertyType === 'apartment' ? ' · apartments' : propertyType === 'hostel' ? ' · hostels' : ' · hostels and apartments'}
+              {total} {total === 1 ? nouns[0] : nouns[1]}
+              {' · prices per month'}
               {(activeFilterCount > 0 || qParamFromUrl) && (
                 <>
                   {' · '}
@@ -410,17 +456,21 @@ export default function HostelsSearch({
           </>
         ) : (
           <div className="rounded-3xl border border-line bg-raised px-6 py-16 text-center">
-            <p className="text-lg font-semibold text-ink">No exact matches</p>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">
-              Try removing a filter, widening your price range or searching a nearby area.
+            <p className="text-lg font-semibold text-ink">
+              {categoryListings.length === 0 ? `No ${nouns[1]} listed yet` : 'No exact matches'}
             </p>
-            <button
+            <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">
+              {categoryListings.length === 0
+                ? `New ${nouns[1]} are being added. Check back soon, or browse ${category === 'apartment' ? 'hostels' : 'apartments'} meanwhile.`
+                : 'Try removing a filter, widening your price range or searching a nearby area.'}
+            </p>
+            {categoryListings.length > 0 && <button
               type="button"
               onClick={handleClearAll}
               className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-ink px-5 text-sm font-semibold text-white hover:bg-ink/90"
             >
               Clear all filters
-            </button>
+            </button>}
           </div>
         )}
 
@@ -445,7 +495,7 @@ export default function HostelsSearch({
         open={panelOpen}
         onOpenChange={setPanelOpen}
         current={applied}
-        listings={allListings}
+        listings={categoryListings}
         countFor={countFor}
         emptyFilters={emptyFilters}
         onApply={(draft) => {

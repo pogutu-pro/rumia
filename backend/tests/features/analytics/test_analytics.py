@@ -14,7 +14,7 @@ async def test_track_view_public(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_view_counts_public(client: AsyncClient):
-    response = await client.get("/api/v1/analytics/views/some-listing-id")
+    response = await client.get("/api/v1/analytics/views/00000000-0000-4000-8000-000000000001")
     assert response.status_code == 200
     data = response.json()
     assert "today_count" in data

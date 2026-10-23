@@ -21,7 +21,7 @@ interface FilterPanelProps {
   onOpenChange: (open: boolean) => void;
   /** The filters in force when the panel opens. */
   current: ExploreFilters;
-  /** Every listing on Explore (for the options, counts and the price chart). */
+  /** The listings of the current category (for the options, counts and the price chart). */
   listings: SearchListing[];
   /** How many places a draft would show; drives the "Show N places" button. */
   countFor: (draft: ExploreFilters) => number;
@@ -45,7 +45,6 @@ export function FilterPanel({ open, onOpenChange, current, listings, countFor, o
   const rooms = useMemo(() => roomTypeOptions(listings), [listings]);
   const amenities = useMemo(() => amenityOptions(listings), [listings]);
   const areas = useMemo(() => areaOptions(listings), [listings]);
-  const hasApartments = useMemo(() => listings.some((l) => l.property_type === 'apartment'), [listings]);
   const count = countFor(draft);
 
   const set = (patch: Partial<ExploreFilters>) => setDraft((d) => ({ ...d, ...patch }));
@@ -75,20 +74,6 @@ export function FilterPanel({ open, onOpenChange, current, listings, countFor, o
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-6">
-            {hasApartments && (
-              <Section title="Type of place">
-                <Segmented
-                  value={draft.propertyType ?? ''}
-                  onChange={(v) => set({ propertyType: v || null })}
-                  options={[
-                    { value: '', label: 'Any type' },
-                    { value: 'hostel', label: 'Hostels' },
-                    { value: 'apartment', label: 'Apartments' },
-                  ]}
-                />
-              </Section>
-            )}
-
             <Section title="Price per month" hint="Starting rent, before deposit.">
               <PriceRange listings={listings} min={draft.minPrice} max={draft.maxPrice} onChange={(minPrice, maxPrice) => set({ minPrice, maxPrice })} />
             </Section>

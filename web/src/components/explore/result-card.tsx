@@ -99,7 +99,7 @@ export function ResultCard({ item, comparing, onToggleCompare, priority = false 
             {area ? ` · ${area}` : ''}
           </p>
           {highlights.length > 0 && <p className="line-clamp-1 text-sm text-ink-muted">{highlights.join(' · ')}</p>}
-          <p className="mt-1.5 text-[15px] text-ink">
+          <p className="mt-1.5 pr-32 text-[15px] text-ink">
             {item.listing_room_types && item.listing_room_types.length > 1 && <span className="text-ink-muted">From </span>}
             <span className="font-semibold">KES {price.toLocaleString()}</span>
             <span className="text-ink-muted"> / month</span>
@@ -111,13 +111,17 @@ export function ResultCard({ item, comparing, onToggleCompare, priority = false 
         <SaveButton listingId={String(item.id)} variant="icon" className="h-9 w-9 border-white/60 bg-white/95 shadow-sm" />
       </div>
 
+      {/* Compare (with the tray at the bottom of the screen): a visible button, outlined until chosen. */}
       <button
         type="button"
         onClick={onToggleCompare}
         aria-pressed={comparing}
+        aria-label={comparing ? `Remove ${item.title} from compare` : `Compare ${item.title}`}
         className={cn(
-          'absolute -bottom-1 right-0 inline-flex h-9 items-center gap-1.5 rounded-full px-2 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-          comparing ? 'text-primary' : 'text-ink-muted hover:text-ink',
+          'absolute -bottom-1 right-0 inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+          comparing
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-slate-300 bg-white text-ink hover:border-ink',
         )}
       >
         {comparing ? <Check className="h-4 w-4" aria-hidden /> : <GitCompareArrows className="h-4 w-4" aria-hidden />}

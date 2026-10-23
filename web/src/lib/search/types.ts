@@ -43,6 +43,10 @@ export interface SearchListing {
     deposit?: number | null;
     furnishing_items?: string[] | null;
     room_type?: string | null;
+    price?: number | null;
+    is_available?: boolean | null;
+    occupancy?: string | number | null;
+    category?: string | null;
   }[] | null;
 }
 

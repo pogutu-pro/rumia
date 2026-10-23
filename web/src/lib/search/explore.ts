@@ -24,14 +24,25 @@ export function kindOf(listing: Pick<SearchListing, 'property_type'>): 'hostel' 
   return listing.property_type ?? 'hostel';
 }
 
+/** The "from" rent the card and the property page show; price filters use this same number. */
 export function startingPrice(listing: SearchListing): number {
-  return getStartingPrice(listing, listing.listing_room_types as never);
+  return getStartingPrice(listing, listing.listing_room_types);
 }
 
-type Refinements = Pick<ExploreRefinements, 'propertyType' | 'bathroom' | 'distance'>;
+type Refinements = Pick<ExploreRefinements, 'propertyType' | 'bathroom' | 'distance'> & {
+  roomTypes?: string[];
+  minPrice?: number | null;
+  maxPrice?: number | null;
+};
 
 export function matchesRefinements(listing: SearchListing, r: Refinements): boolean {
   if (r.propertyType && kindOf(listing) !== r.propertyType) return false;
+  if (r.roomTypes?.length && !r.roomTypes.some((v) => offersRoomType(listing, v))) return false;
+  if (r.minPrice != null || r.maxPrice != null) {
+    const price = startingPrice(listing);
+    if (r.minPrice != null && price < r.minPrice) return false;
+    if (r.maxPrice != null && price > r.maxPrice) return false;
+  }
   if (r.bathroom && (listing.bathroom_type ?? '').toLowerCase() !== r.bathroom) return false;
   if (r.distance) {
     const max = r.distance === 'walk' ? DISTANCE_RANK['5-10min'] : DISTANCE_RANK['1-2km'];
@@ -78,8 +89,14 @@ export function roomTypeLabel(value: string): string {
   return ROOM_LABELS[value] ?? value;
 }
 
+/**
+ * What the listing says its rooms are: its own room type and every room it lists. Titles and descriptions are not
+ * read: "a single bed" in a description is not a single room, and many bedsitters only say so in their rooms.
+ * A listing with no room information at all falls back to its title.
+ */
 function roomHaystack(l: SearchListing): string {
-  return [l.title, l.room_type, l.description].filter(Boolean).join(' ').toLowerCase();
+  const rooms = [l.room_type, ...(l.listing_room_types ?? []).map((r) => r.room_type)].filter(Boolean);
+  return (rooms.length ? rooms : [l.title]).join(' | ').toLowerCase();
 }
 
 export function offersRoomType(l: SearchListing, value: string): boolean {

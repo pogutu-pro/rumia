@@ -4,8 +4,10 @@ import {
   cardKind,
   distanceRank,
   matchesRefinements,
+  offersRoomType,
   roomTypeOptions,
   sortListings,
+  startingPrice,
 } from '../explore';
 import type { SearchListing } from '../types';
 
@@ -84,5 +86,30 @@ describe('options and card text', () => {
   it('ranks distances nearest first', () => {
     expect(distanceRank('walking-500m')).toBeLessThan(distanceRank('5-10min'));
     expect(distanceRank('over-3km')).toBeLessThan(distanceRank(null));
+  });
+});
+
+describe('filters judge what the listing states, not its wording', () => {
+  const rooms = (...r: { room_type: string; price: number; is_available?: boolean }[]) => r;
+
+  it('room types come from the listing and its rooms; a description never makes a room type', () => {
+    const bedsitterInRoomsOnly = L('b', { room_type: 'Self-Contained', listing_room_types: rooms({ room_type: 'Bedsitter - 2 people sharing', price: 4000 }) });
+    const singleBedInDescription = L('d', { room_type: 'Bedsitter - 1 person', description: 'comes with a single bed and a desk' });
+    expect(offersRoomType(bedsitterInRoomsOnly, 'bedsitter')).toBe(true);
+    expect(offersRoomType(singleBedInDescription, 'single')).toBe(false);
+    expect(offersRoomType(L('t', { title: 'Cosy single rooms' }), 'single')).toBe(true); // no room info: title fallback
+  });
+
+  it('price filters use the same "from" rent the card shows (the cheapest available room)', () => {
+    const listing = L('p', { price: 9300, listing_room_types: rooms({ room_type: 'Single', price: 9300 }, { room_type: 'Bedsitter - sharing', price: 5800 }) });
+    expect(startingPrice(listing)).toBe(5800);
+    expect(matchesRefinements(listing, { ...none, maxPrice: 6000 })).toBe(true);
+    expect(matchesRefinements(listing, { ...none, minPrice: 8000 })).toBe(false);
+  });
+
+  it('room-type and price refinements combine with the category', () => {
+    const apt = L('a', { property_type: 'apartment', room_type: '1 bedroom', price: 9000 });
+    expect(matchesRefinements(apt, { ...none, propertyType: 'apartment', roomTypes: ['one_bedroom'], maxPrice: 9000 })).toBe(true);
+    expect(matchesRefinements(apt, { ...none, propertyType: 'hostel', roomTypes: ['one_bedroom'] })).toBe(false);
   });
 });
