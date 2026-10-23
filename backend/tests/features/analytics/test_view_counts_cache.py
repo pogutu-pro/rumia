@@ -52,23 +52,3 @@ async def test_bad_ids_never_reach_the_database(counted):
         await router_mod.get_view_counts("not-a-uuid", Response(), db=None)
     assert counted == []
 
-
-@pytest.mark.asyncio
-async def test_today_counts_for_all_cards_are_one_query_a_minute(monkeypatch):
-    calls = []
-
-    async def fake_today(db):
-        calls.append(1)
-        return {"a": 3}
-
-    clock = [500.0]
-    monkeypatch.setattr(router_mod.AnalyticsService, "get_today_view_counts", staticmethod(fake_today))
-    monkeypatch.setattr(router_mod, "_today_counts_cache", (0.0, {}))
-    monkeypatch.setattr(router_mod.time, "monotonic", lambda: clock[0])
-    response = Response()
-    assert await router_mod.get_today_view_counts(response, db=None) == {"a": 3}
-    assert await router_mod.get_today_view_counts(Response(), db=None) == {"a": 3}
-    assert len(calls) == 1 and response.headers["Cache-Control"].startswith("public")
-    clock[0] += router_mod.VIEW_COUNTS_TTL_SECONDS + 1
-    await router_mod.get_today_view_counts(Response(), db=None)
-    assert len(calls) == 2

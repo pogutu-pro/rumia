@@ -19715,32 +19715,6 @@
         ]
       }
     },
-    "/api/v1/analytics/views/today": {
-      "get": {
-        "description": "Listing id -> views today (listings with none are absent). One query for a whole page of cards. Public.",
-        "operationId": "get_today_view_counts_api_v1_analytics_views_today_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": {
-                    "type": "integer"
-                  },
-                  "title": "Response Get Today View Counts Api V1 Analytics Views Today Get",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Today's views for every listing",
-        "tags": [
-          "Analytics"
-        ]
-      }
-    },
     "/api/v1/analytics/views/{listing_id}": {
       "get": {
         "description": "Fetch today/week/month/all-time view counts for a listing. Public.",
