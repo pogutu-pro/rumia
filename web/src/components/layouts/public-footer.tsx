@@ -13,6 +13,8 @@ import {
   FaLinkedinIn,
 } from 'react-icons/fa6';
 import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
+import { OwnerContact } from './owner-contact';
+import type { PublicAgent } from '@/lib/api/public';
 import { BNB_SEPARATE } from '@/lib/site/separation';
 import { BNB_ORIGIN } from '@/lib/site/hosts';
 
@@ -20,11 +22,14 @@ interface FooterProps {
   whatsappNumber?: string;
   /** Live markets, for the crawlable links below. Optional: pages without them simply show no market links. */
   markets?: Array<{ slug: string; name: string }>;
+  /** The platform owner (from the support team), shown as a contact line on every page. */
+  owner?: PublicAgent | null;
 }
 
 export const Footer = React.memo(function Footer({
   whatsappNumber,
   markets = [],
+  owner = null,
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
@@ -137,9 +142,16 @@ export const Footer = React.memo(function Footer({
           </div>
         </div>
 
+        {/* The platform owner, one tap away on every page (phones have no Verify link in their navigation bar). */}
+        {owner && !isBnbPage && (
+          <div className="mx-auto mt-6 max-w-xl">
+            <OwnerContact owner={owner} />
+          </div>
+        )}
+
         {/* Browse by market and type: gives every page a crawlable path into the market pages */}
         {markets.length > 0 && (
-          <nav aria-label="Browse places to rent" className="mb-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-medium text-ink-muted">
+          <nav aria-label="Browse places to rent" className="mb-6 mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-medium text-ink-muted">
             {markets.slice(0, 8).map((m) => (
               <Link key={m.slug} href={`/${m.slug}`} className="hover:text-ink transition-colors">Rentals in {m.name}</Link>
             ))}

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { listingsApi } from '@/lib/api/listings';
+import { toLegacyListingShape } from '@/lib/api/legacy-listing';
 import HostelsSearch, { type Listing } from './hostels-search';
 import { PublicAnnouncements } from '@/components/announcements/public-announcements';
 import { getDefaultCampus, isFallbackCampus } from '@/lib/data/campuses';
@@ -37,14 +38,10 @@ async function getAllActiveListings(): Promise<Listing[]> {
       is_active: true,
     });
     
-    // Map FastAPI response keys to the legacy keys expected by HostelsSearch
     // Once RumiaBnB is its own site, short stays are not part of Rumia's listings.
     const items = BNB_SEPARATE ? feed.items.filter((item: any) => item.property_type !== 'short_stay') : feed.items;
-    return items.map((item: any) => ({
-      ...item,
-      listing_images: item.images,
-      agents: item.agent,
-    })) as unknown as Listing[];
+    // Shared with the area pages; it keeps the rooms, which decide the "from" price and the room-type filter.
+    return items.map(toLegacyListingShape) as unknown as Listing[];
   } catch (error) {
     console.error('Failed to fetch active listings:', error);
     return [];

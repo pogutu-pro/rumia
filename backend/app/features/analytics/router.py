@@ -1,12 +1,14 @@
 import hashlib
-from typing import Optional
+import time
+import uuid
+from typing import Dict, Optional, Tuple
 
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.errors import ForbiddenException
+from app.core.errors import BadRequestException, ForbiddenException
 from app.features.agents.models import AgentProfile
 from app.core.ratelimit import _client_ip, limiter
 from app.core.security import AuthenticatedUser, get_current_user, get_optional_current_user, require_roles
@@ -20,6 +22,12 @@ from app.features.analytics.schemas import (
 from app.features.analytics.service import AnalyticsService
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
+
+# The public "N people viewed today" line is read on every property page view. Counts change slowly (about a hundred
+# recorded views a day site-wide), so each worker answers from memory for a minute instead of counting again.
+VIEW_COUNTS_TTL_SECONDS = 60
+_VIEW_COUNTS_MAX = 5000
+_view_counts_cache: Dict[str, Tuple[float, ViewCountRead]] = {}
 
 
 @router.post(
@@ -54,9 +62,23 @@ async def track_listing_view(
 )
 async def get_view_counts(
     listing_id: str,
+    response: Response,
     db: AsyncSession = Depends(get_db_session, scope="function"),
 ) -> ViewCountRead:
-    return await AnalyticsService.get_listing_view_counts(db=db, listing_id=listing_id)
+    try:
+        key = str(uuid.UUID(listing_id))
+    except ValueError:
+        raise BadRequestException("Invalid listing id")
+    response.headers["Cache-Control"] = f"public, max-age={VIEW_COUNTS_TTL_SECONDS}"
+    now = time.monotonic()
+    hit = _view_counts_cache.get(key)
+    if hit and hit[0] > now:
+        return hit[1]
+    counts = await AnalyticsService.get_listing_view_counts(db=db, listing_id=key)
+    if len(_view_counts_cache) >= _VIEW_COUNTS_MAX:
+        _view_counts_cache.clear()  # bounded: a full reset is cheap and keeps memory flat
+    _view_counts_cache[key] = (now + VIEW_COUNTS_TTL_SECONDS, counts)
+    return counts
 
 
 @router.get(
