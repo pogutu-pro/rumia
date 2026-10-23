@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple
 
 from sqlalchemy import Numeric, cast, func, select, union_all
@@ -20,6 +20,8 @@ from app.features.listings.models import Agent, Listing, ListingImage, ListingRo
 from app.features.listings.schemas import ListingCreate, ListingImageCreate, ListingRoomTypeCreate, ListingUpdate
 from app.features.listings.verification import verify_listing
 from app.features.zones.models import CampusZone
+
+POPULAR_WINDOW_DAYS = 14
 
 
 def slugify(text: str) -> str:
@@ -162,12 +164,26 @@ class ListingService:
             stmt = stmt.join(target, onclause)
 
         if sort == "views":
+            # "Popular" follows what people are looking at now: views in the last POPULAR_WINDOW_DAYS decide the
+            # order (all-time counts only break ties), so the list moves as interest moves. The count returned for
+            # display stays all-time.
             view_sub = ListingService._all_time_view_counts()
             view_count = func.coalesce(view_sub.c.view_count, 0)
+            recent_sub = (
+                select(ListingView.listing_id.label("listing_id"), func.count(ListingView.id).label("recent"))
+                .where(ListingView.viewed_at > func.now() - timedelta(days=POPULAR_WINDOW_DAYS))
+                .group_by(ListingView.listing_id)
+                .subquery()
+            )
             stmt = stmt.add_columns(view_count.label("view_count"))
-            stmt = stmt.outerjoin(view_sub, view_sub.c.listing_id == Listing.id).order_by(
-                view_count.desc(),
-                Listing.created_at.desc().nulls_last(),
+            stmt = (
+                stmt.outerjoin(view_sub, view_sub.c.listing_id == Listing.id)
+                .outerjoin(recent_sub, recent_sub.c.listing_id == Listing.id)
+                .order_by(
+                    func.coalesce(recent_sub.c.recent, 0).desc(),
+                    view_count.desc(),
+                    Listing.created_at.desc().nulls_last(),
+                )
             )
         elif sort == "newest":
             stmt = stmt.order_by(Listing.created_at.desc().nulls_last())

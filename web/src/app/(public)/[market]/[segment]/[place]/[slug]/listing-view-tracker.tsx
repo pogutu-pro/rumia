@@ -80,7 +80,7 @@ export function ListingViewTracker({
       });
     }
 
-    rememberInterest({ kind, price });
+    rememberInterest({ kind, price, place: area });
 
     posthog.capture('listing_viewed', {
       listing_id: listingId,

@@ -51,7 +51,9 @@ async def test_views_sort_reuses_all_time_counts_for_order_and_response():
     listing_stmt = db.execute.await_args_list[1].args[0]
     sql = str(listing_stmt.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})).lower()
     assert "listing_view_daily_rollup" in sql
-    assert "order by coalesce(anon_1.view_count, 0) desc" in sql
+    # Popular follows the last 14 days; all-time views only break ties.
+    assert "listing_views.viewed_at >" in sql
+    assert "order by coalesce(anon_3.recent, 0) desc, coalesce(anon_1.view_count, 0) desc" in sql
     assert "coalesce(anon_1.view_count, 0) as view_count" in sql
 
 
