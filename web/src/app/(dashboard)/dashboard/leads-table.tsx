@@ -16,8 +16,8 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
 
   if (leads.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-xs">
-        <p className="text-slate-500 font-semibold">No leads yet. Make sure your listings are active and attractive!</p>
+      <div className="bg-raised rounded-2xl border border-line p-8 text-center shadow-xs">
+        <p className="text-ink-muted font-semibold">No leads yet. Make sure your listings are active and attractive!</p>
       </div>
     );
   }
@@ -32,7 +32,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
   const getContactBadge = (type?: string | null) => {
     if (type === 'hostel_owner') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-subtle text-slate-700">
           <Building2 className="h-3 w-3" />
           Owner
         </span>
@@ -47,7 +47,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-200">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-subtle text-ink-muted border border-line">
         <MessageCircle className="h-3 w-3" />
         Legacy
       </span>
@@ -55,16 +55,16 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-xs">
+    <div className="bg-raised rounded-2xl border border-line overflow-hidden shadow-xs">
       {/* Mobile card list */}
-      <ul className="divide-y divide-slate-100 md:hidden">
+      <ul className="divide-y divide-line md:hidden">
         {leads.map((lead) => {
           const listing = listings.find((l) => l.id === lead.listing_id);
           const date = new Date(lead.clicked_at);
           return (
             <li key={lead.id} className="px-4 py-3 flex flex-col gap-1.5">
               <div className="flex justify-between items-start gap-2">
-                <span className="font-bold text-slate-900 text-sm leading-tight">
+                <span className="font-bold text-ink text-sm leading-tight">
                   {listing ? listing.title : 'Unknown Listing'}
                 </span>
                 {getContactBadge(lead.contact_type)}
@@ -86,7 +86,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
                 )}
               </div>
 
-              <span className="text-[11px] font-medium text-slate-500">
+              <span className="text-[11px] font-medium text-ink-muted">
                 {format(date, 'd MMM yyyy')} · {format(date, 'h:mm a')}
               </span>
             </li>
@@ -97,7 +97,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
       {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+          <thead className="bg-subtle border-b border-line text-ink-muted font-bold uppercase tracking-wider text-[11px]">
             <tr>
               <th className="px-5 py-3.5">Contact</th>
               <th className="px-5 py-3.5">Listing</th>
@@ -105,21 +105,21 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
               <th className="px-5 py-3.5">Date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-line">
             {leads.map((lead) => {
               const listing = listings.find((l) => l.id === lead.listing_id);
               const date = new Date(lead.clicked_at);
               return (
-                <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={lead.id} className="hover:bg-subtle transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-bold text-slate-900">
+                      <span className="font-bold text-ink">
                         {lead.name || 'Anonymous User'}
                       </span>
                       {lead.phone ? (
                         <button
                           onClick={() => handleCopyPhone(lead.phone!, lead.id)}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-primary transition-colors w-fit group"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-primary transition-colors w-fit group"
                         >
                           {copiedId === lead.id ? (
                             <Check className="h-3.5 w-3.5 text-primary" />
@@ -131,7 +131,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
                           </span>
                         </button>
                       ) : (
-                        <span className="text-xs text-slate-500 font-medium">No phone provided</span>
+                        <span className="text-xs text-ink-muted font-medium">No phone provided</span>
                       )}
                     </div>
                   </td>
@@ -141,7 +141,7 @@ export function LeadsTable({ leads, listings }: LeadsTableProps) {
                   <td className="px-5 py-3.5">
                     {getContactBadge(lead.contact_type)}
                   </td>
-                  <td className="px-5 py-3.5 text-slate-500 font-medium text-xs">
+                  <td className="px-5 py-3.5 text-ink-muted font-medium text-xs">
                     <div className="flex flex-col gap-0.5">
                       <span>{format(date, 'd MMM yyyy')}</span>
                       <span>{format(date, 'h:mm a')}</span>

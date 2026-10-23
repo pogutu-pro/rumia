@@ -121,8 +121,8 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
   return (
     <div className="space-y-6">
       {listings.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl shadow-xs">
-          <p className="text-slate-500 font-semibold">You haven&apos;t created any listings yet.</p>
+        <div className="text-center py-16 bg-raised border border-line rounded-2xl shadow-xs">
+          <p className="text-ink-muted font-semibold">You haven&apos;t created any listings yet.</p>
           <Link
             href="/dashboard/new"
             className="mt-4 inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-sm font-bold shadow-xs transition-colors"
@@ -140,9 +140,9 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
             return (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col"
+                className="bg-raised rounded-2xl border border-line overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col"
               >
-                <div className="relative aspect-4/3 bg-slate-100 overflow-hidden">
+                <div className="relative aspect-4/3 bg-subtle overflow-hidden">
                   <Image
                     src={imageUrl}
                     alt={item.title}
@@ -177,12 +177,12 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                 </div>
 
                 <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-center gap-1 text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+                  <div className="flex items-center gap-1 text-ink-muted text-xs font-bold uppercase tracking-wider mb-1">
                     <MapPin className="h-3 w-3" />
                     <span className="truncate">{item.location}</span>
                   </div>
                   
-                  <h3 className="font-bold text-slate-900 line-clamp-1 mb-2">
+                  <h3 className="font-bold text-ink line-clamp-1 mb-2">
                     {item.title}
                   </h3>
 
@@ -190,7 +190,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                     <div className="flex items-center gap-1.5 text-primary">
                       <MessageCircle className="h-4 w-4" />
                       <span className="text-sm font-bold">
-                        {leadsCountByListing[String(item.id)] || 0} <span className="font-medium text-slate-500">Leads</span>
+                        {leadsCountByListing[String(item.id)] || 0} <span className="font-medium text-ink-muted">Leads</span>
                       </span>
                     </div>
                     {item.pays_commission !== undefined && (
@@ -221,7 +221,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                     if (!property) return null;
                     return (
                       <div className="flex items-center justify-between gap-2 pb-3">
-                        <p className="text-xs text-slate-500">{confirmedText(property.last_confirmed_at)}</p>
+                        <p className="text-xs text-ink-muted">{confirmedText(property.last_confirmed_at)}</p>
                         <button
                           type="button"
                           onClick={() => handleConfirm(item.id, property.id)}
@@ -236,11 +236,11 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                   })()}
 
                   {/* Actions & Toggle */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-line flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <Link
                         href={`/dashboard/edit/${item.id}`}
-                        className="text-slate-500 hover:text-slate-900 text-sm font-semibold transition-colors"
+                        className="text-ink-muted hover:text-ink text-sm font-semibold transition-colors"
                       >
                         Edit
                       </Link>
@@ -248,7 +248,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                       <Link
                         href={`/listing/${item.id}`}
                         target="_blank"
-                        className="text-slate-500 hover:text-slate-900 text-sm font-semibold transition-colors"
+                        className="text-ink-muted hover:text-ink text-sm font-semibold transition-colors"
                       >
                         View Live
                       </Link>
@@ -272,7 +272,7 @@ export function ListingsList({ initialListings, leadsCountByListing }: ListingsL
                             }`}
                           >
                             <span
-                              className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                              className={`inline-block h-3 w-3 transform rounded-full bg-raised shadow-sm transition-transform ${
                                 item.is_full ? 'translate-x-3.5' : 'translate-x-0.5'
                               }`}
                             />

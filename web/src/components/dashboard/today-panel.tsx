@@ -29,23 +29,23 @@ export function TodayPanel() {
     <section aria-labelledby="today-heading" className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <TriangleAlert className="h-4 w-4 text-amber-700" aria-hidden="true" />
-        <h2 id="today-heading" className="text-sm font-bold text-slate-900">
+        <h2 id="today-heading" className="text-sm font-bold text-ink">
           Needs your attention
         </h2>
       </div>
       <ul className="mt-3 space-y-2">
         {ws.attention.map((a, i) => (
-          <li key={`${a.property_id}-${a.kind}-${i}`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-3.5 py-3 ring-1 ring-slate-200/70">
+          <li key={`${a.property_id}-${a.kind}-${i}`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-raised px-3.5 py-3 ring-1 ring-line">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900">{a.text}</p>
-              <p className="truncate text-xs text-slate-500">{a.name}</p>
+              <p className="text-sm font-semibold text-ink">{a.text}</p>
+              <p className="truncate text-xs text-ink-muted">{a.name}</p>
             </div>
             {a.kind === 'finish_draft' ? (
-              <Link href="/dashboard/listings" className="inline-flex min-h-10 items-center rounded-xl border border-slate-300 px-3.5 text-xs font-semibold text-slate-900">
+              <Link href="/dashboard/listings" className="inline-flex min-h-10 items-center rounded-xl border border-slate-300 px-3.5 text-xs font-semibold text-ink">
                 Open listings
               </Link>
             ) : a.kind === 'reply' ? (
-              <Link href="/dashboard/leads" className="inline-flex min-h-10 items-center rounded-xl border border-slate-300 px-3.5 text-xs font-semibold text-slate-900">
+              <Link href="/dashboard/leads" className="inline-flex min-h-10 items-center rounded-xl border border-slate-300 px-3.5 text-xs font-semibold text-ink">
                 See enquiries
               </Link>
             ) : (

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
-import { AgentHeader } from './agent-header';
+import { AgentShell } from './agent-shell';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { profilesServerApi } from '@/lib/api/profiles.server';
 import { RumiaChrome } from '@/components/shell/rumia-chrome';
@@ -37,17 +37,9 @@ export default async function DashboardLayout({
 
   return (
     <RumiaChrome>
-      <div className="min-h-screen bg-white">
-        <AgentHeader
-          agentName={agentName}
-          userEmail={user.email ?? ''}
-          isAdmin={isAdmin}
-          isManager={isManager}
-        />
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-          {children}
-        </main>
-      </div>
+      <AgentShell agentName={agentName} userEmail={user.email ?? ''} isAdmin={isAdmin} isManager={isManager}>
+        {children}
+      </AgentShell>
     </RumiaChrome>
   );
 }

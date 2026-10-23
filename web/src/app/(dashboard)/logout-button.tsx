@@ -31,7 +31,7 @@ export function LogoutButton() {
       variant="ghost"
       size="icon"
       onClick={handleSignOut}
-      className="text-slate-500 hover:text-white hover:bg-slate-800"
+      className="text-ink-muted hover:text-white hover:bg-slate-800"
       title="Sign out"
     >
       <LogOut className="h-5 w-5" />

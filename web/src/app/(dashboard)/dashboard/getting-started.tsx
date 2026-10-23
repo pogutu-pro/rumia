@@ -39,13 +39,13 @@ export function GettingStarted({ agent, listings }: GettingStartedProps) {
   const completedCount = steps.filter((s) => s.done).length;
 
   return (
-    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-6">
+    <div className="bg-subtle border border-line rounded-2xl p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
         <div className="space-y-1">
-          <h2 className="text-sm font-bold text-slate-900">
+          <h2 className="text-sm font-bold text-ink">
             Getting Started
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-muted">
             Complete these steps to activate your account and start receiving
             student leads.
           </p>
@@ -75,7 +75,7 @@ export function GettingStarted({ agent, listings }: GettingStartedProps) {
               <span
                 className={`text-xs sm:text-sm font-medium ${
                   step.done
-                    ? 'text-slate-500 line-through'
+                    ? 'text-ink-muted line-through'
                     : 'text-slate-700'
                 }`}
               >

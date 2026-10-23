@@ -41,17 +41,17 @@ export function SuspensionBanner({ agentName, suspensionReason }: SuspensionBann
           </div>
         </div>
 
-        <div className="bg-white border border-rose-100 rounded-xl p-4 space-y-1">
+        <div className="bg-raised border border-rose-100 rounded-xl p-4 space-y-1">
           <p className="text-xs font-semibold text-rose-700 uppercase tracking-wider">Reason</p>
           <p className="text-sm text-slate-800">{suspensionReason}</p>
         </div>
       </div>
 
       {/* Appeal section */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+      <div className="bg-raised border border-line rounded-2xl p-6 space-y-4">
         <div>
-          <p className="font-semibold text-slate-900 text-sm">Resolved the issue?</p>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="font-semibold text-ink text-sm">Resolved the issue?</p>
+          <p className="text-xs text-ink-muted mt-0.5">
             If you believe the issue has been resolved, send a message to the admin/manager explaining what you have done. They will review and reinstate your account.
           </p>
         </div>
