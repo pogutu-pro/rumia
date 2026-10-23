@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Check, Footprints, GitCompareArrows, MapPin, Star } from 'lucide-react';
 import { SaveButton } from '@/components/ui/save-button';
+import { TodayViewsBadge } from './today-views-badge';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { cn } from '@/lib/utils/cn';
 import { formatAreaName } from '@/lib/utils/area-label';
@@ -71,6 +72,7 @@ export function ResultCard({ item, comparing, onToggleCompare, priority = false 
               {walk}
             </span>
           )}
+          <TodayViewsBadge listingId={String(item.id)} className="absolute bottom-3 right-3" />
           {(genderTag || item.is_full) && (
             <span
               className={cn(

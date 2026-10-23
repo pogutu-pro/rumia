@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { ArrowRight, SlidersHorizontal } from 'lucide-react';
-import { toast } from 'sonner';
 import { EarlyAccessBanner } from '@/components/feedback/early-access-banner';
 import { FilterPanel, type ExploreFilters } from '@/components/explore/filter-panel';
 import { ResultCard } from '@/components/explore/result-card';
@@ -13,7 +12,7 @@ import { BNB_SEPARATE } from '@/lib/site/separation';
 import { BNB_ORIGIN } from '@/lib/site/hosts';
 import { cn } from '@/lib/utils/cn';
 import { useFilterStore, type ExploreSort } from '@/stores/filter-store';
-import { useCompareStore } from '@/stores/compare-store';
+import { useCompareToggle } from '@/hooks/use-compare-toggle';
 import { clientSearch } from '@/lib/search/client-search';
 import { matchesRefinements, offersRoomType, sortListings, SORT_LABELS } from '@/lib/search/explore';
 import type {
@@ -96,39 +95,19 @@ export default function HostelsSearch({
     }
   }, [searchParams, hydrateFromParams]);
 
-  // Hydrate compare selections from localStorage
-  const hydrateCompare = useCompareStore((s) => s.hydrateFromStorage);
-  useEffect(() => {
-    hydrateCompare();
-  }, [hydrateCompare]);
-
-  const compareSelectedIds = useCompareStore((s) => s.selectedIds);
-  const addCompareSelection = useCompareStore((s) => s.addSelection);
-  const removeCompareSelection = useCompareStore((s) => s.removeSelection);
-  const isCompareSelected = useCompareStore((s) => s.isSelected);
-
+  // Compare: Explore knows the whole listing, so it stores a complete selection (no refetch on /compare).
+  const { isComparing: isCompareSelected, toggle: toggleCompare } = useCompareToggle();
   const handleCompareToggle = useCallback(
     (item: Listing) => {
-      const sorted = [...(item.listing_images || [])].sort(
-        (a, b) => a.display_order - b.display_order,
-      );
-      const imageUrl = sorted[0]?.r2_url;
-      const roomTypes = item.listing_room_types || [];
-      const firstRoom = roomTypes[0] || {};
-
-      if (isCompareSelected(item.id)) {
-        removeCompareSelection(item.id);
-        toast.info(`${item.title} removed from comparison`);
-        return;
-      }
-
-      const result = addCompareSelection({
+      const sorted = [...(item.listing_images || [])].sort((a, b) => a.display_order - b.display_order);
+      const firstRoom = (item.listing_room_types || [])[0] || {};
+      toggleCompare({
         id: item.id,
         title: item.title,
         price: item.price,
         price_single: item.price_single,
         price_sharing: item.price_sharing,
-        imageUrl,
+        imageUrl: sorted[0]?.r2_url,
         slug: item.slug,
         county: item.county,
         area: item.area,
@@ -154,28 +133,8 @@ export default function HostelsSearch({
         furnishingItems: firstRoom.furnishing_items ?? null,
         roomTypeLabel: firstRoom.room_type ?? null,
       });
-
-      if (result.ok) {
-        const currentCount = compareSelectedIds.length + 1;
-        if (currentCount === 1) {
-          toast.success(`${item.title} added to comparison`, {
-            description: 'Select one more hostel to start comparing.',
-          });
-        } else {
-          toast.success(`${item.title} added to comparison`);
-        }
-      } else if (result.reason === 'max_reached') {
-        toast.error('Maximum hostels reached', {
-          description: 'Remove a hostel first before adding another.',
-        });
-      }
     },
-    [
-      addCompareSelection,
-      removeCompareSelection,
-      isCompareSelected,
-      compareSelectedIds.length,
-    ],
+    [toggleCompare],
   );
 
   // ── Results ────────────────────────────────────────────────────────────────

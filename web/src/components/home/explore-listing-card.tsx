@@ -3,12 +3,15 @@
 import { listingPath } from '@/lib/utils/listing-path';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BadgeCheck, MapPin, Star } from 'lucide-react';
+import { BadgeCheck, Check, GitCompareArrows, MapPin, Star } from 'lucide-react';
 import { SaveButton } from '@/components/ui/save-button';
 import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { formatCurrency } from '@/lib/utils/currency';
 import { formatAreaName } from '@/lib/utils/area-label';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
+import { TodayViewsBadge } from '@/components/explore/today-views-badge';
+import { useCompareToggle } from '@/hooks/use-compare-toggle';
+import { cn } from '@/lib/utils/cn';
 import type { PropertyType } from '@/types';
 
 export interface ExploreListing {
@@ -64,11 +67,17 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
   const reviewCount = typeof item.review_count === 'number' && item.review_count > 0 ? item.review_count : 0;
   // Show a rating only when real published reviews stand behind it.
   const rating = reviewCount > 0 && typeof item.rating === 'number' && item.rating > 0 ? item.rating : null;
+  const { isComparing, toggle } = useCompareToggle();
+  const comparing = isComparing(String(item.id));
+  const canCompare = type !== 'short_stay';
 
+  // The heart and Compare sit beside the link (absolutely placed), not inside it: a button inside a link is invalid
+  // and can open the listing instead of saving or comparing.
   return (
+    <div className="group relative flex h-full w-[min(62vw,15rem)] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-line bg-raised transition-shadow hover:shadow-md @xl:w-auto">
     <Link
       href={href}
-      className="group relative flex h-full w-[min(62vw,15rem)] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-line bg-raised transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 @xl:w-auto"
+      className="flex flex-1 flex-col rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-subtle">
         {item.image_url ? (
@@ -92,16 +101,10 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
             <BadgeCheck className="h-3 w-3" aria-hidden /> Verified
           </span>
         )}
-        <div className="absolute right-2 top-2 z-10">
-          <SaveButton
-            listingId={String(item.id)}
-            variant="icon"
-            className="h-9 w-9 border-white/60 bg-white shadow-sm"
-          />
-        </div>
+        <TodayViewsBadge listingId={String(item.id)} className="absolute bottom-2 right-2" />
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
+      <div className={cn('flex flex-1 flex-col gap-1.5 p-3', canCompare && 'pb-14')}>
         <h3 className="line-clamp-1 text-[15px] font-semibold leading-5 text-ink group-hover:text-primary">
           {item.title}
         </h3>
@@ -141,5 +144,38 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
         )}
       </div>
     </Link>
+      <div className="absolute right-2 top-2 z-10">
+        <SaveButton listingId={String(item.id)} variant="icon" className="h-9 w-9 border-white/60 bg-white shadow-sm" />
+      </div>
+      {canCompare && (
+        <button
+          type="button"
+          onClick={() =>
+            toggle({
+              id: String(item.id),
+              title: item.title,
+              price: item.price,
+              imageUrl: item.image_url ?? undefined,
+              slug: item.slug,
+              county: item.county,
+              area: item.area,
+              roomType: item.room_type,
+              bathroomType: item.bathroom_type,
+              distanceCategory: item.distance_category,
+              wifiIncluded: item.wifi_included,
+            })
+          }
+          aria-pressed={comparing}
+          aria-label={comparing ? `Remove ${item.title} from compare` : `Compare ${item.title}`}
+          className={cn(
+            'absolute inset-x-3 bottom-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-full border text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+            comparing ? 'border-primary bg-primary text-primary-foreground' : 'border-slate-300 bg-white text-ink hover:border-ink',
+          )}
+        >
+          {comparing ? <Check className="h-4 w-4" aria-hidden /> : <GitCompareArrows className="h-4 w-4" aria-hidden />}
+          {comparing ? 'Comparing' : 'Compare'}
+        </button>
+      )}
+    </div>
   );
 }

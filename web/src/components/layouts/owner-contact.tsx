@@ -1,12 +1,37 @@
 'use client';
 
+import { useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { Crown, Loader2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { buildWhatsAppUrl, ownerSupportMessage } from '@/lib/utils/phone';
 import { useGatedWhatsApp } from '@/hooks/use-gated-whatsapp';
-import type { PublicAgent } from '@/lib/api/public';
+import { publicApi, type PublicAgent } from '@/lib/api/public';
+
+// The owner, for client-only places such as the contact window: fetched once per page, the first time it is needed.
+let owner: PublicAgent | null | undefined;
+let requested = false;
+const ownerListeners = new Set<() => void>();
+function subscribeOwner(listener: () => void) {
+  ownerListeners.add(listener);
+  if (!requested) {
+    requested = true;
+    publicApi
+      .getSupportTeam()
+      .then((team) => (owner = team.find((a) => a.is_owner && a.whatsapp) ?? null))
+      .catch(() => {
+        owner = null;
+        requested = false;
+      })
+      .finally(() => ownerListeners.forEach((l) => l()));
+  }
+  return () => ownerListeners.delete(listener);
+}
+
+export function usePlatformOwner(): PublicAgent | null {
+  return useSyncExternalStore(subscribeOwner, () => owner ?? null, () => null);
+}
 
 /**
  * One line in the footer: the platform owner, reachable on WhatsApp from every page (phones included, where the
