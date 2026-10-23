@@ -9,7 +9,6 @@ import { NoPhotoTile } from '@/components/ui/no-photo-tile';
 import { formatCurrency } from '@/lib/utils/currency';
 import { formatAreaName } from '@/lib/utils/area-label';
 import { getDistanceBadgeText } from '@/lib/constants/dekut-areas';
-import { TodayViewsBadge } from '@/components/explore/today-views-badge';
 import { useCompareToggle } from '@/hooks/use-compare-toggle';
 import { cn } from '@/lib/utils/cn';
 import type { PropertyType } from '@/types';
@@ -101,7 +100,6 @@ export function ExploreListingCard({ item }: { item: ExploreListing }) {
             <BadgeCheck className="h-3 w-3" aria-hidden /> Verified
           </span>
         )}
-        <TodayViewsBadge listingId={String(item.id)} className="absolute bottom-2 right-2" />
       </div>
 
       <div className={cn('flex flex-1 flex-col gap-1.5 p-3', canCompare && 'pb-14')}>

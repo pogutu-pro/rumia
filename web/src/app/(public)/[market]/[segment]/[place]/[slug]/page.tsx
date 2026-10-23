@@ -32,7 +32,7 @@ import { LazyYouTube } from '@/components/seo/lazy-youtube';
 import { JsonLd } from '@/components/seo/json-ld';
 import { PropertyFacts, ReportListing, SimilarPlaces } from '@/components/discovery/property-extras';
 import { ListingViewTracker } from './listing-view-tracker';
-import { ListingViewsToday } from './listing-view-counts';
+import { ListingViewCountsLine } from './listing-view-counts';
 import { IncludedUtilities } from './included-utilities';
 import { ListingDescription } from './listing-description';
 import { ReviewsSection } from '@/components/reviews/reviews-section';
@@ -371,12 +371,14 @@ export default async function ListingSlugPage({ params }: PageProps) {
                 </div>
               )}
 
-              <h2 className="flex items-center gap-1.5 text-slate-500 font-semibold text-sm">
-                <MapPin className="h-4 w-4 text-slate-500" />
-                {listing.location}
-              </h2>
+              {listing.location?.trim() && (
+                <h2 className="flex items-center gap-1.5 text-slate-500 font-semibold text-sm">
+                  <MapPin className="h-4 w-4 text-slate-500" />
+                  {listing.location}
+                </h2>
+              )}
 
-              <ListingViewsToday listingId={String(listing.id)} />
+              <ListingViewCountsLine listingId={String(listing.id)} />
 
               <div>
                 <p className="text-2xl font-extrabold tracking-tight text-primary">

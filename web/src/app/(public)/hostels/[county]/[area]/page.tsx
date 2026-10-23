@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { notFound } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import { listingsApi } from '@/lib/api/listings';
 import { toLegacyListingShape } from '@/lib/api/legacy-listing';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -100,7 +100,8 @@ function buildSchemas(campus: Campus, canonical: string) {
 export default async function CampusLandingPage({ params }: PageProps) {
   const { county, area } = await params;
   const campus = await resolveCampusFromSegments(county, area);
-  if (!campus) notFound();
+  // Not a campus: an old area address (/hostels/nyeri/boma). Areas live at /{market}/{place} now.
+  if (!campus) permanentRedirect(`/${encodeURIComponent(county.toLowerCase())}/${encodeURIComponent(area.toLowerCase())}`);
 
   // The built-in fallback campus (used when the API is down) has no real id: filter by the legacy area slug instead.
   const feed = await listingsApi
