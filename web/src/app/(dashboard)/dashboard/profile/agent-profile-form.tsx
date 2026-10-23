@@ -56,7 +56,7 @@ function ChipSelect({
               'px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all',
               selected.includes(option)
                 ? 'bg-emerald-50 border-emerald-300 text-primary'
-                : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300',
+                : 'bg-raised border-line text-ink-muted hover:border-slate-300',
             )}
             aria-pressed={selected.includes(option)}
           >
@@ -163,7 +163,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Photos */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">Photos</h2>
+        <h2 className="text-lg font-bold text-ink">Photos</h2>
         <div className="space-y-4">
           <ImageUpload
             onImageChange={setCoverImageFile}
@@ -182,7 +182,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
 
       {/* Basic Info */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">Basic Info</h2>
+        <h2 className="text-lg font-bold text-ink">Basic Info</h2>
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="name">Display Name</Label>
@@ -215,8 +215,8 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
 
       {/* Application Credentials */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">Application Credentials</h2>
-        <p className="text-xs text-slate-500">
+        <h2 className="text-lg font-bold text-ink">Application Credentials</h2>
+        <p className="text-xs text-ink-muted">
           Update the details you submitted in your agent application. These are used for verification and listing ownership.
         </p>
         <div className="space-y-3">
@@ -244,7 +244,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
               id="relationship"
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
-              className="w-full h-10 px-3 border border-slate-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-900 bg-white"
+              className="w-full h-10 px-3 border border-slate-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-900 bg-raised"
             >
               <option value="Hostel Owner">Hostel Owner</option>
               <option value="Caretaker / Manager">Caretaker / Manager</option>
@@ -293,7 +293,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
                 'px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all',
                 helpingSince === year
                   ? 'bg-emerald-50 border-emerald-300 text-primary'
-                  : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300',
+                  : 'bg-raised border-line text-ink-muted hover:border-slate-300',
               )}
               aria-pressed={helpingSince === year}
             >
@@ -305,7 +305,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
 
       {/* Social Links */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">Social Links</h2>
+        <h2 className="text-lg font-bold text-ink">Social Links</h2>
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="portfolio-url">Portfolio Website (optional)</Label>
@@ -316,7 +316,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
               placeholder="https://yoursite.com"
               type="url"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-ink-muted">
               Your personal website, portfolio, or LinkedIn profile
             </p>
           </div>
@@ -335,7 +335,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
                   checked={instagramPublic}
                   onCheckedChange={setInstagramPublic}
                 />
-                <Label htmlFor="instagram-public" className="text-xs text-slate-500">
+                <Label htmlFor="instagram-public" className="text-xs text-ink-muted">
                   Show on public profile
                 </Label>
               </div>
@@ -356,7 +356,7 @@ export function AgentProfileForm({ agent }: AgentProfileFormProps) {
                   checked={linkedinPublic}
                   onCheckedChange={setLinkedinPublic}
                 />
-                <Label htmlFor="linkedin-public" className="text-xs text-slate-500">
+                <Label htmlFor="linkedin-public" className="text-xs text-ink-muted">
                   Show on public profile
                 </Label>
               </div>

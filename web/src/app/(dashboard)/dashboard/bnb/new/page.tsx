@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { marketForAgentCampus } from '@/lib/data/agent-market';
 import { BnbListingForm } from './bnb-listing-form';
+import { DashboardPageHeader } from '@/app/(dashboard)/dashboard-ui';
 
 export const revalidate = 0;
 
@@ -18,15 +17,12 @@ export default async function NewBnbListingPage() {
   if (!agent || agent.status === 'suspended') redirect('/dashboard');
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <Link href="/dashboard/bnb"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3">
-          <ArrowLeft className="h-4 w-4" /> Back to RumiaBnB
-        </Link>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">New BnB listing</h1>
-        <p className="text-sm text-slate-500 mt-1">List your short-stay property on RumiaBnB.</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <DashboardPageHeader
+        back={{ href: '/dashboard/bnb', label: 'RumiaBnB' }}
+        title="New short stay"
+        description="List your short-stay property on RumiaBnB."
+      />
 
       <BnbListingForm agentWhatsapp={agent.whatsapp} county={await marketForAgentCampus(agent.campus_id)} />
     </div>

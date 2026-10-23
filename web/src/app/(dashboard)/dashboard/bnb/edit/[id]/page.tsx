@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect, notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { bnbApi } from '@/lib/api/bnb';
 import { BnbListingForm, type BnbInitialData } from '../../new/bnb-listing-form';
+import { DashboardPageHeader } from '@/app/(dashboard)/dashboard-ui';
 
 export const revalidate = 0;
 
@@ -48,15 +47,12 @@ export default async function EditBnbListingPage({ params }: { params: Promise<{
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <Link href="/dashboard/bnb"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3">
-          <ArrowLeft className="h-4 w-4" /> Back to RumiaBnB
-        </Link>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Edit BnB listing</h1>
-        <p className="text-sm text-slate-500 mt-1 truncate">{listing.title}</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <DashboardPageHeader
+        back={{ href: '/dashboard/bnb', label: 'RumiaBnB' }}
+        title="Edit short stay"
+        description={<span className="block truncate">{listing.title}</span>}
+      />
 
       <BnbListingForm mode="edit" initialData={initialData} agentWhatsapp={agent.whatsapp} />
     </div>

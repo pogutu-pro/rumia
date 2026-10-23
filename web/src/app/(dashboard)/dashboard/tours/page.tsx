@@ -2,8 +2,7 @@ import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { ToursSection } from '../tours-section';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { DashboardPageHeader } from '@/app/(dashboard)/dashboard-ui';
 
 export const revalidate = 0;
 
@@ -27,21 +26,7 @@ export default async function AgentToursPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Link>
-        <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
-          Tour Bookings
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Manage all your scheduled hostel tours in one place.
-        </p>
-      </div>
+      <DashboardPageHeader title="Tours" description="Every viewing students have booked with you, in one place." />
       <ToursSection bookings={tourBookings} />
     </div>
   );

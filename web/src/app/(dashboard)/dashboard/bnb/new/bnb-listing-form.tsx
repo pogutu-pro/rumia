@@ -32,7 +32,7 @@ import { BNB_DEFAULT_HOST_NAME } from '@/lib/site/bnb';
 
 const GoogleLocationInput = dynamic(
   () => import('@/components/ui/google-location-input').then((m) => m.GoogleLocationInput),
-  { ssr: false, loading: () => <div className="h-11 w-full rounded-md bg-slate-100 animate-pulse" /> },
+  { ssr: false, loading: () => <div className="h-11 w-full rounded-md bg-subtle animate-pulse" /> },
 );
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ function SortableImageCard({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : undefined }}
       className={cn(
-        'relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs',
+        'relative aspect-4/3 rounded-xl overflow-hidden border border-line bg-subtle shadow-xs',
         isDragging && 'opacity-50 ring-2 ring-emerald-500',
       )}
     >
@@ -221,7 +221,7 @@ function SortableImageCard({
 
       <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 z-20">
         <select value={img.category} onChange={(e) => onCategoryChange(idx, e.target.value)}
-          className="flex-1 min-w-0 text-[10px] font-bold h-7 bg-white/90 border border-slate-200 rounded px-1.5 text-slate-800 focus:outline-none">
+          className="flex-1 min-w-0 text-[10px] font-bold h-7 bg-white/90 border border-line rounded px-1.5 text-slate-800 focus:outline-none">
           {['Room', 'Bathroom', 'Kitchen', 'Living area', 'Exterior', 'View', 'Other'].map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
@@ -263,7 +263,7 @@ function StepNav({ current, onChange }: { current: number; onChange: (i: number)
         <button key={step.id} type="button" onClick={() => onChange(i)}
           className={cn(
             'shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors',
-            i === current ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+            i === current ? 'bg-slate-900 text-white' : 'bg-subtle text-ink-muted hover:bg-slate-200',
           )}>
           {step.label}
         </button>
@@ -274,10 +274,10 @@ function StepNav({ current, onChange }: { current: number; onChange: (i: number)
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-6">
+    <div className="bg-raised p-6 sm:p-8 rounded-3xl border border-line shadow-xs space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-        {subtitle && <p className="text-xs text-slate-500 font-medium mt-0.5">{subtitle}</p>}
+        <h2 className="text-xl font-bold text-ink">{title}</h2>
+        {subtitle && <p className="text-xs text-ink-muted font-medium mt-0.5">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -465,7 +465,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
               <Label htmlFor="bnb-title">Listing title *</Label>
               <Input id="bnb-title" value={title} onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Cosy studio near DeKUT campus"
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
               <Label>Listing type *</Label>
@@ -475,9 +475,9 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                     <input type="radio" name="listing_type" value={lt.value}
                       checked={listingType === lt.value} onChange={() => setListingType(lt.value)} className="sr-only" />
                     <div className={cn('rounded-2xl border-2 p-4 transition-all',
-                      listingType === lt.value ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300')}>
+                      listingType === lt.value ? 'border-emerald-500 bg-emerald-50' : 'border-line bg-raised hover:border-slate-300')}>
                       <p className={cn('text-sm font-bold', listingType === lt.value ? 'text-emerald-800' : 'text-slate-800')}>{lt.label}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{lt.desc}</p>
+                      <p className="text-xs text-ink-muted mt-0.5">{lt.desc}</p>
                     </div>
                   </label>
                 ))}
@@ -487,7 +487,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
               <Label htmlFor="bnb-desc">Description</Label>
               <Textarea id="bnb-desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe your place — what makes it special, nearby attractions, who it's perfect for..."
-                className="bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm resize-none" />
+                className="bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm resize-none" />
             </div>
             <div className="space-y-2">
               <Label>Location</Label>
@@ -499,27 +499,27 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                 <Label htmlFor="bnb-area">Area / Zone</Label>
                 <Input id="bnb-area" value={area} onChange={(e) => setArea(e.target.value)}
                   placeholder="e.g. Boma, Ngariama"
-                  className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                  className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bnb-landmark">Nearby landmark</Label>
                 <Input id="bnb-landmark" value={nearbyLandmark} onChange={(e) => setNearbyLandmark(e.target.value)}
                   placeholder="e.g. Opposite Equity Bank"
-                  className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                  className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-host-name">Host&rsquo;s name shown to guests <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-host-name">Host&rsquo;s name shown to guests <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-host-name" value={hostName} maxLength={80} onChange={(e) => setHostName(e.target.value)}
                 placeholder="e.g. Mary Wanjiru"
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-              <p className="text-xs text-slate-500">Appears as &ldquo;Hosted by …&rdquo; on RumiaBnB. Leave empty to show {BNB_DEFAULT_HOST_NAME}.</p>
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-xs text-ink-muted">Appears as &ldquo;Hosted by …&rdquo; on RumiaBnB. Leave empty to show {BNB_DEFAULT_HOST_NAME}.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bnb-specific">Specific location detail</Label>
               <Input id="bnb-specific" value={specificLocation} onChange={(e) => setSpecificLocation(e.target.value)}
                 placeholder="e.g. 2nd floor, blue gate"
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
           </div>
         </Section>
@@ -527,12 +527,12 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
 
       {step === 1 && (
         <Section title="Photos" subtitle="Great photos get more bookings. First photo is the cover.">
-          <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/20 rounded-2xl p-8 transition-colors flex flex-col items-center text-center cursor-pointer relative">
+          <div className="border-2 border-dashed border-line hover:border-emerald-500 hover:bg-emerald-50/20 rounded-2xl p-8 transition-colors flex flex-col items-center text-center cursor-pointer relative">
             <input type="file" multiple accept="image/*" onChange={handleFileChange}
               disabled={isUploading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-            <UploadCloud className="h-10 w-10 text-slate-500 mb-3" />
+            <UploadCloud className="h-10 w-10 text-ink-muted mb-3" />
             <p className="text-sm font-bold text-slate-700">{isUploading ? 'Uploading…' : 'Click or drag photos here'}</p>
-            <p className="text-xs text-slate-500 mt-1 font-medium">PNG, JPG or WEBP · up to 10 MB each</p>
+            <p className="text-xs text-ink-muted mt-1 font-medium">PNG, JPG or WEBP · up to 10 MB each</p>
           </div>
           {isUploading && (
             <div className="flex items-center justify-center gap-2 text-primary text-xs font-bold py-2">
@@ -541,7 +541,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
           )}
           {images.length > 0 && (
             <div>
-              <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1.5">
+              <p className="text-xs text-ink-muted font-medium mb-3 flex items-center gap-1.5">
                 <GripVertical className="h-3 w-3" /> Drag to reorder · first image = cover photo
               </p>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -573,14 +573,14 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
             <Input id="bnbVideo" value={videoInput}
               onChange={(e) => setVideoInput(e.target.value)}
               placeholder="Paste a YouTube or YouTube Shorts link"
-              className="h-11 bg-slate-50 border-slate-200/80 text-sm font-medium" />
+              className="h-11 bg-subtle border-line text-sm font-medium" />
             {videoInput.trim() && !video.id && (
               <p className="text-xs font-semibold text-rose-600">That does not look like a YouTube link.</p>
             )}
-            <p className="text-xs text-slate-500">Upload the video to YouTube (unlisted is fine), then paste its link here.</p>
+            <p className="text-xs text-ink-muted">Upload the video to YouTube (unlisted is fine), then paste its link here.</p>
           </div>
           {video.id && (
-            <div className={cn('overflow-hidden rounded-xl border border-slate-200',
+            <div className={cn('overflow-hidden rounded-xl border border-line',
               video.isShort ? 'aspect-[9/16] max-w-[220px]' : 'aspect-video max-w-md')}>
               <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${video.id}`}
                 title="Video tour preview" allowFullScreen
@@ -595,9 +595,9 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
           <div className="grid grid-cols-3 gap-4">
             {([['Max guests', maxGuests, setMaxGuests], ['Bedrooms', bedrooms, setBedrooms], ['Bathrooms', bathrooms, setBathrooms]] as const).map(([label, value, set]) => (
               <div key={label} className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wide">{label}</Label>
+                <Label className="text-xs font-bold text-ink-muted uppercase tracking-wide">{label}</Label>
                 <Input type="number" min={0} value={value} onChange={(e) => (set as any)(e.target.value)}
-                  placeholder="0" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                  placeholder="0" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
               </div>
             ))}
           </div>
@@ -606,16 +606,16 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
               <Label className="text-sm font-bold text-slate-700">Bed configuration</Label>
               <Button type="button" variant="outline" size="sm"
                 onClick={() => setBedConfig((p) => [...p, { type: 'Single', qty: 1 }])}
-                className="h-8 px-3 rounded-lg border-slate-200 text-xs font-bold">
+                className="h-8 px-3 rounded-lg border-line text-xs font-bold">
                 <Plus className="h-3.5 w-3.5 mr-1" /> Add bed
               </Button>
             </div>
             <div className="space-y-2">
               {bedConfig.map((bed, idx) => (
-                <div key={idx} className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <div key={idx} className="flex items-center gap-3 bg-subtle rounded-xl p-3 border border-line">
                   <select value={bed.type}
                     onChange={(e) => setBedConfig((p) => p.map((b, i) => i === idx ? { ...b, type: e.target.value } : b))}
-                    className="flex-1 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    className="flex-1 h-9 rounded-lg border border-line bg-raised px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     {BED_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <div className="flex items-center gap-2 shrink-0">
@@ -629,7 +629,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                   </div>
                   {bedConfig.length > 1 && (
                     <button type="button" onClick={() => setBedConfig((p) => p.filter((_, i) => i !== idx))}
-                      className="p-1.5 text-slate-500 hover:text-rose-600 transition-colors">
+                      className="p-1.5 text-ink-muted hover:text-rose-600 transition-colors">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
@@ -646,51 +646,51 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
             <div className="space-y-2">
               <Label htmlFor="bnb-price">Base price (KES) *</Label>
               <Input id="bnb-price" type="number" min={0} value={price} onChange={(e) => setPrice(e.target.value)}
-                placeholder="e.g. 3500" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="e.g. 3500" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bnb-price-unit">Price per</Label>
               <select id="bnb-price-unit" value={priceUnit} onChange={(e) => setPriceUnit(e.target.value)}
-                className="flex h-11 w-full rounded-md border bg-slate-50 border-slate-200/80 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                className="flex h-11 w-full rounded-md border bg-subtle border-line px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 {PRICE_UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
               </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bnb-min-stay">Minimum stay (nights)</Label>
               <Input id="bnb-min-stay" type="number" min={1} value={minStay} onChange={(e) => setMinStay(e.target.value)}
-                placeholder="1" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="1" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-max-stay">Maximum stay (nights) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-max-stay">Maximum stay (nights) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-max-stay" type="number" min={1} value={maxStay} onChange={(e) => setMaxStay(e.target.value)}
-                placeholder="No limit" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="No limit" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-cleaning">Cleaning fee (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-cleaning">Cleaning fee (KES) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-cleaning" type="number" min={0} value={cleaningFee} onChange={(e) => setCleaningFee(e.target.value)}
-                placeholder="e.g. 500" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="e.g. 500" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-deposit">Security deposit (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-deposit">Security deposit (KES) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-deposit" type="number" min={0} value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)}
-                placeholder="e.g. 2000" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="e.g. 2000" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-weekly">Weekly price (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-weekly">Weekly price (KES) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-weekly" type="number" min={0} value={weeklyPrice} onChange={(e) => setWeeklyPrice(e.target.value)}
-                placeholder="For 7 nights, e.g. 21000" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-              <p className="text-xs text-slate-500">Used for stays of 7 nights or more, if cheaper than nightly.</p>
+                placeholder="For 7 nights, e.g. 21000" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-xs text-ink-muted">Used for stays of 7 nights or more, if cheaper than nightly.</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-monthly">Monthly price (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-monthly">Monthly price (KES) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-monthly" type="number" min={0} value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)}
-                placeholder="For 30 nights, e.g. 60000" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-              <p className="text-xs text-slate-500">Used for stays of 30 nights or more, if cheaper.</p>
+                placeholder="For 30 nights, e.g. 60000" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-xs text-ink-muted">Used for stays of 30 nights or more, if cheaper.</p>
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="bnb-extra-guest">Extra guest fee / person (KES) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-extra-guest">Extra guest fee / person (KES) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-extra-guest" type="number" min={0} value={extraGuestFee} onChange={(e) => setExtraGuestFee(e.target.value)}
-                placeholder="e.g. 300" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="e.g. 300" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
           </div>
         </Section>
@@ -700,30 +700,30 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
         <Section title="Availability" subtitle="When is your place available and what are the check-in rules?">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <Label htmlFor="bnb-from">Available from <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-from">Available from <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-from" type="date" value={availableFrom} onChange={(e) => setAvailableFrom(e.target.value)}
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-until">Available until <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-until">Available until <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-until" type="date" value={availableUntil} onChange={(e) => setAvailableUntil(e.target.value)}
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-checkin">Check-in time <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-checkin">Check-in time <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-checkin" type="time" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)}
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-checkout">Check-out time <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-checkout">Check-out time <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-checkout" type="time" value={checkOutTime} onChange={(e) => setCheckOutTime(e.target.value)}
-                className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="bnb-notice">Advance notice required (hours) <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-notice">Advance notice required (hours) <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-notice" type="number" min={0} value={advanceNotice} onChange={(e) => setAdvanceNotice(e.target.value)}
-                placeholder="e.g. 24" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-              <p className="text-[11px] text-slate-500 font-medium">How many hours before arrival guests must book.</p>
+                placeholder="e.g. 24" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
+              <p className="text-[11px] text-ink-muted font-medium">How many hours before arrival guests must book.</p>
             </div>
           </div>
         </Section>
@@ -743,13 +743,13 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                     className="sr-only" />
                   <div className={cn(
                     'flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-150',
-                    selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm',
+                    selected ? 'border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100/60' : 'border-line bg-raised hover:border-slate-300 hover:shadow-sm',
                   )}>
                     <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl transition-colors',
-                      selected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200')}>
+                      selected ? 'bg-emerald-500 text-white' : 'bg-subtle text-ink-muted group-hover:bg-slate-200')}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    <span className={cn('text-xs font-bold leading-tight text-center', selected ? 'text-primary' : 'text-slate-600')}>
+                    <span className={cn('text-xs font-bold leading-tight text-center', selected ? 'text-primary' : 'text-ink-muted')}>
                       {amenity}
                     </span>
                   </div>
@@ -772,28 +772,28 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                 ['Visitors allowed', visitors, setVisitors],
                 ['Children welcome', children, setChildren],
               ] as [string, boolean, (v: boolean) => void][]).map(([label, value, set]) => (
-                <label key={label} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 border border-slate-100 cursor-pointer">
+                <label key={label} className="flex items-center justify-between bg-subtle rounded-xl px-4 py-3 border border-line cursor-pointer">
                   <span className="text-sm font-medium text-slate-700">{label}</span>
                   <button type="button" onClick={() => set(!value)}
                     className={cn('relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors', value ? 'bg-emerald-500' : 'bg-slate-300')}>
-                    <span className={cn('inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform mt-0.5', value ? 'translate-x-4' : 'translate-x-0.5')} />
+                    <span className={cn('inline-block h-4 w-4 transform rounded-full bg-raised shadow-sm transition-transform mt-0.5', value ? 'translate-x-4' : 'translate-x-0.5')} />
                   </button>
                 </label>
               ))}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-quiet">Quiet hours <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-quiet">Quiet hours <span className="text-ink-muted font-normal">optional</span></Label>
               <Input id="bnb-quiet" value={quietHours} onChange={(e) => setQuietHours(e.target.value)}
-                placeholder="e.g. 22:00–07:00" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
+                placeholder="e.g. 22:00–07:00" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bnb-custom-rules">Additional rules <span className="text-slate-500 font-normal">optional</span></Label>
+              <Label htmlFor="bnb-custom-rules">Additional rules <span className="text-ink-muted font-normal">optional</span></Label>
               <Textarea id="bnb-custom-rules" rows={3} value={customRules} onChange={(e) => setCustomRules(e.target.value)}
                 placeholder="Any other rules guests should know about..."
-                className="bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm resize-none" />
+                className="bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm resize-none" />
             </div>
           </div>
-          <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="space-y-3 pt-2 border-t border-line">
             <p className="text-sm font-semibold text-slate-700">Best suited for</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {GUEST_SUITABILITY_OPTIONS.map(({ value, label }) => {
@@ -804,7 +804,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
                       onChange={() => setGuestSuitability((p) => selected ? p.filter((v) => v !== value) : [...p, value])}
                       className="sr-only" />
                     <div className={cn('rounded-xl border-2 px-3 py-2 text-xs font-semibold text-center transition-all',
-                      selected ? 'border-emerald-400 bg-emerald-50 text-primary' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300')}>
+                      selected ? 'border-emerald-400 bg-emerald-50 text-primary' : 'border-line bg-raised text-ink-muted hover:border-slate-300')}>
                       {label}
                     </div>
                   </label>
@@ -812,11 +812,11 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
               })}
             </div>
           </div>
-          <div className="space-y-2 pt-2 border-t border-slate-100">
+          <div className="space-y-2 pt-2 border-t border-line">
             <Label htmlFor="bnb-whatsapp">Your WhatsApp number</Label>
             <Input id="bnb-whatsapp" type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="e.g. 0712 345 678" className="h-11 bg-slate-50 border-slate-200/80 focus-visible:ring-emerald-500 font-medium text-sm" />
-            <p className="text-[11px] text-slate-500 font-medium">Guests will contact you on this number.</p>
+              placeholder="e.g. 0712 345 678" className="h-11 bg-subtle border-line focus-visible:ring-emerald-500 font-medium text-sm" />
+            <p className="text-[11px] text-ink-muted font-medium">Guests will contact you on this number.</p>
           </div>
         </Section>
       )}
@@ -825,7 +825,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
         <div>
           {step > 0 && (
             <Button type="button" variant="outline" onClick={() => setStep((s) => s - 1)}
-              className="rounded-xl font-bold h-11 border-slate-200 text-slate-600 hover:bg-slate-50">
+              className="rounded-xl font-bold h-11 border-line text-ink-muted hover:bg-subtle">
               Back
             </Button>
           )}
@@ -840,7 +840,7 @@ export function BnbListingForm({ mode = 'create', initialData, agentWhatsapp, co
             <>
               <Button type="button" variant="outline" disabled={isSaving || isUploading}
                 onClick={() => handleSubmit(false)}
-                className="rounded-xl font-bold h-11 border-slate-200 text-slate-600 hover:bg-slate-50">
+                className="rounded-xl font-bold h-11 border-line text-ink-muted hover:bg-subtle">
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
                 Save draft
               </Button>

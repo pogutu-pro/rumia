@@ -2,6 +2,7 @@ import { createClient } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { getAgentHostelsAction } from '@/app/actions/listings';
 import { OfficialHostelsTableClient } from '@/app/(admin)/admin/official-hostels/official-hostels-table-client';
+import { DashboardPageHeader } from '@/app/(dashboard)/dashboard-ui';
 
 export default async function AgentHostelsPage() {
   const authClient = await createClient();
@@ -18,14 +19,10 @@ export default async function AgentHostelsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Hostels Directory
-        </h1>
-        <p className="text-sm text-slate-500">
-          Official DeKUT housing records alongside all agent-uploaded hostels.
-        </p>
-      </div>
+      <DashboardPageHeader
+        title="Hostels directory"
+        description="Official DeKUT housing records alongside every agent-uploaded hostel."
+      />
 
       <OfficialHostelsTableClient
         officialHostels={officialHostels}

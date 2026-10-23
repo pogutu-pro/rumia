@@ -27,20 +27,20 @@ export function AgentProfileClient({ agent }: AgentProfileClientProps) {
     <>
       <AgentProfileForm agent={agent} />
 
-      <div className="mt-10 pt-8 border-t border-slate-100 space-y-4">
+      <div className="mt-10 pt-8 border-t border-line space-y-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 mb-1">Notifications</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-lg font-bold text-ink mb-1">Notifications</h2>
+          <p className="text-sm text-ink-muted">
             Get alerted when students send inquiries or book tours.
           </p>
         </div>
         <NotificationSettings />
       </div>
 
-      <div className="mt-8 bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3">
+      <div className="mt-8 bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-3">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">Account Session</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h3 className="text-sm font-bold text-ink">Account Session</h3>
+          <p className="text-xs text-ink-muted mt-0.5">
             Sign out of your agent account on this device.
           </p>
         </div>

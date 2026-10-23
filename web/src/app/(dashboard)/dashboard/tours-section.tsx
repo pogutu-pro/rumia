@@ -130,14 +130,14 @@ export function ToursSection({ bookings }: ToursSectionProps) {
 
   if (localBookings.length === 0) {
     return (
-      <div className="text-center py-16 bg-white border border-slate-200/80 rounded-2xl p-6">
-        <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mx-auto mb-3">
+      <div className="text-center py-16 bg-raised border border-line rounded-2xl p-6">
+        <div className="w-12 h-12 rounded-full bg-subtle text-ink-muted flex items-center justify-center mx-auto mb-3">
           <CalendarCheck className="h-6 w-6" />
         </div>
-        <h3 className="text-base font-bold text-slate-900 mb-1">
+        <h3 className="text-base font-bold text-ink mb-1">
           No tour bookings yet
         </h3>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-muted">
           Tour bookings from students will appear here.
         </p>
       </div>
@@ -153,7 +153,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 pb-2">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-line pb-2">
         {(
           [
             { id: 'all', label: 'All Tours', count: localBookings.length },
@@ -172,7 +172,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap ${
               activeFilter === filter.id
                 ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
+                : 'text-ink-muted hover:bg-subtle'
             }`}
           >
             <span>{filter.label}</span>
@@ -180,7 +180,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
               className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                 activeFilter === filter.id
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 text-slate-600'
+                  : 'bg-slate-200 text-ink-muted'
               }`}
             >
               {filter.count}
@@ -190,15 +190,15 @@ export function ToursSection({ bookings }: ToursSectionProps) {
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 overflow-hidden">
+      <div className="hidden md:block bg-raised rounded-2xl border border-line overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50">
+            <tr className="border-b border-line bg-subtle">
               {['Student', 'Date & Time', 'Listing', 'Amount', 'Status', 'Contact'].map(
                 (h) => (
                   <th
                     key={h}
-                    className="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-left px-5 py-3"
+                    className="text-[10px] font-bold text-ink-muted uppercase tracking-wider text-left px-5 py-3"
                   >
                     {h}
                   </th>
@@ -206,7 +206,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-line">
             {filteredBookings.map((b) => {
               const isActive =
                 b.status !== 'cancelled' &&
@@ -218,13 +218,13 @@ export function ToursSection({ bookings }: ToursSectionProps) {
               return (
                 <tr
                   key={b.id}
-                  className={isTerminal ? 'opacity-60' : 'hover:bg-slate-50/60 transition-colors'}
+                  className={isTerminal ? 'opacity-60' : 'hover:bg-subtle transition-colors'}
                 >
                   <td className="px-5 py-4">
-                    <p className="text-sm font-bold text-slate-900">
+                    <p className="text-sm font-bold text-ink">
                       {b.student_name}
                     </p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-ink-muted flex items-center gap-1 mt-0.5">
                       <Phone className="h-3 w-3" />
                       {b.phone}
                     </p>
@@ -239,7 +239,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                         year: 'numeric',
                       })}
                     </p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-ink-muted flex items-center gap-1 mt-0.5">
                       <Clock className="h-3 w-3" />
                       {b.preferred_time.charAt(0).toUpperCase() +
                         b.preferred_time.slice(1)}
@@ -262,7 +262,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                   <td className="px-5 py-4 text-sm font-semibold text-slate-700">
                     {b.listings?.title || b.zone}
                   </td>
-                  <td className="px-5 py-4 text-sm font-bold text-slate-900 tabular-nums">
+                  <td className="px-5 py-4 text-sm font-bold text-ink tabular-nums">
                     {formatTourPrice(b.amount)}
                   </td>
                   <td className="px-5 py-4">
@@ -304,16 +304,16 @@ export function ToursSection({ bookings }: ToursSectionProps) {
           return (
             <div
               key={b.id}
-              className={`bg-white rounded-2xl border border-slate-200/80 p-4 space-y-3 ${
+              className={`bg-raised rounded-2xl border border-line p-4 space-y-3 ${
                 isTerminal ? 'opacity-70' : ''
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-slate-900">
+                  <p className="text-sm font-bold text-ink">
                     {b.student_name}
                   </p>
-                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                  <p className="text-xs text-ink-muted flex items-center gap-1 mt-0.5">
                     <Phone className="h-3 w-3" />
                     {b.phone}
                   </p>
@@ -325,8 +325,8 @@ export function ToursSection({ bookings }: ToursSectionProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <CalendarCheck className="h-3.5 w-3.5 text-slate-500" />
+                <div className="flex items-center gap-1.5 text-ink-muted">
+                  <CalendarCheck className="h-3.5 w-3.5 text-ink-muted" />
                   {new Date(
                     b.preferred_date + 'T00:00:00',
                   ).toLocaleDateString('en-KE', {
@@ -334,16 +334,16 @@ export function ToursSection({ bookings }: ToursSectionProps) {
                     day: 'numeric',
                   })}
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <Clock className="h-3.5 w-3.5 text-slate-500" />
+                <div className="flex items-center gap-1.5 text-ink-muted">
+                  <Clock className="h-3.5 w-3.5 text-ink-muted" />
                   {b.preferred_time.charAt(0).toUpperCase() +
                     b.preferred_time.slice(1)}
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <MapPin className="h-3.5 w-3.5 text-slate-500" />
+                <div className="flex items-center gap-1.5 text-ink-muted">
+                  <MapPin className="h-3.5 w-3.5 text-ink-muted" />
                   {b.listings?.title || b.zone}
                 </div>
-                <div className="font-bold text-slate-900 tabular-nums">
+                <div className="font-bold text-ink tabular-nums">
                   {formatTourPrice(b.amount)}
                 </div>
                 {isActive && (
@@ -380,7 +380,7 @@ export function ToursSection({ bookings }: ToursSectionProps) {
 
       {/* Empty Filter State */}
       {filteredBookings.length === 0 && localBookings.length > 0 && (
-        <div className="py-12 text-center text-xs text-slate-500 bg-white border border-slate-200/80 rounded-2xl">
+        <div className="py-12 text-center text-xs text-ink-muted bg-raised border border-line rounded-2xl">
           No {activeFilter} tours found.
         </div>
       )}

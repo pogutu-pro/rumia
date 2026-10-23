@@ -3,8 +3,7 @@ import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
 import { TeamSection } from '@/components/dashboard/team-section';
 import { AgentProfileClient } from './agent-profile-client';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { DashboardPageHeader } from '@/app/(dashboard)/dashboard-ui';
 
 export default async function AgentProfilePage() {
   const authClient = await createClient();
@@ -18,21 +17,7 @@ export default async function AgentProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Link>
-        <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
-          Profile & Settings
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Present yourself professionally to students looking for hostels.
-        </p>
-      </div>
+      <DashboardPageHeader title="Profile" description="How students see you. A complete profile earns more trust and more enquiries." />
 
       <AgentProfileClient agent={agent} />
 

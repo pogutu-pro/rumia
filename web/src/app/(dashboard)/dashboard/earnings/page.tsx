@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/auth/server';
 import { agentDashboardApi } from '@/lib/api/agent-dashboard';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, Wallet, CalendarCheck } from 'lucide-react';
-import Link from 'next/link';
+import { Wallet, CalendarCheck } from 'lucide-react';
+import { DashboardPageHeader } from '@/app/(dashboard)/dashboard-ui';
 
 export const revalidate = 0;
 
@@ -41,46 +41,32 @@ export default async function AgentEarningsPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Link>
-        <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
-          Tour Earnings
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Revenue from your completed and paid tour bookings.
-        </p>
-      </div>
+      <DashboardPageHeader title="Earnings" description="Revenue from your completed and paid tour bookings." />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 flex items-center gap-3">
+        <div className="bg-raised p-4 sm:p-5 rounded-2xl border border-line flex items-center gap-3">
           <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50 text-primary">
             <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div>
-            <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-ink-muted uppercase tracking-wider">
               Total Earned
             </span>
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 tabular-nums">
+            <h3 className="text-lg sm:text-xl font-bold text-ink mt-0.5 tabular-nums">
               KES {totalEarned.toLocaleString()}
             </h3>
           </div>
         </div>
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 flex items-center gap-3">
+        <div className="bg-raised p-4 sm:p-5 rounded-2xl border border-line flex items-center gap-3">
           <div className="p-2.5 sm:p-3 rounded-xl bg-amber-50 text-amber-700">
             <CalendarCheck className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div>
-            <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-ink-muted uppercase tracking-wider">
               Pending
             </span>
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 tabular-nums">
+            <h3 className="text-lg sm:text-xl font-bold text-ink mt-0.5 tabular-nums">
               KES {pendingAmount.toLocaleString()}
             </h3>
           </div>
@@ -89,25 +75,25 @@ export default async function AgentEarningsPage() {
 
       {/* Tour Breakdown */}
       <div className="space-y-3">
-        <h2 className="text-sm font-bold text-slate-900">All Tour Bookings</h2>
+        <h2 className="text-sm font-bold text-ink">All Tour Bookings</h2>
         {tours.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center">
-            <p className="text-sm text-slate-500 font-semibold">
+          <div className="bg-raised rounded-2xl border border-line p-8 text-center">
+            <p className="text-sm text-ink-muted font-semibold">
               No tour bookings yet.
             </p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden divide-y divide-slate-100">
+          <div className="rounded-2xl border border-line bg-raised overflow-hidden divide-y divide-line">
             {tours.map((tour: any) => (
               <div
                 key={tour.id}
-                className="flex items-center justify-between gap-3 p-4 hover:bg-slate-50/80 transition-colors"
+                className="flex items-center justify-between gap-3 p-4 hover:bg-subtle transition-colors"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-slate-900 truncate">
+                  <p className="text-sm font-bold text-ink truncate">
                     {tour.listings?.title || 'Guided Tour'}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-ink-muted mt-0.5">
                     {new Date(tour.preferred_date + 'T00:00:00').toLocaleDateString('en-KE', {
                       weekday: 'short',
                       month: 'short',
@@ -131,7 +117,7 @@ export default async function AgentEarningsPage() {
                       Pending
                     </span>
                   )}
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">
+                  <span className="text-sm font-bold text-ink tabular-nums">
                     KES {(tour.amount || 0).toLocaleString()}
                   </span>
                 </div>
