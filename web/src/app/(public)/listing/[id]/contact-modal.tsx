@@ -1,5 +1,6 @@
 'use client';
 
+import { OwnerContact, usePlatformOwner } from '@/components/layouts/owner-contact';
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -883,6 +884,20 @@ function ModalContent({
         <MessageCircle className="inline h-3 w-3 mr-0.5 -mt-0.5" />
         Connects via WhatsApp
       </p>
+
+      <PlatformOwnerSection />
+    </div>
+  );
+}
+
+/** Below the two choices: the platform owner, for anyone unsure who to trust or what to pay. */
+function PlatformOwnerSection() {
+  const owner = usePlatformOwner();
+  if (!owner) return null;
+  return (
+    <div className="mt-6 border-t border-slate-100 pt-5">
+      <p className="mb-3 text-center text-xs font-semibold text-slate-500">Not sure who to ask? Talk to the platform owner</p>
+      <OwnerContact owner={owner} />
     </div>
   );
 }

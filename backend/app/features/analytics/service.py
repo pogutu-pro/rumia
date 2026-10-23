@@ -40,6 +40,20 @@ class AnalyticsService:
         )
 
     @staticmethod
+    async def get_today_view_counts(db: AsyncSession) -> Dict[str, int]:
+        """Today's views per listing, in one grouped query over today's rows (index on viewed_at).
+        Listings without a view today are absent."""
+        result = await db.execute(
+            text(
+                """SELECT lv.listing_id::text AS listing_id, count(*) AS n
+                   FROM public.listing_views lv, public.rumia_period_bounds() b
+                   WHERE lv.viewed_at >= b.today_start
+                   GROUP BY lv.listing_id"""
+            )
+        )
+        return {row.listing_id: int(row.n) for row in result}
+
+    @staticmethod
     async def get_listing_view_counts(
         db: AsyncSession,
         listing_id: str,

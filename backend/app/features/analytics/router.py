@@ -53,6 +53,30 @@ async def track_listing_view(
     )
 
 
+_today_counts_cache: Tuple[float, Dict[str, int]] = (0.0, {})
+
+
+@router.get(
+    "/views/today",
+    response_model=Dict[str, int],
+    status_code=status.HTTP_200_OK,
+    summary="Today's views for every listing",
+    description="Listing id -> views today (listings with none are absent). One query for a whole page of cards. Public.",
+)
+async def get_today_view_counts(
+    response: Response,
+    db: AsyncSession = Depends(get_db_session, scope="function"),
+) -> Dict[str, int]:
+    global _today_counts_cache
+    response.headers["Cache-Control"] = f"public, max-age={VIEW_COUNTS_TTL_SECONDS}"
+    now = time.monotonic()
+    if _today_counts_cache[0] > now:
+        return _today_counts_cache[1]
+    counts = await AnalyticsService.get_today_view_counts(db)
+    _today_counts_cache = (now + VIEW_COUNTS_TTL_SECONDS, counts)
+    return counts
+
+
 @router.get(
     "/views/{listing_id}",
     response_model=ViewCountRead,
