@@ -51,7 +51,8 @@ import type {
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/date';
 
-const PENDING_REQUEST_KEY = 'rumia_pending_hostel_request';
+export const PENDING_REQUEST_KEY = 'rumia_pending_hostel_request';
+export const FIND_A_HOSTEL_PATH = '/account?tab=find-a-hostel';
 
 interface FindMeAHostelProps {
   variant?: 'dashboard' | 'home';
@@ -269,7 +270,7 @@ export function FindMeAHostel({
           }),
         );
         setSubmitting(false);
-        await signInWithGoogle('/account');
+        await signInWithGoogle(FIND_A_HOSTEL_PATH);
         return;
       }
     }
@@ -1020,17 +1021,8 @@ export function FindMeAHostel({
   }
 
   return (
-    <section className="pt-4 border-t border-line space-y-6">
-      {/* Section header */}
-      <div>
-        <h3 className="text-base sm:text-lg font-bold text-ink">
-          Find Me a Hostel
-        </h3>
-        <p className="text-xs text-ink-muted mt-0.5">
-          Tell us what you&apos;re looking for and Rumia will find it for you. A
-          manager reviews your request and contacts you on WhatsApp.
-        </p>
-      </div>
+    <section className="space-y-6">
+      {/* The account sub-page header introduces this section. */}
 
       {/* Success confirmation */}
       {justSubmitted && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/auth/client';
 import { campusesApi } from '@/lib/api/campuses';
@@ -24,6 +24,8 @@ import { AccountSavedTab } from './account-saved-tab';
 import { AccountFeedbackTab } from './account-feedback-tab';
 import { AccountSettingsTab } from './account-settings-tab';
 import { AccountAgentApplicationTab } from './account-agent-application-tab';
+import { AccountPageHeader } from './account-ui';
+import { FindMeAHostel, PENDING_REQUEST_KEY } from './find-me-a-hostel';
 import { PushNotificationPrompt } from '@/components/pwa/PushNotificationPrompt';
 import {
   getRecentlyViewedHostels,
@@ -39,6 +41,7 @@ const VALID_TABS = new Set<AccountTab>([
   'feedback',
   'settings',
   'agent-application',
+  'find-a-hostel',
 ]);
 
 function getValidTab(value: string | null): AccountTab {
@@ -77,17 +80,16 @@ async function loadProfileWithRetry(): Promise<UserProfile | null> {
 function AccountSkeleton() {
   return (
     <div className="min-h-[calc(100dvh-var(--shell-header-h))]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        <div className="space-y-2">
-          <div className="skeleton h-7 w-40" />
-          <div className="skeleton h-4 w-64" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="skeleton mb-5 h-8 w-36" />
+        <div className="lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-10">
+          <div className="skeleton h-56 rounded-3xl" />
+          <div className="mt-6 space-y-6 lg:mt-0">
+            <div className="skeleton h-24 rounded-3xl" />
+            <div className="skeleton h-36 rounded-2xl" />
+            <div className="skeleton h-36 rounded-2xl" />
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="skeleton h-44 rounded-2xl" />
-          ))}
-        </div>
-        <div className="skeleton h-72 rounded-2xl" />
       </div>
       <span className="sr-only" role="status">Loading your account</span>
     </div>
@@ -274,11 +276,29 @@ export default function AccountPage() {
   }, []);
 
   const handleTabChange = useCallback(
-    (tab: AccountTab) => {
-      router.replace(`/account?tab=${tab}`, { scroll: false });
+    (tab: AccountTab, hash?: string) => {
+      // Sub-pages open at the top, like a new screen; the hub keeps its place.
+      router.replace(`/account?tab=${tab}${hash ? `#${hash}` : ''}`, { scroll: tab !== 'overview' && !hash });
     },
     [router],
   );
+
+  // A guest who started "Find me a hostel" on the homepage comes back here after Google sign-in;
+  // send them to the page that picks up and submits their saved request, whatever tab they landed on.
+  const resumeChecked = useRef(false);
+  useEffect(() => {
+    // Only on first landing, so a dismissed payment step never bounces them off the hub again.
+    if (resumeChecked.current) return;
+    resumeChecked.current = true;
+    if (activeTab === 'find-a-hostel') return;
+    try {
+      if (sessionStorage.getItem(PENDING_REQUEST_KEY)) {
+        router.replace('/account?tab=find-a-hostel', { scroll: false });
+      }
+    } catch {
+      // Storage blocked: nothing pending to resume.
+    }
+  }, [activeTab, router]);
 
   useEffect(() => {
     if (hasAgent && activeTab === 'agent-application') {
@@ -358,6 +378,7 @@ export default function AccountPage() {
            <AccountOverviewTab
              displayName={profile.full_name || 'Student'}
              email={profile.email}
+             avatarUrl={profile.avatar_url}
              isManager={profile.role === 'manager' || profile.role === 'admin'}
              isAdmin={profile.role === 'admin'}
              savedCount={savedCount}
@@ -415,6 +436,28 @@ export default function AccountPage() {
             }}
             onBackToOverview={() => handleTabChange('overview')}
           />
+        )}
+
+        {activeTab === 'find-a-hostel' && (
+          <div className="mx-auto max-w-3xl space-y-8">
+            <AccountPageHeader
+              title="Find me a hostel"
+              description="Tell us what you're looking for. A Rumia manager reviews your request and contacts you on WhatsApp."
+              onBack={() => handleTabChange('overview')}
+            />
+            <FindMeAHostel
+              studentName={profile.full_name || 'Student'}
+              studentPhone={profile.phone}
+              campusId={profile.home_campus_id ?? profile.campus_id ?? null}
+              campusName={
+                profile.home_campus_name ??
+                (profile.home_campus_id
+                  ? campuses.find((c) => c.id === profile.home_campus_id)?.name
+                  : null) ??
+                null
+              }
+            />
+          </div>
         )}
 
         {activeTab === 'agent-application' && (

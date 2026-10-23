@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { AccountPageHeader } from './account-ui';
 import { FeedbackForm } from '@/components/feedback/feedback-form';
 
 interface AccountFeedbackTabProps {
@@ -10,36 +9,14 @@ interface AccountFeedbackTabProps {
 
 export function AccountFeedbackTab({ onBackToOverview }: AccountFeedbackTabProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        {onBackToOverview ? (
-          <button
-            onClick={onBackToOverview}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </button>
-        ) : (
-          <Link
-            href="/account?tab=overview"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Overview
-          </Link>
-        )}
-      </div>
+    <div className="mx-auto max-w-2xl space-y-8">
+      <AccountPageHeader
+        title="Share feedback"
+        description="Tell us how we can make Rumia better. Every field is optional."
+        onBack={onBackToOverview}
+      />
 
-      <div className="bg-raised border border-line rounded-2xl p-5 sm:p-6 space-y-4">
-        <div>
-          <h3 className="text-base font-bold text-ink">
-            Share your feedback
-          </h3>
-          <p className="text-xs text-ink-muted mt-0.5">
-            Tell us how we can make Rumia better for DeKUT students. All fields optional.
-          </p>
-        </div>
+      <div className="rounded-2xl border border-line bg-raised p-5 sm:p-6">
         <FeedbackForm />
       </div>
     </div>
