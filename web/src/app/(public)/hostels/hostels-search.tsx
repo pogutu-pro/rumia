@@ -13,8 +13,10 @@ import { BNB_ORIGIN } from '@/lib/site/hosts';
 import { cn } from '@/lib/utils/cn';
 import { useFilterStore, type ExploreSort } from '@/stores/filter-store';
 import { useCompareToggle } from '@/hooks/use-compare-toggle';
+import { useTaste } from '@/hooks/use-taste';
+import { personalise } from '@/lib/personalisation';
 import { clientSearch } from '@/lib/search/client-search';
-import { matchesRefinements, offersRoomType, sortListings, SORT_LABELS } from '@/lib/search/explore';
+import { matchesRefinements, offersRoomType, sortListings, SORT_LABELS, startingPrice } from '@/lib/search/explore';
 import type {
   SearchListing,
   CombinedFilters,
@@ -183,7 +185,17 @@ export default function HostelsSearch({
     [sort, category],
   );
 
-  const results = useMemo(() => resultsFor(applied, qParamFromUrl), [resultsFor, applied, qParamFromUrl]);
+  // "Recommended" is the site-wide order (re-ranked twice a day from what everyone does), nudged towards what this
+  // visitor has been looking at on this device. No history, a search or another sort: the order is left as it is.
+  const taste = useTaste();
+  const results = useMemo(() => {
+    const base = resultsFor(applied, qParamFromUrl);
+    if (!taste || sort !== 'recommended' || qParamFromUrl) return base;
+    return personalise(
+      base.map((item) => ({ item, kind: item.property_type ?? 'hostel', place_name: item.area, from_price: startingPrice(item) })),
+      taste,
+    ).map((x) => x.item);
+  }, [resultsFor, applied, qParamFromUrl, taste, sort]);
   const countFor = useCallback((draft: ExploreFilters) => resultsFor(draft, qParamFromUrl).length, [resultsFor, qParamFromUrl]);
   const total = results.length;
 

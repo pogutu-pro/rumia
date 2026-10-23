@@ -10,6 +10,8 @@ import { ListingSection } from './listing-section';
 import { formatAreaName, normaliseArea } from '@/lib/utils/area-label';
 import { BNB_SEPARATE } from '@/lib/site/separation';
 import { BNB_ORIGIN } from '@/lib/site/hosts';
+import { useTaste } from '@/hooks/use-taste';
+import { personalise } from '@/lib/personalisation';
 
 export interface ExploreZone {
   name: string;
@@ -78,8 +80,16 @@ export function ExploreDiscovery({
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const router = useRouter();
 
+  const taste = useTaste();
   const filtered = useMemo(() => {
     let result = items.filter((item) => (item.property_type ?? 'hostel') === category);
+    // Site-wide order (re-ranked twice a day), nudged towards what this visitor has looked at; unchanged without history.
+    if (taste) {
+      result = personalise(
+        result.map((item) => ({ item, kind: item.property_type ?? 'hostel', place_name: item.area ?? null, from_price: item.price })),
+        taste,
+      ).map((x) => x.item);
+    }
     if (selectedZone) {
       const target = normaliseArea(selectedZone);
       result = result.filter((item) => {
@@ -89,7 +99,7 @@ export function ExploreDiscovery({
       });
     }
     return result;
-  }, [items, category, selectedZone]);
+  }, [items, category, selectedZone, taste]);
 
   const categoryLabel = useMemo(() => {
     if (category === 'apartment') return 'Apartments';

@@ -76,6 +76,18 @@ async def freshness_and_scores() -> None:
     logger.info("freshness sweep %s; scored %d; distances for %d; photo fingerprints queued %d", result, scored, located, hashed)
 
 
+async def auto_rank_listings() -> None:
+    """Twice a day (once per Nairobi half-day): re-rank listings from recent engagement. See listings/ranking.py."""
+    from app.core.database import async_session_factory
+    from app.features.listings.ranking import auto_rank
+
+    async with async_session_factory() as db:
+        result = await auto_rank(db)
+        await db.commit()
+    if "skipped" not in result:
+        logger.info("auto-rank: %s", result)
+
+
 async def send_alerts() -> None:
     from app.core.database import async_session_factory
     from app.features.discovery.alerts import send_due_alerts
@@ -147,7 +159,9 @@ def start_cron_jobs() -> None:
     loop.create_task(_run_cron_loop(5, run_jobs))
     loop.create_task(_run_cron_loop(6 * 3600, freshness_and_scores))
     loop.create_task(_run_cron_loop(3600, send_alerts))
+    # Cheap check every 30 minutes; it only re-ranks once per half-day slot. First check soon after a (re)start.
+    loop.create_task(_run_cron_loop(1800, auto_rank_listings, first_delay=120))
     loop.create_task(_run_cron_loop(24 * 3600, ensure_event_partitions))
     # First check five minutes after the worker starts (it restarts on every deploy), then daily.
     loop.create_task(_run_cron_loop(24 * 3600, check_projection_drift, first_delay=300))
-    logger.info("Cron jobs scheduled: announcements 15m, delivery retries 1m, job runner 5s, freshness+scores 6h, partitions daily, drift check daily")
+    logger.info("Cron jobs scheduled: announcements 15m, delivery retries 1m, job runner 5s, freshness+scores 6h, auto-rank twice daily, partitions daily, drift check daily")
